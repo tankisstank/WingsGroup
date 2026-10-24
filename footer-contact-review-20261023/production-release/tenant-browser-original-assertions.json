@@ -1,0 +1,182 @@
+[
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101",
+      "tel:0915250101",
+      "tel:0915260101"
+    ],
+    "footerZalo": true,
+    "locale": "vi",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T14:39:46.953Z",
+    "url": "https://wingsgo.vn/",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101",
+      "tel:0915250101",
+      "tel:0915260101"
+    ],
+    "footerZalo": true,
+    "locale": "vi",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T14:39:47.412Z",
+    "url": "https://wingsgo.vn/",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101",
+      "tel:0915250101",
+      "tel:0915260101"
+    ],
+    "footerZalo": true,
+    "locale": "en",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T14:40:01.521Z",
+    "url": "https://wingsgo.vn/en",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101",
+      "tel:0915250101",
+      "tel:0915260101"
+    ],
+    "footerZalo": true,
+    "locale": "en",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T14:40:01.93Z",
+    "url": "https://wingsgo.vn/en",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101"
+    ],
+    "footerZalo": false,
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T14:40:13.481Z",
+    "url": "https://wingside.vn/",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": false,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101"
+    ],
+    "footerZalo": false,
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T14:40:13.882Z",
+    "url": "https://wingside.vn/",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": false,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101"
+    ],
+    "footerZalo": false,
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T14:40:30.496Z",
+    "url": "https://wingside.vn/",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": false,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101"
+    ],
+    "footerZalo": false,
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T14:40:30.916Z",
+    "url": "https://wingside.vn/",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": false,
+    "navigationExit": 0
+  }
+]

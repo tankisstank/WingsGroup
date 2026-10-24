@@ -1,0 +1,119 @@
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +848
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 848, reused 221, downloaded 0, added 0
+Progress: resolved 848, reused 439, downloaded 0, added 0
+Progress: resolved 848, reused 452, downloaded 0, added 0
+Progress: resolved 848, reused 840, downloaded 0, added 3
+Progress: resolved 848, reused 843, downloaded 0, added 17
+Progress: resolved 848, reused 844, downloaded 0, added 57
+Progress: resolved 848, reused 845, downloaded 0, added 77
+Progress: resolved 848, reused 846, downloaded 0, added 110
+Progress: resolved 848, reused 846, downloaded 0, added 132
+Progress: resolved 848, reused 846, downloaded 0, added 187
+Progress: resolved 848, reused 847, downloaded 0, added 231
+Progress: resolved 848, reused 847, downloaded 0, added 279
+Progress: resolved 848, reused 848, downloaded 0, added 299
+Progress: resolved 848, reused 848, downloaded 0, added 300
+Progress: resolved 848, reused 848, downloaded 0, added 321
+Progress: resolved 848, reused 848, downloaded 0, added 322
+Progress: resolved 848, reused 848, downloaded 0, added 339
+Progress: resolved 848, reused 848, downloaded 0, added 362
+Progress: resolved 848, reused 848, downloaded 0, added 396
+Progress: resolved 848, reused 848, downloaded 0, added 435
+Progress: resolved 848, reused 848, downloaded 0, added 436
+Progress: resolved 848, reused 848, downloaded 0, added 446
+Progress: resolved 848, reused 848, downloaded 0, added 465
+Progress: resolved 848, reused 848, downloaded 0, added 498
+Progress: resolved 848, reused 848, downloaded 0, added 517
+Progress: resolved 848, reused 848, downloaded 0, added 537
+Progress: resolved 848, reused 848, downloaded 0, added 572
+Progress: resolved 848, reused 848, downloaded 0, added 615
+Progress: resolved 848, reused 848, downloaded 0, added 624
+Progress: resolved 848, reused 848, downloaded 0, added 700
+Progress: resolved 848, reused 848, downloaded 0, added 736
+Progress: resolved 848, reused 848, downloaded 0, added 754
+Progress: resolved 848, reused 848, downloaded 0, added 768
+Progress: resolved 848, reused 848, downloaded 0, added 789
+Progress: resolved 848, reused 848, downloaded 0, added 806
+Progress: resolved 848, reused 848, downloaded 0, added 836
+Progress: resolved 848, reused 848, downloaded 0, added 837
+Progress: resolved 848, reused 848, downloaded 0, added 838
+Progress: resolved 848, reused 848, downloaded 0, added 840
+Progress: resolved 848, reused 848, downloaded 0, added 842
+Progress: resolved 848, reused 848, downloaded 0, added 843
+Progress: resolved 848, reused 848, downloaded 0, added 844
+Progress: resolved 848, reused 848, downloaded 0, added 845
+Progress: resolved 848, reused 848, downloaded 0, added 846
+Progress: resolved 848, reused 848, downloaded 0, added 847
+Progress: resolved 848, reused 848, downloaded 0, added 848
+Progress: resolved 848, reused 848, downloaded 0, added 848, done
+
+dependencies:
++ @dnd-kit/core 6.3.1
++ @dnd-kit/sortable 10.0.0
++ @dnd-kit/utilities 3.2.2
++ @libsql/client 0.14.0
++ @payloadcms/admin-bar 3.84.1
++ @payloadcms/db-postgres 3.84.1
++ @payloadcms/db-sqlite 3.84.1
++ @payloadcms/email-nodemailer 3.84.1
++ @payloadcms/live-preview-react 3.84.1
++ @payloadcms/next 3.84.1
++ @payloadcms/plugin-form-builder 3.84.1
++ @payloadcms/plugin-import-export 3.84.1
++ @payloadcms/plugin-nested-docs 3.84.1
++ @payloadcms/plugin-redirects 3.84.1
++ @payloadcms/plugin-search 3.84.1
++ @payloadcms/plugin-seo 3.84.1
++ @payloadcms/richtext-lexical 3.84.1
++ @payloadcms/ui 3.84.1
++ @radix-ui/react-checkbox 1.3.3
++ @radix-ui/react-label 2.1.8
++ @radix-ui/react-select 2.2.6
++ @radix-ui/react-slot 1.2.4
++ class-variance-authority 0.7.1
++ clsx 2.1.1
++ cross-env 10.1.0
++ dotenv 16.4.7
++ geist 1.7.1
++ graphql 16.14.0
++ ioredis 5.11.1
++ lucide-react 0.563.0
++ next 16.2.6
++ next-sitemap 4.2.3
++ nodemailer 7.0.12
++ payload 3.84.1
++ prism-react-renderer 2.4.1
++ react 19.2.6
++ react-dom 19.2.6
++ react-hook-form 7.71.1
++ sharp 0.34.2
++ tailwind-merge 3.6.0
+
+devDependencies:
++ @eslint/eslintrc 3.3.5
++ @playwright/test 1.59.1
++ @tailwindcss/postcss 4.3.0
++ @tailwindcss/typography 0.5.19
++ @testing-library/react 16.3.0
++ @types/node 24.12.3
++ @types/nodemailer 8.0.1
++ @types/react 19.2.14
++ @types/react-dom 19.2.3
++ @vitejs/plugin-react 4.5.2
++ eslint 9.39.4
++ eslint-config-next 16.2.6
++ jsdom 28.0.0
++ postcss 8.5.15
++ prettier 3.8.3
++ tailwindcss 4.3.0
++ tsx 4.21.0
++ tw-animate-css 1.4.0
++ typescript 6.0.3
++ vite 7.3.5
++ vite-tsconfig-paths 6.0.5
++ vitest 4.1.6
+
+Done in 1m 7.3s using pnpm v10.34.7

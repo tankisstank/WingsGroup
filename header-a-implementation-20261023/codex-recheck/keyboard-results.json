@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-10-23T07:21:04.4436718Z",
+  "passed": true,
+  "results": [
+    {
+      "route": "/wingsgroup",
+      "popupBefore": {
+        "focusInside": true,
+        "open": true
+      },
+      "popupAfter": {
+        "closed": true,
+        "focusRestored": true
+      },
+      "drawerBefore": {
+        "focusInside": true,
+        "open": true
+      },
+      "drawerAfter": {
+        "closed": true,
+        "focusRestored": true
+      },
+      "passed": true
+    },
+    {
+      "route": "/wingsgroup/en",
+      "popupBefore": {
+        "focusInside": true,
+        "open": true
+      },
+      "popupAfter": {
+        "closed": true,
+        "focusRestored": true
+      },
+      "drawerBefore": {
+        "focusInside": true,
+        "open": true
+      },
+      "drawerAfter": {
+        "closed": true,
+        "focusRestored": true
+      },
+      "passed": true
+    }
+  ]
+}

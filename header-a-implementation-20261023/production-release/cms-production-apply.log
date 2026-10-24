@@ -1,0 +1,5 @@
+(node:1) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[08:11:43] [32mINFO[39m: [36m[US-085] Updated WingsGroup hotline from 0912910101 to 0948786775.[39m
+[08:11:43] [32mINFO[39m: [36m[US-085] Hotline is already up-to-date (0948786775). No change needed.[39m
+{"status":"verified","mode":"apply","releaseSha":"6a0dac015340f7279bfe352e377193c38b3d0d91","targetDatabase":"wingstravel","timestamp":"2026-10-23T08:11:43.387Z","siteID":1,"settingsID":14,"sitesVerified":6,"settingsVerified":6,"beforePhone":"0912910101","result":{"siteCode":"wings-group","status":"updated","previousPhone":"0912910101","currentPhone":"0948786775","message":"Updated WingsGroup hotline from 0912910101 to 0948786775."},"additionalHotlines":[{"id":"wingsgroup-14-hotline-2","phoneNumber":"0915250101","label":"Tư vấn tour"},{"id":"wingsgroup-14-hotline-3","phoneNumber":"0915260101","label":"Hỗ trợ dịch vụ"}],"otherTenantsAndFieldsUnchanged":true,"rowLockUsed":true,"idempotencyVerified":true}

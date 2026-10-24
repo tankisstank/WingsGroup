@@ -1,0 +1,60 @@
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://100.90.228.19:3000
+- Environments: .env
+✓ Ready in 467ms
+- Experiments (use with caution):
+  ⨯ turbopackServerFastRefresh
+
+○ Compiling /[...slug] ...
+(node:47436) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:45884) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[12:50:57] [33mWARN[39m: [36mNo email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.[39m
+ GET /wings-group 404 in 13.5s (next.js: 7.5s, proxy.ts: 1758ms, application-code: 4.3s)
+TypeError: controller[kState].transformAlgorithm is not a function
+    at ignore-listed frames
+ GET /wings-group 404 in 380ms (next.js: 29ms, proxy.ts: 11ms, application-code: 340ms)
+[browser] Image with src "/brand/wingsgroup/wingsgroup-logo-primary.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+(node:51136) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /api/users/me 200 in 4.1s (next.js: 4.1s, application-code: 29ms)
+(node:55620) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /wingsgroup 200 in 2.8s (next.js: 83ms, proxy.ts: 14ms, application-code: 2.7s)
+(node:53184) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /media/wingsgroup-ecosystem-hero-960.avif?2026-10-19T23%3A08%3A48.437Z 200 in 3.3s (next.js: 3.2s, proxy.ts: 38ms, application-code: 55ms)
+ GET /media/wingsgroup-ecosystem-hero.png?2026-10-19T23%3A08%3A48.437Z 200 in 3.3s (next.js: 3.2s, proxy.ts: 40ms, application-code: 67ms)
+ GET /wingsgroup 200 in 1714ms (next.js: 4ms, proxy.ts: 5ms, application-code: 1705ms)
+ GET /media/wingsgroup-ecosystem-hero-640.avif?2026-10-19T23%3A08%3A48.437Z 200 in 41ms (next.js: 15ms, proxy.ts: 4ms, application-code: 22ms)
+(node:39200) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /wingsgroup/en 200 in 1718ms (next.js: 4ms, proxy.ts: 4ms, application-code: 1710ms)
+ GET /wingsgroup/ve-wingsgroup 200 in 1622ms (next.js: 16ms, proxy.ts: 4ms, application-code: 1603ms)
+(node:41172) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /wingsgroup/en/ve-wingsgroup 200 in 1623ms (next.js: 16ms, proxy.ts: 4ms, application-code: 1603ms)
+(node:54656) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /wingsgroup/en?utm_source=us085-review 200 in 1608ms (next.js: 5ms, proxy.ts: 8ms, application-code: 1595ms)
+ GET /media/wingsgroup-corporate-partnership-1-960.avif?2026-10-19T23%3A08%3A52.078Z 200 in 139ms (next.js: 72ms, proxy.ts: 20ms, application-code: 47ms)
+ GET /wingsgroup/en/lien-he 200 in 1734ms (next.js: 19ms, proxy.ts: 5ms, application-code: 1710ms)
+ GET /media/wingsgroup-corporate-partnership-1.png?2026-10-19T23%3A08%3A52.078Z 200 in 201ms (next.js: 45ms, proxy.ts: 20ms, application-code: 135ms)
+ GET /api/lead-submissions?locale=en 400 in 123ms (next.js: 112ms, proxy.ts: 5ms, application-code: 7ms)
+(node:37824) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:33008) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /media/338651170296767688-216.jpg?2026-07-13T09%3A20%3A47.624Z 200 in 271ms (next.js: 49ms, proxy.ts: 20ms, application-code: 202ms)
+ GET /media/dao-nami-17.jpg 403 in 86ms (next.js: 28ms, proxy.ts: 33ms, application-code: 26ms)
+ GET /wingsgo/en 200 in 9.7s (next.js: 4ms, proxy.ts: 5ms, application-code: 9.7s)
+ GET /media/nuiphusimuathu.jpg 403 in 105ms (next.js: 49ms, proxy.ts: 33ms, application-code: 23ms)
+ GET /media/thebund.jpg 403 in 120ms (next.js: 71ms, proxy.ts: 28ms, application-code: 21ms)
+ GET /api/users/me 200 in 28ms (next.js: 19ms, application-code: 9ms)
+(node:51904) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:40452) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)

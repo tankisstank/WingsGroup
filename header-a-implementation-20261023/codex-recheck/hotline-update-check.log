@@ -1,0 +1,48 @@
+{
+  "timestamp": "2026-10-23T07:04:44.620Z",
+  "passed": true,
+  "results": [
+    {
+      "name": "new main, empty additional",
+      "status": "noop",
+      "writes": 0,
+      "passed": true
+    },
+    {
+      "name": "old main, empty additional",
+      "status": "updated",
+      "writes": 1,
+      "passed": true
+    },
+    {
+      "name": "old main, null additional",
+      "status": "updated",
+      "writes": 1,
+      "passed": true
+    },
+    {
+      "name": "old main, custom additional",
+      "status": "updated",
+      "writes": 1,
+      "passed": true
+    },
+    {
+      "name": "cleared main",
+      "status": "noop",
+      "writes": 0,
+      "passed": true
+    },
+    {
+      "name": "empty main",
+      "status": "noop",
+      "writes": 0,
+      "passed": true
+    },
+    {
+      "name": "custom main",
+      "status": "safe-abort",
+      "writes": 0,
+      "passed": true
+    }
+  ]
+}

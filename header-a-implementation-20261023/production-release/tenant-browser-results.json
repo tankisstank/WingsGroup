@@ -1,0 +1,126 @@
+[
+  {
+    "locale": "vi",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T08:14:22.102Z",
+    "url": "https://wingsgo.vn/",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": true
+  },
+  {
+    "locale": "vi",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T08:14:22.607Z",
+    "url": "https://wingsgo.vn/",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": true
+  },
+  {
+    "locale": "en",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T08:14:26.568Z",
+    "url": "https://wingsgo.vn/en",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": true
+  },
+  {
+    "locale": "en",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T08:14:26.999Z",
+    "url": "https://wingsgo.vn/en",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": true
+  },
+  {
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T08:14:38.982Z",
+    "url": "https://wingside.vn/",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": true
+  },
+  {
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T08:14:39.397Z",
+    "url": "https://wingside.vn/",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": true
+  },
+  {
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T08:14:45.415Z",
+    "url": "https://wingside.vn/",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": true
+  },
+  {
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T08:14:45.837Z",
+    "url": "https://wingside.vn/",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": true
+  }
+]

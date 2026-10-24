@@ -719,7 +719,11 @@ export const wingsGroupSettingsSeed = {
     tagline: 'Thoughtful travel, connected expertise.',
     salesEmail: 'sales@wingsgroup.vn',
     supportEmail: 'info@wingsgroup.vn',
-    supportPhone: '0912910101',
+    supportPhone: '0948786775',
+    additionalHotlines: [
+      { phoneNumber: '0915250101', label: 'Tư vấn tour' },
+      { phoneNumber: '0915260101', label: 'Hỗ trợ dịch vụ' },
+    ],
   },
   vi: {
     footerNavItems: [
@@ -741,7 +745,11 @@ export const wingsGroupSettingsSeed = {
     tagline: 'Tận tâm trong từng hành trình, vững vàng trong từng kết nối.',
     salesEmail: 'sales@wingsgroup.vn',
     supportEmail: 'info@wingsgroup.vn',
-    supportPhone: '0912910101',
+    supportPhone: '0948786775',
+    additionalHotlines: [
+      { phoneNumber: '0915250101', label: 'Tư vấn tour' },
+      { phoneNumber: '0915260101', label: 'Hỗ trợ dịch vụ' },
+    ],
   },
 } as const
 

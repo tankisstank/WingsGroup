@@ -1,0 +1,2 @@
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":7,"requestId":"783ee064-f6e7-444d-9013-1c38a8f1c810","status":"ready","timestamp":"2026-10-20T11:54:15.039Z"}wingstravel-candidate-us082-us083-20261020
+Removed root-owned candidate only

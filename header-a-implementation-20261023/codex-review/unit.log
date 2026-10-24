@@ -1,0 +1,15 @@
+
+> website@1.0.0 test:unit E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.unit.config.mts "tests/unit/updateWingsGroupHotline.unit.spec.ts" "tests/unit/wingsGroupCorporateRoutes.unit.spec.ts" "tests/unit/wingsGroupV3PreviewSeed.unit.spec.ts" "tests/unit/siteHotlines.unit.spec.ts"
+
+
+ RUN  v4.1.6 E:/repo/WingsTravel/app
+
+(node:2780) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  4 passed (4)
+      Tests  41 passed (41)
+   Start at  12:49:15
+   Duration  54.02s (transform 784ms, setup 166ms, import 2.82s, tests 51.38s, environment 4.63s)
+

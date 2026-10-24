@@ -1,0 +1,8 @@
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":15,"requestId":"0be7ccd3-f32c-432c-96e2-a856c8aa7cd8","status":"ready","timestamp":"2026-10-20T14:57:32.400Z"}
+Backup entries: 3662
+Previous release: /home/ubuntu/wings-travel/releases/release-us082-us083-consent-20261020-120500
+Rollback image: sha256:15ee80cde57fb60e478b015da903d8e3b70cf52ecb815700f7032723dbbf12b4
+4fd0c527e3e78a226e61e0948d0a1f595f518aeb6a0b8ce4ec99580a5eea1881  /home/ubuntu/wings-travel/shared/backups/release-us083-cms-promotion-20261020-150000.dump
+Backup bytes: 4585853
+2026-10-20T14:57:33+00:00
+bash: line 24: $'\r': command not found

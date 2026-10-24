@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-10-20T12:20:33.411Z",
+  "marker": "us082-compat-local-20261020",
+  "markerField": "brief",
+  "rows": [
+    {
+      "id": 8,
+      "site_id": 1,
+      "form_id": 1,
+      "wings_group_lead_locale": "en",
+      "wings_group_lead_source_path": "/",
+      "wings_group_lead_consent_version": "wingsgroup-contact-v1",
+      "legacy_consent": "true"
+    }
+  ],
+  "sourcePathENProved": false
+}

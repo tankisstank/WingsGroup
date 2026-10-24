@@ -1,0 +1,15 @@
+
+> website@1.0.0 test:unit E:\repo\WingsTravel\deploy\oracle\us085-20261023\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.unit.config.mts "tests/unit/updateWingsGroupHotline.unit.spec.ts" "tests/unit/wingsGroupCorporateRoutes.unit.spec.ts" "tests/unit/wingsGroupV3PreviewSeed.unit.spec.ts" "tests/unit/siteHotlines.unit.spec.ts" "tests/unit/wingsGroupV3FidelityContract.unit.spec.ts" "tests/unit/wingsGroupV3ResponsiveCss.unit.spec.ts"
+
+
+ RUN  v4.1.6 E:/repo/WingsTravel/deploy/oracle/us085-20261023/app
+
+(node:45048) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  6 passed (6)
+      Tests  58 passed (58)
+   Start at  15:01:28
+   Duration  63.28s (transform 1.08s, setup 371ms, import 4.89s, tests 58.61s, environment 83.76s)
+

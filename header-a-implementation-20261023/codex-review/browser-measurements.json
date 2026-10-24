@@ -1,0 +1,4292 @@
+{
+  "timestamp": "2026-10-23T05:53:41.0115158Z",
+  "totalCases": 44,
+  "layoutFailures": 4,
+  "englishMobileMixedLabelCases": 12,
+  "results": [
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [
+        {
+          "leftGroup": 0,
+          "overlap": 2.453125,
+          "rightGroup": 1
+        }
+      ],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 98.796875,
+          "right": 237,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 245,
+          "right": 289,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": false,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": -3,
+        "right": 285,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": false,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 200,
+        "right": 236,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:16.587Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 320
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 153.796875,
+          "right": 292,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 300,
+          "right": 344,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 52,
+        "right": 340,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 255,
+        "right": 291,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:17.029Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 375
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 168.796875,
+          "right": 307,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 315,
+          "right": 359,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 67,
+        "right": 355,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 270,
+        "right": 306,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:17.462Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 390
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 30.71875,
+          "right": 115.96875,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 532.078125,
+          "right": 670.28125,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 678.28125,
+          "right": 722.28125,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 430.28125,
+        "right": 718.28125,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 633.28125,
+        "right": 669.28125,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:17.896Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 768
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 32,
+          "right": 117.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 786.796875,
+          "right": 925,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 933,
+          "right": 977,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 685,
+        "right": 973,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 888,
+        "right": 924,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:18.338Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 1024
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 32,
+          "right": 117.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 961.796875,
+          "right": 1100,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 1108,
+          "right": 1152,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 860,
+        "right": 1148,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 1063,
+        "right": 1099,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:18.788Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 1199
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 336.484375,
+          "right": 408.171875,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 418.359375,
+          "right": 472.578125,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 482.765625,
+          "right": 569.03125,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 579.21875,
+          "right": 691.96875,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 702.15625,
+          "right": 775.34375,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 785.53125,
+          "right": 837.65625,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 847.84375,
+          "right": 1024.578125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1034.765625,
+          "right": 1153,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 736.578125,
+        "right": 1024.578125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 985.578125,
+        "right": 1023.578125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:19.222Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 1200
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 410.78125,
+          "right": 482.46875,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 493.328125,
+          "right": 547.546875,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 558.40625,
+          "right": 644.671875,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 655.53125,
+          "right": 768.28125,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 779.140625,
+          "right": 852.328125,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 863.1875,
+          "right": 915.3125,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 926.171875,
+          "right": 1102.90625,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1113.765625,
+          "right": 1232,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 814.90625,
+        "right": 1102.90625,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1063.90625,
+        "right": 1101.90625,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:19.655Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 1279
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 411.671875,
+          "right": 483.359375,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 494.234375,
+          "right": 548.453125,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 559.328125,
+          "right": 645.59375,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 656.46875,
+          "right": 769.21875,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 780.09375,
+          "right": 853.28125,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 864.15625,
+          "right": 916.28125,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 927.15625,
+          "right": 1103.890625,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1114.765625,
+          "right": 1233,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 815.890625,
+        "right": 1103.890625,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1064.890625,
+        "right": 1102.890625,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:20.08Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 1280
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 92.5,
+          "right": 183.078125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 501.65625,
+          "right": 573.34375,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 585.578125,
+          "right": 639.796875,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 652.03125,
+          "right": 738.296875,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 750.53125,
+          "right": 863.28125,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 875.515625,
+          "right": 948.703125,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 960.9375,
+          "right": 1013.0625,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 1025.296875,
+          "right": 1202.03125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1214.265625,
+          "right": 1332.5,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 914.03125,
+        "right": 1202.03125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1163.03125,
+        "right": 1201.03125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:20.522Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 1440
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 140.5,
+          "right": 231.078125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 571.28125,
+          "right": 642.96875,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 656.015625,
+          "right": 710.234375,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 723.28125,
+          "right": 809.546875,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 822.59375,
+          "right": 935.34375,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 948.390625,
+          "right": 1021.578125,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 1034.625,
+          "right": 1086.75,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 1099.796875,
+          "right": 1276.53125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1289.578125,
+          "right": 1380.5,
+          "top": 15.5,
+          "width": 90.921875
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 988.53125,
+        "right": 1276.53125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1237.53125,
+        "right": 1275.53125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:20.947Z",
+      "url": "http://localhost:3000/wingsgroup",
+      "width": 1536
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [
+        {
+          "leftGroup": 0,
+          "overlap": 1.75,
+          "rightGroup": 1
+        }
+      ],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 99.5,
+          "right": 237,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 245,
+          "right": 289,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": false,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": -3,
+        "right": 285,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": false,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 200,
+        "right": 236,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:23.374Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 320
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 154.5,
+          "right": 292,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 300,
+          "right": 344,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 52,
+        "right": 340,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 255,
+        "right": 291,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:23.782Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 375
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 169.5,
+          "right": 307,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 315,
+          "right": 359,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 67,
+        "right": 355,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 270,
+        "right": 306,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:24.191Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 390
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 30.71875,
+          "right": 115.96875,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 532.78125,
+          "right": 670.28125,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 678.28125,
+          "right": 722.28125,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 430.28125,
+        "right": 718.28125,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 633.28125,
+        "right": 669.28125,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:24.616Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 768
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 32,
+          "right": 117.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 787.5,
+          "right": 925,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 933,
+          "right": 977,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 685,
+        "right": 973,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 888,
+        "right": 924,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:25.033Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 1024
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 32,
+          "right": 117.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 962.5,
+          "right": 1100,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 1108,
+          "right": 1152,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 860,
+        "right": 1148,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 1063,
+        "right": 1099,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:25.45Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 1199
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 318.21875,
+          "right": 360.40625,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 370.59375,
+          "right": 434.515625,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 444.703125,
+          "right": 555.078125,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 565.265625,
+          "right": 703.03125,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 713.21875,
+          "right": 768.78125,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 778.96875,
+          "right": 837.65625,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 847.84375,
+          "right": 1024.578125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1034.765625,
+          "right": 1153,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 736.578125,
+        "right": 1024.578125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 985.578125,
+        "right": 1023.578125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:25.883Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 1200
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 392.515625,
+          "right": 434.703125,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 445.5625,
+          "right": 509.484375,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 520.34375,
+          "right": 630.71875,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 641.578125,
+          "right": 779.34375,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 790.203125,
+          "right": 845.765625,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 856.625,
+          "right": 915.3125,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 926.171875,
+          "right": 1102.90625,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1113.765625,
+          "right": 1232,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 814.90625,
+        "right": 1102.90625,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1063.90625,
+        "right": 1101.90625,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:26.292Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 1279
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 393.40625,
+          "right": 435.59375,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 446.46875,
+          "right": 510.390625,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 521.265625,
+          "right": 631.640625,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 642.515625,
+          "right": 780.28125,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 791.15625,
+          "right": 846.71875,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 857.59375,
+          "right": 916.28125,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 927.15625,
+          "right": 1103.890625,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1114.765625,
+          "right": 1233,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 815.890625,
+        "right": 1103.890625,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1064.890625,
+        "right": 1102.890625,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:26.709Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 1280
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 92.5,
+          "right": 183.078125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 483.390625,
+          "right": 525.578125,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 537.8125,
+          "right": 601.734375,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 613.96875,
+          "right": 724.34375,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 736.578125,
+          "right": 874.34375,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 886.578125,
+          "right": 942.140625,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 954.375,
+          "right": 1013.0625,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 1025.296875,
+          "right": 1202.03125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1214.265625,
+          "right": 1332.5,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 914.03125,
+        "right": 1202.03125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1163.03125,
+        "right": 1201.03125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:27.126Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 1440
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 140.5,
+          "right": 231.078125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 553.015625,
+          "right": 595.203125,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 608.25,
+          "right": 672.171875,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 685.21875,
+          "right": 795.59375,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 808.640625,
+          "right": 946.40625,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 959.453125,
+          "right": 1015.015625,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 1028.0625,
+          "right": 1086.75,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 1099.796875,
+          "right": 1276.53125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1289.578125,
+          "right": 1380.5,
+          "top": 15.5,
+          "width": 90.921875
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 988.53125,
+        "right": 1276.53125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1237.53125,
+        "right": 1275.53125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:27.542Z",
+      "url": "http://localhost:3000/wingsgroup/en",
+      "width": 1536
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [
+        {
+          "leftGroup": 0,
+          "overlap": 2.453125,
+          "rightGroup": 1
+        }
+      ],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 98.796875,
+          "right": 237,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 245,
+          "right": 289,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": false,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": -3,
+        "right": 285,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": false,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 200,
+        "right": 236,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:29.953Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 320
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 153.796875,
+          "right": 292,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 300,
+          "right": 344,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 52,
+        "right": 340,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 255,
+        "right": 291,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:30.378Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 375
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 168.796875,
+          "right": 307,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 315,
+          "right": 359,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 67,
+        "right": 355,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 270,
+        "right": 306,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:30.794Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 390
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 30.71875,
+          "right": 115.96875,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 532.078125,
+          "right": 670.28125,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 678.28125,
+          "right": 722.28125,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 430.28125,
+        "right": 718.28125,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 633.28125,
+        "right": 669.28125,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:31.228Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 768
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 32,
+          "right": 117.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 786.796875,
+          "right": 925,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 933,
+          "right": 977,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 685,
+        "right": 973,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 888,
+        "right": 924,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:31.645Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 1024
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 32,
+          "right": 117.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 961.796875,
+          "right": 1100,
+          "top": 10.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 1108,
+          "right": 1152,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 860,
+        "right": 1148,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 1063,
+        "right": 1099,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:32.062Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 1199
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 336.484375,
+          "right": 408.171875,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 418.359375,
+          "right": 472.578125,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 482.765625,
+          "right": 569.03125,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 579.21875,
+          "right": 691.96875,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 702.15625,
+          "right": 775.34375,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 785.53125,
+          "right": 837.65625,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 847.84375,
+          "right": 1024.578125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1034.765625,
+          "right": 1153,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 736.578125,
+        "right": 1024.578125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 985.578125,
+        "right": 1023.578125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:32.487Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 1200
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 410.78125,
+          "right": 482.46875,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 493.328125,
+          "right": 547.546875,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 558.40625,
+          "right": 644.671875,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 655.53125,
+          "right": 768.28125,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 779.140625,
+          "right": 852.328125,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 863.1875,
+          "right": 915.3125,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 926.171875,
+          "right": 1102.90625,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1113.765625,
+          "right": 1232,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 814.90625,
+        "right": 1102.90625,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1063.90625,
+        "right": 1101.90625,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:32.896Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 1279
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 411.671875,
+          "right": 483.359375,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 494.234375,
+          "right": 548.453125,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 559.328125,
+          "right": 645.59375,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 656.46875,
+          "right": 769.21875,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 780.09375,
+          "right": 853.28125,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 864.15625,
+          "right": 916.28125,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 927.15625,
+          "right": 1103.890625,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1114.765625,
+          "right": 1233,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 815.890625,
+        "right": 1103.890625,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1064.890625,
+        "right": 1102.890625,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:33.329Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 1280
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 92.5,
+          "right": 183.078125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 501.65625,
+          "right": 573.34375,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 585.578125,
+          "right": 639.796875,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 652.03125,
+          "right": 738.296875,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 750.53125,
+          "right": 863.28125,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 875.515625,
+          "right": 948.703125,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 960.9375,
+          "right": 1013.0625,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 1025.296875,
+          "right": 1202.03125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1214.265625,
+          "right": 1332.5,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 914.03125,
+        "right": 1202.03125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1163.03125,
+        "right": 1201.03125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:33.762Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 1440
+    },
+    {
+      "callLabel": "Gọi ngay 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/wingsgroup/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 140.5,
+          "right": 231.078125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 571.28125,
+          "right": 642.96875,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 656.015625,
+          "right": 710.234375,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 723.28125,
+          "right": 809.546875,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 822.59375,
+          "right": 935.34375,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 948.390625,
+          "right": 1021.578125,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 1034.625,
+          "right": 1086.75,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 1099.796875,
+          "right": 1276.53125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1289.578125,
+          "right": 1380.5,
+          "top": 15.5,
+          "width": 90.921875
+        }
+      ],
+      "locale": "vi",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 988.53125,
+        "right": 1276.53125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1237.53125,
+        "right": 1275.53125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:34.179Z",
+      "url": "http://localhost:3000/wingsgroup/ve-wingsgroup",
+      "width": 1536
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [
+        {
+          "leftGroup": 0,
+          "overlap": 1.75,
+          "rightGroup": 1
+        }
+      ],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 99.5,
+          "right": 237,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 245,
+          "right": 289,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": false,
+      "popupBox": {
+        "bottom": 312,
+        "height": 255.5,
+        "left": -3,
+        "right": 285,
+        "top": 56.5,
+        "width": 288
+      },
+      "popupFits": false,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 200,
+        "right": 236,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:36.581Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 320
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 154.5,
+          "right": 292,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 300,
+          "right": 344,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 52,
+        "right": 340,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 255,
+        "right": 291,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:37.09Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 375
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 16,
+          "right": 101.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 169.5,
+          "right": 307,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 315,
+          "right": 359,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 67,
+        "right": 355,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 270,
+        "right": 306,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:37.539Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 390
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 30.71875,
+          "right": 115.96875,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 532.78125,
+          "right": 670.28125,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 678.28125,
+          "right": 722.28125,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 430.28125,
+        "right": 718.28125,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 633.28125,
+        "right": 669.28125,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:37.99Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 768
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 32,
+          "right": 117.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 787.5,
+          "right": 925,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 933,
+          "right": 977,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 685,
+        "right": 973,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 888,
+        "right": 924,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:38.415Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 1024
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 32,
+          "right": 117.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 52.5,
+          "height": 42,
+          "left": 962.5,
+          "right": 1100,
+          "top": 10.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 1108,
+          "right": 1152,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 316,
+        "height": 255.5,
+        "left": 860,
+        "right": 1148,
+        "top": 60.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 51.5,
+        "height": 40,
+        "left": 1063,
+        "right": 1099,
+        "top": 11.5,
+        "width": 36
+      },
+      "timestamp": "2026-10-23T05:53:38.832Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 1199
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 318.21875,
+          "right": 360.40625,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 370.59375,
+          "right": 434.515625,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 444.703125,
+          "right": 555.078125,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 565.265625,
+          "right": 703.03125,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 713.21875,
+          "right": 768.78125,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 778.96875,
+          "right": 837.65625,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 847.84375,
+          "right": 1024.578125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1034.765625,
+          "right": 1153,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 736.578125,
+        "right": 1024.578125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 985.578125,
+        "right": 1023.578125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:39.249Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 1200
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 392.515625,
+          "right": 434.703125,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 445.5625,
+          "right": 509.484375,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 520.34375,
+          "right": 630.71875,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 641.578125,
+          "right": 779.34375,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 790.203125,
+          "right": 845.765625,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 856.625,
+          "right": 915.3125,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 926.171875,
+          "right": 1102.90625,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1113.765625,
+          "right": 1232,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 814.90625,
+        "right": 1102.90625,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1063.90625,
+        "right": 1101.90625,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:39.657Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 1279
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 393.40625,
+          "right": 435.59375,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 446.46875,
+          "right": 510.390625,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 521.265625,
+          "right": 631.640625,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 642.515625,
+          "right": 780.28125,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 791.15625,
+          "right": 846.71875,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 857.59375,
+          "right": 916.28125,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 927.15625,
+          "right": 1103.890625,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1114.765625,
+          "right": 1233,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 815.890625,
+        "right": 1103.890625,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1064.890625,
+        "right": 1102.890625,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:40.091Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 1280
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 92.5,
+          "right": 183.078125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 483.390625,
+          "right": 525.578125,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 537.8125,
+          "right": 601.734375,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 613.96875,
+          "right": 724.34375,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 736.578125,
+          "right": 874.34375,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 886.578125,
+          "right": 942.140625,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 954.375,
+          "right": 1013.0625,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 1025.296875,
+          "right": 1202.03125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1214.265625,
+          "right": 1332.5,
+          "top": 15.5,
+          "width": 118.234375
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 914.03125,
+        "right": 1202.03125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1163.03125,
+        "right": 1201.03125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:40.516Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 1440
+    },
+    {
+      "callLabel": "Call now 0948 786 775",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/wingsgroup/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 140.5,
+          "right": 231.078125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 553.015625,
+          "right": 595.203125,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 608.25,
+          "right": 672.171875,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 685.21875,
+          "right": 795.59375,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 808.640625,
+          "right": 946.40625,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 959.453125,
+          "right": 1015.015625,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 1028.0625,
+          "right": 1086.75,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 1099.796875,
+          "right": 1276.53125,
+          "top": 14.5,
+          "width": 176.734375
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1289.578125,
+          "right": 1380.5,
+          "top": 15.5,
+          "width": 90.921875
+        }
+      ],
+      "locale": "en",
+      "mainHref": "tel:0948786775",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 988.53125,
+        "right": 1276.53125,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1237.53125,
+        "right": 1275.53125,
+        "top": 15.5,
+        "width": 38
+      },
+      "timestamp": "2026-10-23T05:53:40.933Z",
+      "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup",
+      "width": 1536
+    }
+  ]
+}

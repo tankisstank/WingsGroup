@@ -1,0 +1,13 @@
+
+> website@1.0.0 test:unit E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.unit.config.mts "tests/unit/siteHotlines.unit.spec.ts" "tests/unit/updateWingsGoHotline.unit.spec.ts"
+
+
+ RUN  v4.1.6 E:/repo/WingsTravel/app
+
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  22:10:46
+   Duration  1.13s (transform 151ms, setup 120ms, import 131ms, tests 15ms, environment 1.45s)
+

@@ -1,0 +1,743 @@
+2026-10-20T17:10:29.580659Z ERROR codex_core::session::session: failed to load skill C:\Users\VIETD\.claude\skills\seo\SKILL.md: missing YAML frontmatter delimited by ---
+2026-10-20T17:10:29.580693Z ERROR codex_core::session::session: failed to load skill C:\Users\VIETD\.claude\skills\seo\SKILL.md: missing YAML frontmatter delimited by ---
+OpenAI Codex v0.163.0
+--------
+workdir: E:\repo\WingsTravel
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a15a4b-07f9-78c2-af45-79fce60179fe
+--------
+user
+READ ONLY final market selection follow-up. Prior review (market-followup/codex-review.log) flagged P2 old selector chose unsupported JPY over valid VND; source patch now exists: app/src/tours/queries.ts selectMarketNextDeparture and getToursByMarketRoute calls it. Inspect this latest ~495..600 section, matching renderer canPromote in StructuredPages TourMarketPage. Test selector import may still be getting mocked by worker; do not edit or run builds. Confirm prior P2 fixed, and report any concrete remaining P1/P2/P3 in scoped changes; no scans beyond this scope/env/production/delegation. Prefer first eligible verified governed-price nonsoldout departure; fallback remains old getNextDeparture. Each rendered price+original+label stays same selected normalized departure. Root already ran6 component files41/41 and tsc exit0. Production original core delta live; this market follow-up pending build/runtime. Return concise review; no new implementation requests outside actual bug.
+
+
+warning: Codex is ignoring 9 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\VIETD\.codex\config.toml): `features.remote_connections` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.approvals_reviewer` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.model_reasoning_summary_format` is ignored.
+  ... and 6 more ignored settings.
+warning: Codex is ignoring 9 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\VIETD\.codex\config.toml): `features.remote_connections` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.approvals_reviewer` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.model_reasoning_summary_format` is ignored.
+  ... and 6 more ignored settings.
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+I’ll read the selector and matching renderer, check the prior P2, and report concrete findings within that scope. I won’t edit files or run builds.
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command '$file = '"'app/src/tours/queries.ts'; "'$lines = Get-Content -LiteralPath $file; for ($index = 480; $index -lt [Math]::Min(615, $lines.Length); $index++) { '"'{0,4}: {1}' -f ("'$index + 1), $lines[$index] }; rg -n '"'canPromote|TourMarketPage|selectMarketNextDeparture' app/src/components/StructuredPages app/src/tours/queries.ts market-followup/codex-review.log" in E:\repo\WingsTravel
+ exited 1 in 390ms:
+ 481:     builderConfig: resolved.builderConfig,
+ 482:     departures: draft ? departures : getFutureDepartures(departures),
+ 483:     featuredDepartures:
+ 484:       featuredDepartures.length > 0
+ 485:         ? featuredDepartures
+ 486:         : validPublicDepartures.slice(0, 4),
+ 487:     nextDeparture: getNextDeparture(validPublicDepartures),
+ 488:     sectionOrder: resolved.sectionOrder,
+ 489:     sectionVisibility: resolved.sectionVisibility,
+ 490:     tour: {
+ 491:       ...resolvedTour,
+ 492:       relatedTours,
+ 493:     },
+ 494:     variants,
+ 495:   }
+ 496: }
+ 497: 
+ 498: export const selectMarketNextDeparture = (
+ 499:   linkedFuture: DepartureCardViewModel[],
+ 500:   linkedVisible: DepartureCardViewModel[],
+ 501: ): DepartureCardViewModel | null => {
+ 502:   const preferredCommercialDeparture = linkedFuture.find(
+ 503:     (departure) =>
+ 504:       departure.commerceVerified === true &&
+ 505:       Boolean(
+ 506:         normalizeGovernedTourPrice({
+ 507:           currency: departure.currency,
+ 508:           value: departure.priceFrom,
+ 509:         }),
+ 510:       ),
+ 511:   )
+ 512: 
+ 513:   return preferredCommercialDeparture || getNextDeparture(linkedVisible)
+ 514: }
+ 515: 
+ 516: export const getToursByMarketRoute = async ({
+ 517:   draft,
+ 518:   locale,
+ 519:   marketRouteSlug,
+ 520: }: {
+ 521:   draft: boolean
+ 522:   locale?: SupportedLocaleCode
+ 523:   marketRouteSlug: string
+ 524: }): Promise<MarketPageViewModel | null> => {
+ 525:   const marketKey = marketRouteSlugToKey[marketRouteSlug]
+ 526: 
+ 527:   if (!marketKey) {
+ 528:     return null
+ 529:   }
+ 530: 
+ 531:   const toursResult = await queryCollection({
+ 532:     collection: tourProductsCollection,
+ 533:     depth: 2,
+ 534:     draft,
+ 535:     limit: 20,
+ 536:     locale,
+ 537:     where: {
+ 538:       market: {
+ 539:         equals: marketKey,
+ 540:       },
+ 541:     },
+ 542:   })
+ 543: 
+ 544:   const departuresResult = await queryCollection({
+ 545:     collection: tourDeparturesCollection,
+ 546:     depth: 2,
+ 547:     draft,
+ 548:     limit: 100,
+ 549:     locale,
+ 550:     where: {
+ 551:       tourProduct: {
+ 552:         in: (toursResult.docs as any[]).map((tour) => tour.id),
+ 553:       },
+ 554:     },
+ 555:   })
+ 556: 
+ 557:   const allDepartures = sortDepartures(departuresResult.docs as any[]).map((departure) =>
+ 558:     normalizeDepartureCard(departure, draft),
+ 559:   )
+ 560:   const futureDepartures = sortDepartures(getFutureDepartures(allDepartures))
+ 561:   const visibleDepartures = futureDepartures.length > 0 ? futureDepartures : allDepartures
+ 562: 
+ 563:   return {
+ 564:     departures: visibleDepartures,
+ 565:     marketKey,
+ 566:     tours: (toursResult.docs as any[]).map((tour): TourCardViewModel => {
+ 567:       const linkedAll = allDepartures.filter((departure) => {
+ 568:         const relation =
+ 569:           typeof departure.tourProduct === 'object'
+ 570:             ? departure.tourProduct?.id
+ 571:             : departure.tourProduct
+ 572: 
+ 573:         return String(relation) === String(tour.id)
+ 574:       })
+ 575:       const linkedFuture = getFutureDepartures(linkedAll)
+ 576:       const hasFutureDepartures = linkedFuture.length > 0
+ 577:       const linkedVisible = hasFutureDepartures ? linkedFuture : linkedAll
+ 578: 
+ 579:       return {
+ 580:         ...tour,
+ 581:         departureCount: linkedVisible.length,
+ 582:         hasFutureDepartures,
+ 583:         lowestPrice: getLowestPrice(linkedVisible),
+ 584:         nextDeparture: selectMarketNextDeparture(linkedFuture, linkedVisible),
+ 585:       }
+ 586:     }),
+ 587:   }
+ 588: }
+ 589: 
+ 590: export const getTourCampaignBySlug = async ({
+ 591:   draft,
+ 592:   locale,
+ 593:   slug,
+ 594: }: {
+ 595:   draft: boolean
+ 596:   locale?: SupportedLocaleCode
+ 597:   slug: string
+ 598: }): Promise<any> => {
+ 599:   const result = await queryCollection({
+ 600:     collection: tourCampaignsCollection,
+ 601:     depth: 3,
+ 602:     draft,
+ 603:     limit: 1,
+ 604:     locale,
+ 605:     where: {
+ 606:       slug: {
+ 607:         equals: slug,
+ 608:       },
+ 609:     },
+ 610:   })
+ 611: 
+ 612:   const campaign = (result.docs as any[])[0]
+ 613: 
+ 614:   if (!campaign) {
+ 615:     return null
+rg: app/src/components/StructuredPages: The system cannot find the file specified. (os error 2)
+rg: market-followup/codex-review.log: The system cannot find the path specified. (os error 3)
+app/src/tours/queries.ts:250:  const canPromote =
+app/src/tours/queries.ts:256:    canPromote &&
+app/src/tours/queries.ts:283:    promoLabel: canPromote ? departure.promoLabel : null,
+app/src/tours/queries.ts:498:export const selectMarketNextDeparture = (
+app/src/tours/queries.ts:584:        nextDeparture: selectMarketNextDeparture(linkedFuture, linkedVisible),
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "rg --files app/src -g '*StructuredPages*' -g '*TourMarket*'; "'$lines = Get-Content -LiteralPath '"'app/src/tours/queries.ts'; for ("'$index = 0; $index -lt 35; $index++) { '"'{0,4}: {1}' -f ("'$index + 1), $lines[$index] }; for ($index = 185; $index -lt 290; $index++) { '"'{0,4}: {1}' -f ("'$index + 1), $lines[$index] }; rg -n '"'getFutureDepartures|getNextDeparture' app/src/tours/queries.ts" in E:\repo\WingsTravel
+ succeeded in 701ms:
+app/src\tours\StructuredPages.tsx
+   1: import configPromise from '@payload-config'
+   2: import { getPayload } from 'payload'
+   3: 
+   4: import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
+   5: import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+   6: import {
+   7:   isConsultativeTourSiteCode,
+   8:   isRetailTourEnabledSiteCode,
+   9:   isStructuredTourDetailSiteCode,
+  10: } from '@/utilities/siteCapabilities'
+  11: 
+  12: import {
+  13:   defaultTourSectionOrder,
+  14:   defaultTourSectionVisibility,
+  15:   normalizeSectionIDs,
+  16: } from './sectionRegistry'
+  17: import type {
+  18:   DepartureCardViewModel,
+  19:   MarketPageViewModel,
+  20:   SchedulePageViewModel,
+  21:   TourCardViewModel,
+  22:   TourResolvedData,
+  23: } from './types'
+  24: import {
+  25:   filterDepartureVariants,
+  26:   getFutureDepartures,
+  27:   getLowestPrice,
+  28:   getNextDeparture,
+  29:   groupDeparturesByMonth,
+  30:   marketRouteSlugToKey,
+  31:   mergeTourVariant,
+  32:   normalizeTourPublicText,
+  33:   selectPublishableDepartures,
+  34: } from './utils'
+  35: import { isDepartureVerificationCurrent } from './departureCommerce'
+ 186:       typeof candidate.durationDays === 'number' &&
+ 187:       candidate.durationDays > 0
+ 188:         ? Math.abs(sourceDuration - candidate.durationDays)
+ 189:         : Number.MAX_SAFE_INTEGER
+ 190:     const durationDelta = durationDistance(left) - durationDistance(right)
+ 191:     if (durationDelta !== 0) return durationDelta
+ 192: 
+ 193:     const stableKey = (candidate: Record<string, any>) =>
+ 194:       String(candidate.slug || candidate.id || '')
+ 195:         .trim()
+ 196:         .toLowerCase()
+ 197:     return stableKey(left).localeCompare(stableKey(right), 'en')
+ 198:   })
+ 199: }
+ 200: 
+ 201: export const selectRelatedTourCards = ({
+ 202:   candidates,
+ 203:   configured,
+ 204:   source,
+ 205: }: {
+ 206:   candidates: Record<string, any>[]
+ 207:   configured: Record<string, any>[]
+ 208:   source: Record<string, any>
+ 209: }) =>
+ 210:   configured.length > 0
+ 211:     ? configured.slice(0, 3)
+ 212:     : rankRelatedTourFallbacks(source, candidates)
+ 213:         .map(normalizeTourProductCard)
+ 214:         .filter(Boolean)
+ 215:         .slice(0, 3)
+ 216: 
+ 217: const normalizeVariantCard = (
+ 218:   variant: Record<string, any> | number | string | null | undefined,
+ 219:   draft = false,
+ 220: ) => {
+ 221:   const doc = asDoc<Record<string, any>>(variant)
+ 222: 
+ 223:   if (!doc) {
+ 224:     return variant || null
+ 225:   }
+ 226: 
+ 227:   // In public mode, variant must be active
+ 228:   if (!draft && doc.status && doc.status !== 'active') {
+ 229:     return null
+ 230:   }
+ 231: 
+ 232:   return {
+ 233:     id: doc.id,
+ 234:     label: doc.label,
+ 235:     variantKey: doc.variantKey,
+ 236:   }
+ 237: }
+ 238: 
+ 239: const normalizeDepartureCard = (
+ 240:   departure: Record<string, any>,
+ 241:   draft = false,
+ 242: ): DepartureCardViewModel => {
+ 243:   const hasFreshnessGovernance = Boolean(departure.verifiedAt || departure.expiresAt)
+ 244:   const commerceVerified =
+ 245:     draft ||
+ 246:     ((departure.commerceVerified === undefined || departure.commerceVerified === true) &&
+ 247:       (hasFreshnessGovernance
+ 248:         ? isDepartureVerificationCurrent(departure)
+ 249:         : departure.commerceVerified === true))
+ 250:   const canPromote =
+ 251:     commerceVerified &&
+ 252:     (draft || hasFreshnessGovernance || departure.commerceVerified === true) &&
+ 253:     departure.availabilityStatus !== 'sold-out' &&
+ 254:     Boolean(normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }))
+ 255:   const originalPrice =
+ 256:     canPromote &&
+ 257:     typeof departure.originalPrice === 'number' &&
+ 258:     Number.isFinite(departure.originalPrice) &&
+ 259:     departure.originalPrice > departure.priceFrom &&
+ 260:     Boolean(departure.currency) &&
+ 261:     (!departure.originalCurrency || departure.originalCurrency === departure.currency)
+ 262:       ? departure.originalPrice
+ 263:       : null
+ 264: 
+ 265:   return {
+ 266:     airline: departure.airline,
+ 267:     availabilityBadge: commerceVerified ? departure.availabilityBadge : null,
+ 268:     availabilityStatus: commerceVerified ? departure.availabilityStatus : null,
+ 269:     commerceVerified,
+ 270:     ctaLabelOverride: commerceVerified ? departure.ctaLabelOverride : null,
+ 271:     currency: departure.currency,
+ 272:     departureCity: departure.departureCity,
+ 273:     departureDate: departure.departureDate,
+ 274:     depositNote: departure.depositNote,
+ 275:     flightNumber: departure.flightNumber,
+ 276:     holdNote: departure.holdNote,
+ 277:     id: departure.id,
+ 278:     isFeatured: departure.isFeatured,
+ 279:     loyaltyPoints: commerceVerified ? departure.loyaltyPoints : null,
+ 280:     note: departure.note,
+ 281:     originalPrice,
+ 282:     priceFrom: commerceVerified ? departure.priceFrom : null,
+ 283:     promoLabel: canPromote ? departure.promoLabel : null,
+ 284:     returnDate: departure.returnDate,
+ 285:     tourProduct: normalizeTourProductCard(departure.tourProduct),
+ 286:     urgencyLabel: commerceVerified ? departure.urgencyLabel : null,
+ 287:     variantRef: normalizeVariantCard(departure.variantRef, draft),
+ 288:   }
+ 289: }
+ 290: 
+26:  getFutureDepartures,
+28:  getNextDeparture,
+482:    departures: draft ? departures : getFutureDepartures(departures),
+487:    nextDeparture: getNextDeparture(validPublicDepartures),
+513:  return preferredCommercialDeparture || getNextDeparture(linkedVisible)
+560:  const futureDepartures = sortDepartures(getFutureDepartures(allDepartures))
+575:      const linkedFuture = getFutureDepartures(linkedAll)
+665:  const futureDepartures = getFutureDepartures(departures)
+702:      nextDeparture: getNextDeparture(departures),
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "rg -n 'canPromote|TourMarketPage|nextDeparture|normalizedPrice' app/src/tours/StructuredPages.tsx; rg -n -A 38 -B 4 'export const getFutureDepartures|export const getNextDeparture|export function getFutureDepartures|export function getNextDeparture' app/src/tours/utils.ts; rg -n 'normalizeGovernedTourPrice' app/src/tours/queries.ts app/src/tours/StructuredPages.tsx" in E:\repo\WingsTravel
+ succeeded in 320ms:
+218:  nextDeparture,
+221:  nextDeparture?: null | {
+236:    !nextDeparture ||
+237:    !isDepartureVerificationCurrent(nextDeparture) ||
+238:    nextDeparture?.priceBasis !== 'per-person' ||
+239:    !['open', 'limited'].includes(String(nextDeparture?.availabilityStatus || ''))
+242:    currency: nextDeparture?.currency,
+243:    value: nextDeparture?.priceFrom,
+533:  nextDeparture: nextDepartureProp,
+544:  nextDeparture: Record<string, any> | null
+552:  const nextDeparture = context
+556:    : nextDepartureProp
+560:  const nextDepDate = nextDeparture?.departureDate ? new Date(nextDeparture.departureDate) : null
+564:    nextDeparture &&
+570:  const isSoldOut = nextDeparture?.availabilityStatus === 'sold-out'
+571:  const commerceVerified = Boolean(nextDeparture?.commerceVerified)
+581:      ? nextDeparture?.ctaLabelOverride || cta.label || 'Giữ chỗ ngay'
+622:    departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
+623:    departureDate: !isPrivateTour && hasFutureDeparture ? nextDeparture?.departureDate : undefined,
+634:        expectedDepartureDate: hasFutureDeparture ? nextDeparture?.departureDate : undefined,
+635:        expectedDepartureId: hasFutureDeparture ? nextDeparture?.id : undefined,
+661:  const selectedPrice = Number(nextDeparture?.priceFrom) || 0
+712:                    currency={nextDeparture?.currency}
+713:                    originalPrice={nextDeparture?.originalPrice}
+714:                    price={nextDeparture?.priceFrom}
+722:              {isSellable && nextDeparture?.priceFrom ? (
+729:                  ? `Tour starts from ${formatTourPrice(floorPrice, nextDeparture?.currency)} on other dates`
+730:                  : `Tour có đợt từ ${formatTourPrice(floorPrice, nextDeparture?.currency)} cho các ngày khác`}
+739:                  ? nextDeparture?.depositNote ||
+840:                    value={nextDeparture?.id ? String(nextDeparture.id) : ''}
+875:                  {!isPrivateTour && hasFutureDeparture && nextDeparture?.airline ? (
+877:                      {[nextDeparture.departureCity, nextDeparture.airline].filter(Boolean).join(' · ')}
+919:                      ? formatTourDate(nextDeparture?.departureDate, locale)
+924:              [nextDeparture?.airline, nextDeparture?.departureCity].filter(Boolean).length > 0 ? (
+929:                      nextDeparture?.departureCity,
+930:                      nextDeparture?.airline
+931:                        ? `${nextDeparture.airline}${nextDeparture?.flightNumber ? ` (${nextDeparture.flightNumber})` : ''}`
+940:              getAvailabilityLabel(nextDeparture?.availabilityStatus, locale) ? (
+944:                    {getAvailabilityLabel(nextDeparture?.availabilityStatus, locale)}
+1017:                  departureDate: !isPrivateTour && hasFutureDeparture ? nextDeparture?.departureDate : undefined,
+1018:                  departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
+1052:  nextDeparture: nextDepartureProp,
+1059:  nextDeparture: Record<string, any> | null
+1066:  const nextDeparture = context
+1070:    : nextDepartureProp
+1119:    override: nextDeparture?.ctaLabelOverride,
+1273:  const nextDepDate = nextDeparture?.departureDate ? new Date(nextDeparture.departureDate) : null
+1277:    nextDeparture &&
+1304:        {hasFutureDeparture && nextDeparture?.departureCity ? (
+1306:            Khởi hành: {nextDeparture.departureCity}
+1309:        {hasFutureDeparture && nextDeparture?.airline ? (
+1311:            Bay {nextDeparture.airline}
+1312:            {nextDeparture?.flightNumber ? ` (${nextDeparture.flightNumber})` : ''}
+1346:          {hasFutureDeparture && nextDeparture?.commerceVerified && nextDeparture?.availabilityStatus !== 'sold-out' && normalizeGovernedTourPrice({ currency: nextDeparture?.currency, value: nextDeparture?.priceFrom }) ? (
+1348:              <PromotionBadge label={nextDeparture?.promoLabel} />
+2533:  nextDeparture,
+2537:  nextDeparture: Record<string, any> | null
+2543:    ...getGovernedPricePostureInput({ nextDeparture, tour }),
+2595:  nextDeparture,
+2600:  nextDeparture: Record<string, any> | null
+2611:    ...getGovernedPricePostureInput({ nextDeparture, tour }),
+2617:    override: nextDeparture?.ctaLabelOverride,
+2905:  nextDeparture: nextDepartureProp,
+2911:  nextDeparture: Record<string, any> | null
+2917:  const nextDeparture = context
+2921:    : nextDepartureProp
+2927:    ...getGovernedPricePostureInput({ nextDeparture, tour }),
+2962:                override: nextDeparture?.ctaLabelOverride,
+2972:  const nextDepDate = nextDeparture?.departureDate ? new Date(nextDeparture.departureDate) : null
+2977:      nextDeparture &&
+2982:  const isSoldOut = nextDeparture?.availabilityStatus === 'sold-out'
+2983:  const commerceVerified = Boolean(nextDeparture?.commerceVerified)
+2989:          formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency),
+2990:          formatTourDate(nextDeparture?.departureDate),
+2991:          nextDeparture?.airline || null,
+2996:        ? `Đã hết chỗ • ${formatTourDate(nextDeparture?.departureDate)}${nextDeparture?.airline ? ` • ${nextDeparture.airline}` : ''}`
+3013:              const isSoldOut = nextDeparture?.availabilityStatus === 'sold-out'
+3014:              const commerceVerified = Boolean(nextDeparture?.commerceVerified)
+3025:                  ? (nextDeparture?.ctaLabelOverride || 'Giữ chỗ ngay')
+3032:                  ? (nextDeparture?.ctaLabelOverride || 'Tư vấn')
+3040:                    departureDate: !isPrivateTour && hasFutureDeparture ? (nextDeparture?.departureDate || nextDeparture?.date) : undefined,
+3041:                    departureId: !isPrivateTour && hasFutureDeparture ? nextDeparture?.id : undefined,
+3083:  nextDeparture,
+3089:  nextDeparture: Record<string, any> | null
+3099:      nextDeparture={nextDeparture}
+3307:      initialDeparture={data.nextDeparture}
+3315:              nextDeparture={data.nextDeparture}
+3339:            <TourPricePostureSection locale={locale} nextDeparture={data.nextDeparture} tour={tour} />
+3352:              nextDeparture={data.nextDeparture}
+3432:                    nextDeparture={data.nextDeparture}
+3450:                  nextDeparture={data.nextDeparture}
+3477:                nextDeparture={data.nextDeparture}
+3583:export const TourMarketPage = ({
+3608:            const departure = tour.nextDeparture
+3609:            const canPromote = Boolean(
+3629:                    {canPromote ? (
+3671:                      {canPromote ? (
+3684:                  {tour.nextDeparture ? (
+3695:                              formatTourDate(tour.nextDeparture.departureDate, locale),
+3696:                              tour.nextDeparture.airline,
+3714:                          tour.nextDeparture
+3719:                        {tour.nextDeparture ? 'Xem lịch đi gần nhất' : 'Xem đợt đi'}
+3863:              {formatTourDate(schedule.heroStats.nextDeparture?.departureDate, locale) ||
+526-
+527-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+528-}
+529-
+530:export const getFutureDepartures = <T extends { departureDate?: null | string }>(
+531-  departures?: T[] | null,
+532-) => {
+533-  const today = new Date()
+534-  const threshold = new Date(
+535-    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+536-  )
+537-
+538-  return (departures || []).filter((departure) => {
+539-    const date = toDateOnly(departure.departureDate)
+540-
+541-    return date ? date.getTime() >= threshold.getTime() : false
+542-  })
+543-}
+544-
+545-export const selectPublishableDepartures = <
+546-  T extends { commerceVerified?: boolean | null; departureDate?: null | string },
+547->(
+548-  departures?: T[] | null,
+549-  options?: { draft?: boolean },
+550-): T[] => {
+551-  const draft = options?.draft ?? false
+552-  if (draft) return departures || []
+553-  return getFutureDepartures(departures).filter((departure) => departure.commerceVerified)
+554-}
+555-
+556-/**
+557- * A homepage "on sale" card requires governed airline and price claims.
+558- * Flight number is optional and displayed when provided by operations.
+559- */
+560-export const isDeparturePublishable = (
+561-  departure: Pick<DepartureCardViewModel, 'airline' | 'currency' | 'priceFrom'> &
+562-    Partial<Pick<DepartureCardViewModel, 'flightNumber'>>,
+563-) =>
+564-  Boolean(
+565-    departure.airline?.trim() &&
+566-      formatTourPrice(departure.priceFrom, departure.currency),
+567-  )
+568-
+--
+597-    .filter((variant) => (draft ? variant.status !== 'archived' : variant.status === 'active'))
+598-    .sort((left, right) => Number(left.displayPriority || 0) - Number(right.displayPriority || 0))
+599-}
+600-
+601:export const getNextDeparture = <
+602-  T extends {
+603-    availabilityStatus?: unknown
+604-    commerceVerified?: unknown
+605-    departureDate?: null | string
+606-    priceFrom?: unknown
+607-  },
+608->(
+609-  departures?: T[] | null,
+610-) => {
+611-  const future = getFutureDepartures(departures)
+612-  if (future.length === 0) return null
+613-
+614-  const openSellable = future.filter(
+615-    (d) =>
+616-      (d.commerceVerified && d.availabilityStatus !== 'sold-out' && Number(d.priceFrom) > 0) ||
+617-      d.availabilityStatus === 'open' ||
+618-      d.availabilityStatus === 'limited',
+619-  )
+620-
+621-  if (openSellable.length > 0) {
+622-    const sorted = [...openSellable].sort((a, b) => {
+623-      const priceA = Number(a.priceFrom) || Infinity
+624-      const priceB = Number(b.priceFrom) || Infinity
+625-      if (priceA !== priceB) return priceA - priceB
+626-      const dateA = a.departureDate ? new Date(a.departureDate).getTime() : Infinity
+627-      const dateB = b.departureDate ? new Date(b.departureDate).getTime() : Infinity
+628-      return dateA - dateB
+629-    })
+630-    return sorted[0]
+631-  }
+632-
+633-  return future[0]
+634-}
+635-
+636-export const groupDeparturesByMonth = <T extends { departureDate?: null | string }>(
+637-  departures?: T[] | null,
+638-) => {
+639-  const groups = new Map<string, T[]>()
+app/src/tours/queries.ts:36:import { normalizeGovernedTourPrice } from './currency'
+app/src/tours/queries.ts:254:    Boolean(normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }))
+app/src/tours/queries.ts:506:        normalizeGovernedTourPrice({
+app/src/tours/StructuredPages.tsx:23:import { normalizeGovernedTourPrice } from './currency'
+app/src/tours/StructuredPages.tsx:241:  const departurePrice = normalizeGovernedTourPrice({
+app/src/tours/StructuredPages.tsx:1346:          {hasFutureDeparture && nextDeparture?.commerceVerified && nextDeparture?.availabilityStatus !== 'sold-out' && normalizeGovernedTourPrice({ currency: nextDeparture?.currency, value: nextDeparture?.priceFrom }) ? (
+app/src/tours/StructuredPages.tsx:3506:          normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }),
+app/src/tours/StructuredPages.tsx:3613:              normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }),
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command '$lines = Get-Content -LiteralPath '"'app/src/tours/StructuredPages.tsx'; for ("'$index = 3582; $index -lt 3727; $index++) { '"'{0,4}: {1}' -f ("'$index + 1), $lines[$index] }; Get-Content -LiteralPath '"'app/src/tours/currency.ts'" in E:\repo\WingsTravel
+ succeeded in 333ms:
+3583: export const TourMarketPage = ({
+3584:   departures,
+3585:   locale,
+3586:   marketKey,
+3587:   tours,
+3588: }: {
+3589:   departures: DepartureCardViewModel[]
+3590:   locale: 'en' | 'vi'
+3591:   marketKey: string
+3592:   tours: TourCardViewModel[]
+3593: }) => {
+3594:   const market = getMarketConfig(marketKey)
+3595: 
+3596:   return (
+3597:     <div className="container space-y-8">
+3598:       <Panel>
+3599:         <SectionHeading
+3600:           eyebrow="Thị trường outbound"
+3601:           level="h1"
+3602:           title={market?.heading || 'Tour outbound'}
+3603:           description="Các line tour được tổ chức theo thị trường để khách so sánh route, mức giá và nhịp khởi hành trước khi đi vào từng tour detail."
+3604:         />
+3605:         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+3606:           {tours.map((tour) => {
+3607:             const tourBadges = getMarketTourBadges(tour)
+3608:             const departure = tour.nextDeparture
+3609:             const canPromote = Boolean(
+3610:               departure?.commerceVerified === true &&
+3611:               departure.availabilityStatus !== 'sold-out' &&
+3612:               getFutureDepartures([departure]).length > 0 &&
+3613:               normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }),
+3614:             )
+3615: 
+3616:             return (
+3617:               <article
+3618:                 className="group relative rounded-[24px] border border-border/60 bg-background p-5 shadow-sm transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-1 hover:border-[color:var(--site-accent)]/40 hover:bg-card hover:shadow-[0_18px_46px_color-mix(in_oklch,var(--site-brand)_14%,transparent)]"
+3619:                 key={tour.id}
+3620:               >
+3621:                 <div className="relative z-10">
+3622:                   <div className="relative mb-4 aspect-[16/10] overflow-hidden rounded-[20px] bg-muted">
+3623:                     <Media
+3624:                       fill
+3625:                       imgClassName="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+3626:                       pictureClassName="absolute inset-0"
+3627:                       resource={tour.heroMedia || asArray(tour.gallery)[0] || null}
+3628:                     />
+3629:                     {canPromote ? (
+3630:                       <div className="absolute inset-x-3 top-3 z-10 flex justify-start">
+3631:                         <PromotionBadge label={departure?.promoLabel} />
+3632:                       </div>
+3633:                     ) : null}
+3634:                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent p-3">
+3635:                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/90">
+3636:                         {tour.hasFutureDepartures === false
+3637:                           ? 'Đang cập nhật đợt mới'
+3638:                           : tour.departureCount
+3639:                             ? `${tour.departureCount} đợt đang mở bán`
+3640:                             : 'Line tour đang bán'}
+3641:                       </p>
+3642:                     </div>
+3643:                   </div>
+3644:                   {tourBadges.length > 0 ? (
+3645:                     <div className="mb-4 flex flex-wrap gap-2">
+3646:                       {tourBadges.map((badge) => (
+3647:                         <span
+3648:                           className="rounded-full border border-border/70 bg-muted/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-foreground transition-colors duration-200 group-hover:border-[var(--site-brand)]/20 group-hover:text-[var(--site-brand)]"
+3649:                           key={badge}
+3650:                         >
+3651:                           {badge}
+3652:                         </span>
+3653:                       ))}
+3654:                     </div>
+3655:                   ) : null}
+3656:                   {tour.slug ? (
+3657:                     <SiteLink
+3658:                       className="text-lg font-semibold text-foreground no-underline transition-colors duration-200 group-hover:text-[var(--site-brand)]"
+3659:                       href={getTourPath(tour.slug)}
+3660:                     >
+3661:                       {tour.title}
+3662:                     </SiteLink>
+3663:                   ) : (
+3664:                     <p className="text-lg font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+3665:                       {tour.title}
+3666:                     </p>
+3667:                   )}
+3668:                   <p className="mt-2 text-sm leading-7 text-muted-foreground">{tour.summary}</p>
+3669:                   <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+3670:                     <p className="text-2xl font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+3671:                       {canPromote ? (
+3672:                         <PromotionPrice
+3673:                           contactLabel={locale === 'en' ? 'Contact us' : 'Liên hệ'}
+3674:                           currency={departure?.currency}
+3675:                           originalPrice={departure?.originalPrice}
+3676:                           price={departure?.priceFrom}
+3677:                         />
+3678:                       ) : (locale === 'en' ? 'Contact us' : 'Liên hệ')}
+3679:                     </p>
+3680:                     <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+3681:                       {locale === 'en' ? 'Selected departure' : 'Giá theo đợt'}
+3682:                     </span>
+3683:                   </div>
+3684:                   {tour.nextDeparture ? (
+3685:                     <div className="mt-3 rounded-[18px] border border-border/60 bg-muted/25 px-4 py-3 transition-colors duration-200 group-hover:border-[var(--site-brand)]/18 group-hover:bg-[var(--site-brand)]/4">
+3686:                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+3687:                         {tour.hasFutureDepartures === false
+3688:                           ? 'Đang cập nhật đợt mới'
+3689:                           : 'Đợt gần nhất'}
+3690:                       </p>
+3691:                       <p className="mt-1 text-sm font-semibold text-foreground">
+3692:                         {tour.hasFutureDepartures === false
+3693:                           ? 'Liên hệ để nhận lịch khởi hành sắp mở'
+3694:                           : [
+3695:                               formatTourDate(tour.nextDeparture.departureDate, locale),
+3696:                               tour.nextDeparture.airline,
+3697:                             ]
+3698:                               .filter(Boolean)
+3699:                               .join(' • ')}
+3700:                       </p>
+3701:                     </div>
+3702:                   ) : null}
+3703:                   {tour.slug ? (
+3704:                     <div className="mt-5 flex flex-wrap gap-3">
+3705:                       <SiteLink
+3706:                         className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline transition-[transform,color,border-color,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--site-brand)]/30 hover:bg-[var(--site-brand)]/6 hover:text-[var(--site-brand)] hover:shadow-[0_12px_28px_color-mix(in_oklch,var(--site-brand)_10%,transparent)]"
+3707:                         href={getTourPath(tour.slug)}
+3708:                       >
+3709:                         Xem chi tiết tour
+3710:                       </SiteLink>
+3711:                       <SiteLink
+3712:                         className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_color-mix(in_oklch,var(--site-brand)_18%,transparent)]"
+3713:                         href={
+3714:                           tour.nextDeparture
+3715:                             ? `${getTourPath(tour.slug)}#departures`
+3716:                             : getTourPath(tour.slug)
+3717:                         }
+3718:                       >
+3719:                         {tour.nextDeparture ? 'Xem lịch đi gần nhất' : 'Xem đợt đi'}
+3720:                       </SiteLink>
+3721:                     </div>
+3722:                   ) : null}
+3723:                 </div>
+3724:               </article>
+3725:             )
+3726:           })}
+3727:         </div>
+export const supportedTourCurrencyCodes = ['VND', 'USD'] as const
+
+export type SupportedTourCurrencyCode = (typeof supportedTourCurrencyCodes)[number]
+
+export const supportedTourCurrencyOptions = supportedTourCurrencyCodes.map((currency) => ({
+  label: currency,
+  value: currency,
+}))
+
+export const normalizeSupportedTourCurrency = (
+  value: unknown,
+): SupportedTourCurrencyCode | null => {
+  if (typeof value !== 'string') return null
+
+  const currency = value.trim().toUpperCase()
+  return supportedTourCurrencyCodes.includes(currency as SupportedTourCurrencyCode)
+    ? (currency as SupportedTourCurrencyCode)
+    : null
+}
+export type GovernedTourPrice = {
+  currency: SupportedTourCurrencyCode
+  value: number
+}
+
+export const normalizeGovernedTourPrice = ({
+  currency,
+  value,
+}: {
+  currency: unknown
+  value: unknown
+}): GovernedTourPrice | null => {
+  const normalizedCurrency = normalizeSupportedTourCurrency(currency)
+
+  return typeof value === 'number' &&
+    Number.isFinite(value) &&
+    value > 0 &&
+    normalizedCurrency
+    ? { currency: normalizedCurrency, value }
+    : null
+}
+
+codex
+Prior **JPY-over-VND P2 is fixed**: selection now requires a governed price, rejecting unsupported JPY.
+
+**Remaining P2:** [queries.ts:502](/E:/repo/WingsTravel/app/src/tours/queries.ts:502) omits the nonsoldout condition. A first verified, valid-price **sold-out** departure wins over a later eligible departure. Renderer `canPromote` then hides its price/promotion and displays “Liên hệ”, despite an eligible departure existing.
+
+Fallback remains `getNextDeparture(linkedVisible)`. Rendered price, original price, and promotion label consistently use the same selected normalized departure. No other concrete scoped findings.
+
+Checked source with `Get-Content` and `rg`; no edits or tests/builds run. Build/runtime verification remains pending.
+tokens used
+34,528
+Prior **JPY-over-VND P2 is fixed**: selection now requires a governed price, rejecting unsupported JPY.
+
+**Remaining P2:** [queries.ts:502](/E:/repo/WingsTravel/app/src/tours/queries.ts:502) omits the nonsoldout condition. A first verified, valid-price **sold-out** departure wins over a later eligible departure. Renderer `canPromote` then hides its price/promotion and displays “Liên hệ”, despite an eligible departure existing.
+
+Fallback remains `getNextDeparture(linkedVisible)`. Rendered price, original price, and promotion label consistently use the same selected normalized departure. No other concrete scoped findings.
+
+Checked source with `Get-Content` and `rg`; no edits or tests/builds run. Build/runtime verification remains pending.

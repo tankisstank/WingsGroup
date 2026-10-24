@@ -1,0 +1,9 @@
+
+E:\repo\WingsTravel\app\src\Header\Nav\index.tsx
+  145:9  warning  'isHotlineSite' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+E:\repo\WingsTravel\app\tests\component\wingsGroupHeaderOptionA.component.spec.tsx
+  32:13  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+

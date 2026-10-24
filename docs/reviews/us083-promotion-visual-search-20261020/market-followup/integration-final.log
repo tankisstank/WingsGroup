@@ -1,0 +1,13 @@
+
+> website@1.0.0 test:int E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation node scripts/run-integration-tests.mjs "tests/int/wingsSideTourScoping.int.spec.ts"
+
+
+ RUN  v4.1.6 E:/repo/WingsTravel/app
+
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  00:14:23
+   Duration  660ms (transform 212ms, setup 0ms, import 363ms, tests 11ms, environment 0ms)
+

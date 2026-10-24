@@ -1,0 +1,49 @@
+{
+  "approved": true,
+  "errors": [],
+  "gateResults": [
+    {
+      "key": "legal-identity",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "privacy-consent",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "consultation-channels",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "proof-publication",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "ecosystem-deep-links",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "locale-completeness",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "editorial-media",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "key": "brand-logo-tokens",
+      "errors": [],
+      "warnings": []
+    }
+  ],
+  "mandatoryGateCount": 5,
+  "pendingMandatory": [],
+  "siteCode": "wings-group"
+}

@@ -1,0 +1,90 @@
+{
+  "timestamp": "2026-10-20T11:53:39.491Z",
+  "readOnly": true,
+  "english": {
+    "status": 200,
+    "body": {
+      "available": true,
+      "enabled": true,
+      "channels": [
+        {
+          "key": "zalo",
+          "label": "Zalo OA",
+          "state": "pending-update"
+        },
+        {
+          "key": "whatsapp",
+          "label": "WhatsApp",
+          "state": "pending-update"
+        },
+        {
+          "key": "messenger",
+          "label": "Messenger",
+          "state": "pending-update"
+        },
+        {
+          "key": "callback",
+          "label": "Specialist callback",
+          "state": "pending-update"
+        }
+      ],
+      "consentCopy": "I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy.",
+      "consentVersion": "wingsgroup-contact-v1",
+      "policyHref": "/en/chinh-sach-bao-mat",
+      "retentionMonths": 24
+    }
+  },
+  "trustedEnglish": {
+    "status": 200,
+    "body": {
+      "available": true,
+      "enabled": true,
+      "channels": [
+        {
+          "key": "zalo",
+          "label": "Zalo OA",
+          "state": "pending-update"
+        },
+        {
+          "key": "whatsapp",
+          "label": "WhatsApp",
+          "state": "pending-update"
+        },
+        {
+          "key": "messenger",
+          "label": "Messenger",
+          "state": "pending-update"
+        },
+        {
+          "key": "callback",
+          "label": "Specialist callback",
+          "state": "pending-update"
+        }
+      ],
+      "consentCopy": "I agree that WingsGroup may use the information provided to contact me, provide consultation, and route my request to the appropriate team in accordance with the Privacy Policy.",
+      "consentVersion": "wingsgroup-contact-v1",
+      "policyHref": "/en/chinh-sach-bao-mat",
+      "retentionMonths": 24
+    }
+  },
+  "invalid": {
+    "status": 400,
+    "body": {
+      "error": "Invalid request."
+    }
+  },
+  "otherTenant": {
+    "status": 200,
+    "body": {
+      "enabled": false
+    }
+  },
+  "catalog": {
+    "allCount": 6,
+    "featuredCount": 6,
+    "verifiedCount": 6,
+    "discountCount": 0,
+    "promotionLabels": []
+  },
+  "assertions": "PASS English consent/privacy/trusted locale/invalid locale/tenant isolation and catalog price governance"
+}

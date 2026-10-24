@@ -1,0 +1,54 @@
+========================================================================
+>>> US-083: Live Payload CMS Hook Invalidation & Mutation Gate <<<
+========================================================================
+
+--- Step 1: Creating task-only super-admin in PostgreSQL 55432 ---
+(node:69404) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[18:44:39] [33mWARN[39m: [36mNo email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.[39m
+Created task super-admin ID: 3, email: task-admin-1792496679919@wingsgo.local
+
+--- Step 2: Native HTTP login to Next.js on port 3102 ---
+Login status: 200
+Obtained JWT token successfully.
+
+--- Step 3: Seeding Redis fixtures (Tenant 2 & 9) ---
+Redis tenant keys initialized.
+
+--- Step 4: Native HTTP PATCH /api/tour-departures/1 (Price: 8.8M/13.8M, Promo: Live Hook Promo 8.8M) ---
+PATCH status: 200
+Redis after PATCH:
+  Tenant 2 key (must be evicted): null
+  Tenant 9 key (must be preserved): true
+>>> PATCH Redis Eviction & Isolation Assertion: PASS <<<
+Public catalog after PATCH:
+  Price value: 8800000
+  Original price: 13800000
+  Promo label: Live Hook Promo 8.8M
+>>> PATCH Public Catalog Freshness Assertion: PASS <<<
+
+--- Step 5: Re-seeding Tenant 2 key before DELETE ---
+
+--- Step 6: Native HTTP DELETE /api/tour-departures/1 ---
+DELETE status: 200
+Redis after DELETE:
+  Tenant 2 key (must be evicted): null
+  Tenant 9 key (must be preserved): true
+>>> DELETE Redis Eviction & Isolation Assertion: PASS <<<
+Public catalog featured count after DELETE: 0
+>>> DELETE Public Catalog Removal Assertion: PASS <<<
+
+========================================================================
+>>> PASS: Complete Live Payload CMS Hook & HTTP Revalidation Verified <<<
+  1. Native HTTP login as super-admin: PASS
+  2. Native HTTP PATCH departure: fired revalidateTourDeparture hook
+     - Redis Tenant 2 evicted, Tenant 9 preserved
+     - Public catalog served fresh price (8.8M/13.8M) and promo label
+  3. Native HTTP DELETE departure: fired revalidateTourDepartureDelete hook
+     - Redis Tenant 2 evicted, Tenant 9 preserved
+     - Public catalog removed deleted departure cleanly
+========================================================================
+
+Restoring baseline departure 1 in PostgreSQL...
+Cleaning up task admin user: task-admin-1792496679919@wingsgo.local...
+Cleanup complete.

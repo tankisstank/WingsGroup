@@ -1,5 +1,19 @@
 # Thiết kế Kỹ thuật: US-081 — Đa Hotline Liên hệ & Tư vấn WingsGo có Click-to-Call
 
+## Hợp đồng hiện tại — follow-up 23/10/2026
+
+- Hotline chính WingsGo là `0948786775`; fallback và seed đồng bộ. Giá trị CMS hợp lệ vẫn được ưu tiên.
+- Footer chỉ giữ một link gọi ngay và một email ưu tiên; bỏ cột tư vấn lặp, các số phụ, Zalo và theme selector.
+- WingsGo cố định light từ SSR và ThemeProvider; không lấy lựa chọn dark từ localStorage hay hệ điều hành. Site khác giữ hành vi hiện có.
+- FAB ẩn khi footer vào viewport. Dialog đã mở vẫn hiển thị; Escape đóng và chuyển focus về link gọi footer.
+- Form liên hệ lấy hotline đã resolve từ RenderBlocks thay ba literal cũ; không thay schema hay luồng submit.
+- Công cụ `updateWingsGoHotline.ts` mặc định plan; chỉ đổi main cũ của đúng site, không seed lại và không chạm hotline phụ. Apply production cần shared transaction/row lock, backup và rehearsal PostgreSQL.
+- Candidate độc lập dựa trên release đang chạy `d6057d4`; bằng chứng và giới hạn trong `wingsgo-footer-review-20261023/`. Chưa triển khai production cho follow-up này.
+
+## Thiết kế lịch sử ngày 19/10/2026
+
+Các đoạn bên dưới lưu thiết kế ban đầu. Số chính cũ và yêu cầu hiển thị cả ba số tại footer đã được thay bằng hợp đồng follow-up ở trên.
+
 ## 1. Kiến trúc Dữ liệu & Schema CMS
 
 ### 1.1. Collection `SiteSettings` (Additive Schema)

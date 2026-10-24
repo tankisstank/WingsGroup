@@ -1,0 +1,17 @@
+
+E:\repo\WingsTravel\app\scripts\seed-subsites.ts
+   805:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   824:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   843:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   862:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2203:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  2206:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+E:\repo\WingsTravel\app\src\payload-types.ts
+  0:0  warning  File ignored because of a matching ignore pattern. Use "--no-ignore" to disable file ignore settings or use "--no-warn-ignored" to suppress this warning
+
+E:\repo\WingsTravel\app\tests\component\retailTourConsultationDialog.component.spec.tsx
+  10:10  warning  'RetailDecisionRail' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+✖ 8 problems (0 errors, 8 warnings)
+

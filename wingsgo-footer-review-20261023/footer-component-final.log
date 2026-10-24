@@ -1,0 +1,13 @@
+
+> website@1.0.0 test:component E:\repo\WingsTravel\wingsgo-footer-review-20261023\candidate\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.component.config.mts "tests/component/footerHotlines.component.spec.tsx"
+
+
+ RUN  v4.1.6 E:/repo/WingsTravel/wingsgo-footer-review-20261023/candidate/app
+
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  22:31:44
+   Duration  1.83s (transform 293ms, setup 54ms, import 725ms, tests 139ms, environment 638ms)
+

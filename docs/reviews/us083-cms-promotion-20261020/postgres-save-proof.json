@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-10-20T14:25:10.057Z",
+  "mode": "save",
+  "latest": {
+    "parent_id": 2,
+    "version_site_id": 2,
+    "version_tour_product_id": 3,
+    "version_price_from": 12900000,
+    "version_original_price": 15900000,
+    "version__status": "draft",
+    "version_verified_at": "2026-10-20T14:22:29.341+00:00",
+    "version_expires_at": "2026-10-22T16:59:00+00:00",
+    "version_promo_label": "Ưu đãi rehearsal"
+  },
+  "main": {
+    "id": 2,
+    "site_id": 2,
+    "tour_product_id": 3,
+    "price_from": 12900000,
+    "original_price": null,
+    "_status": "draft"
+  }
+}

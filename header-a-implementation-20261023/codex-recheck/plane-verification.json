@@ -1,0 +1,80 @@
+{
+  "timestamp": "2026-10-23T07:32:58.998Z",
+  "status": "PASS",
+  "project": "Nền tảng lõi WingsGroup",
+  "epic": {
+    "name": "E09 - Trải nghiệm public WingsGroup v3",
+    "id": "219556d4-89ec-4eac-b583-14db6bce1058",
+    "type": "223b8bfe-2183-48bd-9515-cbc9d44211e8"
+  },
+  "missingDates": 0,
+  "genericChildNames": 0,
+  "verifiedChildren": 4,
+  "expectedOwner": "c0508g",
+  "items": [
+    {
+      "id": "0d0e959f-672c-4fe6-a3f9-33f2420811fe",
+      "name": "US-085 Hợp nhất liên hệ header WingsGroup và cập nhật hotline",
+      "parent": "219556d4-89ec-4eac-b583-14db6bce1058",
+      "state": "Chờ xác nhận",
+      "start_date": "2026-10-23",
+      "target_date": "2026-10-26",
+      "assigneeCount": 1,
+      "labels": [
+        "content",
+        "feature",
+        "bug"
+      ]
+    },
+    {
+      "id": "dbe54728-98e9-4ed8-b330-3325ed14a331",
+      "name": "US-085 - Kiểm chứng responsive, hoàn tất Codex review và đồng bộ Plane.",
+      "parent": "0d0e959f-672c-4fe6-a3f9-33f2420811fe",
+      "state": "Chờ xác nhận",
+      "start_date": "2026-10-26",
+      "target_date": "2026-10-26",
+      "assigneeCount": 1,
+      "labels": [
+        "uat"
+      ]
+    },
+    {
+      "id": "a56f0f94-7235-4256-b4cf-fb2f1699a8f1",
+      "name": "US-085 - Giữ Zalo, form context và accessibility của luồng liên hệ.",
+      "parent": "0d0e959f-672c-4fe6-a3f9-33f2420811fe",
+      "state": "Chờ xác nhận",
+      "start_date": "2026-10-25",
+      "target_date": "2026-10-25",
+      "assigneeCount": 1,
+      "labels": [
+        "feature"
+      ]
+    },
+    {
+      "id": "bb9de9b2-7968-4896-9feb-535d7d683abe",
+      "name": "US-085 - Đổi hotline WingsGroup qua CMS, giữ isolation giữa các site.",
+      "parent": "0d0e959f-672c-4fe6-a3f9-33f2420811fe",
+      "state": "Chờ xác nhận",
+      "start_date": "2026-10-24",
+      "target_date": "2026-10-24",
+      "assigneeCount": 1,
+      "labels": [
+        "content"
+      ]
+    },
+    {
+      "id": "4c83d8a9-f514-425b-9de5-cbf343fc85be",
+      "name": "US-085 - Hợp nhất header VI/EN theo A trên desktop và mobile.",
+      "parent": "0d0e959f-672c-4fe6-a3f9-33f2420811fe",
+      "state": "Chờ xác nhận",
+      "start_date": "2026-10-23",
+      "target_date": "2026-10-23",
+      "assigneeCount": 1,
+      "labels": [
+        "feature",
+        "bug"
+      ]
+    }
+  ],
+  "issues": []
+}

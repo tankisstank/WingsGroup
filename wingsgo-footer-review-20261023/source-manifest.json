@@ -1,0 +1,79 @@
+{
+  "checkedAt": "2026-10-23T22:39:10.4650511+07:00",
+  "baseCommit": "d6057d41c2b3897b27cbd656356f83873d652870",
+  "buildID": "5Ldw8c9J0JVnrfUO-XFYc",
+  "files": [
+    {
+      "path": "app/src/Footer/Component.tsx",
+      "sha256": "A0CE79D3A5C2AEDB70234C7E721D37C21D100040B0FA982F1697D57515556FE5"
+    },
+    {
+      "path": "app/src/app/(frontend)/globals.css",
+      "sha256": "DBE74FCFB79A79D02A8B53798F70F9666C69248730806205CA9A0F05113800B5"
+    },
+    {
+      "path": "app/src/components/SiteContactFab.tsx",
+      "sha256": "885F96169D7A02297BE5B83061E28649307C673C695BABD5456D633E9BC5B122"
+    },
+    {
+      "path": "app/src/blocks/Form/Component.tsx",
+      "sha256": "FB9F6AF0DA40DA13B31B1B5648C19F43F9F79761FD5F4699F9BA2F18DB9A2695"
+    },
+    {
+      "path": "app/src/utilities/siteHotlines.ts",
+      "sha256": "7FAA944370E65470EB39C327252FFDDAFB9A04181415B685E7F7F6F96053769E"
+    },
+    {
+      "path": "app/src/providers/Theme/index.tsx",
+      "sha256": "5C4A04F11184A4CBF83412B53E69FF74A3231AB7ED579C9219D56DF48F68DB4C"
+    },
+    {
+      "path": "app/src/app/(frontend)/layout.tsx",
+      "sha256": "CBD8D5FCEFA347BB88BC468160983C803EB4C8ADB252A6C9926E4909D103CB3F"
+    },
+    {
+      "path": "app/scripts/seed-subsites.ts",
+      "sha256": "103F27DE1EEE83A5C1ABA48DC1A2D5BE3598F5B601DC7FE9C5CBB56EDA3ABD3B"
+    },
+    {
+      "path": "app/scripts/updateWingsGoHotline.ts",
+      "sha256": "1029F130ED820B8D847DB44FCDE6A95165B1133F7CEB45634E664D9610F492B7"
+    },
+    {
+      "path": "app/tests/component/footerHotlines.component.spec.tsx",
+      "sha256": "6163DD801A378717C2341454C782FDA1CBFE6F5CAB90DCDFEBBF563E87D06D3C"
+    },
+    {
+      "path": "app/tests/component/siteContactFab.component.spec.tsx",
+      "sha256": "1DB48BC163395EA80CBE10729ECF2A6C2E46FA0F339A56904279ED0D60154895"
+    },
+    {
+      "path": "app/tests/component/headerHotlines.component.spec.tsx",
+      "sha256": "1990C040F3C363595B833286D0830E587C1B5E605951A50B146CA0E0DD67BA16"
+    },
+    {
+      "path": "app/tests/component/retailTourConsultationDialog.component.spec.tsx",
+      "sha256": "AB84C2A3565D9005270177EDCFB994908F0E00DE9C1C6E8585854665ECAF5762"
+    },
+    {
+      "path": "app/tests/component/leadForm.component.spec.tsx",
+      "sha256": "2C18F82E861B08A358595E32D8D9AC9D2CFF78294A378C335CBC3902E1034A87"
+    },
+    {
+      "path": "app/tests/component/themeProvider.component.spec.tsx",
+      "sha256": "6EAFEB266DA2AB44742A0AEE21B3821AEF00E0078689A3C27743753B5EB5EF16"
+    },
+    {
+      "path": "app/tests/component/wingsSideHiFiChrome.component.spec.tsx",
+      "sha256": "FCB07CCBE8B1931650062FB94899D1E52A38EA97F82A36F17BE49E6A7C0BE727"
+    },
+    {
+      "path": "app/tests/unit/siteHotlines.unit.spec.ts",
+      "sha256": "46A65B69ACF54E3E46F98566960B8BDF8F035B9883FE6BB82098F49AED70D551"
+    },
+    {
+      "path": "app/tests/unit/updateWingsGoHotline.unit.spec.ts",
+      "sha256": "686092B34161C15314B84A8D79123A2CD36DB6BFE2BD73F2A4757B9F1291A5AE"
+    }
+  ]
+}

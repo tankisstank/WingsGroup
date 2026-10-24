@@ -27,6 +27,14 @@ Delivered surfaces:
 - `site-settings.branding`: per-site preset assignment and controlled
   overrides.
 
+Public WingsGroup and WingsGo use a fixed light appearance. Their HTML declares
+`data-theme="light"` during SSR and ThemeProvider ignores stored/system dark
+preferences and dark/null theme requests. WingsGo's footer has no public theme
+selector. Other sites retain their existing preference behavior. This governs
+public appearance; CMS brand presets/tokens remain the source of site styling.
+The WingsGo follow-up is tracked under US-081; local proof does not imply a
+production release.
+
 The public frontend resolves theme values in this order:
 
 ```text

@@ -1,0 +1,11 @@
+
+ RUN  v4.1.6 E:/repo/WingsTravel/app
+
+(node:70416) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 4 skipped (5)
+   Start at  18:45:10
+   Duration  1.36s (transform 206ms, setup 0ms, import 1.03s, tests 150ms, environment 0ms)
+

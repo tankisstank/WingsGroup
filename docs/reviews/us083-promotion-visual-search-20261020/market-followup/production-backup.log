@@ -1,0 +1,7 @@
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":16,"requestId":"6c7a5fa0-c2f8-497b-892f-d9d8500e8b9d","status":"ready","timestamp":"2026-10-20T17:07:43.731Z"}
+Backup entries: 3662
+Previous release: /home/ubuntu/wings-travel/releases/release-us083-promotion-search-20261020-170000
+Rollback image: sha256:46d8b184fd48cb485ba0c38398893830325be517580987c46d516cffd132758c
+e845a6fb4e727f0fd3bb509418b3918f62b69c78c5f89a5508de9c1655b66837  /home/ubuntu/wings-travel/shared/backups/release-us083-promotion-search-market-20261020-172000.dump
+Backup bytes: 4593773
+2026-10-20T17:07:44+00:00

@@ -1,0 +1,15 @@
+(node:32676) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[22:18:22] [33mWARN[39m: [36mNo email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.[39m
+E:\repo\WingsTravel\wingsgo-footer-review-20261023\candidate\app\src\access\siteScope.ts:271
+    throw new Error('Authentication is required.')
+          ^
+
+
+Error: Authentication is required.
+    at enforceSiteAccess (E:\repo\WingsTravel\wingsgo-footer-review-20261023\candidate\app\src\access\siteScope.ts:271:11)
+    at updateDocument (E:\repo\WingsTravel\wingsgo-footer-review-20261023\candidate\app\node_modules\.pnpm\payload@3.84.1_graphql@16.14.0_typescript@6.0.3\node_modules\payload\src\collections\operations\utilities\update.ts:230:16)
+    at async updateByIDOperation (E:\repo\WingsTravel\wingsgo-footer-review-20261023\candidate\app\node_modules\.pnpm\payload@3.84.1_graphql@16.14.0_typescript@6.0.3\node_modules\payload\src\collections\operations\updateByID.ts:203:18)
+    at async <anonymous> (E:\repo\WingsTravel\wingsgo-footer-review-20261023\rehearse-local.mts:24:3)
+
+Node.js v22.20.0

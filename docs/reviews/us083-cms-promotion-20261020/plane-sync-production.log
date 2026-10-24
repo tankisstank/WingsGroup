@@ -1,0 +1,12 @@
+
+> website@1.0.0 plane:sync:workitems E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation node scripts/plane-import.mjs sync-workitems
+
+Plane plan hiện tại không hỗ trợ Initiatives; tiếp tục đồng bộ Project/Epic/US mà không liên kết Initiative.
+Project WPLUS đã archive; giữ nguyên và bỏ qua đồng bộ lịch sử.
+Project WCARE đã archive; giữ nguyên và bỏ qua đồng bộ lịch sử.
+Project WPASS đã archive; giữ nguyên và bỏ qua đồng bộ lịch sử.
+{
+  "patchedCount": 1,
+  "missingCount": 0
+}

@@ -1,0 +1,448 @@
+{
+  "checkedAt": "2026-10-23T22:34:24.3937846+07:00",
+  "cases": [
+    {
+      "path": "/",
+      "width": 320,
+      "proof": {
+        "addresses": "Trụ sở chính: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiVăn phòng du lịch: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Gọi ngay: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "vi",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/",
+      "width": 390,
+      "proof": {
+        "addresses": "Trụ sở chính: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiVăn phòng du lịch: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Gọi ngay: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "vi",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/",
+      "width": 768,
+      "proof": {
+        "addresses": "Trụ sở chính: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiVăn phòng du lịch: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Gọi ngay: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "vi",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/",
+      "width": 1280,
+      "proof": {
+        "addresses": "Trụ sở chính: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiVăn phòng du lịch: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Gọi ngay: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "vi",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/en",
+      "width": 320,
+      "proof": {
+        "addresses": "Head office: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiTravel office: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Call now: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "en",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/en",
+      "width": 390,
+      "proof": {
+        "addresses": "Head office: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiTravel office: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Call now: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "en",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/en",
+      "width": 768,
+      "proof": {
+        "addresses": "Head office: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiTravel office: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Call now: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "en",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/en",
+      "width": 1280,
+      "proof": {
+        "addresses": "Head office: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiTravel office: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Call now: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "en",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/lien-he",
+      "width": 320,
+      "proof": {
+        "addresses": "Trụ sở chính: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiVăn phòng du lịch: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Gọi ngay: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "vi",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/lien-he",
+      "width": 390,
+      "proof": {
+        "addresses": "Trụ sở chính: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiVăn phòng du lịch: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Gọi ngay: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "vi",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/lien-he",
+      "width": 768,
+      "proof": {
+        "addresses": "Trụ sở chính: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiVăn phòng du lịch: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Gọi ngay: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "vi",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/lien-he",
+      "width": 1280,
+      "proof": {
+        "addresses": "Trụ sở chính: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiVăn phòng du lịch: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Gọi ngay: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "vi",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/en/lien-he",
+      "width": 320,
+      "proof": {
+        "addresses": "Head office: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiTravel office: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Call now: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "en",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/en/lien-he",
+      "width": 390,
+      "proof": {
+        "addresses": "Head office: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiTravel office: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Call now: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "en",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/en/lien-he",
+      "width": 768,
+      "proof": {
+        "addresses": "Head office: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiTravel office: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Call now: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "en",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "path": "/en/lien-he",
+      "width": 1280,
+      "proof": {
+        "addresses": "Head office: Tầng 2 số 28B ngõ 44 Phố Hào Nam, phường Ô Chợ Dừa, quận Đống Đa, TP Hà NộiTravel office: Tầng 12, Ngọc Khánh Plaza, Số 1 Phạm Huy Thông, Giảng Võ, Hà Nội",
+        "callHeight": 44,
+        "callLabel": "Call now: 0948 786 775",
+        "duplicateAdvice": false,
+        "emails": [
+          "mailto:sales@wingsgo.vn"
+        ],
+        "language": "en",
+        "oldPhones": 0,
+        "overflow": -15,
+        "phones": [
+          "tel:0948786775"
+        ],
+        "selectors": 0,
+        "site": "wings-go",
+        "theme": "light",
+        "triggerHidden": true,
+        "zalo": 0
+      }
+    },
+    {
+      "site": "wings-group",
+      "width": 390,
+      "proof": {
+        "htmlTheme": "light",
+        "phones": [
+          "tel:0948786775"
+        ],
+        "site": "wings-group",
+        "wingGoPhone": false
+      }
+    },
+    {
+      "site": "wings-group",
+      "width": 1280,
+      "proof": {
+        "htmlTheme": "light",
+        "phones": [
+          "tel:0948786775"
+        ],
+        "site": "wings-group",
+        "wingGoPhone": false
+      }
+    },
+    {
+      "site": "wing-side",
+      "width": 390,
+      "proof": {
+        "htmlTheme": "light",
+        "phones": [
+          "tel:+84903000222",
+          "tel:+84903000222"
+        ],
+        "site": "wing-side",
+        "wingGoPhone": false
+      }
+    },
+    {
+      "site": "wing-side",
+      "width": 1280,
+      "proof": {
+        "htmlTheme": "light",
+        "phones": [
+          "tel:+84903000222",
+          "tel:+84903000222"
+        ],
+        "site": "wing-side",
+        "wingGoPhone": false
+      }
+    }
+  ],
+  "browserErrors": {
+    "success": true,
+    "data": {
+      "errors": []
+    },
+    "error": null
+  },
+  "ssrLight": true,
+  "interaction": "PASS: FAB hide/show, open dialog preserved, Escape focuses footer call"
+}

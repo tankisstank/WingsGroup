@@ -48,7 +48,7 @@ test('the governed register has the immutable expected inventory and records the
   assert.equal(result.mandatoryGateCount, 5)
   assert.deepEqual(result.pendingMandatory, [])
   assert.equal(gateByKey(governedRegister, 'privacy-consent').state, 'approved')
-  assert.equal(gateByKey(governedRegister, 'privacy-consent').approvedAt, '2026-08-24')
+  assert.equal(gateByKey(governedRegister, 'privacy-consent').approvedAt, '2026-09-26')
   assert.equal(gateByKey(governedRegister, 'locale-completeness').state, 'approved')
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'locale-completeness'))
   assert.ok(!result.pendingMandatory.some(({ key }) => key === 'legal-identity'))
@@ -101,7 +101,7 @@ test('the complete optional consultation-channel gate may remain pending without
   )
   assert.deepEqual(gateByKey(candidate, 'consultation-channels').directContacts, {
     contactEmail: 'info@wingsgroup.vn',
-    hotline: '0912910101',
+    hotline: '0948786775',
     salesEmail: 'sales@wingsgroup.vn',
   })
   assert.equal(result.approved, true)

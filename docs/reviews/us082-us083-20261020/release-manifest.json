@@ -1,0 +1,144 @@
+{
+  "release": "release-us082-us083-20261020-114500",
+  "generatedAt": "2026-10-20T11:48:51.6442734Z",
+  "gitHead": "3ec9dd9ea6948575213f6b57a27560719f0c4209",
+  "dirtyWorkspace": true,
+  "buildID": "LxVduuw1SbZJxMRFOjuCa",
+  "archiveSha256": "d154223cd6080802b8889f038a224fb1913b2bcadeadb6310c33021f88ce10b0",
+  "archiveBytes": 111473696,
+  "previousRelease": "release-us081-wingsgroup-ui-20261019-141000",
+  "rollbackImage": "sha256:e34ceef1bd9c42a93ed07f2068282a6405a2d08922e120976d6c98530dbff994",
+  "postgresBackup": "/home/ubuntu/wings-travel/shared/backups/release-us082-us083-20261020-114500.dump",
+  "migrationsRequired": false,
+  "unit": "150 files /1130 tests PASS; P3 targeted independently PASS after assertion update",
+  "component": "46 files /236 tests PASS",
+  "integration": "31 scoped tests PASS",
+  "typecheck": 0,
+  "build": 0,
+  "sourceFiles": [
+    {
+      "path": "app/src/app/(frontend)/cmsPage.tsx",
+      "sha256": "f41efd26e996dbc51c3fc727e7b8a5e773afef74c63bc8ca01a630dea0ee0afb"
+    },
+    {
+      "path": "app/src/app/(frontend)/layout.tsx",
+      "sha256": "a5eba0abed1134cebfaecf0b5e5f37134a9c4e85919c7a3af8f4c95c03165d8e"
+    },
+    {
+      "path": "app/src/app/(payload)/admin/importMap.js",
+      "sha256": "43c712bcd7828f742dd81071d3f7e6d518c6f827e8496e104fe530d410ec4ca1"
+    },
+    {
+      "path": "app/src/app/(payload)/api/lead-submissions/route.ts",
+      "sha256": "a558561d6757448cdb8a5f3ba0ffb6e8cb532b551720f211ea6bed208774dda2"
+    },
+    {
+      "path": "app/src/blocks/ArchiveBlock/Component.tsx",
+      "sha256": "241191bc8e5e79c73b0c272c1e4116f5c024aa7ad91e06c4f39999eec7205bcc"
+    },
+    {
+      "path": "app/src/blocks/Form/Component.tsx",
+      "sha256": "6c2089e1520d3951a961d7197afa545fc1acf7e23bfe7c9a488e574c8b5b9773"
+    },
+    {
+      "path": "app/src/blocks/RenderBlocks.tsx",
+      "sha256": "357aca1f8f2fd8aa0497a85a689b0472c93ab29bfba686c8a31305054751653a"
+    },
+    {
+      "path": "app/src/blocks/WingsGroupContact/Component.tsx",
+      "sha256": "f803b34ea813e4293a3956c77c47f4eb235801a3e1c8099af59e565e69567897"
+    },
+    {
+      "path": "app/src/collections/SiteSettings.ts",
+      "sha256": "fe0f243302df5a2d71c9aa4f1d38e22cd8f320dce03d31b644c4fe65de7636b6"
+    },
+    {
+      "path": "app/src/collections/TourCurations/hooks.ts",
+      "sha256": "cd7c9d813079ffa0e92783e80bd33f5643ba54568fa1c281eb76eba5e3554e21"
+    },
+    {
+      "path": "app/src/collections/Tours/hooks/revalidateTourContent.ts",
+      "sha256": "120c20c3fac9c93ba481db9f8a044b593498abfc1fd154c14fac5b913b0ae0e0"
+    },
+    {
+      "path": "app/src/components/SiteContactFab.tsx",
+      "sha256": "0c6c8b248f18658a1c631058236e17b4d0263bf3cb88a8ed6dc1702614699c66"
+    },
+    {
+      "path": "app/src/components/WingsGroupV3/ConsultationDialog.tsx",
+      "sha256": "01b4d11293019c4e7b78f4395e43e3db66af58efd44acee838e570c8ac19c3e6"
+    },
+    {
+      "path": "app/src/Footer/Component.tsx",
+      "sha256": "bde3d5d2ba32d959470953291645669b9ba08ce1aa4108b16878f057fe375e3b"
+    },
+    {
+      "path": "app/src/Header/Component.client.tsx",
+      "sha256": "9838ccc1ed14c8414875085400a9598c46c914bb7250bf74156fe1f2b18ac3de"
+    },
+    {
+      "path": "app/src/Header/Component.tsx",
+      "sha256": "f6c57ca0cba2c4776159ef8a5981e2b133cfdd84cdea7471a2193bf66ad8c95e"
+    },
+    {
+      "path": "app/src/Header/Nav/index.tsx",
+      "sha256": "068f985dff6187bdc9de7b31b5e945098844c391afd50a4d339b70a8c90da8d8"
+    },
+    {
+      "path": "app/src/lead-capture/types.ts",
+      "sha256": "a40eedfd861b3d384fb9c96131534161d7744310c40bb649d43c35f2a8e1a428"
+    },
+    {
+      "path": "app/src/lead-capture/validation.ts",
+      "sha256": "41359e0ff4b389957ac723fbc0cc2a3bbe15491ee64ab905bd3936c79252fa31"
+    },
+    {
+      "path": "app/src/migrations/20261019_100000_site_settings_hotlines.ts",
+      "sha256": "9e853da41e5d41a627e8af5de39ed5c90e9406e4b334f2676f87c9cc66b2889f"
+    },
+    {
+      "path": "app/src/migrations/index.ts",
+      "sha256": "0948a389ea860f3c72efaa083c75eacdba4ded828096abca697149536243138f"
+    },
+    {
+      "path": "app/src/payload-types.ts",
+      "sha256": "6260791049a3edb99fe9eddfcedd345167e3bb6496c850a3424d73b378eee0f0"
+    },
+    {
+      "path": "app/src/tours/queries.ts",
+      "sha256": "80fd1dae12c539ff52bc1efb12802a0d3115f56b209cbc0772ad261d2bd50b4e"
+    },
+    {
+      "path": "app/src/tours/RetailTourConsultationDialog.tsx",
+      "sha256": "16cf33040871f0eaa9bdc5829d30c9a8f6cf57f256760b18d44acf99266444e4"
+    },
+    {
+      "path": "app/src/tours/StructuredPages.tsx",
+      "sha256": "1f230316c9a0edecd0a10861f42ac57012b137ac41556ab36bed6c631248eab6"
+    },
+    {
+      "path": "app/src/tours/wingsGoCatalog.ts",
+      "sha256": "8daa72e8707b53a8d7b88aa4d23913318e6231826a21fad53aa43fe14e9bc3cf"
+    },
+    {
+      "path": "app/src/tours/WingsGoHomepageSections.tsx",
+      "sha256": "d9f994f4e3ee738ecc6e3c9499a15d6f76a54d02904338de6b7732aef39c5951"
+    },
+    {
+      "path": "app/src/tours/WingsGoTourCard.tsx",
+      "sha256": "d3531c57cbe8a2d7279c5d0a21bb6f00dbe437f0b6555779d226ac7926eb9b01"
+    },
+    {
+      "path": "app/src/utilities/localPreviewStore.ts",
+      "sha256": "9f27f04229e134966b3eafa9b25e4de4837e578bd17c17130e34db73a9702143"
+    },
+    {
+      "path": "app/src/utilities/repairLocalSQLiteSchema.ts",
+      "sha256": "ac515f64f0ec07d1dcc1a86fc61b6becef108d6fc175cc77b6bee5b4545431cb"
+    },
+    {
+      "path": "app/src/utilities/siteHotlines.ts",
+      "sha256": "694d6826afb768b76398f45cd488b66b4dffc96de3da6f84c2f1893b771ba478"
+    }
+  ]
+}

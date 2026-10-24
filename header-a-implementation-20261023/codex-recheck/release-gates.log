@@ -1,0 +1,106 @@
+TAP version 13
+# Subtest: the governed register has the immutable expected inventory and records the approved source contracts
+ok 1 - the governed register has the immutable expected inventory and records the approved source contracts
+  ---
+  duration_ms: 1.9429
+  type: 'test'
+  ...
+# Subtest: approved mandatory gates require non-sensitive evidence references
+ok 2 - approved mandatory gates require non-sensitive evidence references
+  ---
+  duration_ms: 0.4627
+  type: 'test'
+  ...
+# Subtest: configured consultation channels require their complete operational contract
+ok 3 - configured consultation channels require their complete operational contract
+  ---
+  duration_ms: 0.2813
+  type: 'test'
+  ...
+# Subtest: the complete optional consultation-channel gate may remain pending without blocking release
+ok 4 - the complete optional consultation-channel gate may remain pending without blocking release
+  ---
+  duration_ms: 0.3259
+  type: 'test'
+  ...
+# Subtest: approved privacy gate requires the complete stakeholder-approved contract
+ok 5 - approved privacy gate requires the complete stakeholder-approved contract
+  ---
+  duration_ms: 0.2545
+  type: 'test'
+  ...
+# Subtest: the fully evidenced expected inventory can pass the release-gate contract
+ok 6 - the fully evidenced expected inventory can pass the release-gate contract
+  ---
+  duration_ms: 0.7053
+  type: 'test'
+  ...
+# Subtest: pending ecosystem deep links remain non-blocking while their CTAs stay fail-closed
+ok 7 - pending ecosystem deep links remain non-blocking while their CTAs stay fail-closed
+  ---
+  duration_ms: 0.3064
+  type: 'test'
+  ...
+# Subtest: pending proof publication remains non-blocking while every proof stays fail-closed
+ok 8 - pending proof publication remains non-blocking while every proof stays fail-closed
+  ---
+  duration_ms: 0.204
+  type: 'test'
+  ...
+# Subtest: upgrading ecosystem deep links to mandatory violates their locked P2 classification
+ok 9 - upgrading ecosystem deep links to mandatory violates their locked P2 classification
+  ---
+  duration_ms: 0.3444
+  type: 'test'
+  ...
+# Subtest: omitting any expected gate fails closed
+ok 10 - omitting any expected gate fails closed
+  ---
+  duration_ms: 0.7348
+  type: 'test'
+  ...
+# Subtest: downgrading a mandatory publication gate to optional fails closed
+ok 11 - downgrading a mandatory publication gate to optional fails closed
+  ---
+  duration_ms: 0.1991
+  type: 'test'
+  ...
+# Subtest: upgrading proof publication to a release blocker violates its locked classification
+ok 12 - upgrading proof publication to a release blocker violates its locked classification
+  ---
+  duration_ms: 0.1248
+  type: 'test'
+  ...
+# Subtest: upgrading the optional consultation gate to mandatory also violates its locked classification
+ok 13 - upgrading the optional consultation gate to mandatory also violates its locked classification
+  ---
+  duration_ms: 0.122
+  type: 'test'
+  ...
+# Subtest: extra, duplicate, and renamed gates fail closed
+ok 14 - extra, duplicate, and renamed gates fail closed
+  ---
+  duration_ms: 0.2392
+  type: 'test'
+  ...
+# Subtest: consultation-channel inventory rejects omissions, extras, and duplicates
+ok 15 - consultation-channel inventory rejects omissions, extras, and duplicates
+  ---
+  duration_ms: 0.5535
+  type: 'test'
+  ...
+# Subtest: ecosystem deep-link inventory is immutable
+ok 16 - ecosystem deep-link inventory is immutable
+  ---
+  duration_ms: 0.1593
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 86.5953

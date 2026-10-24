@@ -1,0 +1,178 @@
+[
+  {
+    "viewport": 320,
+    "documentWidth": 305,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": false,
+    "brandRight": 101.25,
+    "contentLeft": 0,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 0,
+      "right": 0,
+      "width": 0,
+      "top": 0,
+      "height": 0
+    }
+  },
+  {
+    "viewport": 375,
+    "documentWidth": 360,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": false,
+    "brandRight": 101.25,
+    "contentLeft": 0,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 0,
+      "right": 0,
+      "width": 0,
+      "top": 0,
+      "height": 0
+    }
+  },
+  {
+    "viewport": 390,
+    "documentWidth": 375,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": false,
+    "brandRight": 101.25,
+    "contentLeft": 0,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 0,
+      "right": 0,
+      "width": 0,
+      "top": 0,
+      "height": 0
+    }
+  },
+  {
+    "viewport": 768,
+    "documentWidth": 753,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": false,
+    "brandRight": 115.97,
+    "contentLeft": 0,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 0,
+      "right": 0,
+      "width": 0,
+      "top": 0,
+      "height": 0
+    }
+  },
+  {
+    "viewport": 1024,
+    "documentWidth": 1009,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": false,
+    "brandRight": 117.25,
+    "contentLeft": 0,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 0,
+      "right": 0,
+      "width": 0,
+      "top": 0,
+      "height": 0
+    }
+  },
+  {
+    "viewport": 1199,
+    "documentWidth": 1184,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": false,
+    "brandRight": 117.25,
+    "contentLeft": 0,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 0,
+      "right": 0,
+      "width": 0,
+      "top": 0,
+      "height": 0
+    }
+  },
+  {
+    "viewport": 1200,
+    "documentWidth": 1185,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": true,
+    "brandRight": 122.58,
+    "contentLeft": 336.484375,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 847.84,
+      "right": 1024.58,
+      "width": 176.73,
+      "top": 14.5,
+      "height": 46
+    }
+  },
+  {
+    "viewport": 1279,
+    "documentWidth": 1264,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": true,
+    "brandRight": 122.58,
+    "contentLeft": 410.78125,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 926.17,
+      "right": 1102.91,
+      "width": 176.73,
+      "top": 14.5,
+      "height": 46
+    }
+  },
+  {
+    "viewport": 1280,
+    "documentWidth": 1265,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": true,
+    "brandRight": 122.58,
+    "contentLeft": 411.671875,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 927.16,
+      "right": 1103.89,
+      "width": 176.73,
+      "top": 14.5,
+      "height": 46
+    }
+  },
+  {
+    "viewport": 1440,
+    "documentWidth": 1425,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": true,
+    "brandRight": 183.08,
+    "contentLeft": 501.65625,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 1025.3,
+      "right": 1202.03,
+      "width": 176.73,
+      "top": 14.5,
+      "height": 46
+    }
+  },
+  {
+    "viewport": 1536,
+    "documentWidth": 1521,
+    "hasHorizontalOverflow": false,
+    "primaryVisible": true,
+    "brandRight": 231.08,
+    "contentLeft": 571.28125,
+    "brandNavOverlap": 0,
+    "contactBox": {
+      "left": 1099.8,
+      "right": 1276.53,
+      "width": 176.73,
+      "top": 14.5,
+      "height": 46
+    }
+  }
+]

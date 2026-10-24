@@ -1,0 +1,22 @@
+
+E:\repo\WingsTravel\app\tests\unit\wingsGroupV3FidelityContract.unit.spec.ts
+   13:46  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   14:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   18:83  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   24:66  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   26:59  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   30:55  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   43:83  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   45:71  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   60:31  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   67:73  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   73:83  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   78:29  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  102:83  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:61  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  110:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  138:83  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 17 problems (0 errors, 17 warnings)
+

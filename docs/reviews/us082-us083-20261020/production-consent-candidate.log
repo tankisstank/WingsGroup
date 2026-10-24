@@ -1,0 +1,92 @@
+release-clean.zip: OK
+Dockerfile.standalone: OK
+relink.sh: OK
+docker-compose.production.yml: OK
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.standalone
+#1 transferring dockerfile: 674B done
+#1 WARN: LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 4)
+#1 WARN: LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 5)
+#1 WARN: UndefinedVar: Usage of undefined variable '$LD_LIBRARY_PATH' (line 6)
+#1 WARN: LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 6)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.17.0-alpine
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/12] FROM docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed
+#4 resolve docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 381.33MB 2.6s done
+#5 DONE 2.7s
+
+#6 [ 4/12] RUN adduser --system --uid 1001 nextjs
+#6 CACHED
+
+#7 [ 2/12] WORKDIR /app
+#7 CACHED
+
+#8 [ 3/12] RUN addgroup --system --gid 1001 nodejs
+#8 CACHED
+
+#9 [ 5/12] COPY public ./public
+#9 CACHED
+
+#10 [ 6/12] COPY .next ./.next
+#10 DONE 19.7s
+
+#11 [ 7/12] COPY node_modules ./node_modules
+#11 DONE 7.3s
+
+#12 [ 8/12] COPY package.json ./package.json
+#12 DONE 0.2s
+
+#13 [ 9/12] COPY server.js ./server.js
+#13 DONE 0.1s
+
+#14 [10/12] COPY relink.sh ./relink.sh
+#14 DONE 0.1s
+
+#15 [11/12] RUN chmod +x ./relink.sh && ./relink.sh && rm ./relink.sh
+#15 DONE 4.2s
+
+#16 [12/12] RUN chown -R nextjs:nodejs /app
+#16 DONE 8.7s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 12.0s done
+#17 exporting manifest sha256:767026eebaa0fde675b751c2231c0648405fbe1bb03a3ad48e711ddb1c8db9bd 0.0s done
+#17 exporting config sha256:1b6c2f787c5ce24452c51793c59ac13aaae184d3ac42d139196e70bc2ae154a4 0.0s done
+#17 exporting attestation manifest sha256:7a3686821597f4c3720a14356fd63c42c7f5f87703041471533b2d20d62e29b2 0.0s done
+#17 exporting manifest list sha256:15ee80cde57fb60e478b015da903d8e3b70cf52ecb815700f7032723dbbf12b4 0.0s done
+#17 naming to docker.io/library/wingstravel-app:release-us082-us083-consent-20261020-120500 done
+#17 unpacking to docker.io/library/wingstravel-app:release-us082-us083-consent-20261020-120500
+#17 unpacking to docker.io/library/wingstravel-app:release-us082-us083-consent-20261020-120500 3.9s done
+#17 naming to docker.io/library/wingstravel-app:latest done
+#17 unpacking to docker.io/library/wingstravel-app:latest 0.0s done
+#17 naming to docker.io/library/app-app:latest done
+#17 unpacking to docker.io/library/app-app:latest 0.0s done
+#17 DONE 16.1s
+
+ 4 warnings found (use docker --debug to expand):
+ - UndefinedVar: Usage of undefined variable '$LD_LIBRARY_PATH' (line 6)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 6)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 4)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 5)
+ Container wingstravel-candidate-us082-consent-20261020 Creating 
+ Container wingstravel-candidate-us082-consent-20261020 Created 
+89b5a662ba1864c1484d88ce378d6e635d76694687173fb9e0d6bc9ebbf7e477
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":221,"requestId":"149a19b9-212d-4254-b7b5-ddc158ffbbb8","status":"ready","timestamp":"2026-10-20T12:17:27.541Z"}
+ARM64 libsql { native_ok: 1 }
+ARM64 sharp/libvips bytes 90
+Candidate image sha256:15ee80cde57fb60e478b015da903d8e3b70cf52ecb815700f7032723dbbf12b4
+Current remains: /home/ubuntu/wings-travel/releases/release-us082-us083-20261020-114500
+2026-10-20T12:17:27+00:00

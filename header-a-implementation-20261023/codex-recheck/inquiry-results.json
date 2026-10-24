@@ -1,0 +1,24 @@
+[
+  {
+    "dialogOpen": false,
+    "focusInForm": true,
+    "focusKey": null,
+    "focusedName": "full-name",
+    "inquiryContext": "outbound",
+    "locale": "vi",
+    "timestamp": "2026-10-23T07:18:54.935Z",
+    "url": "http://localhost:3000/wingsgroup/lien-he#contact-form",
+    "passed": true
+  },
+  {
+    "dialogOpen": false,
+    "focusInForm": true,
+    "focusKey": null,
+    "focusedName": "full-name",
+    "inquiryContext": "outbound",
+    "locale": "en",
+    "timestamp": "2026-10-23T07:19:00.565Z",
+    "url": "http://localhost:3000/wingsgroup/en/lien-he#contact-form",
+    "passed": true
+  }
+]

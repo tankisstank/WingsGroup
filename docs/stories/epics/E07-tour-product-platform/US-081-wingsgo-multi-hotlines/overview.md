@@ -2,7 +2,9 @@
 
 ## 1. Trạng thái (Status)
 
-`in_progress`
+`Đã bàn giao`
+
+Follow-up ngày2026-10-23 theo phản hồi trực tiếp của người dùng: footer WingsGo vẫn có theme selector, số cũ và nhiều CTA. Release d6057d4 trước đó chỉ rút gọn WingsGroup; không phải bằng chứng sửa WingsGo. Candidate đã được deploy production và CMS WingsGo đã được cập nhật theo wrapper transaction có row lock. Evidence: wingsgo-footer-review-20261023/.
 
 ## 2. Phân làn (Lane)
 
@@ -10,11 +12,11 @@
 
 ## 3. Hợp đồng Sản phẩm (Product Contract)
 
-Hệ thống cho phép hiển thị và tương tác với danh sách đa hotline liên hệ trên site WingsGo, bổ sung thêm 2 đầu số `0915250101` và `0915260101` bên cạnh hotline chính hiện có `0912910101`.
+WingsGo dùng hotline chính `0948786775`, hai hotline phụ `0915250101` và `0915260101`. Số chính cũ `0912910101` chỉ được chuyển qua công cụ CMS có kiểm tra giá trị cũ; không đổi số tenant khác.
 
 Hệ thống phải đảm bảo:
 1. **Bảo tồn Hotline chính & Bổ sung Hotline phụ:**
-   - Hotline chính: `0912 910 101` (tel: `0912910101`).
+   - Hotline chính: `0948 786 775` (tel: `0948786775`).
    - Hotline phụ 1: `0915 250 101` (tel: `0915250101`).
    - Hotline phụ 2: `0915 260 101` (tel: `0915260101`).
 2. **Click-to-Call (`<a href="tel:...">`) trên Mọi Thiết bị:**
@@ -23,8 +25,8 @@ Hệ thống phải đảm bảo:
 3. **Phân phối Điểm chạm UI/UX:**
    - **Header Desktop:** Giữ hotline chính gọi trực tiếp, có dropdown/popover hoặc nhóm chip số phụ tinh gọn, không làm vỡ bố cục thanh điều hướng.
    - **Header Mobile Navigation Drawer:** Liệt kê đầy đủ 3 đầu số với icon ☎/📞 và nhãn rõ ràng để gọi ngay.
-   - **Footer:** Hiển thị khu vực Hotline tư vấn với đủ 3 số, có click-to-call.
-   - **Floating Action Button (SiteContactFab):** Hiển thị danh sách 3 đầu số hotline trực quan trong popover liên hệ để khách hàng tùy chọn bấm gọi.
+   - **Footer:** Một link Gọi ngay / Call now tới hotline chính và một email ưu tiên supportEmail rồi salesEmail. Không lặp số phụ, Zalo, Nhận tư vấn Tour hoặc bộ chọn sáng/tối. Địa chỉ và navigation được giữ.
+   - **Floating Action Button (SiteContactFab):** Giữ kênh phụ trong dialog; ẩn trigger khi footer vào viewport. Không tự đóng dialog đang mở; khi đóng ở footer, focus về link gọi footer.
    - **Modal Tư vấn Giữ chỗ (RetailTourConsultationDialog):** Cung cấp các nút gọi nhanh cho từng hotline và một nút Zalo OA chung qua `getSharedZaloCTA(siteCode, locale)`; người dùng đã chốt không dùng Zalo cá nhân theo số.
 4. **An toàn Kiến trúc & Backward Compatibility:**
    - Collection `SiteSettings` giữ nguyên trường `supportPhone: text` làm hotline chính (tránh breaking change cho các tenant khác và database migrations).
@@ -33,14 +35,14 @@ Hệ thống phải đảm bảo:
    - Chỉ WingsGo nhận fallback. Trường `additionalHotlines` chưa tồn tại (`undefined`) dùng hai số phụ mặc định; `[]` hoặc `null` nghĩa là CMS đã chủ động bỏ số phụ. Không tái thêm các số đã xóa khi đọc dữ liệu hay chạy lại migration.
    - Giữ nguyên hotline chính hợp lệ do CMS cấu hình; số Việt Nam dạng `+84` được chuẩn hóa về `0`, các tenant khác giữ định dạng quốc tế hợp lệ.
 
-## 4. Hành vi Hiện tại (Current Behavior)
+## 4. Hành vi trước triển khai ban đầu (Historical Behavior)
 
 - WingsGo chỉ hiển thị một đầu số duy nhất là `0912 910 101`.
 - Số điện thoại bị hardcode phân tán tại Header, Footer, Fab, Modal mà chưa có cơ chế quản lý danh sách đa hotline thống nhất.
 
 ## 5. Hành vi Đích (Target Behavior)
 
-- Khách hàng trên WingsGo có thể nhìn thấy và lựa chọn gọi vào bất kỳ số nào trong 3 đầu số: `0912 910 101`, `0915 250 101`, `0915 260 101`.
+- Khách có thể gọi chính `0948 786 775`; các số phụ `0915 250 101`, `0915 260 101` được giữ ở menu và dialog, không dàn hàng trong footer.
 - Mọi vị trí hiển thị đều có link `<a href="tel:..."` click gọi ngay trên di động.
 - Quản trị viên CMS có thể cấu hình thêm/bớt số hotline phụ trong `SiteSettings`.
 
@@ -48,7 +50,21 @@ Hệ thống phải đảm bảo:
 
 Tiêu chí chấp nhận theo thứ tự AC1–AC4; ba đầu số và định dạng được quy định tại Hợp đồng Sản phẩm.
 
-- Hiển thị ba hotline tại menu di động, Footer, FAB và modal WingsGo.
+- Giữ kênh phụ trong menu; rút gọn liên hệ footer.
 - Gọi trực tiếp qua liên kết `tel:` chuẩn hóa và bộ quay số trên mobile.
 - Giữ menu desktop gọn, gọi số chính và mở danh sách hotline phụ.
 - Bảo toàn cấu hình và giao diện liên hệ của các site khác.
+
+## Follow-up light theme và an toàn dữ liệu
+
+WingsGo cố định light từ SSR và ThemeProvider, không dùng stored dark/system preference; không chỉ che selector bằng CSS. WingSide và tenant khác giữ preference hiện hữu. Form WingsGo dùng hotlines đã nhận từ RenderBlocks thay số viết cứng; prop[] không tạo lại link gọi. Seed/fallback WingsGo đồng bộ số mới, nhưng số hợp lệ do CMS cấu hình vẫn là nguồn ưu tiên.
+
+Production audit read-only ngày23/10: settingsID16 WingsGo vẫn0912910101, settingsID14 WingsGroup đã0948786775; không ghi dữ liệu. Công cụ updater mặc định plan, chỉ old→new; new/empty→noop, custom/invalid→abort, không chạm additionalHotlines. Production apply cần backup, rehearsal PostgreSQL và shared transaction/row lock theo runbook trước release. Không seed lại toàn bộ nội dung.
+
+## Production release — 24/10/2026
+
+- Revision: `16ff60a28ba48489d7d06de648780c522372e13f`.
+- CMS WingsGo settings ID16: main hotline `0948786775`; additional hotlines và tenant khác giữ nguyên.
+- Footer production: một link gọi, một email ưu tiên, không theme selector, không lặp CTA/Zalo/số phụ.
+- Health ready sau cutover: database, Redis, lead delivery đều đạt.
+- Kỹ thuật đã bàn giao; stakeholder UAT và kiểm tra thiết bị thật còn chờ xác nhận.

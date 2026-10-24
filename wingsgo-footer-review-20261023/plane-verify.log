@@ -1,0 +1,22 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Wrong owner US-081 Da hotline tu van WingsGo co lien ket goi truc tiep tel:
++ actual - expected
+
++ []
+- [
+-   '2792b34c-d5f0-481a-b561-48808098906b'
+- ]
+
+    at file:///E:/repo/WingsTravel/wingsgo-footer-review-20261023/verify-plane.mjs:85:12 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: [],
+  expected: [ '2792b34c-d5f0-481a-b561-48808098906b' ],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.20.0

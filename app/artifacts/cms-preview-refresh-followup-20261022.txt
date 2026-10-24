@@ -1,0 +1,7 @@
+**Prior P2 resolved.** All four retained-callback cases passed through actual React rerender with fresh context objects. No additional release-blocking P1/P2/P3 found in the narrow caller/initializer diff.
+
+Verification: 35 related component tests and 11 initializer tests passed, exit 0; focused verbose rerun: 13 passed.
+
+Saved [finding disposition](/E:/repo/WingsTravel/app/artifacts/cms-preview-refresh-followup-review-20261022.txt), including commands and results.
+
+No code edits, deployment, network writes, or subagents. Live production handoff and downstream cache behavior remain unverified.

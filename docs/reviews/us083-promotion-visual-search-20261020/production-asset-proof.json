@@ -1,0 +1,9 @@
+{
+  "buildID": "wgqUkwWtCKGG7aKW-11iv",
+  "assetPath": "static/chunks/0l1fqk9o9wz_g.js",
+  "sha256": "457eba508cf5509805cc00e3998c4dfbad2c44efe3ad223dc496ff9c60f2d25d",
+  "timestamp": "2026-10-20T17:01:36.545Z",
+  "actualSHA256": "457eba508cf5509805cc00e3998c4dfbad2c44efe3ad223dc496ff9c60f2d25d",
+  "bytes": 436840,
+  "assertions": "PASS exact public asset bytes match verified promotion build"
+}

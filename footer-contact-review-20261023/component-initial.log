@@ -1,0 +1,14 @@
+
+> website@1.0.0 test:component E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.component.config.mts "tests/component/wingsGroupHeaderOptionA.component.spec.tsx" "tests/component/footerHotlines.component.spec.tsx"
+
+
+ RUN  v4.1.6 E:/repo/WingsTravel/app
+
+Not implemented: navigation to another Document
+
+ Test Files  2 passed (2)
+      Tests  15 passed (15)
+   Start at  16:11:46
+   Duration  1.82s (transform 496ms, setup 104ms, import 1.16s, tests 403ms, environment 1.30s)
+

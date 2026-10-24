@@ -31,9 +31,9 @@ import { HorizontalRuleFeatureClient as HorizontalRuleFeatureClient_e70f5e05f09f
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_6c48040f6618a25e23c2a770435a999b } from '@/components/AdminGuidance/TourProductEditGuidance'
 import { default as default_ba290a9fe200293e4bb86af139824b76 } from '@/components/TourAuthoring/TourProductSiteField'
+import { default as default_a650091bc460629fe18a9b59f25fed6a } from '@/components/TourAuthoring/EditorialBadgeKindField'
 import { default as default_0165f3a062ce19f7271a26c2d24f4398 } from '@/components/TourAuthoring'
 import { default as default_26964421676ddaf6bd429d976a2b85bb } from '@/components/TourGalleryField'
-import { default as default_a650091bc460629fe18a9b59f25fed6a } from '@/components/TourAuthoring/EditorialBadgeKindField'
 import { OrderedListFeatureClient as OrderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { UnorderedListFeatureClient as UnorderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { default as default_16770289a0956af26e4f7a84c072656c } from '@/components/TourItineraryRowLabel'
@@ -112,9 +112,9 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BlocksFeatureClient": BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/AdminGuidance/TourProductEditGuidance#default": default_6c48040f6618a25e23c2a770435a999b,
   "@/components/TourAuthoring/TourProductSiteField#default": default_ba290a9fe200293e4bb86af139824b76,
+  "@/components/TourAuthoring/EditorialBadgeKindField#default": default_a650091bc460629fe18a9b59f25fed6a,
   "@/components/TourAuthoring#default": default_0165f3a062ce19f7271a26c2d24f4398,
   "@/components/TourGalleryField#default": default_26964421676ddaf6bd429d976a2b85bb,
-  "@/components/TourAuthoring/EditorialBadgeKindField#default": default_a650091bc460629fe18a9b59f25fed6a,
   "@payloadcms/richtext-lexical/client#OrderedListFeatureClient": OrderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#UnorderedListFeatureClient": UnorderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/TourItineraryRowLabel#default": default_16770289a0956af26e4f7a84c072656c,

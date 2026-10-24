@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-10-20T17:01:18.137Z",
+  "readOnly": true,
+  "buildID": "wgqUkwWtCKGG7aKW-11iv",
+  "configChunks": [
+    "_02.c6~n._.js",
+    "_03rvvj9._.js",
+    "_0nsy8l9._.js"
+  ],
+  "routes": [
+    {
+      "pathname": "/",
+      "original": "42.900.000",
+      "sale": "40.900.000",
+      "assertions": "PASS rendered original/sale pair and numeric badge suppressed"
+    },
+    {
+      "pathname": "/tour",
+      "original": "42.900.000",
+      "sale": "40.900.000",
+      "assertions": "PASS rendered original/sale pair and numeric badge suppressed"
+    },
+    {
+      "pathname": "/tour/tour-6n5d-osaka-kobe-kyoto-nui-phu-si-tokyo-kix-nrt",
+      "original": "42.900.000",
+      "sale": "40.900.000",
+      "assertions": "PASS rendered original/sale pair and numeric badge suppressed"
+    }
+  ]
+}

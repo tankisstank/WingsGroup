@@ -1,0 +1,26 @@
+[
+  {
+    "locale": "vi",
+    "mobileCall": [
+      {
+        "href": "tel:0903000111",
+        "label": "Gọi hotline WingsGo 0903 000 111"
+      }
+    ],
+    "passed": true,
+    "timestamp": "2026-10-23T07:11:25.023Z",
+    "url": "http://localhost:3000/wingsgo"
+  },
+  {
+    "locale": "en",
+    "mobileCall": [
+      {
+        "href": "tel:0903000111",
+        "label": "Call WingsGo 0903 000 111"
+      }
+    ],
+    "passed": true,
+    "timestamp": "2026-10-23T07:11:34.69Z",
+    "url": "http://localhost:3000/wingsgo/en"
+  }
+]

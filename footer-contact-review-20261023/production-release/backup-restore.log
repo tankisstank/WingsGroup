@@ -1,0 +1,13 @@
+Loaded image: wingstravel-ops:us085-footer-d6057d4
+{"backup":"/backups/wingstravel-2026-10-23T14-19-48-385Z.dump.age","manifest":"/backups/wingstravel-2026-10-23T14-19-48-385Z.dump.age.json","status":"ok"}
+{
+  "checksumSha256": "e4c866cb2d09a41ba507e22add688db8572c51bef0b89e2c4313d8d4859b00a5",
+  "createdAt": "2026-10-23T14:19:49.645Z",
+  "database": "wingstravel",
+  "encrypted": true,
+  "file": "wingstravel-2026-10-23T14-19-48-385Z.dump.age",
+  "format": "postgres-custom",
+  "sizeBytes": 4786606
+}
+{"activeSites":6,"backupChecksumSha256":"e4c866cb2d09a41ba507e22add688db8572c51bef0b89e2c4313d8d4859b00a5","durationSeconds":10,"homepages":6,"assertionProfile":null,"scope":"full-site","scopedEvidence":null,"profileEvidence":null,"restoreListVerified":true,"verifiedAt":"2026-10-23T14:20:00.529Z","status":"ok","targetDatabase":"us085_restore_d6057d4"}
+Backup and disposable restore completed: 2026-10-23T14:20:00Z

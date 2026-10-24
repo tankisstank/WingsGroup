@@ -1,0 +1,79 @@
+6de9fb958561 heuristic_johnson "docker-entrypoint.s…"
+release-clean.zip: OK
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.standalone
+#1 transferring dockerfile: 697B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.17.0-alpine
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/12] FROM docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed
+#4 resolve docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 338.85MB 2.5s done
+#5 DONE 2.5s
+
+#6 [ 2/12] WORKDIR /app
+#6 CACHED
+
+#7 [ 3/12] RUN addgroup --system --gid 1001 nodejs
+#7 CACHED
+
+#8 [ 4/12] RUN adduser --system --uid 1001 nextjs
+#8 CACHED
+
+#9 [ 5/12] COPY public ./public
+#9 DONE 14.4s
+
+#10 [ 6/12] COPY .next ./.next
+#10 DONE 1.0s
+
+#11 [ 7/12] COPY node_modules ./node_modules
+#11 DONE 7.2s
+
+#12 [ 8/12] COPY package.json ./package.json
+#12 DONE 0.3s
+
+#13 [ 9/12] COPY server.js ./server.js
+#13 DONE 0.1s
+
+#14 [10/12] COPY relink.sh ./relink.sh
+#14 DONE 0.1s
+
+#15 [11/12] RUN chmod +x ./relink.sh && ./relink.sh && rm ./relink.sh
+#15 DONE 5.0s
+
+#16 [12/12] RUN chown -R nextjs:nodejs /app
+#16 DONE 11.5s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 12.0s done
+#17 exporting manifest sha256:bb2ffa6c2c892fb342a799903a88a6789fa703f751359f5e136161ebbe68b7aa 0.0s done
+#17 exporting config sha256:75664b79854d7c6081b5d723db1730ba4d18b802babd28469d830e12a5be7b99 0.0s done
+#17 exporting attestation manifest sha256:edae6b889851cd1c7c5638f479f034aa095735adc39b9d6b49d768950389c41f 0.0s done
+#17 exporting manifest list sha256:54821addabf22f01d90986cc1fcea3e00e4d842627bf4738729b14d2f3c0b962 0.0s done
+#17 naming to docker.io/library/wingstravel-app:release-us085-6a0dac0 done
+#17 unpacking to docker.io/library/wingstravel-app:release-us085-6a0dac0
+#17 unpacking to docker.io/library/wingstravel-app:release-us085-6a0dac0 3.7s done
+#17 DONE 15.9s
+
+ 4 warnings found (use docker --debug to expand):
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 5)
+ - UndefinedVar: Usage of undefined variable '$LD_LIBRARY_PATH' (line 6)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 6)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 4)
+ Container wings-us085-6a0dac0 Creating 
+ Container wings-us085-6a0dac0 Created 
+7489ba8c6e3577455e64850ca23fedf201f85ebec581a60e7b56c18ffd31d39f
+curl: (56) Recv failure: Connection reset by peer
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":247,"requestId":"57281a8f-e173-40bf-b05a-dc2d1898757b","status":"ready","timestamp":"2026-10-23T08:07:38.123Z"}ARM64 libsql/sharp PASS arm64 90
+Candidate ready: 2026-10-23T08:07:38Z

@@ -1,5 +1,27 @@
 # Biên bản Nghiệm thu: US-081 — Đa Hotline Liên hệ & Tư vấn WingsGo
 
+## Follow-up hiện tại — 23/10/2026
+
+Trạng thái: **đã bàn giao kỹ thuật production; stakeholder UAT còn chờ xác nhận** cho yêu cầu sửa footer WingsGo. Release `d6057d4` trước đó rút gọn footer WingsGroup, không phải WingsGo. Bằng chứng ngày 19/10 bên dưới là lịch sử, không xác nhận hợp đồng mới đã chạy production.
+
+Hợp đồng mới: main `0948786775`; footer một link gọi và một email ưu tiên, không selector, Zalo, số phụ hoặc CTA tư vấn lặp. FAB ẩn khi footer hiện; dialog đang mở được giữ, Escape focus về link gọi footer. Header/dialog tiếp tục giữ kênh phụ.
+
+Bằng chứng hiện tại tại `wingsgo-footer-review-20261023/`:
+
+- `production-before.json` và `production-settings-before.log`: đọc thực tế public/CMS, main WingsGo còn `0912910101`, WingsGroup đã `0948786775`; không ghi production.
+- `unit-final.log`: resolver/updater 21/21, exit 0.
+- `agy-component-final.log`: 9 file, 94/94 tests, exit 0. Một expectation WingGo cũ trong suite chrome được cập nhật sau lần chạy đầu 93/94.
+- `footer-component-final.log`: 14/14, exit 0 sau khi sửa nhãn nút bị CSS span cũ bọc pill.
+- `typecheck.log`: exit 0. `agy-lint-final.log`: exit 0, 0 errors và 8 warnings đã ghi rõ trong review.
+- `cms-rehearsal-final.log`: Payload trên bản sao SQLite riêng; plan không ghi, apply chỉ main WingsGo và updatedAt, repeat noop, toàn bộ trường còn lại và 5 site khác giữ nguyên. Custom main abort an toàn; không dùng bằng chứng SQLite thay cho PostgreSQL production.
+- `build-final.log`: build/postbuild exit0 sau sửa span; compile20.3s, TypeScript28.5s. `browser-final.log` và `browser-results.json`:20/20 cases exit0, 16 WingsGo home/contact VI/EN320–1280px và4 cross-tenant; SSR light, stored dark/reload, FAB hide/show, dialog retention và Escape focus đã thử thật, exceptions[]. Hai ảnh cuối đã mở xem.
+- Updater cần `context: { seed: true }` theo pattern trusted migration có sẵn; `overrideAccess` một mình không vượt hook xác thực. Không thay access hook.
+- Tracking: `plane:preview`1 story/4 children; `plane:sync:workitems` patched5/missing0. API readback `plane-readback.log` exit0 xác nhận WingsGo/E07/US081/4 child, owner c0508g,0 missingDates và0 genericChildNames; lịch gốc19–22/10 giữ nguyên. Lần kiểm đầu phát hiện owner trống, đã gán theo default owner của skill rồi đọc lại API mới. Plane plan không hỗ trợ Initiative; Project/Epic/US hoạt động bình thường.
+
+Browser/build cuối và phân tích nhận xét agy được ghi trong `wingsgo-footer-review-20261023/review.md`. Các gate release audit, shared transaction/row lock cho CMS, fresh backup/restore PostgreSQL, ARM64 và public smoke đã đạt; bằng chứng production được bổ sung ở phần addendum cuối file. Chưa thử gọi điện, chat Zalo, gửi lead hoặc điện thoại thật.
+
+## Biên bản lịch sử ngày 19/10/2026
+
 ## 1. Trạng thái Nghiệm thu
 - **Tình trạng:** `Đã bàn giao kỹ thuật` (implementation, display QA and production release complete; stakeholder UAT pending)
 - **Ngày lập:** 19/10/2026
@@ -42,3 +64,16 @@
 - WingsGroup cache đã invalidate; readiness tiếp tục `database=up`, `leadDelivery=configured`, `redis=up`; RSC payload chứa đủ 3 hotline. Smoke desktop 1280px và mobile 375px đạt, không tràn ngang.
 - Rollback point: `/home/ubuntu/wings-travel/releases/release-capability-en-20261016-143523`.
 - Không commit/push; không triển khai US-082/US-083. Stakeholder UAT vẫn pending.
+
+## Production release addendum — 24/10/2026
+
+Follow-up footer WingsGo đã được deploy production. Revision `16ff60a28ba48489d7d06de648780c522372e13f`; operations image digest `sha256:f9a0f53174fcacd34465a6745f45f4c80f8592aedec54baa077ce5600ea57ec8`, label khớp revision.
+
+- Fresh encrypted backup và full-site restore drill đạt: 6 active sites, 6 homepages, checksum `88a00dc36d1b186f2e212b62fdef0334f6e545197edcee9997f9e76e2d500aeb`.
+- `payload migrate` exit 0; `migrate:status` xác nhận 28 migration đã áp dụng, không pending.
+- CMS apply trên PostgreSQL dùng transaction và `FOR UPDATE`: settings `wings-go` ID16 đổi đúng `0912910101` thành `0948786775`; 1 write; repeat noop; các trường còn lại và 5 site khác giữ nguyên; cache được invalidate.
+- Cutover health: `database=up`, `leadDelivery=configured`, `redis=up`, `status=ready`.
+- Public browser QA trên `/`, `/en`, `/lien-he`, `/en/lien-he`: footer có đúng một link gọi và một email, không theme selector; không có browser errors.
+
+Tình trạng kỹ thuật: **Đã bàn giao production**. Stakeholder UAT và kiểm tra quay số/Zalo/lead trên thiết bị thật vẫn chờ xác nhận.
+

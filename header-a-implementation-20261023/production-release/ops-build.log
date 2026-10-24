@@ -1,0 +1,45 @@
+#0 building with "wingstravel-arm64" instance using docker-container driver
+
+#1 [internal] load build definition from Dockerfile.operations
+#1 transferring dockerfile: 559B 0.0s done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/node:22.17.0-alpine
+#2 DONE 0.5s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 202B done
+#3 DONE 0.1s
+
+#4 [1/6] FROM docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed
+#4 resolve docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed 0.0s done
+#4 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 78.39kB 0.1s done
+#5 DONE 0.1s
+
+#6 [3/6] WORKDIR /app
+#6 CACHED
+
+#7 [4/6] COPY package.json pnpm-lock.yaml ./
+#7 CACHED
+
+#8 [5/6] RUN corepack enable && corepack prepare pnpm@10.28.1 --activate && pnpm install --frozen-lockfile
+#8 CACHED
+
+#9 [2/6] RUN apk add --no-cache libc6-compat age postgresql16-client
+#9 CACHED
+
+#10 [6/6] COPY . .
+#10 CACHED
+
+#11 exporting to docker image format
+#11 exporting layers done
+#11 exporting manifest sha256:98477bc67d4d7ddb069d6109394c6b7a4a77b7f867fa33df3f64c59273a9708b 0.0s done
+#11 exporting config sha256:83a669a799baff20fbd8a23321257fd2c1df0cb2512eeb2bbe3274f25ce4a34d 0.0s done
+#11 sending tarball
+#11 sending tarball 4.9s done
+#11 DONE 5.0s
+
+View build details: docker-desktop://dashboard/build/wingstravel-arm64/wingstravel-arm640/wtl2im7ijbx1ldom033yawv3x

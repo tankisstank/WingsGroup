@@ -1,0 +1,4 @@
+tests/component/wingsGroupHeaderOptionA.component.spec.tsx(265,9): error TS2322: Type '{ fields: never[]; id: number; title: string; }' is not assignable to type 'number | Form'.
+  Type '{ fields: never[]; id: number; title: string; }' is missing the following properties from type 'Form': updatedAt, createdAt
+tests/component/wingsGroupHeaderOptionA.component.spec.tsx(279,9): error TS2322: Type '{ fields: never[]; id: number; title: string; }' is not assignable to type 'number | Form'.
+  Type '{ fields: never[]; id: number; title: string; }' is missing the following properties from type 'Form': updatedAt, createdAt

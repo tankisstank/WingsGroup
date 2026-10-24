@@ -1,0 +1,176 @@
+{
+  "assertions": 300,
+  "cases": 24,
+  "results": [
+    {
+      "groups": 4,
+      "locale": "vi",
+      "option": "preview-a",
+      "passed": true,
+      "width": 1440
+    },
+    {
+      "groups": 4,
+      "locale": "vi",
+      "option": "preview-b",
+      "passed": true,
+      "width": 1440
+    },
+    {
+      "groups": 4,
+      "locale": "vi",
+      "option": "preview-a",
+      "passed": true,
+      "width": 1280
+    },
+    {
+      "groups": 4,
+      "locale": "vi",
+      "option": "preview-b",
+      "passed": true,
+      "width": 1280
+    },
+    {
+      "groups": 4,
+      "locale": "vi",
+      "option": "preview-a",
+      "passed": true,
+      "width": 1200
+    },
+    {
+      "groups": 4,
+      "locale": "vi",
+      "option": "preview-b",
+      "passed": true,
+      "width": 1200
+    },
+    {
+      "groups": 2,
+      "locale": "vi",
+      "option": "preview-a",
+      "passed": true,
+      "width": 1024
+    },
+    {
+      "groups": 2,
+      "locale": "vi",
+      "option": "preview-b",
+      "passed": true,
+      "width": 1024
+    },
+    {
+      "groups": 2,
+      "locale": "vi",
+      "option": "preview-a",
+      "passed": true,
+      "width": 390
+    },
+    {
+      "groups": 2,
+      "locale": "vi",
+      "option": "preview-b",
+      "passed": true,
+      "width": 390
+    },
+    {
+      "groups": 2,
+      "locale": "vi",
+      "option": "preview-a",
+      "passed": true,
+      "width": 320
+    },
+    {
+      "groups": 2,
+      "locale": "vi",
+      "option": "preview-b",
+      "passed": true,
+      "width": 320
+    },
+    {
+      "groups": 4,
+      "locale": "en",
+      "option": "preview-a",
+      "passed": true,
+      "width": 1440
+    },
+    {
+      "groups": 4,
+      "locale": "en",
+      "option": "preview-b",
+      "passed": true,
+      "width": 1440
+    },
+    {
+      "groups": 4,
+      "locale": "en",
+      "option": "preview-a",
+      "passed": true,
+      "width": 1280
+    },
+    {
+      "groups": 4,
+      "locale": "en",
+      "option": "preview-b",
+      "passed": true,
+      "width": 1280
+    },
+    {
+      "groups": 4,
+      "locale": "en",
+      "option": "preview-a",
+      "passed": true,
+      "width": 1200
+    },
+    {
+      "groups": 4,
+      "locale": "en",
+      "option": "preview-b",
+      "passed": true,
+      "width": 1200
+    },
+    {
+      "groups": 2,
+      "locale": "en",
+      "option": "preview-a",
+      "passed": true,
+      "width": 1024
+    },
+    {
+      "groups": 2,
+      "locale": "en",
+      "option": "preview-b",
+      "passed": true,
+      "width": 1024
+    },
+    {
+      "groups": 2,
+      "locale": "en",
+      "option": "preview-a",
+      "passed": true,
+      "width": 390
+    },
+    {
+      "groups": 2,
+      "locale": "en",
+      "option": "preview-b",
+      "passed": true,
+      "width": 390
+    },
+    {
+      "groups": 2,
+      "locale": "en",
+      "option": "preview-a",
+      "passed": true,
+      "width": 320
+    },
+    {
+      "groups": 2,
+      "locale": "en",
+      "option": "preview-b",
+      "passed": true,
+      "width": 320
+    }
+  ],
+  "status": "PASS",
+  "timestamp": "2026-10-23T04:42:39.135Z"
+}

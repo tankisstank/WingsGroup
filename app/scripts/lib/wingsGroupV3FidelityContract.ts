@@ -111,7 +111,7 @@ export const assessWingsGroupV3FidelityContract = (
   }
   if (
     !header ||
-    array(header.primaryNavigation).length < 5 ||
+    array(header.primaryNavigation).length < 6 ||
     array(header.mobileNavigation).length < 6
   ) {
     errors.push('Contract header needs desktop and mobile navigation.')
@@ -120,12 +120,12 @@ export const assessWingsGroupV3FidelityContract = (
   const primaryCta = isRecord(header?.primaryCta) ? header.primaryCta : null
   if (
     !primaryCta ||
-    primaryCta.label !== 'Trao đổi nhu cầu' ||
-    primaryCta.target !== '[data-od-id=consultation-dialog]' ||
-    primaryCta.kind !== 'dialog' ||
-    primaryCta.flow !== 'specialist-consultation-dialog'
+    primaryCta.label !== 'Gọi ngay' ||
+    primaryCta.target !== 'tel:0948786775' ||
+    primaryCta.kind !== 'tel' ||
+    primaryCta.flow !== 'split-call-contact'
   ) {
-    errors.push('Header primary CTA must use the specialist consultation dialog flow.')
+    errors.push('Header primary CTA must use the approved Option A split-call contact flow.')
   }
 
   const hero = sections.find((section) => section.key === 'hero')

@@ -1,0 +1,9 @@
+
+ RUN  v4.1.6 E:/repo/WingsTravel/app
+
+
+ Test Files  4 passed (4)
+      Tests  32 passed (32)
+   Start at  00:15:42
+   Duration  2.91s (transform 1.17s, setup 266ms, import 3.38s, tests 48ms, environment 4.39s)
+

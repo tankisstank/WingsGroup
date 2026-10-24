@@ -1,0 +1,85 @@
+release-clean.zip: OK
+relink.sh: OK
+Dockerfile.standalone: OK
+docker-compose.production.yml: OK
+candidate.compose.yml: OK
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.standalone
+#1 transferring dockerfile: 674B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.17.0-alpine
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/12] FROM docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed
+#4 resolve docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 381.34MB 2.8s done
+#5 DONE 2.9s
+
+#6 [ 2/12] WORKDIR /app
+#6 CACHED
+
+#7 [ 3/12] RUN addgroup --system --gid 1001 nodejs
+#7 CACHED
+
+#8 [ 4/12] RUN adduser --system --uid 1001 nextjs
+#8 CACHED
+
+#9 [ 5/12] COPY public ./public
+#9 CACHED
+
+#10 [ 6/12] COPY .next ./.next
+#10 DONE 19.9s
+
+#11 [ 7/12] COPY node_modules ./node_modules
+#11 DONE 7.2s
+
+#12 [ 8/12] COPY package.json ./package.json
+#12 DONE 0.2s
+
+#13 [ 9/12] COPY server.js ./server.js
+#13 DONE 0.1s
+
+#14 [10/12] COPY relink.sh ./relink.sh
+#14 DONE 0.1s
+
+#15 [11/12] RUN chmod +x ./relink.sh && ./relink.sh && rm ./relink.sh
+#15 DONE 4.5s
+
+#16 [12/12] RUN chown -R nextjs:nodejs /app
+#16 DONE 8.3s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 12.0s done
+#17 exporting manifest sha256:7bc750c37061b199a982dda35dd8384f4a3cbcb245422ed3a11ac2158279d256 0.0s done
+#17 exporting config sha256:bae8b21f51c8d1e4d62838f896a175a1431bbb65a584e7f2f5081d8f93bbd76c 0.0s done
+#17 exporting attestation manifest sha256:9d9ee21944763ebe7bae99c090cc5dd27ab2d6b2b5f9a18c0355f3ae7af233f6 0.0s done
+#17 exporting manifest list sha256:8756cce56b9bf7978f2586d382e0039a16075962463248bbc39f7beeb3d3541f 0.0s done
+#17 naming to docker.io/library/wingstravel-app:release-us083-cms-promotion-20261020-150000 done
+#17 unpacking to docker.io/library/wingstravel-app:release-us083-cms-promotion-20261020-150000
+#17 unpacking to docker.io/library/wingstravel-app:release-us083-cms-promotion-20261020-150000 3.8s done
+#17 DONE 16.0s
+
+ 4 warnings found (use docker --debug to expand):
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 4)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 5)
+ - UndefinedVar: Usage of undefined variable '$LD_LIBRARY_PATH' (line 6)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 6)
+ Container wingstravel-candidate-us083-cms-20261020 Creating 
+ Container wingstravel-candidate-us083-cms-20261020 Created 
+310c45bae9efee8f18632aee8e092a8d6199bc496115391705349222b1bbf99c
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":234,"requestId":"02f08319-aecc-4d85-a38b-a3edb1cb63e3","status":"ready","timestamp":"2026-10-20T15:04:58.215Z"}
+ARM64 libsql memory write/read { value: 'cms-promotion-runtime' }
+ARM64 sharp/libvips bytes 90
+Candidate image sha256:8756cce56b9bf7978f2586d382e0039a16075962463248bbc39f7beeb3d3541f
+Current remains: /home/ubuntu/wings-travel/releases/release-us082-us083-consent-20261020-120500
+2026-10-20T15:04:58+00:00

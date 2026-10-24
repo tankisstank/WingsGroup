@@ -1,0 +1,7 @@
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":16,"requestId":"7c3ae695-6618-4858-9cac-f922410145f6","status":"ready","timestamp":"2026-10-20T12:05:12.788Z"}
+Backup entries: 3662
+Previous release: /home/ubuntu/wings-travel/releases/release-us082-us083-20261020-114500
+Rollback image: sha256:fec07a9405c1a82afec0f7aa39340e21519a0ad58d429a9d2e1f8131057679ef
+879963288fde5e1039336bf05c298aff302e3901ccc1a9474d2b19ac56ece382  /home/ubuntu/wings-travel/shared/backups/release-us082-us083-consent-20261020-120500.dump
+Backup bytes: 4585770
+2026-10-20T12:05:14+00:00

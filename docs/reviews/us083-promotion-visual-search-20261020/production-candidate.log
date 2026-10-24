@@ -1,0 +1,91 @@
+release-clean.zip: OK
+Dockerfile.standalone: OK
+relink.sh: OK
+docker-compose.production.yml: OK
+candidate.compose.yml: OK
+expected-build-id.txt: OK
+release-identity.json: OK
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.standalone
+#1 transferring dockerfile: 674B done
+#1 WARN: LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 4)
+#1 WARN: LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 5)
+#1 WARN: UndefinedVar: Usage of undefined variable '$LD_LIBRARY_PATH' (line 6)
+#1 WARN: LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 6)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.17.0-alpine
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [ 1/12] FROM docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed
+#4 resolve docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 381.35MB 2.5s done
+#5 DONE 2.6s
+
+#6 [ 2/12] WORKDIR /app
+#6 CACHED
+
+#7 [ 3/12] RUN addgroup --system --gid 1001 nodejs
+#7 CACHED
+
+#8 [ 4/12] RUN adduser --system --uid 1001 nextjs
+#8 CACHED
+
+#9 [ 5/12] COPY public ./public
+#9 CACHED
+
+#10 [ 6/12] COPY .next ./.next
+#10 DONE 20.0s
+
+#11 [ 7/12] COPY node_modules ./node_modules
+#11 DONE 7.3s
+
+#12 [ 8/12] COPY package.json ./package.json
+#12 DONE 0.3s
+
+#13 [ 9/12] COPY server.js ./server.js
+#13 DONE 0.1s
+
+#14 [10/12] COPY relink.sh ./relink.sh
+#14 DONE 0.1s
+
+#15 [11/12] RUN chmod +x ./relink.sh && ./relink.sh && rm ./relink.sh
+#15 DONE 4.6s
+
+#16 [12/12] RUN chown -R nextjs:nodejs /app
+#16 DONE 8.3s
+
+#17 exporting to image
+#17 exporting layers
+#17 exporting layers 12.1s done
+#17 exporting manifest sha256:d1c07e97c723c6f10ef829e7d785108f9493fb5ed290b923fb1e87579f48021f 0.0s done
+#17 exporting config sha256:c477115a23aa144a2ce99de5a0fa5c0e2abcadc1720d8ca57bc66f7217c3b137 0.0s done
+#17 exporting attestation manifest sha256:f91041be82f589ed0a2b18951feedf8eaed134474a4e21653dfb857b83e79735 0.0s done
+#17 exporting manifest list sha256:46d8b184fd48cb485ba0c38398893830325be517580987c46d516cffd132758c 0.0s done
+#17 naming to docker.io/library/wingstravel-app:release-us083-promotion-search-20261020-170000 done
+#17 unpacking to docker.io/library/wingstravel-app:release-us083-promotion-search-20261020-170000
+#17 unpacking to docker.io/library/wingstravel-app:release-us083-promotion-search-20261020-170000 3.8s done
+#17 DONE 16.0s
+
+ 4 warnings found (use docker --debug to expand):
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 4)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 5)
+ - UndefinedVar: Usage of undefined variable '$LD_LIBRARY_PATH' (line 6)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 6)
+ Container wingstravel-candidate-us083-promo-search-20261020 Creating 
+ Container wingstravel-candidate-us083-promo-search-20261020 Created 
+9010eef821e671bec3f87b840d4de7b07a436e47b70376ec21306d3d6dc21c3b
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":274,"requestId":"d06d8947-fdce-4694-b077-aeb10cd367ab","status":"ready","timestamp":"2026-10-20T16:59:56.515Z"}
+ARM64 libsql memory write/read { value: 'promotion-search-runtime' }
+ARM64 sharp/libvips bytes 90
+Candidate image sha256:46d8b184fd48cb485ba0c38398893830325be517580987c46d516cffd132758c
+Current remains: /home/ubuntu/wings-travel/releases/release-us083-cms-promotion-20261020-150000
+2026-10-20T16:59:56+00:00

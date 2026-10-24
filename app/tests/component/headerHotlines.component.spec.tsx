@@ -21,7 +21,7 @@ describe('WingsGo hotline navigation', () => {
       <HeaderNav data={{ navItems: [] }} publicPathname="/" resolvedLocale="vi" siteCode="wings-go" />,
     )
     const nav = screen.getByRole('navigation', { name: 'Primary navigation' })
-    expect(nav.querySelector('a[href="tel:0912910101"]')).toBeTruthy()
+    expect(nav.querySelector('a[href="tel:0948786775"]')).toBeTruthy()
     const toggle = within(nav).getByRole('button', { name: /hotline/i })
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
     fireEvent.click(toggle)
@@ -47,7 +47,7 @@ describe('WingsGo hotline navigation', () => {
       <HeaderNav data={{ navItems: [] }} publicPathname="/" resolvedLocale="vi" siteCode="wings-go" />,
     )
     fireEvent.click(screen.getByRole('button', { name: 'Mở điều hướng' }))
-    for (const phone of ['0912910101', '0915250101', '0915260101']) {
+    for (const phone of ['0948786775', '0915250101', '0915260101']) {
       expect(container.querySelector(`a[href="tel:${phone}"]`)).toBeTruthy()
     }
     rerender(

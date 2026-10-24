@@ -116,7 +116,7 @@ const createCurrentSchemaPreviewBaseline = async () => {
             site: site.id,
             siteName: 'WingsGroup',
             supportEmail: 'info@wingsgroup.vn',
-            supportPhone: '0912910101',
+            supportPhone: '0948786775',
           },
         })
       } finally {

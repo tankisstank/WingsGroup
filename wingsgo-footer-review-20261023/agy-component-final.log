@@ -1,0 +1,29 @@
+
+> website@1.0.0 test:component E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.component.config.mts "tests/component/footerHotlines.component.spec.tsx" "tests/component/siteContactFab.component.spec.tsx" "tests/component/headerHotlines.component.spec.tsx" "tests/component/retailTourConsultationDialog.component.spec.tsx" "tests/component/leadForm.component.spec.tsx" "tests/component/themeProvider.component.spec.tsx" "tests/component/wingsSideHiFiChrome.component.spec.tsx" "tests/component/wingsGroupHeaderOptionA.component.spec.tsx" "tests/component/wingsGroupV3Homepage.component.spec.tsx"
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.6 [39m[90mE:/repo/WingsTravel/app[39m
+
+ [32m✓[39m tests/component/themeProvider.component.spec.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 213[2mms[22m[39m
+ [32m✓[39m tests/component/siteContactFab.component.spec.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 692[2mms[22m[39m
+     [33m[2m✓[22m[39m offers three callable numbers and one shared OA, then restores focus on Escape [33m 404[2mms[22m[39m
+ [32m✓[39m tests/component/headerHotlines.component.spec.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 529[2mms[22m[39m
+     [33m[2m✓[22m[39m keeps the main number callable and opens supplementary numbers with keyboard dismissal [33m 431[2mms[22m[39m
+ [32m✓[39m tests/component/footerHotlines.component.spec.tsx [2m([22m[2m14 tests[22m[2m)[22m[33m 314[2mms[22m[39m
+ [32m✓[39m tests/component/wingsSideHiFiChrome.component.spec.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 921[2mms[22m[39m
+     [33m[2m✓[22m[39m renders full 7-route nav + Plan trip CTA for the wing-side tenant only [33m 411[2mms[22m[39m
+     [33m[2m✓[22m[39m smooth-scrolls the WingsGroup contact link without navigating away [33m 338[2mms[22m[39m
+Not implemented: navigation to another Document
+ [32m✓[39m tests/component/wingsGroupHeaderOptionA.component.spec.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 1178[2mms[22m[39m
+     [33m[2m✓[22m[39m renders Option A split call button with main hotline 0948 786 775 on desktop (VI) [33m 594[2mms[22m[39m
+ [32m✓[39m tests/component/retailTourConsultationDialog.component.spec.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 304[2mms[22m[39m
+ [32m✓[39m tests/component/leadForm.component.spec.tsx [2m([22m[2m18 tests[22m[2m)[22m[33m 1690[2mms[22m[39m
+     [33m[2m✓[22m[39m uses the bounded endpoint and prevents a second submit while pending [33m 467[2mms[22m[39m
+ [32m✓[39m tests/component/wingsGroupV3Homepage.component.spec.tsx [2m([22m[2m26 tests[22m[2m)[22m[33m 1714[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m      Tests [22m [1m[32m94 passed[39m[22m[90m (94)[39m
+[2m   Start at [22m 22:16:26
+[2m   Duration [22m 13.07s[2m (transform 7.77s, setup 1.61s, import 22.23s, tests 7.56s, environment 15.30s)[22m
+

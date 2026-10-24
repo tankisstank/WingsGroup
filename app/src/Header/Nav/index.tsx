@@ -18,7 +18,8 @@ import { getWingsSideHiFiCta, getWingsSideHiFiNavItems } from '@/utilities/wings
 import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
 import type { HotlineItem } from '@/utilities/siteHotlines'
 import { formatHotlineDisplay, resolveSiteHotlines } from '@/utilities/siteHotlines'
-import { Globe2Icon, MenuIcon, SearchIcon, XIcon } from 'lucide-react'
+import { ChevronDownIcon, FileTextIcon, Globe2Icon, MenuIcon, PhoneIcon, SearchIcon, XIcon } from 'lucide-react'
+import { useSitePath } from '@/utilities/useSitePath'
 import { getWingsGroupSwitcherLocales } from '@/components/WingsGroupV3/model'
 
 const WINGSGO_NAV = [
@@ -81,6 +82,19 @@ export const getWingsGroupHomeNav = (locale: SupportedLocaleCode) =>
 export const getWingsGroupV3RouteNav = (locale: SupportedLocaleCode) =>
   locale === 'en' ? WINGSGROUP_V3_ROUTE_NAV_EN : WINGSGROUP_V3_ROUTE_NAV
 
+const resolveHotlineItemLabel = (
+  label: string | undefined,
+  index: number,
+  locale: SupportedLocaleCode,
+): string => {
+  if (locale === 'en') {
+    if (!label || label === 'Tư vấn tour') return 'Tour consultation'
+    if (label === 'Hỗ trợ dịch vụ') return 'Travel support'
+    return label
+  }
+  return label || (index === 0 ? 'Tư vấn tour' : 'Hỗ trợ dịch vụ')
+}
+
 const getNativeLocaleLabel = (code: SupportedLocaleCode, fallback: string): string => {
   if (code === 'en') return 'ENGLISH (en)'
   if (code === 'vi') return 'Tiếng Việt (vi)'
@@ -127,16 +141,19 @@ export const HeaderNav: React.FC<{
 }) => {
   const navItems = data?.navItems || []
   const isWingsGo = siteCode === 'wings-go'
-  const isWingsGroup = siteCode === 'wings-group'
-  const isHotlineSite = isWingsGo || isWingsGroup
   const wingsGoNav = resolvedLocale === 'en' ? WINGSGO_NAV_EN : WINGSGO_NAV
   const [isOpen, setIsOpen] = useState(false)
   const [isHotlinesOpen, setIsHotlinesOpen] = useState(false)
+  const [isMobileHotlinesOpen, setIsMobileHotlinesOpen] = useState(false)
   const [clientReady, setClientReady] = useState(false)
   const [locationSuffix, setLocationSuffix] = useState('')
   const headerNavRef = useRef<HTMLDivElement>(null)
   const hotlineToggleRef = useRef<HTMLButtonElement>(null)
   const hotlineDropdownRef = useRef<HTMLDivElement>(null)
+  const mobileHotlineToggleRef = useRef<HTMLButtonElement>(null)
+  const mobileHotlineDropdownRef = useRef<HTMLDivElement>(null)
+  const mobileNavToggleRef = useRef<HTMLButtonElement>(null)
+  const toSitePath = useSitePath()
 
   const resolvedHotlines =
     hotlines !== undefined ? hotlines : resolveSiteHotlines(undefined, siteCode)
@@ -144,22 +161,37 @@ export const HeaderNav: React.FC<{
   const secondaryHotlines = resolvedHotlines.slice(1)
 
   useEffect(() => {
-    if (!isHotlinesOpen) return
+    if (!isHotlinesOpen && !isMobileHotlinesOpen) return
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault()
-        setIsHotlinesOpen(false)
-        hotlineToggleRef.current?.focus()
+        if (isHotlinesOpen) {
+          setIsHotlinesOpen(false)
+          hotlineToggleRef.current?.focus()
+        }
+        if (isMobileHotlinesOpen) {
+          setIsMobileHotlinesOpen(false)
+          mobileHotlineToggleRef.current?.focus()
+        }
       }
     }
     const handleMouseDown = (event: MouseEvent) => {
+      const target = event.target as Node
       if (
         hotlineDropdownRef.current &&
-        !hotlineDropdownRef.current.contains(event.target as Node) &&
+        !hotlineDropdownRef.current.contains(target) &&
         hotlineToggleRef.current &&
-        !hotlineToggleRef.current.contains(event.target as Node)
+        !hotlineToggleRef.current.contains(target)
       ) {
         setIsHotlinesOpen(false)
+      }
+      if (
+        mobileHotlineDropdownRef.current &&
+        !mobileHotlineDropdownRef.current.contains(target) &&
+        mobileHotlineToggleRef.current &&
+        !mobileHotlineToggleRef.current.contains(target)
+      ) {
+        setIsMobileHotlinesOpen(false)
       }
     }
     document.addEventListener('keydown', handleKeyDown)
@@ -168,7 +200,16 @@ export const HeaderNav: React.FC<{
       document.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('mousedown', handleMouseDown)
     }
-  }, [isHotlinesOpen])
+  }, [isHotlinesOpen, isMobileHotlinesOpen])
+
+  const handleInquiryClick = () => {
+    setIsHotlinesOpen(false)
+    setIsMobileHotlinesOpen(false)
+    setIsOpen(false)
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem('wingsgroup-contact-focus', 'contact-form')
+    }
+  }
   const pathname = useSitePublicPathname()
   const searchParams = useSearchParams()
   const localeSwitchPathname = pathname || publicPathname || '/'
@@ -190,6 +231,7 @@ export const HeaderNav: React.FC<{
   const sharedZaloCTA = getSharedZaloCTA(siteCode, resolvedLocale)
   const shouldRenderPrimaryAction =
     !isWingsGo &&
+    !isWingsGroupV3Surface &&
     resolvedPrimaryAction &&
     !(wingsSideHiFiNav
       ? wingsSideHiFiNav.some(
@@ -335,7 +377,11 @@ export const HeaderNav: React.FC<{
       setIsOpen(false)
     }
     const closeMobileNavigationOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false)
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setIsOpen(false)
+        mobileNavToggleRef.current?.focus()
+      }
     }
 
     document.addEventListener('pointerdown', closeMobileNavigation)
@@ -356,13 +402,15 @@ export const HeaderNav: React.FC<{
       data-client-ready={clientReady ? 'true' : 'false'}
     >
       <Globe2Icon aria-hidden="true" className="h-4 w-4" />
-      {switcherLocales.map((metadata) => {
+      {switcherLocales.map((metadata, index) => {
+        const isWingsGroupSite = siteCode === 'wings-group'
         const label =
-          siteCode === 'wings-go'
+          siteCode === 'wings-go' || isWingsGroupSite
             ? metadata.code.toUpperCase()
-            : siteCode === 'wings-group'
-            ? getNativeLocaleLabel(metadata.code, metadata.label)
             : metadata.label
+        const accessibleLabel = isWingsGroupSite
+          ? getNativeLocaleLabel(metadata.code, metadata.label)
+          : metadata.label
         const href = buildLocaleSwitchHref(
           `${localeSwitchPathname}${clientReady ? locationSuffix : ''}`,
           metadata.code,
@@ -370,27 +418,37 @@ export const HeaderNav: React.FC<{
         )
 
         return (
-          <a
-            aria-current={metadata.code === resolvedLocale ? 'page' : undefined}
-            className="site-language-switcher__link"
-            data-locale-code={metadata.code}
-            href={href}
-            key={metadata.code}
-            onClick={navigateAndCloseMobile}
-            title={metadata.label}
-          >
-            {label}
-          </a>
+          <React.Fragment key={metadata.code}>
+            {isWingsGroupSite && index > 0 ? (
+              <span aria-hidden="true" className="site-language-switcher__divider select-none text-xs text-muted-foreground/60">/</span>
+            ) : null}
+            <a
+              aria-current={metadata.code === resolvedLocale ? 'page' : undefined}
+              aria-label={accessibleLabel}
+              className="site-language-switcher__link"
+              data-locale-code={metadata.code}
+              href={href}
+              key={metadata.code}
+              onClick={navigateAndCloseMobile}
+              title={metadata.label}
+            >
+              {label}
+            </a>
+          </React.Fragment>
         )
       })}
       {isWingsGroupV3Surface && englishPublicationState === 'hidden' ? (
-        <span
-          aria-disabled="true"
-          className="site-language-switcher__link site-language-switcher__link--pending"
-          title="English — Sắp có"
-        >
-          ENGLISH (en)
-        </span>
+        <>
+          <span aria-hidden="true" className="site-language-switcher__divider select-none text-xs text-muted-foreground/60">/</span>
+          <span
+            aria-disabled="true"
+            aria-label="English — Sắp có"
+            className="site-language-switcher__link site-language-switcher__link--pending"
+            title="English — Sắp có"
+          >
+            EN
+          </span>
+        </>
       ) : null}
     </nav>
   )
@@ -502,13 +560,123 @@ export const HeaderNav: React.FC<{
             {resolvedPrimaryAction.label}
           </SiteLink>
         ) : null}
-        {isHotlineSite && mainHotline ? (
+        {isWingsGroupV3Surface ? (
+          <div className="wingsgroup-contact-zone relative inline-flex items-center">
+            <div className="wingsgroup-split-call inline-flex items-stretch">
+              {mainHotline ? (
+                <a
+                  aria-label={
+                    resolvedLocale === 'en'
+                      ? `Call now ${formatHotlineDisplay(mainHotline.normalized)}`
+                      : `Gọi ngay ${formatHotlineDisplay(mainHotline.normalized)}`
+                  }
+                  className="wingsgroup-call-link"
+                  href={mainHotline.href}
+                >
+                  <PhoneIcon aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  <span className="wingsgroup-call-copy">
+                    <span className="wingsgroup-call-caption">
+                      {resolvedLocale === 'en' ? 'Call now' : 'Gọi ngay'}
+                    </span>
+                    <span className="wingsgroup-call-number">
+                      {formatHotlineDisplay(mainHotline.normalized)}
+                    </span>
+                  </span>
+                </a>
+              ) : null}
+              <button
+                ref={hotlineToggleRef}
+                aria-controls="wingsgroup-header-contact-dropdown"
+                aria-expanded={isHotlinesOpen}
+                aria-label={
+                  resolvedLocale === 'en'
+                    ? 'Choose a contact channel'
+                    : 'Chọn kênh liên hệ'
+                }
+                className="wingsgroup-split-toggle"
+                onClick={() => setIsHotlinesOpen((prev) => !prev)}
+                type="button"
+              >
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className={`h-4 w-4 transition-transform duration-150 ${isHotlinesOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+            </div>
+            {isHotlinesOpen ? (
+              <div
+                id="wingsgroup-header-contact-dropdown"
+                ref={hotlineDropdownRef}
+                className="wingsgroup-contact-popup"
+              >
+                <p className="wingsgroup-popup-label">
+                  {resolvedLocale === 'en' ? 'Choose a contact channel' : 'Chọn kênh liên hệ'}
+                </p>
+                {secondaryHotlines.map((item, index) => {
+                  const itemLabel = resolveHotlineItemLabel(item.label, index, resolvedLocale)
+                  return (
+                    <a
+                      key={item.normalized}
+                      aria-label={
+                        resolvedLocale === 'en'
+                          ? `Call ${itemLabel} ${formatHotlineDisplay(item.normalized)}`
+                          : `Gọi ${itemLabel} ${formatHotlineDisplay(item.normalized)}`
+                      }
+                      className="wingsgroup-channel"
+                      href={item.href}
+                      onClick={() => setIsHotlinesOpen(false)}
+                    >
+                      <span className="wingsgroup-channel-mark" aria-hidden="true">
+                        <PhoneIcon className="h-4 w-4" />
+                      </span>
+                      <span className="wingsgroup-channel-copy">
+                        <b>{formatHotlineDisplay(item.normalized)}</b>
+                        <small>{itemLabel}</small>
+                      </span>
+                    </a>
+                  )
+                })}
+                {secondaryHotlines.length > 0 ? <div className="wingsgroup-popup-divider" /> : null}
+                {sharedZaloCTA ? (
+                  <a
+                    aria-label={resolvedLocale === 'en' ? 'Chat on Zalo' : 'Chat Zalo'}
+                    className="wingsgroup-channel"
+                    href={sharedZaloCTA.href}
+                    onClick={() => setIsHotlinesOpen(false)}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <span className="wingsgroup-channel-mark" aria-hidden="true">Z</span>
+                    <span className="wingsgroup-channel-copy">
+                      <b>{resolvedLocale === 'en' ? 'Chat on Zalo' : 'Chat Zalo'}</b>
+                      <small>{resolvedLocale === 'en' ? 'Message the WingsGroup team' : 'Nhắn tin với WingsGroup'}</small>
+                    </span>
+                  </a>
+                ) : null}
+                <a
+                  aria-label={resolvedLocale === 'en' ? 'Send an inquiry' : 'Gửi nhu cầu'}
+                  className="wingsgroup-channel"
+                  href={toSitePath('/lien-he#contact-form')}
+                  onClick={handleInquiryClick}
+                >
+                  <span className="wingsgroup-channel-mark" aria-hidden="true">
+                    <FileTextIcon className="h-4 w-4" />
+                  </span>
+                  <span className="wingsgroup-channel-copy">
+                    <b>{resolvedLocale === 'en' ? 'Send an inquiry' : 'Gửi nhu cầu'}</b>
+                    <small>{resolvedLocale === 'en' ? 'Let our specialists get back to you' : 'Để chuyên viên liên hệ với bạn'}</small>
+                  </span>
+                </a>
+              </div>
+            ) : null}
+          </div>
+        ) : isWingsGo && mainHotline ? (
           <div className="relative inline-flex items-center">
             <a
               aria-label={
                 resolvedLocale === 'en'
-                  ? `Call ${isWingsGroup ? 'WingsGroup' : 'WingsGo'} ${formatHotlineDisplay(mainHotline.normalized)}`
-                  : `Gọi hotline ${isWingsGroup ? 'WingsGroup' : 'WingsGo'} ${formatHotlineDisplay(mainHotline.normalized)}`
+                  ? `Call WingsGo ${formatHotlineDisplay(mainHotline.normalized)}`
+                  : `Gọi hotline WingsGo ${formatHotlineDisplay(mainHotline.normalized)}`
               }
               className={`inline-flex min-h-10 shrink-0 items-center gap-1 whitespace-nowrap border border-[var(--site-border)] px-3 text-sm font-semibold text-[var(--site-brand)] no-underline ${secondaryHotlines.length > 0 ? 'rounded-l-full border-r-0' : 'rounded-full'}`}
               href={mainHotline.href}
@@ -520,7 +688,7 @@ export const HeaderNav: React.FC<{
               <>
                 <button
                   ref={hotlineToggleRef}
-                  aria-controls={isWingsGroup ? 'wingsgroup-header-hotlines-dropdown' : 'wingsgo-header-hotlines-dropdown'}
+                  aria-controls="wingsgo-header-hotlines-dropdown"
                   aria-expanded={isHotlinesOpen}
                   aria-label={
                     resolvedLocale === 'en'
@@ -535,7 +703,7 @@ export const HeaderNav: React.FC<{
                 </button>
                 {isHotlinesOpen ? (
                   <div
-                    id={isWingsGroup ? 'wingsgroup-header-hotlines-dropdown' : 'wingsgo-header-hotlines-dropdown'}
+                    id="wingsgo-header-hotlines-dropdown"
                     ref={hotlineDropdownRef}
                     className="absolute right-0 top-full z-50 mt-1 min-w-[200px] rounded-xl border border-[var(--site-border)] bg-background p-2 shadow-lg"
                   >
@@ -560,7 +728,7 @@ export const HeaderNav: React.FC<{
             ) : null}
           </div>
         ) : null}
-        {sharedZaloCTA ? (
+        {!isWingsGroupV3Surface && sharedZaloCTA ? (
           <a
             aria-label={sharedZaloCTA.ariaLabel}
             className="site-header-zalo-link"
@@ -580,41 +748,150 @@ export const HeaderNav: React.FC<{
         {languageSwitcher}
       </nav>
 
-      <div className="flex items-center gap-2 xl:hidden">
-        {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
-          <SiteLink
-            className="site-header-cta site-header-cta--mobile"
-            data-wingsgroup-consultation-trigger={isWingsGroupV3Surface ? 'true' : undefined}
-            href={resolvedPrimaryAction.url}
-          >
-            {resolvedPrimaryAction.label}
-          </SiteLink>
-        ) : null}
-        {isHotlineSite && mainHotline ? (
-          <a
-            aria-label={
-              resolvedLocale === 'en'
-                ? `Call ${isWingsGroup ? 'WingsGroup' : 'WingsGo'} ${formatHotlineDisplay(mainHotline.normalized)}`
-                : `Gọi hotline ${isWingsGroup ? 'WingsGroup' : 'WingsGo'} ${formatHotlineDisplay(mainHotline.normalized)}`
-            }
-            className="site-icon-button"
-            href={mainHotline.href}
-            title={formatHotlineDisplay(mainHotline.normalized)}
-          >
-            <span aria-hidden="true">☎</span>
-          </a>
-        ) : null}
-        {sharedZaloCTA ? (
-          <a
-            aria-label={sharedZaloCTA.ariaLabel}
-            className="site-header-zalo-link site-header-zalo-link--mobile"
-            href={sharedZaloCTA.href}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            {sharedZaloCTA.label}
-          </a>
-        ) : null}
+      <div className="flex items-center gap-1.5 sm:gap-2 xl:hidden">
+        {isWingsGroupV3Surface ? (
+          <div className="wingsgroup-contact-zone wingsgroup-contact-zone--mobile relative inline-flex items-center">
+            <div className="wingsgroup-split-call wingsgroup-split-call--mobile inline-flex items-stretch">
+              {mainHotline ? (
+                <a
+                  aria-label={
+                    resolvedLocale === 'en'
+                      ? `Call now ${formatHotlineDisplay(mainHotline.normalized)}`
+                      : `Gọi ngay ${formatHotlineDisplay(mainHotline.normalized)}`
+                  }
+                  className="wingsgroup-call-link wingsgroup-call-link--mobile"
+                  href={mainHotline.href}
+                >
+                  <PhoneIcon aria-hidden="true" className="h-4 w-4 shrink-0" />
+                  <span className="wingsgroup-call-number">
+                    {resolvedLocale === 'en' ? 'Call now' : 'Gọi ngay'}
+                  </span>
+                </a>
+              ) : null}
+              <button
+                ref={mobileHotlineToggleRef}
+                aria-controls="wingsgroup-mobile-contact-dropdown"
+                aria-expanded={isMobileHotlinesOpen}
+                aria-label={
+                  resolvedLocale === 'en'
+                    ? 'Choose a contact channel'
+                    : 'Chọn kênh liên hệ'
+                }
+                className="wingsgroup-split-toggle wingsgroup-split-toggle--mobile"
+                onClick={() => setIsMobileHotlinesOpen((prev) => !prev)}
+                type="button"
+              >
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className={`h-4 w-4 transition-transform duration-150 ${isMobileHotlinesOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+            </div>
+            {isMobileHotlinesOpen ? (
+              <div
+                id="wingsgroup-mobile-contact-dropdown"
+                ref={mobileHotlineDropdownRef}
+                className="wingsgroup-contact-popup wingsgroup-contact-popup--mobile"
+              >
+                <p className="wingsgroup-popup-label">
+                  {resolvedLocale === 'en' ? 'Choose a contact channel' : 'Chọn kênh liên hệ'}
+                </p>
+                {secondaryHotlines.map((item, index) => {
+                  const itemLabel = resolveHotlineItemLabel(item.label, index, resolvedLocale)
+                  return (
+                    <a
+                      key={item.normalized}
+                      aria-label={
+                        resolvedLocale === 'en'
+                          ? `Call ${itemLabel} ${formatHotlineDisplay(item.normalized)}`
+                          : `Gọi ${itemLabel} ${formatHotlineDisplay(item.normalized)}`
+                      }
+                      className="wingsgroup-channel"
+                      href={item.href}
+                      onClick={() => setIsMobileHotlinesOpen(false)}
+                    >
+                      <span className="wingsgroup-channel-mark" aria-hidden="true">
+                        <PhoneIcon className="h-4 w-4" />
+                      </span>
+                      <span className="wingsgroup-channel-copy">
+                        <b>{formatHotlineDisplay(item.normalized)}</b>
+                        <small>{itemLabel}</small>
+                      </span>
+                    </a>
+                  )
+                })}
+                {secondaryHotlines.length > 0 ? <div className="wingsgroup-popup-divider" /> : null}
+                {sharedZaloCTA ? (
+                  <a
+                    aria-label={resolvedLocale === 'en' ? 'Chat on Zalo' : 'Chat Zalo'}
+                    className="wingsgroup-channel"
+                    href={sharedZaloCTA.href}
+                    onClick={() => setIsMobileHotlinesOpen(false)}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <span className="wingsgroup-channel-mark" aria-hidden="true">Z</span>
+                    <span className="wingsgroup-channel-copy">
+                      <b>{resolvedLocale === 'en' ? 'Chat on Zalo' : 'Chat Zalo'}</b>
+                      <small>{resolvedLocale === 'en' ? 'Message the WingsGroup team' : 'Nhắn tin với WingsGroup'}</small>
+                    </span>
+                  </a>
+                ) : null}
+                <a
+                  aria-label={resolvedLocale === 'en' ? 'Send an inquiry' : 'Gửi nhu cầu'}
+                  className="wingsgroup-channel"
+                  href={toSitePath('/lien-he#contact-form')}
+                  onClick={handleInquiryClick}
+                >
+                  <span className="wingsgroup-channel-mark" aria-hidden="true">
+                    <FileTextIcon className="h-4 w-4" />
+                  </span>
+                  <span className="wingsgroup-channel-copy">
+                    <b>{resolvedLocale === 'en' ? 'Send an inquiry' : 'Gửi nhu cầu'}</b>
+                    <small>{resolvedLocale === 'en' ? 'Let our specialists get back to you' : 'Để chuyên viên liên hệ với bạn'}</small>
+                  </span>
+                </a>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <>
+            {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
+              <SiteLink
+                className="site-header-cta site-header-cta--mobile"
+                data-wingsgroup-consultation-trigger={isWingsGroupV3Surface ? 'true' : undefined}
+                href={resolvedPrimaryAction.url}
+              >
+                {resolvedPrimaryAction.label}
+              </SiteLink>
+            ) : null}
+            {isWingsGo && mainHotline ? (
+              <a
+                aria-label={
+                  resolvedLocale === 'en'
+                    ? `Call WingsGo ${formatHotlineDisplay(mainHotline.normalized)}`
+                    : `Gọi hotline WingsGo ${formatHotlineDisplay(mainHotline.normalized)}`
+                }
+                className="site-icon-button"
+                href={mainHotline.href}
+                title={formatHotlineDisplay(mainHotline.normalized)}
+              >
+                <span aria-hidden="true">☎</span>
+              </a>
+            ) : null}
+            {sharedZaloCTA ? (
+              <a
+                aria-label={sharedZaloCTA.ariaLabel}
+                className="site-header-zalo-link site-header-zalo-link--mobile"
+                href={sharedZaloCTA.href}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {sharedZaloCTA.label}
+              </a>
+            ) : null}
+          </>
+        )}
         {!isWingsSide && !isWingsGo && showSearch ? (
           <SiteLink className="site-icon-button" href="/search">
             <span className="sr-only">{copy.search}</span>
@@ -622,6 +899,7 @@ export const HeaderNav: React.FC<{
           </SiteLink>
         ) : null}
         <button
+          ref={mobileNavToggleRef}
           aria-controls="mobile-primary-navigation"
           aria-expanded={isOpen}
           aria-label={isOpen ? copy.closeNavigation : copy.openNavigation}
@@ -729,45 +1007,100 @@ export const HeaderNav: React.FC<{
                       />
                     )
                   })}
-          {isHotlineSite
-            ? resolvedHotlines.map((item) => (
+          {isWingsGroupV3Surface ? (
+            <>
+              <div className="wingsgroup-drawer-divider my-2 border-t border-[var(--site-border,#dedbd3)]" />
+              {mainHotline ? (
                 <a
-                  key={item.normalized}
-                  className="site-mobile-nav__link"
-                  href={item.href}
+                  className="site-mobile-nav__link font-semibold"
+                  href={mainHotline.href}
                   onClick={() => setIsOpen(false)}
                 >
-                  ☎{' '}
-                  {item.label
-                    ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
-                    : resolvedLocale === 'en'
-                      ? `Call ${formatHotlineDisplay(item.normalized)}`
-                      : `Gọi ${formatHotlineDisplay(item.normalized)}`}
+                  <PhoneIcon aria-hidden="true" className="mr-2 inline-block h-4 w-4" />
+                  {resolvedLocale === 'en'
+                    ? `Call now: ${formatHotlineDisplay(mainHotline.normalized)}`
+                    : `Gọi ngay: ${formatHotlineDisplay(mainHotline.normalized)}`}
                 </a>
-              ))
-            : null}
-          {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
-            <SiteLink
-              className="site-mobile-nav__link site-mobile-nav__link--primary"
-              data-wingsgroup-consultation-trigger={isWingsGroupV3Surface ? 'true' : undefined}
-              href={resolvedPrimaryAction.url}
-              onClick={navigateAndCloseMobile}
-            >
-              {resolvedPrimaryAction.label}
-            </SiteLink>
-          ) : null}
-          {sharedZaloCTA ? (
-            <a
-              aria-label={sharedZaloCTA.ariaLabel}
-              className="site-mobile-nav__link site-mobile-nav__link--external"
-              href={sharedZaloCTA.href}
-              rel="noopener noreferrer"
-              target="_blank"
-              onClick={() => setIsOpen(false)}
-            >
-              {sharedZaloCTA.label}
-            </a>
-          ) : null}
+              ) : null}
+              {secondaryHotlines.map((item, index) => {
+                const itemLabel = resolveHotlineItemLabel(item.label, index, resolvedLocale)
+                return (
+                  <a
+                    key={item.normalized}
+                    className="site-mobile-nav__link"
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <PhoneIcon aria-hidden="true" className="mr-2 inline-block h-4 w-4" />
+                    {itemLabel}: {formatHotlineDisplay(item.normalized)}
+                  </a>
+                )
+              })}
+              {sharedZaloCTA ? (
+                <a
+                  aria-label={sharedZaloCTA.ariaLabel}
+                  className="site-mobile-nav__link"
+                  href={sharedZaloCTA.href}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="mr-2 inline-flex h-4 w-4 items-center justify-center rounded border border-current text-xs font-bold">Z</span>
+                  {resolvedLocale === 'en' ? 'Chat on Zalo' : 'Chat Zalo'}
+                </a>
+              ) : null}
+              <a
+                className="site-mobile-nav__link"
+                href={toSitePath('/lien-he#contact-form')}
+                onClick={handleInquiryClick}
+              >
+                <FileTextIcon aria-hidden="true" className="mr-2 inline-block h-4 w-4" />
+                {resolvedLocale === 'en' ? 'Send an inquiry' : 'Gửi nhu cầu'}
+              </a>
+            </>
+          ) : (
+            <>
+              {isWingsGo
+                ? resolvedHotlines.map((item) => (
+                    <a
+                      key={item.normalized}
+                      className="site-mobile-nav__link"
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      ☎{' '}
+                      {item.label
+                        ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                        : resolvedLocale === 'en'
+                          ? `Call ${formatHotlineDisplay(item.normalized)}`
+                          : `Gọi ${formatHotlineDisplay(item.normalized)}`}
+                    </a>
+                  ))
+                : null}
+              {shouldRenderPrimaryAction && resolvedPrimaryAction ? (
+                <SiteLink
+                  className="site-mobile-nav__link site-mobile-nav__link--primary"
+                  data-wingsgroup-consultation-trigger={isWingsGroupV3Surface ? 'true' : undefined}
+                  href={resolvedPrimaryAction.url}
+                  onClick={navigateAndCloseMobile}
+                >
+                  {resolvedPrimaryAction.label}
+                </SiteLink>
+              ) : null}
+              {sharedZaloCTA ? (
+                <a
+                  aria-label={sharedZaloCTA.ariaLabel}
+                  className="site-mobile-nav__link site-mobile-nav__link--external"
+                  href={sharedZaloCTA.href}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {sharedZaloCTA.label}
+                </a>
+              ) : null}
+            </>
+          )}
           {languageSwitcher}
         </nav>
       ) : null}

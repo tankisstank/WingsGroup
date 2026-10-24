@@ -1,0 +1,24 @@
+[
+  {
+    "dialogOpen": false,
+    "focusInForm": true,
+    "focusKey": null,
+    "focusedName": "full-name",
+    "inquiryContext": "outbound",
+    "locale": "vi",
+    "timestamp": "2026-10-23T08:14:51.12Z",
+    "url": "https://wingsgroup.vn/lien-he#contact-form",
+    "passed": true
+  },
+  {
+    "dialogOpen": false,
+    "focusInForm": false,
+    "focusKey": null,
+    "focusedName": null,
+    "inquiryContext": "outbound",
+    "locale": "en",
+    "timestamp": "2026-10-23T08:14:55.038Z",
+    "url": "https://wingsgroup.vn/en/lien-he#contact-form",
+    "passed": false
+  }
+]

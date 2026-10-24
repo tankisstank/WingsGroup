@@ -1,0 +1,92 @@
+[
+  {
+    "badge": [
+      {
+        "width": 317,
+        "x": 29
+      },
+      {
+        "width": 136.75,
+        "x": 29
+      }
+    ],
+    "documentWidth": 375,
+    "prices": [
+      {
+        "color": "lab(48.4493 77.4328 61.5452)",
+        "original": "15.900.000 ₫",
+        "sale": "12.900.000 ₫"
+      }
+    ],
+    "url": "http://127.0.0.1:3106/tour",
+    "width": 390
+  },
+  {
+    "badge": [
+      {
+        "width": 136.75,
+        "x": 29
+      }
+    ],
+    "documentWidth": 375,
+    "prices": [
+      {
+        "color": "lab(48.4493 77.4328 61.5452)",
+        "original": "15.900.000 ₫",
+        "sale": "12.900.000 ₫"
+      },
+      {
+        "color": "rgb(0, 80, 144)",
+        "original": "15.900.000 ₫",
+        "sale": "12.900.000 ₫"
+      }
+    ],
+    "url": "http://127.0.0.1:3106/tour/han-quoc-5n4d-mua-thu",
+    "width": 390
+  },
+  {
+    "badge": [
+      {
+        "width": 398,
+        "x": 69.5
+      },
+      {
+        "width": 136.75,
+        "x": 69.5
+      }
+    ],
+    "documentWidth": 1425,
+    "prices": [
+      {
+        "color": "lab(48.4493 77.4328 61.5452)",
+        "original": "15.900.000 ₫",
+        "sale": "12.900.000 ₫"
+      }
+    ],
+    "url": "http://127.0.0.1:3106/tour",
+    "width": 1440
+  },
+  {
+    "badge": [
+      {
+        "width": 136.75,
+        "x": 157.5
+      }
+    ],
+    "documentWidth": 1425,
+    "prices": [
+      {
+        "color": "lab(48.4493 77.4328 61.5452)",
+        "original": "15.900.000 ₫",
+        "sale": "12.900.000 ₫"
+      },
+      {
+        "color": "rgb(0, 80, 144)",
+        "original": "15.900.000 ₫",
+        "sale": "12.900.000 ₫"
+      }
+    ],
+    "url": "http://127.0.0.1:3106/tour/han-quoc-5n4d-mua-thu",
+    "width": 1440
+  }
+]

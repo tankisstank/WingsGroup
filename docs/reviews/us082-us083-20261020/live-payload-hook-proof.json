@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-10-20T11:44:36.006Z",
+  "steps": {
+    "patchMutation": {
+      "patchStatus": 200,
+      "tenant2Evicted": true,
+      "tenant9Preserved": true,
+      "publicPrice": {
+        "currency": "VND",
+        "kind": "verified",
+        "originalPrice": 13800000,
+        "value": 8800000
+      },
+      "publicNextDeparture": {
+        "airline": null,
+        "date": "2026-11-15T00:00:00.000Z",
+        "departureCity": "Hà Nội",
+        "promoLabel": "Live Hook Promo 8.8M"
+      }
+    },
+    "deleteMutation": {
+      "deleteStatus": 200,
+      "tenant2Evicted": true,
+      "tenant9Preserved": true,
+      "featuredCountAfterDelete": 0
+    }
+  }
+}

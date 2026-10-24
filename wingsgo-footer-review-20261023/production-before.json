@@ -1,0 +1,66 @@
+{
+  "floatingContact": 1,
+  "footerCount": 1,
+  "links": [
+    {
+      "href": "/",
+      "label": ""
+    },
+    {
+      "href": "mailto:info@wingsgroup.vn",
+      "label": "info@wingsgroup.vn"
+    },
+    {
+      "href": "mailto:sales@wingsgroup.vn",
+      "label": "sales@wingsgroup.vn"
+    },
+    {
+      "href": "tel:0912910101",
+      "label": "0912 910 101"
+    },
+    {
+      "href": "/thi-truong",
+      "label": "Thị trường"
+    },
+    {
+      "href": "/lich-khoi-hanh",
+      "label": "Lịch khởi hành"
+    },
+    {
+      "href": "/gioi-thieu",
+      "label": "Giới thiệu"
+    },
+    {
+      "href": "https://zalo.me/4142059657526524531",
+      "label": "Zalo OA"
+    },
+    {
+      "href": "https://zalo.me/4142059657526524531",
+      "label": "Nhận tư vấn Tour"
+    },
+    {
+      "href": "tel:0912910101",
+      "label": "Hotline: 0912 910 101"
+    },
+    {
+      "href": "tel:0915250101",
+      "label": "Tư vấn tour: 0915 250 101"
+    },
+    {
+      "href": "tel:0915260101",
+      "label": "Hỗ trợ dịch vụ: 0915 260 101"
+    }
+  ],
+  "phones": [
+    "tel:0912910101",
+    "tel:0912910101",
+    "tel:0915250101",
+    "tel:0915260101"
+  ],
+  "ready": "complete",
+  "storedTheme": null,
+  "theme": "light",
+  "themeSelectors": 1,
+  "timestamp": "2026-10-23T15:03:00.158Z",
+  "url": "https://wingsgo.vn/"
+}

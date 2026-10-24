@@ -3,8 +3,6 @@ import React from 'react'
 
 import { FormBlock } from '@/blocks/Form/Component'
 import styles from '@/components/WingsGroupV3/WingsGroupV3.module.css'
-import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
-import { ProtectedEmailLink } from '@/components/ProtectedEmailLink'
 import type { HotlineItem } from '@/utilities/siteHotlines'
 import { formatHotlineDisplay } from '@/utilities/siteHotlines'
 
@@ -24,7 +22,10 @@ export const WingsGroupContactSection = ({
   wingsGroupV3,
   ...formBlock
 }: Props) => {
-  const sharedZaloCTA = getSharedZaloCTA(siteCode, locale)
+  const primaryHotline =
+    hotlines === undefined
+      ? { href: 'tel:0948786775', normalized: '0948786775' }
+      : hotlines[0]
 
   return (
     <section
@@ -45,29 +46,14 @@ export const WingsGroupContactSection = ({
               : 'Để lại một vài thông tin ngắn, đội ngũ phù hợp của WingsGroup sẽ chủ động kết nối.'}
           </p>
         </header>
-        {wingsGroupV3 ? (
+        {wingsGroupV3 && primaryHotline ? (
           <div className={styles.contactDirect} data-testid="wingsgroup-direct-contacts">
             <span>
               {locale === 'en' ? 'Prefer a direct conversation?' : 'Bạn muốn trao đổi trực tiếp?'}
             </span>
-            {hotlines && hotlines.length > 0 ? (
-              hotlines.map((item) => (
-                <a href={item.href} key={item.normalized}>
-                  {item.label
-                    ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
-                    : formatHotlineDisplay(item.normalized)}
-                </a>
-              ))
-            ) : (
-              <a href="tel:0912910101">0912 910 101</a>
-            )}
-            <ProtectedEmailLink email="info@wingsgroup.vn" />
-            <ProtectedEmailLink email="sales@wingsgroup.vn" />
-            {sharedZaloCTA ? (
-              <a href={sharedZaloCTA.href} rel="noopener noreferrer" target="_blank">
-                {sharedZaloCTA.label}
-              </a>
-            ) : null}
+            <a href={primaryHotline.href}>
+              {locale === 'en' ? 'Call now' : 'Gọi ngay'}: {formatHotlineDisplay(primaryHotline.normalized)}
+            </a>
           </div>
         ) : null}
         <FormBlock

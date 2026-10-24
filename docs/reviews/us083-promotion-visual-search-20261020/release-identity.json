@@ -1,0 +1,34 @@
+{
+  "release": "release-us083-promotion-search-20261020-170000",
+  "buildID": "wgqUkwWtCKGG7aKW-11iv",
+  "baseCommit": "58633ae36834bcc0869237f5565d12ccac41929d",
+  "includedCommit": "58633ae36834bcc0869237f5565d12ccac41929d",
+  "sourceState": "existing mixed workspace plus reviewed visual delta; no new commit or push",
+  "capturedAt": "2026-10-20T16:55:48.6161803Z",
+  "files": [
+    {
+      "sha256": "19612fd5a2d97d7ec02e5e85c7d79a74949e9f2dabb3c1a25255dab555810e13",
+      "path": "app/src/collections/TourDepartures.ts"
+    },
+    {
+      "sha256": "cde924a41d3e23cd906ec6588e80b3c41819ab463d1620a82d6fdf3f259b24de",
+      "path": "app/src/tours/PromotionPrice.tsx"
+    },
+    {
+      "sha256": "c29ab2ee3e0a22e1e3d66832edecfae50f4256c924b97799b9083299ad5c8cf3",
+      "path": "app/src/tours/WingsGoTourCard.tsx"
+    },
+    {
+      "sha256": "f96eefe3fbc2bb69d5859c83d00a74a556912c8364d8987c015ef8abdea51db7",
+      "path": "app/src/tours/WingsGoHomepageSections.tsx"
+    },
+    {
+      "sha256": "fb23eb081d88f25c254e308a676ab977d1eb4fe0ac26de1d2bc5f50560a1a992",
+      "path": "app/src/tours/StructuredPages.tsx"
+    },
+    {
+      "sha256": "9491fe98035e3446eb195856e5e9e6e735138789529ef373fe862a7d1c9eb415",
+      "path": "app/src/heros/HighImpact/index.tsx"
+    }
+  ]
+}

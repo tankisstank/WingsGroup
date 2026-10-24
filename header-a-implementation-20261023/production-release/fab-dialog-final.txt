@@ -1,0 +1,7 @@
+- heading "Trao đổi với chuyên viên." [level=2, ref=e1]
+- button "Đóng bảng chọn kênh" [ref=e2]
+- link "Mở Zalo OA WingsGroup" [ref=e3]
+- link "Gọi hotline 0948 786 775" [ref=e4]
+- link "Gọi Tư vấn tour 0915 250 101" [ref=e5]
+- link "Gọi Hỗ trợ dịch vụ 0915 260 101" [ref=e6]
+- button "Để lại nhu cầu Chuyên viên sẽ đồng hành cùng bạn." [ref=e7]

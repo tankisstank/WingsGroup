@@ -1,0 +1,36 @@
+
+> website@1.0.0 test:component E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.component.config.mts "tests/component/footerHotlines.component.spec.tsx" "tests/component/siteContactFab.component.spec.tsx" "tests/component/headerHotlines.component.spec.tsx" "tests/component/retailTourConsultationDialog.component.spec.tsx" "tests/component/leadForm.component.spec.tsx" "tests/component/themeProvider.component.spec.tsx" "tests/component/wingsSideHiFiChrome.component.spec.tsx" "tests/component/wingsGroupHeaderOptionA.component.spec.tsx" "tests/component/wingsGroupV3Homepage.component.spec.tsx"
+
+
+ RUN  v4.1.6 E:/repo/WingsTravel/app
+
+ ❯ tests/component/wingsSideHiFiChrome.component.spec.tsx (5 tests | 1 failed) 808ms
+     × does not force WingSide nav on WingsGo 30ms
+Not implemented: navigation to another Document
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/component/wingsSideHiFiChrome.component.spec.tsx > WingSide hi-fi header chrome (site isolation) > does not force WingSide nav on WingsGo
+AssertionError: expected 'HomeDestinationsDeparture scheduleSea…' to contain '0912 910 101'
+
+Expected: "0912 910 101"
+Received: "HomeDestinationsDeparture scheduleSeasonal toursTours☎0948 786 775▼Zalo OA☎Zalo OA"
+
+ ❯ tests/component/wingsSideHiFiChrome.component.spec.tsx:142:35
+    140|     expect(container.textContent).toContain('Home')
+    141|     expect(container.textContent).toContain('Departure schedule')
+    142|     expect(container.textContent).toContain('0912 910 101')
+       |                                   ^
+    143|     unmount()
+    144|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  1 failed | 93 passed (94)
+   Start at  22:11:28
+   Duration  51.25s (transform 11.15s, setup 925ms, import 65.89s, tests 6.97s, environment 15.12s)
+
+ ELIFECYCLE  Command failed with exit code 1.

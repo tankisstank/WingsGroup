@@ -1,0 +1,286 @@
+{
+  "buildID": "Jbkhivn63kcHi42C2Be4O",
+  "results": [
+    {
+      "dom": {
+        "bodyLength": 8457,
+        "discounts": [
+          {
+            "color": "lab(48.4493 77.4328 61.5452)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          },
+          {
+            "color": "lab(48.4493 77.4328 61.5452)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          }
+        ],
+        "documentWidth": 1425,
+        "h1": "WingsGo - Du lịch Outbound Trọn Gói & Khởi Hành Đúng Lịch",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "WingsGo | Outbound Tours",
+        "url": "https://wingsgo.vn/",
+        "width": 1440
+      },
+      "viewport": "desktop",
+      "screenshot": "prod-home-desktop.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 8270,
+        "discounts": [
+          {
+            "color": "lab(48.4493 77.4328 61.5452)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          }
+        ],
+        "documentWidth": 1425,
+        "h1": "Tour outbound nổi bật: giá, lịch và điểm nhấn rõ ràng",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour WingsGo | Outbound Tours",
+        "url": "https://wingsgo.vn/tour",
+        "width": 1440
+      },
+      "viewport": "desktop",
+      "screenshot": "prod-tour-desktop.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 12840,
+        "discounts": [
+          {
+            "color": "lab(48.4493 77.4328 61.5452)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          },
+          {
+            "color": "rgb(0, 80, 144)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          }
+        ],
+        "documentWidth": 1425,
+        "h1": "TOUR 6N5Đ: OSAKA - KOBE - KYOTO - NÚI PHÚ SĨ - TOKYO (KIX-NRT)",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "TOUR 6N5Đ: OSAKA - KOBE - KYOTO - NÚI PHÚ SĨ - TOKYO (KIX-NRT) | Outbound Tours | WingsGo",
+        "url": "https://wingsgo.vn/tour/tour-6n5d-osaka-kobe-kyoto-nui-phu-si-tokyo-kix-nrt",
+        "width": 1440
+      },
+      "viewport": "desktop",
+      "screenshot": "prod-detail-119-desktop.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 5273,
+        "discounts": [],
+        "documentWidth": 1425,
+        "h1": "Tour Hàn Quốc",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour Hàn Quốc | Outbound Tours | WingsGo",
+        "url": "https://wingsgo.vn/thi-truong/han-quoc",
+        "width": 1440
+      },
+      "viewport": "desktop",
+      "screenshot": "prod-hanquoc-desktop.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 7763,
+        "discounts": [
+          {
+            "color": "lab(48.4493 77.4328 61.5452)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          }
+        ],
+        "documentWidth": 1425,
+        "h1": "Tour Nhật Bản",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour Nhật Bản | Outbound Tours | WingsGo",
+        "url": "https://wingsgo.vn/thi-truong/nhat-ban",
+        "width": 1440
+      },
+      "viewport": "desktop",
+      "screenshot": "prod-nhatban-desktop.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 4429,
+        "discounts": [],
+        "documentWidth": 1425,
+        "h1": "Find the right service for your journey.",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [
+          {
+            "href": "/en/chinh-sach-bao-mat",
+            "text": "Read the Privacy Policy"
+          },
+          {
+            "href": "/en/chinh-sach-bao-mat",
+            "text": "Customer Privacy Policy"
+          }
+        ],
+        "title": "WingsGroup — Connected travel expertise | Travel Ecosystem",
+        "url": "https://wingsgroup.vn/en",
+        "width": 1440
+      },
+      "viewport": "desktop",
+      "screenshot": "prod-wingsgroup-en-desktop.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 8381,
+        "discounts": [
+          {
+            "color": "lab(48.4493 77.4328 61.5452)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          },
+          {
+            "color": "lab(48.4493 77.4328 61.5452)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          }
+        ],
+        "documentWidth": 375,
+        "h1": "WingsGo - Du lịch Outbound Trọn Gói & Khởi Hành Đúng Lịch",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "WingsGo | Outbound Tours",
+        "url": "https://wingsgo.vn/",
+        "width": 390
+      },
+      "viewport": "mobile",
+      "screenshot": "prod-home-mobile.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 8194,
+        "discounts": [
+          {
+            "color": "lab(48.4493 77.4328 61.5452)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          }
+        ],
+        "documentWidth": 375,
+        "h1": "Tour outbound nổi bật: giá, lịch và điểm nhấn rõ ràng",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour WingsGo | Outbound Tours",
+        "url": "https://wingsgo.vn/tour",
+        "width": 390
+      },
+      "viewport": "mobile",
+      "screenshot": "prod-tour-mobile.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 12720,
+        "discounts": [
+          {
+            "color": "lab(48.4493 77.4328 61.5452)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          },
+          {
+            "color": "rgb(0, 80, 144)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          }
+        ],
+        "documentWidth": 375,
+        "h1": "TOUR 6N5Đ: OSAKA - KOBE - KYOTO - NÚI PHÚ SĨ - TOKYO (KIX-NRT)",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "TOUR 6N5Đ: OSAKA - KOBE - KYOTO - NÚI PHÚ SĨ - TOKYO (KIX-NRT) | Outbound Tours | WingsGo",
+        "url": "https://wingsgo.vn/tour/tour-6n5d-osaka-kobe-kyoto-nui-phu-si-tokyo-kix-nrt",
+        "width": 390
+      },
+      "viewport": "mobile",
+      "screenshot": "prod-detail-119-mobile.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 5197,
+        "discounts": [],
+        "documentWidth": 375,
+        "h1": "Tour Hàn Quốc",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour Hàn Quốc | Outbound Tours | WingsGo",
+        "url": "https://wingsgo.vn/thi-truong/han-quoc",
+        "width": 390
+      },
+      "viewport": "mobile",
+      "screenshot": "prod-hanquoc-mobile.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 7687,
+        "discounts": [
+          {
+            "color": "lab(48.4493 77.4328 61.5452)",
+            "original": "42.900.000 ₫",
+            "sale": "40.900.000 ₫"
+          }
+        ],
+        "documentWidth": 375,
+        "h1": "Tour Nhật Bản",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour Nhật Bản | Outbound Tours | WingsGo",
+        "url": "https://wingsgo.vn/thi-truong/nhat-ban",
+        "width": 390
+      },
+      "viewport": "mobile",
+      "screenshot": "prod-nhatban-mobile.png"
+    },
+    {
+      "dom": {
+        "bodyLength": 4324,
+        "discounts": [],
+        "documentWidth": 375,
+        "h1": "Find the right service for your journey.",
+        "numericBadge": false,
+        "overflow": false,
+        "privacyLinks": [
+          {
+            "href": "/en/chinh-sach-bao-mat",
+            "text": "Read the Privacy Policy"
+          },
+          {
+            "href": "/en/chinh-sach-bao-mat",
+            "text": "Customer Privacy Policy"
+          }
+        ],
+        "title": "WingsGroup — Connected travel expertise | Travel Ecosystem",
+        "url": "https://wingsgroup.vn/en",
+        "width": 390
+      },
+      "viewport": "mobile",
+      "screenshot": "prod-wingsgroup-en-mobile.png"
+    }
+  ],
+  "timestamp": "2026-10-20T17:25:57.2439077Z",
+  "pageErrors": 0,
+  "readOnly": true
+}

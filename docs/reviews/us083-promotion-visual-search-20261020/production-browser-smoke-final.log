@@ -1,0 +1,19 @@
+✓ Done
+✓ WingsGo | Outbound Tours
+  https://wingsgo.vn/
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-promotion-visual-search-20261020/prod-home-desktop.png
+PASS desktop https://wingsgo.vn/ width=1425/1440 discounts=2
+✓ Tour WingsGo | Outbound Tours
+  https://wingsgo.vn/tour
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-promotion-visual-search-20261020/prod-tour-desktop.png
+PASS desktop https://wingsgo.vn/tour width=1425/1440 discounts=1
+✓ TOUR 6N5Đ: OSAKA - KOBE - KYOTO - NÚI PHÚ SĨ - TOKYO (KIX-NRT) | Outbound Tours | WingsGo
+  https://wingsgo.vn/tour/tour-6n5d-osaka-kobe-kyoto-nui-phu-si-tokyo-kix-nrt
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-promotion-visual-search-20261020/prod-detail-119-desktop.png
+PASS desktop https://wingsgo.vn/tour/tour-6n5d-osaka-kobe-kyoto-nui-phu-si-tokyo-kix-nrt width=1425/1440 discounts=2
+✓ Tour Hàn Quốc | Outbound Tours | WingsGo
+  https://wingsgo.vn/thi-truong/han-quoc
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-promotion-visual-search-20261020/prod-hanquoc-desktop.png
+PASS desktop https://wingsgo.vn/thi-truong/han-quoc width=1425/1440 discounts=0
+✓ Tour Nhật Bản | Outbound Tours | WingsGo
+  https://wingsgo.vn/thi-truong/nhat-ban

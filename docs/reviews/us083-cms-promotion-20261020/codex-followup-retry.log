@@ -1,0 +1,864 @@
+2026-10-20T14:15:44.414869Z ERROR codex_core::session::session: failed to load skill C:\Users\VIETD\.claude\skills\seo\SKILL.md: missing YAML frontmatter delimited by ---
+2026-10-20T14:15:44.414908Z ERROR codex_core::session::session: failed to load skill C:\Users\VIETD\.claude\skills\seo\SKILL.md: missing YAML frontmatter delimited by ---
+OpenAI Codex v0.163.0
+--------
+workdir: E:\repo\WingsTravel
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a159ab-099d-7bd1-8e21-f1c54bf498cb
+--------
+user
+Read-only follow-up for root CMS inline departure promotion. Previous independent review found P2 locale fallback and stale vi-en-vi save response. Root fixed GET fallback-locale=none and monotonic contextVersion/generation in TourDepartureManager.tsx guards load/save/catch/finally/delete. New component suite covers stale PATCH roundtrip. Review ONLY those corrections, current source + test; no edits or mutations, no broad search. Report remaining findings or none. Draft API verified by prior review. Output stdout.
+
+warning: Codex is ignoring 9 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\VIETD\.codex\config.toml): `features.remote_connections` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.approvals_reviewer` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.model_reasoning_summary_format` is ignored.
+  ... and 6 more ignored settings.
+warning: Codex is ignoring 9 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\VIETD\.codex\config.toml): `features.remote_connections` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.approvals_reviewer` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.model_reasoning_summary_format` is ignored.
+  ... and 6 more ignored settings.
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+I’ll read the current component and its focused test, then check the locale fallback and stale response guards. I’ll keep this read-only and report findings in stdout.
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'codegraph explore "TourDepartureManager.tsx current source and component test file locations"' in E:\repo\WingsTravel
+ succeeded in 1509ms:
+**Exploration: TourDepartureManager.tsx current source and component test file locations**
+
+Found 18 symbols across 3 files.
+
+**Blast radius — what depends on these (update/verify before editing)**
+
+- `TourDepartureManager` (app/src/components/TourAuthoring/TourDepartureManager.tsx:53) — 2 callers; tests: `app/tests/component/tourAuthoring.component.spec.tsx`, `app/tests/component/tourDeparturePromotion.component.spec.tsx`
+- `TestTour` (app/tests/unit/pageLocaleInventory.unit.spec.ts:31) — 1 caller; tests: `app/tests/unit/pageLocaleInventory.unit.spec.ts`
+- `SourceTour` (app/scripts/generate-wingsside-tour-english-editorial-artifacts.ts:14) — 2 callers in `app/scripts/generate-wingsside-tour-english-editorial-artifacts.ts`; ⚠️ no covering tests found
+- `SourceDeparture` (app/scripts/lib/doicanhviet.ts:42) — 4 callers in `app/scripts/lib/tourSnapshots.ts`, `app/scripts/lib/doicanhviet.ts`; ⚠️ no covering tests found
+- `TestIntersectionObserver` (app/tests/component/wingsGoTourCatalog.component.spec.tsx:38) — 1 caller; tests: `app/tests/component/wingsGoTourCatalog.component.spec.tsx`
+
+**Relationships**
+
+**calls:**
+- TourDepartureManager → tourAuthoringRelationID
+- TourDepartureManager → buildTourAuthoringDepartureQuery
+- TourDepartureManager → localDateTime
+- TourDepartureManager → getTourAuthoringFreshness
+- TourDepartureManager → blankDeparture
+- TourDepartureManager → formatAdminDate
+- TourProductSiteField → tourAuthoringRelationID
+- getTourAuthoringSiteState → tourAuthoringRelationID
+- normalizeTourAuthoringRelations → tourAuthoringRelationID
+- TourProductAuthoring → tourAuthoringRelationID
+- ... and 135 more
+
+**references:**
+- TourDepartureManager → freshnessLabel
+- tourAuthoringRelationID → TourAuthoringRelation
+- getTourAuthoringFreshness → TourAuthoringFreshness
+- blankDeparture → DepartureFormValue
+- formatAdminDate → adminDateFormatter
+- TourProductSiteField → Props
+- getTourAuthoringSiteState → TourAuthoringRelation
+- getTourAuthoringSiteState → TourAuthoringSiteState
+- buildPayload → TestTour
+- buildPayload → TestPage
+- ... and 69 more
+
+**Source Code**
+
+> The code below is the **verbatim, current on-disk source** of these files — re-read from disk on this call and line-numbered, byte-for-byte identical to what the Read tool returns. It is NOT a summary, outline, or stale cache. Treat each block as a Read you have already performed: do not Read a file shown here.
+
+**`app/src/components/TourAuthoring/TourDepartureManager.tsx`** — getTourAuthoringFreshness(calls), blankDeparture(function), DepartureFormValue(references), freshnessLabel(constant), localDateTime(function), TourDepartureManager(function), tourAuthoringRelationID(calls), buildTourAuthoringDepartureQuery(calls), localDateTime(calls), blankDeparture(calls), +1 more
+
+```tsx
+23	  verifiedAt?: string | null
+24	}
+25	
+26	const blankDeparture = (): DepartureFormValue => ({
+27	  airline: '',
+28	  availabilityStatus: 'open',
+29	  currency: 'VND',
+30	  departureCity: '',
+31	  departureDate: '',
+32	  expiresAt: '',
+33	  originalPrice: '',
+34	  priceFrom: '',
+35	  promoLabel: '',
+36	  promotionEnabled: false,
+37	  verified: false,
+38	})
+39	
+40	const freshnessLabel = {
+41	  current: 'Xác minh còn hiệu lực',
+42	  expired: 'Đã hết hạn · public có thể hiển thị Liên hệ tư vấn',
+43	  'needs-verification': 'Cần xác minh',
+44	} as const
+45	
+46	const localDateTime = (value?: string | null) => {
+47	  if (!value) return ''
+48	  const date = new Date(value)
+49	  if (!Number.isFinite(date.getTime())) return ''
+50	  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
+51	}
+52	
+53	export default function TourDepartureManager({ onSaved }: { onSaved?: () => void }) {
+54	  const { data, id: productID } = useDocumentInfo()
+55	  const { code: locale } = useLocale()
+56	  const [departures, setDepartures] = useState<Departure[]>([])
+57	  const [form, setForm] = useState<DepartureFormValue | null>(null)
+58	  const [editingID, setEditingID] = useState<number | string | null>(null)
+59	  const [error, setError] = useState('')
+60	  const [busy, setBusy] = useState(false)
+61	  const [saved, setSaved] = useState(false)
+62	  const siteID = tourAuthoringRelationID(data?.site)
+63	  const context = `${productID}:${siteID}:${locale}`
+64	  const currentContext = useRef(context)
+65	  const contextVersion = useRef(0)
+66	  if (currentContext.current !== context) {
+67	    currentContext.current = context
+68	    contextVersion.current += 1
+69	  }
+70	  const generation = contextVersion.current
+71	  const loadVersion = useRef(0)
+72	
+73	  const load = useCallback(async (signal?: AbortSignal) => {
+74	    if (productID == null || siteID == null) return
+75	    const version = ++loadVersion.current
+76	    const response = await fetch(`${buildTourAuthoringDepartureQuery(productID, siteID)}&locale=${encodeURIComponent(locale || 'vi')}&fallback-locale=none&draft=true`, {
+77	      credentials: 'include',
+78	      headers: { 'Accept-Language': locale || 'vi' },
+79	      signal,
+80	    })
+81	    if (!response.ok) throw new Error(`Không tải được lịch khởi hành (${response.status}).`)
+82	    const result = await response.json() as { docs?: Departure[] }
+83	    if (!signal?.aborted && contextVersion.current === generation && version === loadVersion.current) {
+84	      setDepartures(result.docs || [])
+85	    }
+86	  }, [generation, locale, productID, siteID])
+87	
+88	  useEffect(() => {
+89	    const controller = new AbortController()
+90	    setDepartures([])
+91	    setForm(null)
+92	    setEditingID(null)
+93	    setError('')
+94	    setSaved(false)
+95	    setBusy(false)
+96	    void load(controller.signal).catch((reason: Error) => {
+97	      if (!controller.signal.aborted) setError(reason.message)
+98	    })
+99	    return () => controller.abort()
+100	  }, [load])
+101	
+102	  const save = async (value: DepartureFormValue, saveAndNext = false) => {
+103	    if (productID == null || siteID == null || busy) return
+104	    const requestContext = generation
+105	    setBusy(true)
+106	    setSaved(false)
+107	    try {
+108	      const payload = {
+109	        availabilityStatus: value.availabilityStatus,
+110	        currency: value.currency,
+111	        departureCity: value.departureCity || null,
+112	        departureDate: value.departureDate,
+113	        airline: value.airline || null,
+114	        originalPrice: value.promotionEnabled && value.originalPrice ? Number(value.originalPrice) : null,
+115	        priceFrom: Number(value.priceFrom),
+116	        promoLabel: value.promotionEnabled ? value.promoLabel?.trim() || null : null,
+117	        site: siteID,
+118	        tourProduct: productID,
+119	        verifiedAt: value.verified ? new Date().toISOString() : null,
+120	        expiresAt: value.verified ? new Date(value.expiresAt).toISOString() : null,
+121	        _status: 'draft',
+122	      }
+123	      const endpoint = editingID == null ? '/api/tour-departures' : `/api/tour-departures/${encodeURIComponent(String(editingID))}`
+124	      const response = await fetch(`${endpoint}?locale=${encodeURIComponent(locale || 'vi')}&draft=true`, {
+125	        body: JSON.stringify(payload),
+126	        credentials: 'include',
+127	        headers: { 'Content-Type': 'application/json', 'Accept-Language': locale || 'vi' },
+128	        method: editingID == null ? 'POST' : 'PATCH',
+129	      })
+130	      if (!response.ok) {
+131	        const body = await response.json().catch(() => ({})) as { errors?: Array<{ message?: string }>; message?: string }
+132	        if (response.status === 409) throw new Error('Đã có lịch khởi hành trùng inventoryIdentity. Dòng hiện có không bị ghi đè.')
+133	        throw new Error(body.errors?.[0]?.message || body.message || `Không lưu được lịch khởi hành (${response.status}).`)
+134	      }
+135	      if (contextVersion.current !== requestContext) return
+136	      await load()
+137	      if (contextVersion.current !== requestContext) return
+138	      setError('')
+139	      setEditingID(null)
+140	      setForm(saveAndNext ? { ...value, departureDate: '', verified: false, expiresAt: '' } : null)
+141	      setSaved(true)
+142	      onSaved?.()
+143	    } catch (reason) {
+144	      if (contextVersion.current === requestContext) {
+145	        setError(reason instanceof Error ? reason.message : 'Không lưu được lịch khởi hành.')
+146	      }
+147	    } finally {
+148	      if (contextVersion.current === requestContext) setBusy(false)
+149	    }
+150	  }
+151	
+152	  const deleteDeparture = async (departureID: number | string) => {
+153	    if (busy || !window.confirm('Xóa lịch khởi hành này? Chỉ quan hệ inventory này bị xóa.')) return
+154	    setBusy(true)
+155	    try {
+156	      const response = await fetch(`/api/tour-departures/${encodeURIComponent(String(departureID))}`, { credentials: 'include', method: 'DELETE' })
+157	      if (!response.ok) throw new Error(response.status === 403 ? 'Bạn không có quyền xóa lịch này.' : `Không xóa được lịch khởi hành (${response.status}).`)
+158	      if (contextVersion.current !== generation) return
+159	      await load()
+160	      onSaved?.()
+161	    } catch (reason) {
+162	      if (contextVersion.current === generation) setError(reason instanceof Error ? reason.message : 'Không xóa được lịch khởi hành.')
+163	    } finally {
+164	      if (contextVersion.current === generation) setBusy(false)
+165	    }
+166	  }
+167	
+168	  const edit = (departure: Departure) => {
+169	    setEditingID(departure.id)
+170	    setError('')
+171	    setSaved(false)
+172	    setForm({
+173	      airline: departure.airline || '',
+174	      availabilityStatus: departure.availabilityStatus,
+175	      currency: departure.currency,
+176	      departureCity: departure.departureCity || '',
+177	      departureDate: departure.departureDate.slice(0, 10),
+178	      expiresAt: localDateTime(departure.expiresAt),
+179	      originalPrice: departure.originalPrice == null ? '' : String(departure.originalPrice),
+180	      priceFrom: String(departure.priceFrom),
+181	      promoLabel: departure.promoLabel || '',
+182	      promotionEnabled: Boolean(departure.originalPrice || departure.promoLabel),
+183	      verified: getTourAuthoringFreshness(departure) === 'current',
+184	    })
+185	  }
+186	
+187	  if (productID == null || productID === 'create') {
+188	    return <section id="tour-departures"><strong>Ngày khởi hành & giá</strong><p>Lưu TourProduct trước khi thêm lịch khởi hành.</p></section>
+189	  }
+190	
+191	  return (
+192	    <section aria-label="Quản lý ngày khởi hành" aria-busy={busy} id="tour-departures" style={{ boxSizing: 'border-box', marginTop: '1rem', maxWidth: '100%', minWidth: 0, padding: '1rem', border: '1px solid var(--theme-elevation-150)', borderRadius: 6 }}>
+193	      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+194	        <div>
+195	          <h3 style={{ margin: 0 }}>Ngày khởi hành & giá</h3>
+196	          <p style={{ margin: '0.35rem 0', color: 'var(--theme-elevation-600)' }}>Sửa giá và ưu đãi riêng từng đợt ngay tại đây. Lưu lịch tạo bản nháp; chọn lịch trong phần Lịch bay & xuất bản để đưa thay đổi lên website.</p>
+197	        </div>
+198	        <button disabled={busy} type="button" onClick={() => { setEditingID(null); setForm(blankDeparture()); setError(''); setSaved(false) }}>Thêm lịch</button>
+199	      </div>
+200	      {error && <p role="alert" style={{ color: 'var(--theme-error-500)' }}>{error}</p>}
+201	      {saved && <p role="status">Đã lưu bản nháp lịch khởi hành. Hãy chọn lịch và xuất bản để cập nhật website.</p>}
+202	      {form && <TourDepartureForm busy={busy} createActions={editingID == null} initial={form} onCancel={() => { setForm(null); setEditingID(null) }} onSubmit={(value, mode) => save(value, editingID == null && mode === 'next')} />}
+203	      <div style={{ overflowX: 'auto' }}>
+204	        <table style={{ width: '100%', minWidth: 850, marginTop: '0.75rem' }}>
+205	          <thead><tr><th>Ngày</th><th>Điểm đi</th><th>Hãng bay</th><th>Giá</th><th>Giá gốc</th><th>Promotion</th><th>Tiền tệ</th><th>Availability</th><th>Publish</th><th>Freshness</th><th>Thao tác</th></tr></thead>
+206	          <tbody>
+207	            {departures.map((departure) => (
+208	              <tr key={departure.id}>
+209	                <td>{formatAdminDate(departure.departureDate)}</td>
+210	                <td>{departure.departureCity || '—'}</td>
+211	                <td>{departure.airline || '—'}</td>
+212	                <td>{Number(departure.priceFrom).toLocaleString('vi-VN')}</td>
+213	                <td>{departure.originalPrice == null ? '—' : Number(departure.originalPrice).toLocaleString('vi-VN')}</td>
+214	                <td>{departure.promoLabel || '—'}</td>
+215	                <td>{departure.currency}</td>
+216	                <td>{availabilityLabels[departure.availabilityStatus]}</td>
+217	                <td>{departure._status === 'published' ? 'Đã xuất bản' : 'Bản nháp'}</td>
+218	                <td>{freshnessLabel[getTourAuthoringFreshness(departure)]}</td>
+219	                <td>
+220	                  <button disabled={busy} type="button" onClick={() => edit(departure)}>Sửa</button>{' '}
+221	                  <a href={`/admin/collections/tour-departures/${encodeURIComponent(String(departure.id))}?locale=${encodeURIComponent(locale || 'vi')}`}>Mở đầy đủ</a>{' '}
+222	                  <button disabled={busy} type="button" onClick={() => void deleteDeparture(departure.id)}>Xóa</button>
+223	                </td>
+224	              </tr>
+225	            ))}
+226	          </tbody>
+227	        </table>
+228	        {!departures.length && <p>Chưa có lịch khởi hành.</p>}
+229	      </div>
+230	    </section>
+231	  )
+232	}
+233	
+```
+
+**`app/tests/component/wingsGoTourCatalog.component.spec.tsx`** — TestIntersectionObserver(class), constructor(method), disconnect(method), observe(method), unobserve(method), replace(constant), instances(property)
+
+```tsx
+1	import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+2	import { beforeEach, describe, expect, it, vi } from 'vitest'
+3	
+4	import type { WingsGoCatalogCard, WingsGoCatalogData } from '@/tours/wingsGoCatalog'
+5	import { WingsGoTourCatalogClient } from '@/tours/WingsGoTourCatalogClient'
+6	
+7	const replace = vi.fn()
+8	
+9	vi.mock('next/navigation', () => ({
+10	  usePathname: () => '/tour',
+11	  useRouter: () => ({ replace }),
+12	}))
+13	
+14	const makeCard = (id: number): WingsGoCatalogCard => ({
+15	  duration: { days: 5, nights: 4 },
+16	  href: `/tour/tour-${id}`,
+17	  id,
+18	  image: null,
+19	  market: 'korea',
+20	  nextDeparture: {
+21	    airline: null,
+22	    date: `2026-${String(id + 1).padStart(2, '0')}-01T00:00:00.000Z`,
+23	    departureCity: null,
+24	  },
+25	  price: { kind: 'contact', label: 'Liên hệ' },
+26	  slug: `tour-${id}`,
+27	  summary: '',
+28	  title: `Tour ${id}`,
+29	})
+30	
+31	const data = (ids: number[], hasMore = true): WingsGoCatalogData => ({
+32	  all: ids.map(makeCard),
+33	  featured: [],
+34	  hasMore,
+35	  nextOffset: ids.length,
+36	})
+37	
+38	class TestIntersectionObserver {
+39	  static instances: TestIntersectionObserver[] = []
+40	  callback: IntersectionObserverCallback
+41	
+42	  constructor(callback: IntersectionObserverCallback) {
+43	    this.callback = callback
+44	    TestIntersectionObserver.instances.push(this)
+45	  }
+46	
+47	  disconnect() {}
+48	  observe() {}
+49	  unobserve() {}
+50	}
+51	
+52	describe('WingsGoTourCatalogClient', () => {
+53	  beforeEach(() => {
+54	    cleanup()
+55	    replace.mockReset()
+56	    TestIntersectionObserver.instances = []
+57	    vi.stubGlobal('IntersectionObserver', TestIntersectionObserver)
+58	    vi.stubGlobal('fetch', vi.fn())
+59	  })
+60	
+61	  it('loads an exact six-card batch through the observer and removes duplicate IDs', async () => {
+62	    vi.mocked(fetch).mockResolvedValue(
+63	      new Response(JSON.stringify(data([6, 6, 7, 8, 9, 10], false)), { status: 200 }),
+64	    )
+65	    render(<WingsGoTourCatalogClient initial={data([1, 2, 3, 4, 5, 6])} initialFilters={{}} />)
+66	
+67	    await waitFor(() => expect(TestIntersectionObserver.instances.length).toBeGreaterThan(0))
+68	    fireEvent.click(screen.getAllByRole('button', { name: 'Tải thêm 6 tour' })[0]!)
+69	
+70	    await waitFor(() => expect(screen.getByText('Tour 10')).toBeTruthy())
+71	    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(10)
+72	    expect(screen.getByText('Đã hiển thị hết tour phù hợp.')).toBeTruthy()
+73	  })
+74	
+75	  it('shows retry and resets displayed pagination when URL filters change', async () => {
+76	    vi.mocked(fetch)
+77	      .mockRejectedValueOnce(new Error('network'))
+78	      .mockResolvedValueOnce(new Response(JSON.stringify(data([8], false)), { status: 200 }))
+79	
+80	    const view = render(<WingsGoTourCatalogClient initial={data([1, 2])} initialFilters={{}} />)
+81	    fireEvent.click(screen.getAllByRole('button', { name: 'Tải thêm 6 tour' })[0]!)
+82	    await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy())
+83	    fireEvent.click(screen.getByRole('button', { name: 'Thử lại' }))
+84	    await waitFor(() => expect(screen.getByText('Tour 8')).toBeTruthy())
+85	
+86	    view.rerender(
+87	      <WingsGoTourCatalogClient initial={data([3], false)} initialFilters={{ market: 'japan' }} />,
+88	    )
+89	    await waitFor(() => {
+90	      expect(screen.getByText('Tour 3')).toBeTruthy()
+91	      expect(screen.queryByText('Tour 1')).toBeNull()
+92	    })
+93	  })
+94	
+95	  it('does not append an in-flight response from the previous filter generation', async () => {
+96	    let resolvePreviousRequest: ((response: Response) => void) | undefined
+97	    vi.mocked(fetch).mockImplementation(
+98	      () =>
+99	        new Promise((resolve) => {
+100	          resolvePreviousRequest = resolve
+101	        }),
+102	    )
+103	
+104	    const view = render(<WingsGoTourCatalogClient initial={data([1], true)} initialFilters={{}} />)
+105	    fireEvent.click(screen.getAllByRole('button', { name: 'Tải thêm 6 tour' })[0]!)
+106	
+107	    view.rerender(
+108	      <WingsGoTourCatalogClient initial={data([3], false)} initialFilters={{ market: 'japan' }} />,
+109	    )
+110	    await waitFor(() => expect(screen.getByText('Tour 3')).toBeTruthy())
+111	
+112	    resolvePreviousRequest?.(new Response(JSON.stringify(data([9], false)), { status: 200 }))
+113	    await new Promise((resolve) => setTimeout(resolve, 0))
+114	    expect(screen.queryByText('Tour 9')).toBeNull()
+115	  })
+116	
+117	  it('renders WingsGoTourCard with dynamic promo badge and duration', async () => {
+118	    const { WingsGoTourCard } = await import('@/tours/WingsGoTourCard')
+119	    const card: WingsGoCatalogCard = {
+120	      ...makeCard(101),
+121	      nextDeparture: {
+122	        airline: 'VN',
+123	        date: '2026-11-20T00:00:00.000Z',
+124	        departureCity: 'Hà Nội',
+125	        promoLabel: 'Khuyến mại 2 triệu',
+126	      },
+127	      summary: 'Khám phá mùa thu vàng',
+128	      title: 'Hà Nội - Seoul - Everland',
+129	    }
+130	
+131	    render(<WingsGoTourCard card={card} locale="vi" />)
+132	
+133	    expect(screen.getByText('Khuyến mại 2 triệu')).toBeTruthy()
+134	    expect(screen.getByText('Hà Nội - Seoul - Everland')).toBeTruthy()
+135	    expect(screen.getByText('Khám phá mùa thu vàng')).toBeTruthy()
+136	    expect(screen.getByText('Xem tour →')).toBeTruthy()
+137	  })
+138	})
+```
+
+**`app/scripts/generate-wingsside-tour-english-editorial-artifacts.ts`** — SourceTour(type_alias), CandidateTour(type_alias), argumentValue(function), find(calls), required(function), argumentValue(calls)
+
+```typescript
+11	  type WingsSideTourEnglishEditorialDocument,
+12	} from './lib/wingsSideTourEnglishEditorial'
+13	
+14	type SourceTour = {
+15	  excludes?: Array<{ id: string; label: string }>
+16	  id: number | string
+17	  includes?: Array<{ id: string; label: string }>
+18	  meta?: {
+19	    breadcrumbLabel?: string
+20	    description?: string
+21	    title?: string
+22	  }
+23	  primaryCTALabel?: string
+24	  routeSummary?: string
+25	  slug: string
+26	  summary: string
+27	  title: string
+28	}
+29	
+30	type CandidateTour = {
+31	  meta?: {
+32	    breadcrumbLabel?: string
+33	    description?: string
+34	    title?: string
+35	  }
+36	  primaryCTALabel?: string
+37	  routeSummary?: string
+38	  slug: string
+39	  summary: string
+40	  title: string
+41	}
+42	
+43	const argumentValue = (name: string) => {
+44	  const inline = process.argv.find((argument) => argument.startsWith(`${name}=`))
+45	  if (inline) return inline.slice(name.length + 1)
+46	  const index = process.argv.indexOf(name)
+47	  return index >= 0 ? process.argv[index + 1] : undefined
+48	}
+49	
+50	const required = (name: string) => {
+51	  const value = argumentValue(name)
+52	  if (!value) throw new Error(`Missing required ${name}`)
+53	  return path.resolve(value)
+54	}
+55	
+56	const readJSON = async <T>(filePath: string): Promise<T> =>
+57	  JSON.parse(await readFile(filePath, 'utf8')) as T
+```
+
+
+... (output truncated to budget; the source above is complete and verbatim — treat it as already Read. For any area not covered, run another codegraph_explore with the specific names — do NOT Read these files.)
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command '$line = 0; Get-Content -LiteralPath '"'app/tests/component/tourDeparturePromotion.component.spec.tsx' | ForEach-Object { "'$line++; '"'{0,4} {1}' -f "'$line, $_ }' in E:\repo\WingsTravel
+ succeeded in 371ms:
+   1 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+   2 import React from 'react'
+   3 import { afterEach, describe, expect, it, vi } from 'vitest'
+   4 
+   5 const uiMocks = vi.hoisted(() => ({
+   6   documentId: 41,
+   7   documentSite: 2,
+   8   localeCode: 'vi',
+   9   setValue: vi.fn(),
+  10 }))
+  11 
+  12 vi.mock('@payloadcms/ui', () => ({
+  13   FieldError: () => null,
+  14   FieldLabel: ({ label }: { label?: string }) => React.createElement('label', null, label),
+  15   useAuth: () => ({ user: { role: 'super-admin', sites: [1, 2] } }),
+  16   useDocumentInfo: () => ({ data: { site: uiMocks.documentSite }, id: uiMocks.documentId }),
+  17   useField: () => ({ errorMessage: null, setValue: uiMocks.setValue, showError: false, value: null }),
+  18   useFormModified: () => false,
+  19   useLocale: () => ({ code: uiMocks.localeCode }),
+  20 }))
+  21 
+  22 import TourDepartureManager, {
+  23   type DepartureFormValue,
+  24   TourDepartureForm,
+  25 } from '@/components/TourAuthoring/TourDepartureManager'
+  26 
+  27 afterEach(() => {
+  28   cleanup()
+  29   uiMocks.setValue.mockReset()
+  30   uiMocks.localeCode = 'vi'
+  31   vi.unstubAllGlobals()
+  32 })
+  33 
+  34 const defaultInitial: DepartureFormValue = {
+  35   airline: '',
+  36   availabilityStatus: 'open',
+  37   currency: 'VND',
+  38   departureCity: '',
+  39   departureDate: '2026-11-01',
+  40   expiresAt: '',
+  41   originalPrice: '',
+  42   priceFrom: '10000000',
+  43   promoLabel: '',
+  44   promotionEnabled: false,
+  45   verified: false,
+  46 }
+  47 
+  48 const existingDeparture = {
+  49   _status: 'draft',
+  50   airline: 'Vietnam Airlines',
+  51   availabilityStatus: 'open',
+  52   currency: 'VND',
+  53   departureCity: 'Hà Nội',
+  54   departureDate: '2026-11-15T00:00:00.000Z',
+  55   expiresAt: null,
+  56   id: 77,
+  57   originalPrice: 15000000,
+  58   priceFrom: 12000000,
+  59   promoLabel: 'Ưu đãi mùa thu',
+  60   updatedAt: '2026-10-20T00:00:00.000Z',
+  61 }
+  62 
+  63 const mockResponse = (body: unknown, status = 200) => ({
+  64   json: async () => body,
+  65   ok: status < 400,
+  66   status,
+  67 })
+  68 
+  69 describe('US083 CMS Tour Departure Promotion - Component Tests', () => {
+  70   it('defaults promotion fields to hidden and toggles inputs on checkbox change', () => {
+  71     render(<TourDepartureForm initial={defaultInitial} onCancel={vi.fn()} onSubmit={vi.fn()} />)
+  72     const toggle = screen.getByLabelText('Áp dụng ưu đãi') as HTMLInputElement
+  73     expect(toggle.checked).toBe(false)
+  74     expect(screen.queryByLabelText('Giá gốc')).toBeNull()
+  75 
+  76     fireEvent.click(toggle)
+  77     expect(toggle.checked).toBe(true)
+  78     expect(screen.getByLabelText('Giá gốc')).toBeTruthy()
+  79     expect(screen.getByLabelText('Nhãn promotion')).toBeTruthy()
+  80 
+  81     fireEvent.click(toggle)
+  82     expect(toggle.checked).toBe(false)
+  83     expect(screen.queryByLabelText('Giá gốc')).toBeNull()
+  84   })
+  85 
+  86   it('validates promotion price bounds and requirements, allowing label-only', async () => {
+  87     const onSubmit = vi.fn()
+  88     render(<TourDepartureForm initial={defaultInitial} onCancel={vi.fn()} onSubmit={onSubmit} />)
+  89     fireEvent.click(screen.getByLabelText('Áp dụng ưu đãi'))
+  90 
+  91     // Both empty -> rejected
+  92     fireEvent.click(screen.getByRole('button', { name: 'Lưu lịch khởi hành' }))
+  93     expect(screen.getByRole('alert').textContent).toContain('Nhập giá gốc hoặc nhãn promotion cho ưu đãi.')
+  94     expect(onSubmit).not.toHaveBeenCalled()
+  95 
+  96     // Non-numeric text -> rejected
+  97     fireEvent.change(screen.getByLabelText('Giá gốc'), { target: { value: 'invalid-price' } })
+  98     fireEvent.click(screen.getByRole('button', { name: 'Lưu lịch khởi hành' }))
+  99     expect(screen.getByRole('alert').textContent).toContain('giá gốc phải hợp lệ và lớn hơn giá bán')
+ 100 
+ 101     // Lower/equal -> rejected
+ 102     fireEvent.change(screen.getByLabelText('Giá gốc'), { target: { value: '8,000,000' } })
+ 103     fireEvent.click(screen.getByRole('button', { name: 'Lưu lịch khởi hành' }))
+ 104     expect(screen.getByRole('alert').textContent).toContain('giá gốc phải hợp lệ và lớn hơn giá bán')
+ 105 
+ 106     // Label-only without original price -> valid
+ 107     fireEvent.change(screen.getByLabelText('Giá gốc'), { target: { value: '' } })
+ 108     fireEvent.change(screen.getByLabelText('Nhãn promotion'), { target: { value: 'Ưu đãi mùa hè' } })
+ 109     fireEvent.click(screen.getByRole('button', { name: 'Lưu lịch khởi hành' }))
+ 110     await waitFor(() => {
+ 111       expect(onSubmit).toHaveBeenCalledWith(
+ 112         expect.objectContaining({ originalPrice: '', priceFrom: '10000000', promoLabel: 'Ưu đãi mùa hè', promotionEnabled: true }),
+ 113         'done',
+ 114       )
+ 115     })
+ 116 
+ 117     // Strictly greater original price -> valid
+ 118     fireEvent.change(screen.getByLabelText('Giá gốc'), { target: { value: '12,000,000' } })
+ 119     fireEvent.click(screen.getByRole('button', { name: 'Lưu lịch khởi hành' }))
+ 120     await waitFor(() => {
+ 121       expect(onSubmit).toHaveBeenCalledWith(
+ 122         expect.objectContaining({ originalPrice: '12000000', priceFrom: '10000000', promotionEnabled: true }),
+ 123         'done',
+ 124       )
+ 125     })
+ 126   })
+ 127 
+ 128   it('submits promotionEnabled:false, originalPrice:"", promoLabel:"" when disabled to clear promotion', async () => {
+ 129     const onSubmit = vi.fn()
+ 130     render(
+ 131       <TourDepartureForm
+ 132         initial={{ ...defaultInitial, originalPrice: '14000000', promoLabel: 'Flash Sale', promotionEnabled: true }}
+ 133         onCancel={vi.fn()}
+ 134         onSubmit={onSubmit}
+ 135       />,
+ 136     )
+ 137     const toggle = screen.getByLabelText('Áp dụng ưu đãi') as HTMLInputElement
+ 138     expect(toggle.checked).toBe(true)
+ 139 
+ 140     fireEvent.click(toggle)
+ 141     expect(toggle.checked).toBe(false)
+ 142     fireEvent.click(screen.getByRole('button', { name: 'Lưu lịch khởi hành' }))
+ 143 
+ 144     await waitFor(() => {
+ 145       expect(onSubmit).toHaveBeenCalledWith(
+ 146         expect.objectContaining({ originalPrice: '', promoLabel: '', promotionEnabled: false }),
+ 147         'done',
+ 148       )
+ 149     })
+ 150   })
+ 151 
+ 152   it('resets verified to false and clears expiresAt whenever promotion or price fields change', () => {
+ 153     const verifiedInitial: DepartureFormValue = {
+ 154       ...defaultInitial,
+ 155       expiresAt: '2027-01-01T12:00',
+ 156       originalPrice: '15000000',
+ 157       promoLabel: 'Mùa thu',
+ 158       promotionEnabled: true,
+ 159       verified: true,
+ 160     }
+ 161     render(<TourDepartureForm initial={verifiedInitial} onCancel={vi.fn()} onSubmit={vi.fn()} />)
+ 162 
+ 163     const verifyCheckbox = screen.getByLabelText(/Tôi xác nhận/) as HTMLInputElement
+ 164     expect(verifyCheckbox.checked).toBe(true)
+ 165 
+ 166     fireEvent.change(screen.getByLabelText('Giá gốc'), { target: { value: '16000000' } })
+ 167     expect(verifyCheckbox.checked).toBe(false)
+ 168     expect(screen.queryByLabelText('Hết hạn xác minh')).toBeNull()
+ 169 
+ 170     fireEvent.click(verifyCheckbox)
+ 171     fireEvent.change(screen.getByLabelText('Hết hạn xác minh'), { target: { value: '2027-01-01T12:00' } })
+ 172     fireEvent.change(screen.getByLabelText('Nhãn promotion'), { target: { value: 'Mùa đông' } })
+ 173     expect(verifyCheckbox.checked).toBe(false)
+ 174 
+ 175     fireEvent.click(verifyCheckbox)
+ 176     fireEvent.change(screen.getByLabelText('Hết hạn xác minh'), { target: { value: '2027-01-01T12:00' } })
+ 177     fireEvent.click(screen.getByLabelText('Áp dụng ưu đãi'))
+ 178     expect(verifyCheckbox.checked).toBe(false)
+ 179 
+ 180     fireEvent.click(verifyCheckbox)
+ 181     fireEvent.change(screen.getByLabelText('Hết hạn xác minh'), { target: { value: '2027-01-01T12:00' } })
+ 182     fireEvent.change(screen.getByLabelText('Giá'), { target: { value: '11000000' } })
+ 183     expect(verifyCheckbox.checked).toBe(false)
+ 184   })
+ 185 
+ 186   it('shows promo columns in list, and editing departure sends PATCH with promo payload', async () => {
+ 187     let patchUrl = ''
+ 188     let patchMethod = ''
+ 189     let patchBody: Record<string, unknown> | null = null
+ 190 
+ 191     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+ 192       if (init?.method === 'PATCH') {
+ 193         patchUrl = String(input)
+ 194         patchMethod = init.method
+ 195         patchBody = JSON.parse(String(init.body)) as Record<string, unknown>
+ 196         return mockResponse({ ...existingDeparture, ...patchBody }, 200)
+ 197       }
+ 198       return mockResponse({ docs: [existingDeparture] })
+ 199     })
+ 200     vi.stubGlobal('fetch', fetchMock)
+ 201 
+ 202     render(<TourDepartureManager />)
+ 203     await waitFor(() => expect(screen.getByText('12.000.000')).toBeTruthy())
+ 204     expect(screen.getByText('15.000.000')).toBeTruthy()
+ 205     expect(screen.getByText('Ưu đãi mùa thu')).toBeTruthy()
+ 206     expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining('fallback-locale=none'), expect.any(Object))
+ 207 
+ 208     fireEvent.click(screen.getByRole('button', { name: 'Sửa' }))
+ 209 
+ 210     expect((screen.getByLabelText('Áp dụng ưu đãi') as HTMLInputElement).checked).toBe(true)
+ 211     expect((screen.getByLabelText('Giá gốc') as HTMLInputElement).value).toBe('15000000')
+ 212 
+ 213     fireEvent.change(screen.getByLabelText('Giá gốc'), { target: { value: '16000000' } })
+ 214     fireEvent.change(screen.getByLabelText('Nhãn promotion'), { target: { value: 'Siêu Sale 2026' } })
+ 215 
+ 216     fireEvent.click(screen.getByRole('button', { name: 'Lưu lịch khởi hành' }))
+ 217 
+ 218     await waitFor(() => expect(patchMethod).toBe('PATCH'))
+ 219     expect(patchUrl).toContain('/api/tour-departures/77')
+ 220     expect(patchUrl).toContain('locale=vi')
+ 221     expect(patchUrl).toContain('draft=true')
+ 222 
+ 223     expect(patchBody).toMatchObject({
+ 224       _status: 'draft',
+ 225       originalPrice: 16000000,
+ 226       priceFrom: 12000000,
+ 227       promoLabel: 'Siêu Sale 2026',
+ 228       site: 2,
+ 229       tourProduct: 41,
+ 230     })
+ 231   })
+ 232 
+ 233   it('sends originalPrice: null and promoLabel: null in PATCH when promotion is disabled on save', async () => {
+ 234     let patchBody: Record<string, unknown> | null = null
+ 235     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+ 236       if (init?.method === 'PATCH') {
+ 237         patchBody = JSON.parse(String(init.body)) as Record<string, unknown>
+ 238         return mockResponse({ ...existingDeparture, ...patchBody }, 200)
+ 239       }
+ 240       return mockResponse({ docs: [existingDeparture] })
+ 241     })
+ 242     vi.stubGlobal('fetch', fetchMock)
+ 243 
+ 244     render(<TourDepartureManager />)
+ 245     await waitFor(() => expect(screen.getByText('Ưu đãi mùa thu')).toBeTruthy())
+ 246 
+ 247     fireEvent.click(screen.getByRole('button', { name: 'Sửa' }))
+ 248     const toggle = screen.getByLabelText('Áp dụng ưu đãi') as HTMLInputElement
+ 249     expect(toggle.checked).toBe(true)
+ 250 
+ 251     fireEvent.click(toggle)
+ 252     fireEvent.click(screen.getByRole('button', { name: 'Lưu lịch khởi hành' }))
+ 253 
+ 254     await waitFor(() => expect(patchBody).not.toBeNull())
+ 255     expect(patchBody).toMatchObject({ originalPrice: null, promoLabel: null })
+ 256   })
+ 257 
+ 258   it('preserves user promotion inputs in form when PATCH/POST API fails', async () => {
+ 259     const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+ 260       if (init?.method === 'POST') return mockResponse({ message: 'Lỗi máy chủ tạm thời' }, 500)
+ 261       return mockResponse({ docs: [] })
+ 262     })
+ 263     vi.stubGlobal('fetch', fetchMock)
+ 264 
+ 265     render(<TourDepartureManager />)
+ 266     await waitFor(() => expect(screen.getByText('Chưa có lịch khởi hành.')).toBeTruthy())
+ 267 
+ 268     fireEvent.click(screen.getByRole('button', { name: 'Thêm lịch' }))
+ 269     fireEvent.change(screen.getByLabelText('Ngày khởi hành'), { target: { value: '2026-12-01' } })
+ 270     fireEvent.change(screen.getByLabelText('Giá'), { target: { value: '15000000' } })
+ 271 
+ 272     fireEvent.click(screen.getByLabelText('Áp dụng ưu đãi'))
+ 273     fireEvent.change(screen.getByLabelText('Giá gốc'), { target: { value: '18000000' } })
+ 274     fireEvent.change(screen.getByLabelText('Nhãn promotion'), { target: { value: 'Hot Deal Cuối Năm' } })
+ 275 
+ 276     fireEvent.click(screen.getByRole('button', { name: 'Lưu & hoàn tất' }))
+ 277 
+ 278     await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Lỗi máy chủ tạm thời'))
+ 279     expect((screen.getByLabelText('Giá') as HTMLInputElement).value).toBe('15000000')
+ 280     expect((screen.getByLabelText('Áp dụng ưu đãi') as HTMLInputElement).checked).toBe(true)
+ 281     expect((screen.getByLabelText('Giá gốc') as HTMLInputElement).value).toBe('18000000')
+ 282     expect((screen.getByLabelText('Nhãn promotion') as HTMLInputElement).value).toBe('Hot Deal Cuối Năm')
+ 283   })
+ 284 
+ 285   it('closes the open editor and discards unsaved form when locale changes', async () => {
+ 286     const fetchMock = vi.fn().mockResolvedValue(mockResponse({ docs: [] }))
+ 287     vi.stubGlobal('fetch', fetchMock)
+ 288 
+ 289     const { rerender } = render(<TourDepartureManager />)
+ 290     await waitFor(() => expect(screen.getByText('Chưa có lịch khởi hành.')).toBeTruthy())
+ 291 
+ 292     fireEvent.click(screen.getByRole('button', { name: 'Thêm lịch' }))
+ 293     expect(screen.getByRole('group', { name: 'Form lịch khởi hành' })).toBeTruthy()
+ 294 
+ 295     uiMocks.localeCode = 'en'
+ 296     rerender(<TourDepartureManager />)
+ 297 
+ 298     await waitFor(() => {
+ 299       expect(screen.queryByRole('group', { name: 'Form lịch khởi hành' })).toBeNull()
+ 300     })
+ 301   })
+ 302 
+ 303   it('prevents deferred PATCH response from closing newer editor after VI-EN-VI roundtrip', async () => {
+ 304     let resolvePatch!: (value: ReturnType<typeof mockResponse>) => void
+ 305     const patchPromise = new Promise<ReturnType<typeof mockResponse>>((res) => {
+ 306       resolvePatch = res
+ 307     })
+ 308 
+ 309     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+ 310       if (init?.method === 'PATCH') return patchPromise
+ 311       return mockResponse({ docs: [existingDeparture] })
+ 312     })
+ 313     vi.stubGlobal('fetch', fetchMock)
+ 314 
+ 315     const { rerender } = render(<TourDepartureManager />)
+ 316     await waitFor(() => expect(screen.getByText('12.000.000')).toBeTruthy())
+ 317 
+ 318     // 1. Open editor in initial 'vi' context
+ 319     fireEvent.click(screen.getByRole('button', { name: 'Sửa' }))
+ 320     expect(screen.getByRole('group', { name: 'Form lịch khởi hành' })).toBeTruthy()
+ 321 
+ 322     // 2. Trigger save -> in-flight PATCH pending
+ 323     fireEvent.click(screen.getByRole('button', { name: 'Lưu lịch khởi hành' }))
+ 324     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith(
+ 325       expect.stringContaining('/api/tour-departures/77'),
+ 326       expect.objectContaining({ method: 'PATCH' }),
+ 327     ))
+ 328 
+ 329     // 3. Locale roundtrip: vi -> en -> vi
+ 330     uiMocks.localeCode = 'en'
+ 331     rerender(<TourDepartureManager />)
+ 332     await waitFor(() => expect(screen.queryByRole('group', { name: 'Form lịch khởi hành' })).toBeNull())
+ 333 
+ 334     uiMocks.localeCode = 'vi'
+ 335     rerender(<TourDepartureManager />)
+ 336     await waitFor(() => expect(screen.getByText('12.000.000')).toBeTruthy())
+ 337 
+ 338     // 4. In new 'vi' generation, user opens a fresh editor
+ 339     fireEvent.click(screen.getByRole('button', { name: 'Thêm lịch' }))
+ 340     expect(screen.getByRole('group', { name: 'Form lịch khởi hành' })).toBeTruthy()
+ 341     fireEvent.change(screen.getByLabelText('Ngày khởi hành'), { target: { value: '2026-12-25' } })
+ 342     expect((screen.getByLabelText('Ngày khởi hành') as HTMLInputElement).value).toBe('2026-12-25')
+ 343 
+ 344     // 5. Stale PATCH resolves from older context generation
+ 345     resolvePatch(mockResponse({ ...existingDeparture, priceFrom: 12000000 }, 200))
+ 346 
+ 347     // 6. Monotonic context guard drops stale response; newer editor remains open and intact
+ 348     await new Promise((r) => setTimeout(r, 60))
+ 349     expect(screen.getByRole('group', { name: 'Form lịch khởi hành' })).toBeTruthy()
+ 350     expect((screen.getByLabelText('Ngày khởi hành') as HTMLInputElement).value).toBe('2026-12-25')
+ 351   })
+ 352 })
+
+codex
+- **P2 — stale delete completion still calls `onSaved`.** In [TourDepartureManager.tsx:159](/E:/repo/WingsTravel/app/src/components/TourAuthoring/TourDepartureManager.tsx:159), delete awaits `load()` then calls `onSaved` without rechecking generation. Switching locale while that GET is pending still allows the old context’s callback. Save correctly rechecks after `await load()`. The focused suite does not cover this delete sequence.
+
+GET fallback suppression and the stale PATCH roundtrip guard look correct.
+
+Read-only source/test review; tests were not executed. Draft API was not re-reviewed.
+- **P2 — stale delete completion still calls `onSaved`.** In [TourDepartureManager.tsx:159](/E:/repo/WingsTravel/app/src/components/TourAuthoring/TourDepartureManager.tsx:159), delete awaits `load()` then calls `onSaved` without rechecking generation. Switching locale while that GET is pending still allows the old context’s callback. Save correctly rechecks after `await load()`. The focused suite does not cover this delete sequence.
+tokens used
+
+GET fallback suppression and the stale PATCH roundtrip guard look correct.
+
+33,453
+Read-only source/test review; tests were not executed. Draft API was not re-reviewed.

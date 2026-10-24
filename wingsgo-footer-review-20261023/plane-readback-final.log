@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-23T15:42:03.787Z",
+  "status": "PASS",
+  "project": "WingsGo",
+  "epic": {
+    "id": "e39742d3-0998-4f96-8f84-a197f7e937c0",
+    "name": "E07 - Nền tảng sản phẩm tour WingsGo",
+    "type": "681ce32b-a47c-4ba0-852a-25e64158d8b0"
+  },
+  "children": 4,
+  "missingDates": 0,
+  "genericChildNames": 0,
+  "owner": "c0508g",
+  "state": "Chờ xác nhận",
+  "items": [
+    {
+      "id": "24b0e588-0ff5-46be-8a8c-65a5e2bace9f",
+      "name": "US-081 Da hotline tu van WingsGo co lien ket goi truc tiep tel:",
+      "parent": "e39742d3-0998-4f96-8f84-a197f7e937c0",
+      "start_date": "2026-10-19",
+      "target_date": "2026-10-22"
+    },
+    {
+      "id": "2bd93d02-9e02-492b-9514-cafdb529425a",
+      "name": "US-081 - Bảo toàn cấu hình và giao diện liên hệ của các site khác.",
+      "parent": "24b0e588-0ff5-46be-8a8c-65a5e2bace9f",
+      "start_date": "2026-10-22",
+      "target_date": "2026-10-22"
+    },
+    {
+      "id": "49658d29-71ac-4bb8-92d1-c2831f6324f3",
+      "name": "US-081 - Giữ menu desktop gọn, gọi số chính và mở danh sách hotline phụ.",
+      "parent": "24b0e588-0ff5-46be-8a8c-65a5e2bace9f",
+      "start_date": "2026-10-21",
+      "target_date": "2026-10-21"
+    },
+    {
+      "id": "5d6a055b-ab36-48ac-bbcb-bb918bcd42c0",
+      "name": "US-081 - Gọi trực tiếp qua liên kết `tel:` chuẩn hóa và bộ quay số trên mobile.",
+      "parent": "24b0e588-0ff5-46be-8a8c-65a5e2bace9f",
+      "start_date": "2026-10-20",
+      "target_date": "2026-10-20"
+    },
+    {
+      "id": "34c2fc65-066f-454d-9b37-8fe87bae7a18",
+      "name": "US-081 - Giữ kênh phụ trong menu; rút gọn liên hệ footer.",
+      "parent": "24b0e588-0ff5-46be-8a8c-65a5e2bace9f",
+      "start_date": "2026-10-19",
+      "target_date": "2026-10-19"
+    }
+  ]
+}

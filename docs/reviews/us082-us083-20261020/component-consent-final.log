@@ -1,0 +1,13 @@
+
+> website@1.0.0 test:component E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.component.config.mts
+
+
+ RUN  v4.1.6 E:/repo/WingsTravel/app
+
+
+ Test Files  46 passed (46)
+      Tests  237 passed (237)
+   Start at  19:07:07
+   Duration  42.02s (transform 45.57s, setup 6.82s, import 156.28s, tests 68.27s, environment 404.85s)
+

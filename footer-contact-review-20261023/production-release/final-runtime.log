@@ -1,0 +1,5 @@
+/home/ubuntu/wings-travel/releases/release-us085-footer-d6057d4
+sha256:b189e9f428e6e1c372916d378108198376a9cdf528e26c1a838167bb670eee3d started=2026-10-23T14:29:11.028862774Z restarts=0
+KZO1JJYEFmtAhk9MhsCjv{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":17,"requestId":"3dced1e1-b492-46e7-8a88-8566ddd7ea6c","status":"ready","timestamp":"2026-10-23T14:46:00.415Z"}Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        45G   42G  2.6G  95% /
+Final runtime and cleanup verification: 2026-10-23T14:46:00Z

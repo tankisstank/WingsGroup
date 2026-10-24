@@ -1,0 +1,3756 @@
+2026-10-20T17:06:07.168990Z ERROR codex_core::session::session: failed to load skill C:\Users\VIETD\.claude\skills\seo\SKILL.md: missing YAML frontmatter delimited by ---
+2026-10-20T17:06:07.169056Z ERROR codex_core::session::session: failed to load skill C:\Users\VIETD\.claude\skills\seo\SKILL.md: missing YAML frontmatter delimited by ---
+OpenAI Codex v0.163.0
+--------
+workdir: E:\repo\WingsTravel
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a15a47-06b8-7de2-a9b1-7b2c635a2b71
+--------
+user
+Independent Codex READ ONLY follow-up release review, no edits/delegation/env reads. Production release first delta succeeded core homepage/catalog/detail, but live Japan market gate failed: TourMarketPage formatted tour.lowestPrice without currency, returning Contact and missing eligible discount. Root patched app/src/tours/StructuredPages.tsx: TourMarketPage uses only normalized tour.nextDeparture with verified=true, future, nonsoldout, governedprice; original/sale/label same departure and shared pure Promotion components; badge overlays image; no synthesized marketing. DepartureStrip now uses existing canHoldSeat guard for promotion (includes future). agy owns app/src/tours/queries.ts getToursByMarketRoute ONLY: prefers first linkedFuture verified governed-price departure, then previous fallback, aligning catalog commercial selection. Inspect current final versions; agy may still be finishing. Review those specific changes for P1/P2/P3 money/site/freshness/selection regressions; old normalization and tenant queries unchanged. Tests owned agy: app/tests/component/marketPromotion.component.spec.tsx and optional unit marketCommercialDeparture spec; may not yet exist. No production data edits, no migration. Prior reviews in parent folder closed pure-module server/client and detail-null-selection P2. Report concrete actionable findings and limits briefly; do not re-audit unrelated WIP. Root will build+package+candidate ARM64+browser after worker completion.
+
+
+warning: Codex is ignoring 9 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\VIETD\.codex\config.toml): `features.remote_connections` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.approvals_reviewer` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.model_reasoning_summary_format` is ignored.
+  ... and 6 more ignored settings.
+warning: Codex is ignoring 9 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\VIETD\.codex\config.toml): `features.remote_connections` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.approvals_reviewer` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.model_reasoning_summary_format` is ignored.
+  ... and 6 more ignored settings.
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+I’ll inspect the current market page and departure selection changes read only, then report actionable money, site, freshness, or selection findings. I won’t read environment files or delegate.
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'git diff -- app/src/tours/StructuredPages.tsx app/src/tours/queries.ts app/tests/component/marketPromotion.component.spec.tsx app/tests/unit/marketCommercialDeparture.spec.ts; git status --short -- app/src/tours/StructuredPages.tsx app/src/tours/queries.ts app/tests/component/marketPromotion.component.spec.tsx app/tests/unit/marketCommercialDeparture.spec.ts' in E:\repo\WingsTravel
+ succeeded in 491ms:
+diff --git a/app/src/tours/StructuredPages.tsx b/app/src/tours/StructuredPages.tsx
+index ee15100..124982e 100644
+--- a/app/src/tours/StructuredPages.tsx
++++ b/app/src/tours/StructuredPages.tsx
+@@ -35,6 +35,7 @@ import {
+   getAvailabilityLabel,
+   getContactPath,
+   getDurationLabel,
++  getFutureDepartures,
+   getMarketConfig,
+   getMealChipFlags,
+   getPriorityMarketDeparture,
+@@ -53,6 +54,9 @@ import { TourEnquiryContextBridge } from './TourEnquiryContextBridge'
+ import type { TourEnquiryContext } from './enquiryContext'
+ import { getWingSideTourCopy, normalizeWingSideConsultativeTour } from './wingsSideTourViewModel'
+ import { getSharedZaloCTA } from '@/utilities/sharedConsultationChannels'
++import type { HotlineItem } from '@/utilities/siteHotlines'
++import { formatHotlineDisplay, resolveSiteHotlines } from '@/utilities/siteHotlines'
++import { PromotionBadge, PromotionPrice } from './PromotionPrice'
+ 
+ /** Retail = WingsGo dense conversion. Consultative = Wingside private inbound. */
+ export type TourDetailPresentation = 'consultative' | 'retail'
+@@ -700,14 +704,21 @@ export const RetailDecisionRail = ({
+                 </button>
+               ) : null}
+             </div>
+-            <div className="mt-1 flex items-baseline gap-2">
+-              <span className="font-mono text-3xl font-extrabold text-[var(--site-brand)]">
+-                {isSellable
+-                  ? formatTourPrice(nextDeparture?.priceFrom, nextDeparture?.currency) || (isEn ? 'Contact' : 'Liên hệ')
+-                  : isEn
+-                    ? 'Contact'
+-                    : 'Liên hệ'}
+-              </span>
++            <div className="mt-1 flex flex-wrap items-baseline gap-2">
++              {isSellable ? (
++                <span className="font-mono text-3xl font-extrabold text-[var(--site-brand)]">
++                  <PromotionPrice
++                    contactLabel={isEn ? 'Contact' : 'Liên hệ'}
++                    currency={nextDeparture?.currency}
++                    originalPrice={nextDeparture?.originalPrice}
++                    price={nextDeparture?.priceFrom}
++                  />
++                </span>
++              ) : (
++                <span className="font-mono text-3xl font-extrabold text-[var(--site-brand)]">
++                  {isEn ? 'Contact' : 'Liên hệ'}
++                </span>
++              )}
+               {isSellable && nextDeparture?.priceFrom ? (
+                 <span className="text-xs text-muted-foreground">{isEn ? '/ guest' : '/ khách'}</span>
+               ) : null}
+@@ -1052,11 +1063,11 @@ const TourDecisionHeader = ({
+   variants?: Array<Record<string, any>>
+ }) => {
+   const context = useTourDepartureSelection()
+-  const nextDeparture = context?.isPrivateTour
+-    ? null
+-    : context?.isSelectionExplicit
+-      ? context.selectedDeparture
+-      : context?.selectedDeparture || nextDepartureProp
++  const nextDeparture = context
++    ? context.isPrivateTour
++      ? null
++      : context.selectedDeparture
++    : nextDepartureProp
+   const isConsultative = presentation === 'consultative'
+   const wingSideCopy = getWingSideTourCopy(locale)
+   const durationLabel = getDurationLabel(tour.durationDays, tour.durationNights, locale)
+@@ -1331,7 +1342,12 @@ const TourDecisionHeader = ({
+         ) : null}
+ 
+         {/* Media Presentation: Collage if >=3 images, otherwise single hero frame */}
+-        <div className="overflow-hidden rounded-2xl border border-border/70 bg-muted shadow-sm">
++        <div className="relative overflow-hidden rounded-2xl border border-border/70 bg-muted shadow-sm">
++          {hasFutureDeparture && nextDeparture?.commerceVerified && nextDeparture?.availabilityStatus !== 'sold-out' && normalizeGovernedTourPrice({ currency: nextDeparture?.currency, value: nextDeparture?.priceFrom }) ? (
++            <div className="absolute inset-x-3 top-3 z-10 flex justify-start">
++              <PromotionBadge label={nextDeparture?.promoLabel} />
++            </div>
++          ) : null}
+           {hasCollage ? (
+             <div className="grid grid-cols-3 gap-1.5 aspect-[16/10] sm:aspect-[16/9]" data-od-id="tour-gallery-collage">
+               <div className="relative col-span-2 h-full bg-muted">
+@@ -3062,11 +3078,13 @@ const StickyBookingCTASection = ({
+ }
+ 
+ const RetailTourConsultationDialogMount = ({
++  hotlines,
+   locale,
+   nextDeparture,
+   siteCode,
+   tour,
+ }: {
++  hotlines?: HotlineItem[]
+   locale: SupportedLocaleCode
+   nextDeparture: Record<string, any> | null
+   siteCode?: null | string
+@@ -3075,6 +3093,7 @@ const RetailTourConsultationDialogMount = ({
+   const context = useTourDepartureSelection()
+   return (
+     <RetailTourConsultationDialog
++      hotlines={hotlines}
+       isOpen={Boolean(context?.isConsultationOpen)}
+       locale={locale}
+       nextDeparture={nextDeparture}
+@@ -3204,6 +3223,7 @@ export const TourDetailPage = ({
+   data,
+   discoveryContext,
+   enquiryForm,
++  hotlines,
+   locale,
+   presentation = 'retail',
+   siteCode: siteCodeProp,
+@@ -3211,6 +3231,7 @@ export const TourDetailPage = ({
+   data: TourResolvedData
+   discoveryContext?: Omit<TourEnquiryContext, 'source' | 'tourId' | 'tourSlug' | 'tourTitle'>
+   enquiryForm?: FormType | null
++  hotlines?: HotlineItem[]
+   locale: SupportedLocaleCode
+   presentation?: TourDetailPresentation
+   siteCode?: null | string
+@@ -3451,6 +3472,7 @@ export const TourDetailPage = ({
+             {visibleSections.has('sticky-cta') ? sections['sticky-cta'] : null}
+             {!isConsultative ? (
+               <RetailTourConsultationDialogMount
++                hotlines={hotlines}
+                 locale={locale}
+                 nextDeparture={data.nextDeparture}
+                 siteCode={siteCode}
+@@ -3477,6 +3499,12 @@ const DepartureStrip = ({
+     <div className="grid gap-4 lg:grid-cols-3">
+       {items.map((departure) => {
+         const product = asDoc<Record<string, any>>(departure.tourProduct)
++        const canHoldSeat = Boolean(
++          departure.commerceVerified &&
++          departure.availabilityStatus !== 'sold-out' &&
++          getFutureDepartures([departure]).length > 0 &&
++          normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }),
++        )
+ 
+         return (
+           <article
+@@ -3500,17 +3528,24 @@ const DepartureStrip = ({
+                   .join(' • ')}
+               </p>
+               <p className="mt-4 text-2xl font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+-                {formatTourPrice(departure.priceFrom, departure.currency) || 'Liên hệ'}
++                {canHoldSeat ? (
++                  <PromotionPrice
++                    contactLabel={locale === 'en' ? 'Contact us' : 'Liên hệ'}
++                    currency={departure.currency}
++                    originalPrice={departure.originalPrice}
++                    price={departure.priceFrom}
++                  />
++                ) : (
++                  formatTourPrice(departure.priceFrom, departure.currency) || 'Liên hệ'
++                )}
+               </p>
+               <div className="mt-4 flex flex-wrap gap-2">
+                 <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
+                   {departure.availabilityBadge ||
+                     getAvailabilityLabel(departure.availabilityStatus, locale)}
+                 </span>
+-                {departure.promoLabel ? (
+-                  <span className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground">
+-                    {departure.promoLabel}
+-                  </span>
++                {canHoldSeat ? (
++                  <PromotionBadge label={departure.promoLabel} />
+                 ) : null}
+               </div>
+               <div className="mt-5 flex gap-3">
+@@ -3518,13 +3553,15 @@ const DepartureStrip = ({
+                   className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_color-mix(in_oklch,var(--site-brand)_18%,transparent)]"
+                   href={getTourInquiryPath({
+                     departureId: departure.id,
+-                    intent: 'hold-seat',
++                    intent: canHoldSeat ? 'hold-seat' : 'inquiry',
+                     source: 'departure-strip',
+                     tourId: product?.id,
+                     tourSlug: product?.slug,
+                   })}
+                 >
+-                  {departure.ctaLabelOverride || 'Giữ chỗ'}
++                  {canHoldSeat
++                    ? departure.ctaLabelOverride || (locale === 'en' ? 'Hold a seat' : 'Giữ chỗ')
++                    : locale === 'en' ? 'Request consultation' : 'Liên hệ tư vấn'}
+                 </SiteLink>
+                 {product?.slug ? (
+                   <SiteLink
+@@ -3568,6 +3605,13 @@ export const TourMarketPage = ({
+         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+           {tours.map((tour) => {
+             const tourBadges = getMarketTourBadges(tour)
++            const departure = tour.nextDeparture
++            const canPromote = Boolean(
++              departure?.commerceVerified === true &&
++              departure.availabilityStatus !== 'sold-out' &&
++              getFutureDepartures([departure]).length > 0 &&
++              normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }),
++            )
+ 
+             return (
+               <article
+@@ -3582,6 +3626,11 @@ export const TourMarketPage = ({
+                       pictureClassName="absolute inset-0"
+                       resource={tour.heroMedia || asArray(tour.gallery)[0] || null}
+                     />
++                    {canPromote ? (
++                      <div className="absolute inset-x-3 top-3 z-10 flex justify-start">
++                        <PromotionBadge label={departure?.promoLabel} />
++                      </div>
++                    ) : null}
+                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent p-3">
+                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/90">
+                         {tour.hasFutureDepartures === false
+@@ -3617,12 +3666,19 @@ export const TourMarketPage = ({
+                     </p>
+                   )}
+                   <p className="mt-2 text-sm leading-7 text-muted-foreground">{tour.summary}</p>
+-                  <div className="mt-4 flex items-end justify-between gap-3">
++                  <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+                     <p className="text-2xl font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+-                      {formatTourPrice(tour.lowestPrice) || 'Liên hệ'}
++                      {canPromote ? (
++                        <PromotionPrice
++                          contactLabel={locale === 'en' ? 'Contact us' : 'Liên hệ'}
++                          currency={departure?.currency}
++                          originalPrice={departure?.originalPrice}
++                          price={departure?.priceFrom}
++                        />
++                      ) : (locale === 'en' ? 'Contact us' : 'Liên hệ')}
+                     </p>
+                     <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+-                      Giá tham khảo
++                      {locale === 'en' ? 'Selected departure' : 'Giá theo đợt'}
+                     </span>
+                   </div>
+                   {tour.nextDeparture ? (
+@@ -3727,13 +3783,17 @@ export const TourCampaignPage = ({
+ )
+ 
+ export const TourSchedulePage = ({
++  hotlines,
+   locale,
+   schedule,
+ }: {
++  hotlines?: HotlineItem[]
+   locale: 'en' | 'vi'
+   schedule: SchedulePageViewModel
+ }) => {
+   const isEn = locale === 'en'
++  const resolvedHotlines =
++    hotlines !== undefined ? hotlines : resolveSiteHotlines(undefined, 'wings-go')
+   const zaloCTA = getSharedZaloCTA('wings-go', locale)
+   const markets = [
+     {
+@@ -3930,9 +3990,17 @@ export const TourSchedulePage = ({
+             >
+               {isEn ? 'GET ADVICE & A QUOTE' : 'NHẬN TƯ VẤN & BÁO GIÁ'}
+             </SiteLink>
+-            <a className="inline-flex min-h-11 items-center font-semibold text-foreground no-underline" href="tel:0912910101">
+-              {isEn ? 'Call' : 'Hotline'}: 0912 910 101
+-            </a>
++            {resolvedHotlines.map((item, idx) => (
++              <a
++                key={item.normalized}
++                className="inline-flex min-h-11 items-center font-semibold text-foreground no-underline"
++                href={item.href}
++              >
++                {item.label
++                  ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
++                  : `${idx === 0 ? (isEn ? 'Call' : 'Hotline') : (isEn ? 'Alt' : 'Hotline 2')}: ${formatHotlineDisplay(item.normalized)}`}
++              </a>
++            ))}
+             {zaloCTA ? (
+               <a
+                 className="inline-flex min-h-11 items-center font-semibold text-foreground underline"
+diff --git a/app/src/tours/queries.ts b/app/src/tours/queries.ts
+index 7ad8c16..efe9199 100644
+--- a/app/src/tours/queries.ts
++++ b/app/src/tours/queries.ts
+@@ -33,6 +33,7 @@ import {
+   selectPublishableDepartures,
+ } from './utils'
+ import { isDepartureVerificationCurrent } from './departureCommerce'
++import { normalizeGovernedTourPrice } from './currency'
+ import {
+   buildTourTaxonomyWhere,
+   type TourDestinationKey,
+@@ -91,7 +92,7 @@ const queryCollection = async ({
+     fallbackLocale,
+     limit,
+     locale,
+-    overrideAccess: true,
++    overrideAccess: draft,
+     pagination: false,
+     where: scopedWhere,
+   })
+@@ -242,9 +243,24 @@ const normalizeDepartureCard = (
+   const hasFreshnessGovernance = Boolean(departure.verifiedAt || departure.expiresAt)
+   const commerceVerified =
+     draft ||
+-    (hasFreshnessGovernance
+-      ? isDepartureVerificationCurrent(departure)
+-      : typeof departure.priceFrom === 'number' && departure.priceFrom > 0)
++    ((departure.commerceVerified === undefined || departure.commerceVerified === true) &&
++      (hasFreshnessGovernance
++        ? isDepartureVerificationCurrent(departure)
++        : departure.commerceVerified === true))
++  const canPromote =
++    commerceVerified &&
++    (draft || hasFreshnessGovernance || departure.commerceVerified === true) &&
++    departure.availabilityStatus !== 'sold-out' &&
++    Boolean(normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }))
++  const originalPrice =
++    canPromote &&
++    typeof departure.originalPrice === 'number' &&
++    Number.isFinite(departure.originalPrice) &&
++    departure.originalPrice > departure.priceFrom &&
++    Boolean(departure.currency) &&
++    (!departure.originalCurrency || departure.originalCurrency === departure.currency)
++      ? departure.originalPrice
++      : null
+ 
+   return {
+     airline: departure.airline,
+@@ -262,9 +278,9 @@ const normalizeDepartureCard = (
+     isFeatured: departure.isFeatured,
+     loyaltyPoints: commerceVerified ? departure.loyaltyPoints : null,
+     note: departure.note,
+-    originalPrice: commerceVerified ? departure.originalPrice : null,
++    originalPrice,
+     priceFrom: commerceVerified ? departure.priceFrom : null,
+-    promoLabel: commerceVerified ? departure.promoLabel : null,
++    promoLabel: canPromote ? departure.promoLabel : null,
+     returnDate: departure.returnDate,
+     tourProduct: normalizeTourProductCard(departure.tourProduct),
+     urgencyLabel: commerceVerified ? departure.urgencyLabel : null,
+@@ -463,7 +479,7 @@ export const getResolvedTourDetailBySlug = async ({
+ 
+   return {
+     builderConfig: resolved.builderConfig,
+-    departures: validPublicDepartures,
++    departures: draft ? departures : getFutureDepartures(departures),
+     featuredDepartures:
+       featuredDepartures.length > 0
+         ? featuredDepartures
+ M app/src/tours/StructuredPages.tsx
+ M app/src/tours/queries.ts
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Test-Path .codegraph; rg -n "getToursByMarketRoute|getFutureDepartures|selectPublishableDepartures|getPriorityMarketDeparture|normalizeTourProductCard" app/src/tours/queries.ts app/src/tours/utils.ts; Get-Content app/src/tours/PromotionPrice.tsx; Get-Content app/src/tours/currency.ts; Get-Content app/src/tours/departureCommerce.ts' in E:\repo\WingsTravel
+ succeeded in 328ms:
+True
+app/src/tours/utils.ts:530:export const getFutureDepartures = <T extends { departureDate?: null | string }>(
+app/src/tours/utils.ts:545:export const selectPublishableDepartures = <
+app/src/tours/utils.ts:553:  return getFutureDepartures(departures).filter((departure) => departure.commerceVerified)
+app/src/tours/utils.ts:569:export const getPriorityMarketDeparture = (
+app/src/tours/utils.ts:573:  getFutureDepartures(departures)
+app/src/tours/utils.ts:611:  const future = getFutureDepartures(departures)
+app/src/tours/queries.ts:26:  getFutureDepartures,
+app/src/tours/queries.ts:33:  selectPublishableDepartures,
+app/src/tours/queries.ts:104:const normalizeTourProductCard = (
+app/src/tours/queries.ts:213:        .map(normalizeTourProductCard)
+app/src/tours/queries.ts:285:    tourProduct: normalizeTourProductCard(departure.tourProduct),
+app/src/tours/queries.ts:475:  const validPublicDepartures = selectPublishableDepartures(departures, { draft })
+app/src/tours/queries.ts:482:    departures: draft ? departures : getFutureDepartures(departures),
+app/src/tours/queries.ts:498:export const getToursByMarketRoute = async ({
+app/src/tours/queries.ts:542:  const futureDepartures = sortDepartures(getFutureDepartures(allDepartures))
+app/src/tours/queries.ts:557:      const linkedFuture = getFutureDepartures(linkedAll)
+app/src/tours/queries.ts:647:  const futureDepartures = getFutureDepartures(departures)
+import { formatTourPrice } from './utils'
+
+export const isDisplayablePromoLabel = (value: unknown): value is string => {
+  if (typeof value !== 'string') return false
+  const label = value.trim()
+  return Boolean(label) && !/^\d[\d\s.,-]*$/.test(label)
+}
+
+export function PromotionBadge({ label }: { label?: null | string }) {
+  if (!isDisplayablePromoLabel(label)) return null
+
+  return (
+    <span className="inline-flex max-w-full w-fit break-words rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1 text-xs font-bold text-white shadow-md [overflow-wrap:anywhere]">
+      {label.trim()}
+    </span>
+  )
+}
+
+export function PromotionPrice({
+  currency,
+  contactLabel = 'Liên hệ',
+  originalPrice,
+  price,
+}: {
+  currency?: null | string
+  contactLabel?: string
+  originalPrice?: null | number
+  price?: null | number
+}) {
+  const salePrice = Number.isFinite(price) && Number(price) > 0 ? Number(price) : 0
+  const saleLabel = formatTourPrice(salePrice, currency)
+  const originalLabel = formatTourPrice(originalPrice, currency)
+  const hasDiscount = Boolean(saleLabel && originalLabel && Number(originalPrice) > salePrice)
+
+  return (
+    <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-1">
+      {hasDiscount ? (
+        <del className="text-sm font-normal text-muted-foreground">{originalLabel}</del>
+      ) : null}
+      <span className={hasDiscount ? 'font-extrabold text-red-600 dark:text-red-400' : undefined}>
+        {saleLabel || contactLabel}
+      </span>
+    </span>
+  )
+}
+export const supportedTourCurrencyCodes = ['VND', 'USD'] as const
+
+export type SupportedTourCurrencyCode = (typeof supportedTourCurrencyCodes)[number]
+
+export const supportedTourCurrencyOptions = supportedTourCurrencyCodes.map((currency) => ({
+  label: currency,
+  value: currency,
+}))
+
+export const normalizeSupportedTourCurrency = (
+  value: unknown,
+): SupportedTourCurrencyCode | null => {
+  if (typeof value !== 'string') return null
+
+  const currency = value.trim().toUpperCase()
+  return supportedTourCurrencyCodes.includes(currency as SupportedTourCurrencyCode)
+    ? (currency as SupportedTourCurrencyCode)
+    : null
+}
+export type GovernedTourPrice = {
+  currency: SupportedTourCurrencyCode
+  value: number
+}
+
+export const normalizeGovernedTourPrice = ({
+  currency,
+  value,
+}: {
+  currency: unknown
+  value: unknown
+}): GovernedTourPrice | null => {
+  const normalizedCurrency = normalizeSupportedTourCurrency(currency)
+
+  return typeof value === 'number' &&
+    Number.isFinite(value) &&
+    value > 0 &&
+    normalizedCurrency
+    ? { currency: normalizedCurrency, value }
+    : null
+}
+import type { CollectionBeforeValidateHook } from 'payload'
+
+type Relation = number | string | { id?: number | string | null } | null | undefined
+
+export type GovernedDepartureFreshness = {
+  expiresAt?: null | string
+  verifiedAt?: null | string
+}
+
+const relationID = (value: Relation): number | string | null => {
+  if (typeof value === 'number' || typeof value === 'string') return value
+  if (value && (typeof value.id === 'number' || typeof value.id === 'string')) return value.id
+  return null
+}
+
+const dateOnlyUTC = (value: unknown): string | null => {
+  const date = new Date(String(value || ''))
+  if (!Number.isFinite(date.getTime())) return null
+  return date.toISOString().slice(0, 10)
+}
+
+const normalizeVariantKey = (value: unknown): string | null => {
+  const normalized = String(value || '')
+    .normalize('NFKC')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/gu, '-')
+  return normalized || null
+}
+
+export const buildDepartureInventoryIdentity = ({
+  departureDate,
+  site,
+  tourProduct,
+  variantKey,
+  variantRef,
+}: {
+  departureDate?: unknown
+  site?: Relation
+  tourProduct?: Relation
+  variantKey?: unknown
+  variantRef?: Relation
+}): string | null => {
+  const siteID = relationID(site)
+  const tourID = relationID(tourProduct)
+  const date = dateOnlyUTC(departureDate)
+  if (siteID == null || tourID == null || !date) return null
+
+  const variantID = relationID(variantRef)
+  const normalizedVariantKey = normalizeVariantKey(variantKey)
+  const variant =
+    variantID != null
+      ? `ref:${variantID}`
+      : normalizedVariantKey
+        ? `key:${normalizedVariantKey}`
+        : 'base'
+
+  return `s:${siteID}|t:${tourID}|d:${date}|v:${variant}`
+}
+
+/**
+ * Price, departure and availability claims are visible only inside a current
+ * verification window. Expiry does not remove the tour or its contact fallback.
+ */
+export const isDepartureVerificationCurrent = (
+  departure: GovernedDepartureFreshness,
+  now = Date.now(),
+): boolean => {
+  const verifiedAt = Date.parse(departure.verifiedAt || '')
+  const expiresAt = Date.parse(departure.expiresAt || '')
+  return (
+    Number.isFinite(verifiedAt) &&
+    Number.isFinite(expiresAt) &&
+    verifiedAt <= now &&
+    expiresAt > now &&
+    verifiedAt < expiresAt
+  )
+}
+
+export const setDepartureInventoryIdentity: CollectionBeforeValidateHook = ({
+  data,
+  originalDoc,
+}) => {
+  if (!data) return data
+  const merged = { ...(originalDoc || {}), ...data }
+  return {
+    ...data,
+    inventoryIdentity: buildDepartureInventoryIdentity({
+      departureDate: merged.departureDate,
+      site: merged.site,
+      tourProduct: merged.tourProduct,
+      variantKey: merged.variantKey,
+      variantRef: merged.variantRef,
+    }),
+  }
+}
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'codegraph explore "app/src/tours/queries.ts getToursByMarketRoute and app/src/tours/utils.ts getFutureDepartures sortDepartures"' in E:\repo\WingsTravel
+ succeeded in 1252ms:
+**Exploration: app/src/tours/queries.ts getToursByMarketRoute and app/src/tours/utils.ts getFutureDepartures sortDepartures**
+
+Found 30 symbols across 2 files.
+
+**Blast radius — what depends on these (update/verify before editing)**
+
+- `sortDepartures` (app/src/tours/queries.ts:56) — 4 callers in `app/src/tours/queries.ts`; ⚠️ no covering tests found
+- `sortDepartures` (app/src/tours/wingsGoCatalog.ts:126) — 1 caller in `app/src/tours/wingsGoCatalog.ts`; ⚠️ no covering tests found
+- `getFutureDepartures` (app/src/tours/utils.ts:530) — 14 callers in `app/src/tours/utils.ts`, `app/src/tours/queries.ts`, `app/src/tours/WingsGoHomepageSections.tsx`, `app/src/tours/StructuredPages.tsx`; tests: `app/tests/unit/tourDetailBuilder.unit.spec.ts`, `app/tests/unit/us027DataGuard.unit.spec.ts`
+- `getToursByMarketRoute` (app/src/tours/queries.ts:498) — 2 callers in `app/src/app/(frontend)/cmsPage.tsx`; ⚠️ no covering tests found
+
+**Relationships**
+
+**calls:**
+- getTourDeparturesForProduct → sortDepartures
+- getToursByMarketRoute → sortDepartures
+- getTourCampaignBySlug → sortDepartures
+- getResolvedScheduleData → sortDepartures
+- getTourDeparturesForProduct → queryCollection
+- getTourDeparturesForProduct → normalizeDepartureCard
+- getResolvedTourDetailBySlug → getTourDeparturesForProduct
+- getToursByMarketRoute → queryCollection
+- getToursByMarketRoute → normalizeDepartureCard
+- getToursByMarketRoute → getFutureDepartures
+- ... and 190 more
+
+**references:**
+- getTourDeparturesForProduct → tourDeparturesCollection
+- getTourDeparturesForProduct → SupportedLocaleCode
+- getToursByMarketRoute → tourDeparturesCollection
+- getToursByMarketRoute → tourProductsCollection
+- getToursByMarketRoute → SupportedLocaleCode
+- getToursByMarketRoute → MarketPageViewModel
+- getTourCampaignBySlug → tourDeparturesCollection
+- getTourCampaignBySlug → tourCampaignsCollection
+- getTourCampaignBySlug → SupportedLocaleCode
+- getResolvedScheduleData → scheduleTrustSignals
+- ... and 93 more
+
+**instantiates:**
+- getParamsID → TriageError
+- getOperatorContext → TriageError
+- authenticatedRequest → AuthoringError
+- parseAuthoringID → AuthoringError
+- parseAuthoringLocale → AuthoringError
+
+**Source Code**
+
+> The code below is the **verbatim, current on-disk source** of these files — re-read from disk on this call and line-numbered, byte-for-byte identical to what the Read tool returns. It is NOT a summary, outline, or stale cache. Treat each block as a Read you have already performed: do not Read a file shown here.
+
+**`app/src/tours/queries.ts`** — imports(imports), calls(calls), SupportedLocaleCode(references), appendSiteWhere(imports), SupportedLocaleCode(imports), DepartureCardViewModel(imports), MarketPageViewModel(imports), SchedulePageViewModel(imports), getFutureDepartures(imports), getLowestPrice(imports), +17 more
+
+```typescript
+1	import configPromise from '@payload-config'
+2	import { getPayload } from 'payload'
+3	
+4	import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
+5	import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+6	import {
+7	  isConsultativeTourSiteCode,
+8	  isRetailTourEnabledSiteCode,
+9	  isStructuredTourDetailSiteCode,
+10	} from '@/utilities/siteCapabilities'
+11	
+12	import {
+13	  defaultTourSectionOrder,
+14	  defaultTourSectionVisibility,
+15	  normalizeSectionIDs,
+16	} from './sectionRegistry'
+17	import type {
+18	  DepartureCardViewModel,
+19	  MarketPageViewModel,
+20	  SchedulePageViewModel,
+21	  TourCardViewModel,
+22	  TourResolvedData,
+23	} from './types'
+24	import {
+25	  filterDepartureVariants,
+26	  getFutureDepartures,
+27	  getLowestPrice,
+28	  getNextDeparture,
+29	  groupDeparturesByMonth,
+30	  marketRouteSlugToKey,
+31	  mergeTourVariant,
+32	  normalizeTourPublicText,
+33	  selectPublishableDepartures,
+34	} from './utils'
+35	import { isDepartureVerificationCurrent } from './departureCommerce'
+36	import { normalizeGovernedTourPrice } from './currency'
+37	import {
+38	  buildTourTaxonomyWhere,
+39	  type TourDestinationKey,
+40	  type TourTravelStyleKey,
+41	} from './taxonomy'
+42	import { sanitizeWingSidePublicText } from './wingsSideTourViewModel'
+43	
+44	const tourProductsCollection = 'tour-products' as never
+45	const tourDeparturesCollection = 'tour-departures' as never
+46	const tourCampaignsCollection = 'tour-campaigns' as never
+47	const departureVariantsCollection = 'departure-variants' as never
+48	
+49	export const scheduleTrustSignals = [
+50	  'Giá công khai theo từng đợt mở bán',
+51	  'Giữ chỗ sau khi sales xác nhận tồn chỗ',
+52	  'Hỗ trợ visa, hồ sơ và điều phối trước ngày đi',
+53	  'Điều hành gửi xác nhận trước khi chốt booking',
+54	] as const
+55	
+56	const sortDepartures = <T extends { departureDate?: null | string }>(departures: T[] = []) =>
+57	  [...departures].sort((left, right) => {
+58	    const leftTime = left.departureDate
+59	      ? new Date(left.departureDate).getTime()
+60	      : Number.MAX_SAFE_INTEGER
+61	    const rightTime = right.departureDate
+62	      ? new Date(right.departureDate).getTime()
+63	      : Number.MAX_SAFE_INTEGER
+64	
+65	    return leftTime - rightTime
+66	  })
+67	
+68	const queryCollection = async ({
+69	  collection,
+70	  depth = 2,
+71	  draft,
+72	  fallbackLocale,
+73	  limit = 20,
+74	  locale,
+75	  where,
+76	}: {
+77	  collection: never
+78	  depth?: number
+79	  draft: boolean
+80	  fallbackLocale?: SupportedLocaleCode | false
+81	  limit?: number
+82	  locale?: SupportedLocaleCode
+83	  where: Record<string, unknown>
+84	}): Promise<any> => {
+85	  const payload = await getPayload({ config: configPromise })
+86	  const scopedWhere = await appendSiteWhere(where as never)
+87	
+88	  return payload.find({
+89	    collection,
+90	    depth,
+91	    draft,
+92	    fallbackLocale,
+93	    limit,
+94	    locale,
+95	    overrideAccess: draft,
+96	    pagination: false,
+97	    where: scopedWhere,
+98	  })
+99	}
+100	
+101	const asDoc = <T extends object>(value: T | number | string | null | undefined): T | null =>
+102	  value && typeof value === 'object' ? value : null
+103	
+104	const normalizeTourProductCard = (
+105	  tour: Record<string, any> | number | string | null | undefined,
+106	) => {
+107	  const doc = asDoc<Record<string, any>>(tour)
+108	
+109	  if (!doc) {
+110	    return tour || null
+111	  }
+112	
+113	  return {
+114	    durationDays: doc.durationDays,
+115	    durationNights: doc.durationNights,
+116	    heroMedia: doc.heroMedia,
+117	    id: doc.id,
+118	    market: doc.market,
+119	    marketCard: doc.marketCard || null,
+120	    slug: doc.slug,
+121	    summary: normalizeTourPublicText(sanitizeWingSidePublicText(doc.summary)),
+122	    title: normalizeTourPublicText(sanitizeWingSidePublicText(doc.title)),
+123	  }
+124	}
+125	
+126	const stringSet = (value: unknown): Set<string> =>
+127	  new Set(
+```
+
+**`app/src/tours/utils.ts`** — calls(calls), getFutureDepartures(calls), DepartureCardViewModel(references), toDateOnly(calls), getLowestPrice(function), toDateOnly(function), getFutureDepartures(function), selectPublishableDepartures(function), isDeparturePublishable(function), getPriorityMarketDeparture(function), +4 more
+
+```typescript
+500	export const getCampaignPath = (slug?: null | string) => (slug ? `/campaign/${slug}` : '/campaign')
+501	export const getTourPath = (slug?: null | string) => (slug ? `/tour/${slug}` : '/tour')
+502	
+503	export const getLowestPrice = (departures?: Array<{ priceFrom?: null | number }> | null) => {
+504	  const values =
+505	    departures
+506	      ?.map((departure) => departure.priceFrom)
+507	      .filter((value): value is number => typeof value === 'number') || []
+508	
+509	  if (values.length === 0) {
+510	    return null
+511	  }
+512	
+513	  return Math.min(...values)
+514	}
+515	
+516	const toDateOnly = (value?: null | string) => {
+517	  if (!value) {
+518	    return null
+519	  }
+520	
+521	  const date = new Date(value)
+522	
+523	  if (Number.isNaN(date.getTime())) {
+524	    return null
+525	  }
+526	
+527	  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
+528	}
+529	
+530	export const getFutureDepartures = <T extends { departureDate?: null | string }>(
+531	  departures?: T[] | null,
+532	) => {
+533	  const today = new Date()
+534	  const threshold = new Date(
+535	    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+536	  )
+537	
+538	  return (departures || []).filter((departure) => {
+539	    const date = toDateOnly(departure.departureDate)
+540	
+541	    return date ? date.getTime() >= threshold.getTime() : false
+542	  })
+543	}
+544	
+545	export const selectPublishableDepartures = <
+546	  T extends { commerceVerified?: boolean | null; departureDate?: null | string },
+547	>(
+548	  departures?: T[] | null,
+549	  options?: { draft?: boolean },
+550	): T[] => {
+551	  const draft = options?.draft ?? false
+552	  if (draft) return departures || []
+553	  return getFutureDepartures(departures).filter((departure) => departure.commerceVerified)
+554	}
+555	
+556	/**
+557	 * A homepage "on sale" card requires governed airline and price claims.
+558	 * Flight number is optional and displayed when provided by operations.
+559	 */
+560	export const isDeparturePublishable = (
+561	  departure: Pick<DepartureCardViewModel, 'airline' | 'currency' | 'priceFrom'> &
+562	    Partial<Pick<DepartureCardViewModel, 'flightNumber'>>,
+563	) =>
+564	  Boolean(
+565	    departure.airline?.trim() &&
+566	      formatTourPrice(departure.priceFrom, departure.currency),
+567	  )
+568	
+569	export const getPriorityMarketDeparture = (
+570	  departures: DepartureCardViewModel[],
+571	  market: string,
+572	) =>
+573	  getFutureDepartures(departures)
+574	    .filter((departure) => {
+575	      const product = departure.tourProduct
+576	      return (
+577	        Boolean(product && typeof product === 'object' && product.market === market) &&
+578	        isDeparturePublishable(departure)
+579	      )
+580	    })
+581	    .sort((left, right) => {
+582	      const limited =
+583	        Number(right.availabilityStatus === 'limited') -
+584	        Number(left.availabilityStatus === 'limited')
+585	      const featured = Number(right.isFeatured === true) - Number(left.isFeatured === true)
+586	      const leftDate = left.departureDate ? new Date(left.departureDate).getTime() : Infinity
+587	      const rightDate = right.departureDate ? new Date(right.departureDate).getTime() : Infinity
+588	      return limited || featured || leftDate - rightDate
+589	    })[0]
+590	
+591	export const filterDepartureVariants = <T extends { displayPriority?: null | number; status?: null | string }>(
+592	  variants?: T[] | null,
+593	  options?: { draft?: boolean },
+594	): T[] => {
+595	  const draft = options?.draft ?? false
+596	  return (variants || [])
+597	    .filter((variant) => (draft ? variant.status !== 'archived' : variant.status === 'active'))
+598	    .sort((left, right) => Number(left.displayPriority || 0) - Number(right.displayPriority || 0))
+599	}
+600	
+601	export const getNextDeparture = <
+602	  T extends {
+603	    availabilityStatus?: unknown
+604	    commerceVerified?: unknown
+605	    departureDate?: null | string
+606	    priceFrom?: unknown
+607	  },
+608	>(
+609	  departures?: T[] | null,
+610	) => {
+611	  const future = getFutureDepartures(departures)
+612	  if (future.length === 0) return null
+613	
+614	  const openSellable = future.filter(
+615	    (d) =>
+616	      (d.commerceVerified && d.availabilityStatus !== 'sold-out' && Number(d.priceFrom) > 0) ||
+617	      d.availabilityStatus === 'open' ||
+618	      d.availabilityStatus === 'limited',
+619	  )
+620	
+621	  if (openSellable.length > 0) {
+622	    const sorted = [...openSellable].sort((a, b) => {
+623	      const priceA = Number(a.priceFrom) || Infinity
+624	      const priceB = Number(b.priceFrom) || Infinity
+625	      if (priceA !== priceB) return priceA - priceB
+626	      const dateA = a.departureDate ? new Date(a.departureDate).getTime() : Infinity
+627	      const dateB = b.departureDate ? new Date(b.departureDate).getTime() : Infinity
+628	      return dateA - dateB
+629	    })
+630	    return sorted[0]
+631	  }
+632	
+633	  return future[0]
+634	}
+635	
+636	export const groupDeparturesByMonth = <T extends { departureDate?: null | string }>(
+637	  departures?: T[] | null,
+638	) => {
+639	  const groups = new Map<string, T[]>()
+640	
+641	  for (const departure of departures || []) {
+642	    const date = toDateOnly(departure.departureDate)
+643	    const key = date
+644	      ? `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`
+645	      : 'undated'
+646	
+647	    groups.set(key, [...(groups.get(key) || []), departure])
+648	  }
+649	
+650	  return Array.from(groups.entries()).map(([key, items]) => ({
+651	    key,
+652	    label:
+653	      key === 'undated'
+654	        ? 'Chưa có ngày cụ thể'
+655	        : new Intl.DateTimeFormat('vi-VN', {
+656	            month: 'long',
+657	            year: 'numeric',
+658	          }).format(new Date(`${key}-01T00:00:00.000Z`)),
+659	    items,
+660	  }))
+661	}
+662	
+663	export const mergeTourVariant = ({
+664	  tour,
+665	  variant,
+666	}: {
+667	  tour: Record<string, any>
+668	  variant?: null | Record<string, any>
+669	}) => {
+670	  if (!variant) {
+671	    return {
+672	      builderConfig: tour.bcfg || null,
+673	      sectionOrder: normalizeSectionIDs(tour.sectionOrder || defaultTourSectionOrder),
+674	      sectionVisibility: normalizeSectionIDs(
+675	        tour.sectionVisibility || defaultTourSectionVisibility,
+676	      ),
+677	      tour,
+678	    }
+679	  }
+680	
+681	  const itineraryDays = Array.isArray(tour.itineraryDays) ? [...tour.itineraryDays] : []
+682	  const overrides = Array.isArray(variant.itineraryDayOverrides)
+683	    ? variant.itineraryDayOverrides
+684	    : []
+685	
+686	  for (const override of overrides) {
+687	    const index = itineraryDays.findIndex(
+688	      (day) => String(day.dayNumber) === String(override.dayNumber),
+689	    )
+690	
+691	    if (index >= 0) {
+692	      itineraryDays[index] = {
+693	        ...itineraryDays[index],
+694	        ...Object.fromEntries(
+695	          Object.entries(override).filter(
+696	            ([, value]) => value !== null && value !== undefined && value !== '',
+697	          ),
+698	        ),
+699	      }
+700	    }
+701	  }
+702	
+703	  const variantRouteViz = variant.rvo || {}
+704	  const routeViz = {
+705	    ...(tour.routeViz || {}),
+706	    ...variantRouteViz,
+707	    stops: variantRouteViz.st || variantRouteViz.stops || tour.routeViz?.stops || [],
+708	  }
+709	
+710	  const servicesSummary = {
+711	    ...(tour.servicesSummary || {}),
+712	    ...(variant.servicesOverride || {}),
+713	  }
+714	
+715	  const mergedTour = {
+716	    ...tour,
+717	    summary: variant.summaryOverride || tour.summary,
+718	    heroMedia: variant.heroMediaOverride || tour.heroMedia,
+719	    itineraryDays,
+720	    routeViz,
+721	    servicesSummary,
+722	    variantLabel: variant.label || null,
+723	    variantMeta: variant,
+724	  }
+725	
+726	  return {
+727	    builderConfig: tour.bcfg || null,
+728	    sectionOrder: normalizeSectionIDs(tour.sectionOrder || defaultTourSectionOrder),
+729	    sectionVisibility: normalizeSectionIDs(tour.sectionVisibility || defaultTourSectionVisibility),
+730	    tour: mergedTour,
+731	  }
+732	}
+733	
+```
+
+
+... (output truncated to budget; the source above is complete and verbatim — treat it as already Read. For any area not covered, run another codegraph_explore with the specific names — do NOT Read these files.)
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'codegraph explore "getToursByMarketRoute"' in E:\repo\WingsTravel
+ succeeded in 963ms:
+**Exploration: getToursByMarketRoute**
+
+Found 21 symbols across 4 files.
+
+**Blast radius — what depends on these (update/verify before editing)**
+
+- `getToursByMarketRoute` (app/src/tours/queries.ts:498) — 2 callers in `app/src/app/(frontend)/cmsPage.tsx`; ⚠️ no covering tests found
+- `GET` (app/src/app/(payload)/api/health/live/route.ts:6) — 6 callers in `app/src/app/(payload)/api/health/live/route.ts`; tests: `app/tests/int/wingsGroupEditorialSitemap.int.spec.ts`, `app/tests/unit/wingsGoTourCatalogEndpoint.unit.spec.ts`, `app/tests/int/leadTriageRoute.int.spec.ts`, `app/tests/unit/localPreviewRoute.unit.spec.ts` +1
+
+**Relationships**
+
+**calls:**
+- getToursByMarketRoute → queryCollection
+- getToursByMarketRoute → sortDepartures
+- getToursByMarketRoute → normalizeDepartureCard
+- getToursByMarketRoute → getFutureDepartures
+- getToursByMarketRoute → getLowestPrice
+- getToursByMarketRoute → getNextDeparture
+- resolveStructuredTourPage → getToursByMarketRoute
+- queryCollection → appendSiteWhere
+- queryCollection → find
+- getTourProductBySlug → queryCollection
+- ... and 213 more
+
+**references:**
+- getToursByMarketRoute → tourDeparturesCollection
+- getToursByMarketRoute → tourProductsCollection
+- getToursByMarketRoute → SupportedLocaleCode
+- getToursByMarketRoute → MarketPageViewModel
+- queryCollection → SupportedLocaleCode
+- GET → PreviewDocument
+- GET → PreviewSite
+- getCollection → PreviewCollection
+- getLocale → SupportedLocaleCode
+- GET → RouteContext
+- ... and 68 more
+
+**instantiates:**
+- getParamsID → TriageError
+- getOperatorContext → TriageError
+- authenticatedRequest → AuthoringError
+- parseAuthoringID → AuthoringError
+- parseAuthoringLocale → AuthoringError
+
+**Source Code**
+
+> The code below is the **verbatim, current on-disk source** of these files — re-read from disk on this call and line-numbered, byte-for-byte identical to what the Read tool returns. It is NOT a summary, outline, or stale cache. Treat each block as a Read you have already performed: do not Read a file shown here.
+
+**`app/src/tours/queries.ts`** — SupportedLocaleCode(references), queryCollection(calls), calls(calls), references(references), sortDepartures(calls), normalizeDepartureCard(calls), getFutureDepartures(calls), getNextDeparture(calls), getLowestPrice(calls), normalizeVariantCard(function), +17 more
+
+```typescript
+214	        .filter(Boolean)
+215	        .slice(0, 3)
+216	
+217	const normalizeVariantCard = (
+218	  variant: Record<string, any> | number | string | null | undefined,
+219	  draft = false,
+220	) => {
+221	  const doc = asDoc<Record<string, any>>(variant)
+222	
+223	  if (!doc) {
+224	    return variant || null
+225	  }
+226	
+227	  // In public mode, variant must be active
+228	  if (!draft && doc.status && doc.status !== 'active') {
+229	    return null
+230	  }
+231	
+232	  return {
+233	    id: doc.id,
+234	    label: doc.label,
+235	    variantKey: doc.variantKey,
+236	  }
+237	}
+238	
+239	const normalizeDepartureCard = (
+240	  departure: Record<string, any>,
+241	  draft = false,
+242	): DepartureCardViewModel => {
+243	  const hasFreshnessGovernance = Boolean(departure.verifiedAt || departure.expiresAt)
+244	  const commerceVerified =
+245	    draft ||
+246	    ((departure.commerceVerified === undefined || departure.commerceVerified === true) &&
+247	      (hasFreshnessGovernance
+248	        ? isDepartureVerificationCurrent(departure)
+249	        : departure.commerceVerified === true))
+250	  const canPromote =
+251	    commerceVerified &&
+252	    (draft || hasFreshnessGovernance || departure.commerceVerified === true) &&
+253	    departure.availabilityStatus !== 'sold-out' &&
+254	    Boolean(normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }))
+255	  const originalPrice =
+256	    canPromote &&
+257	    typeof departure.originalPrice === 'number' &&
+258	    Number.isFinite(departure.originalPrice) &&
+259	    departure.originalPrice > departure.priceFrom &&
+260	    Boolean(departure.currency) &&
+261	    (!departure.originalCurrency || departure.originalCurrency === departure.currency)
+262	      ? departure.originalPrice
+263	      : null
+264	
+265	  return {
+266	    airline: departure.airline,
+267	    availabilityBadge: commerceVerified ? departure.availabilityBadge : null,
+268	    availabilityStatus: commerceVerified ? departure.availabilityStatus : null,
+269	    commerceVerified,
+270	    ctaLabelOverride: commerceVerified ? departure.ctaLabelOverride : null,
+271	    currency: departure.currency,
+272	    departureCity: departure.departureCity,
+273	    departureDate: departure.departureDate,
+274	    depositNote: departure.depositNote,
+275	    flightNumber: departure.flightNumber,
+276	    holdNote: departure.holdNote,
+277	    id: departure.id,
+278	    isFeatured: departure.isFeatured,
+279	    loyaltyPoints: commerceVerified ? departure.loyaltyPoints : null,
+280	    note: departure.note,
+281	    originalPrice,
+282	    priceFrom: commerceVerified ? departure.priceFrom : null,
+283	    promoLabel: canPromote ? departure.promoLabel : null,
+284	    returnDate: departure.returnDate,
+285	    tourProduct: normalizeTourProductCard(departure.tourProduct),
+286	    urgencyLabel: commerceVerified ? departure.urgencyLabel : null,
+287	    variantRef: normalizeVariantCard(departure.variantRef, draft),
+288	  }
+289	}
+290	
+291	export { mergeTourVariant }
+292	
+293	export const getTourProductBySlug = async ({
+294	  draft,
+295	  fallbackLocale,
+296	  locale,
+297	  slug,
+298	}: {
+299	  draft: boolean
+300	  fallbackLocale?: SupportedLocaleCode | false
+301	  locale?: SupportedLocaleCode
+302	  slug: string
+303	}): Promise<any> => {
+304	  const result = await queryCollection({
+305	    collection: tourProductsCollection,
+306	    depth: 2,
+307	    draft,
+308	    fallbackLocale,
+309	    limit: 1,
+310	    locale,
+311	    where: {
+312	      slug: {
+313	        equals: slug,
+314	      },
+315	    },
+316	  })
+317	
+318	  return result.docs[0] || null
+319	}
+320	
+321	export const getTourProductsByTaxonomy = async ({
+322	  destination,
+323	  draft,
+324	  fallbackLocale,
+325	  limit = 20,
+326	  locale,
+327	  travelStyle,
+328	}: {
+329	  destination?: TourDestinationKey
+330	  draft: boolean
+331	  fallbackLocale?: SupportedLocaleCode | false
+332	  limit?: number
+333	  locale?: SupportedLocaleCode
+334	  travelStyle?: TourTravelStyleKey
+335	}) => {
+336	  const result = await queryCollection({
+337	    collection: tourProductsCollection,
+338	    depth: 2,
+339	    draft,
+340	    fallbackLocale,
+341	    limit,
+342	    locale,
+343	    where: buildTourTaxonomyWhere({ destination, travelStyle }),
+344	  })
+345	
+346	  return result.docs as any[]
+347	}
+348	
+349	export const getTourDeparturesForProduct = async ({
+350	  draft,
+351	  fallbackLocale,
+352	  locale,
+353	  tourProductId,
+354	}: {
+355	  draft: boolean
+356	  fallbackLocale?: SupportedLocaleCode | false
+357	  locale?: SupportedLocaleCode
+358	  tourProductId: number | string
+359	}): Promise<any[]> => {
+360	  const result = await queryCollection({
+361	    collection: tourDeparturesCollection,
+362	    depth: 2,
+363	    draft,
+364	    fallbackLocale,
+365	    limit: 50,
+366	    locale,
+367	    where: {
+368	      tourProduct: {
+369	        equals: tourProductId,
+370	      },
+371	    },
+372	  })
+373	
+374	  return sortDepartures(result.docs as any[])
+375	    .map((departure) => normalizeDepartureCard(departure, draft))
+376	}
+377	
+378	export const getDepartureVariantsForProduct = async ({
+379	  draft,
+380	  fallbackLocale,
+381	  locale,
+382	  tourProductId,
+383	}: {
+384	  draft: boolean
+385	  fallbackLocale?: SupportedLocaleCode | false
+386	  locale?: SupportedLocaleCode
+387	  tourProductId: number | string
+388	}) => {
+389	  const result = await queryCollection({
+390	    collection: departureVariantsCollection,
+391	    depth: 2,
+392	    draft,
+393	    fallbackLocale,
+394	    limit: 20,
+395	    locale,
+396	    where: {
+397	      tourProduct: {
+398	        equals: tourProductId,
+399	      },
+400	    },
+401	  })
+402	
+403	  return filterDepartureVariants(result.docs as any[], { draft })
+404	}
+405	
+406	export const getResolvedTourDetailBySlug = async ({
+407	  draft,
+408	  fallbackLocale,
+409	  locale,
+410	  slug,
+411	}: {
+412	  draft: boolean
+413	  fallbackLocale?: SupportedLocaleCode | false
+414	  locale?: SupportedLocaleCode
+415	  slug: string
+416	}): Promise<TourResolvedData | null> => {
+417	  const tour = await getTourProductBySlug({
+418	    draft,
+419	    fallbackLocale,
+420	    locale,
+421	    slug,
+422	  })
+423	
+424	  if (!tour) {
+425	    return null
+426	  }
+427	
+428	  const departures = await getTourDeparturesForProduct({
+429	    draft,
+430	    fallbackLocale,
+431	    locale,
+432	    tourProductId: tour.id,
+433	  })
+434	
+435	  const variants = await getDepartureVariantsForProduct({
+436	    draft,
+437	    fallbackLocale,
+438	    locale,
+439	    tourProductId: tour.id,
+440	  })
+441	
+442	  const featuredVariant =
+443	    variants.find((variant) => variant.status === 'active' && variant.displayPriority === 0) ||
+444	    variants.find((variant) => variant.status === 'active') ||
+445	    (draft ? variants[0] || null : null)
+446	
+447	  const resolved = mergeTourVariant({
+448	    tour,
+449	    variant: featuredVariant,
+450	  })
+451	
+452	  const resolvedTour = resolved.tour as Record<string, any>
+453	  const configuredRelated = Array.isArray(resolvedTour.relatedTours)
+454	    ? resolvedTour.relatedTours.filter((item: unknown) => item && typeof item === 'object')
+455	    : []
+456	  const relatedResult = configuredRelated.length
+457	    ? null
+458	    : await queryCollection({
+459	        collection: tourProductsCollection,
+460	        depth: 2,
+461	        draft,
+462	        fallbackLocale,
+463	        limit: 100,
+464	        locale,
+465	        where: {
+466	          and: [{ id: { not_equals: tour.id } }, { wrapperPage: { exists: true } }],
+467	        },
+468	      })
+469	  const relatedTours = selectRelatedTourCards({
+470	    candidates: relatedResult?.docs || [],
+471	    configured: configuredRelated,
+472	    source: resolvedTour,
+473	  })
+474	
+475	  const validPublicDepartures = selectPublishableDepartures(departures, { draft })
+476	  const featuredDepartures = validPublicDepartures.filter(
+477	    (departure) => departure.isFeatured || departure.availabilityStatus === 'open',
+478	  )
+479	
+480	  return {
+481	    builderConfig: resolved.builderConfig,
+482	    departures: draft ? departures : getFutureDepartures(departures),
+483	    featuredDepartures:
+484	      featuredDepartures.length > 0
+485	        ? featuredDepartures
+486	        : validPublicDepartures.slice(0, 4),
+487	    nextDeparture: getNextDeparture(validPublicDepartures),
+488	    sectionOrder: resolved.sectionOrder,
+489	    sectionVisibility: resolved.sectionVisibility,
+490	    tour: {
+491	      ...resolvedTour,
+492	      relatedTours,
+493	    },
+494	    variants,
+495	  }
+496	}
+497	
+498	export const getToursByMarketRoute = async ({
+499	  draft,
+500	  locale,
+501	  marketRouteSlug,
+502	}: {
+503	  draft: boolean
+504	  locale?: SupportedLocaleCode
+505	  marketRouteSlug: string
+506	}): Promise<MarketPageViewModel | null> => {
+507	  const marketKey = marketRouteSlugToKey[marketRouteSlug]
+508	
+509	  if (!marketKey) {
+510	    return null
+511	  }
+512	
+513	  const toursResult = await queryCollection({
+514	    collection: tourProductsCollection,
+515	    depth: 2,
+516	    draft,
+517	    limit: 20,
+518	    locale,
+519	    where: {
+520	      market: {
+521	        equals: marketKey,
+522	      },
+523	    },
+524	  })
+525	
+526	  const departuresResult = await queryCollection({
+527	    collection: tourDeparturesCollection,
+528	    depth: 2,
+529	    draft,
+530	    limit: 100,
+531	    locale,
+532	    where: {
+533	      tourProduct: {
+534	        in: (toursResult.docs as any[]).map((tour) => tour.id),
+535	      },
+536	    },
+537	  })
+538	
+539	  const allDepartures = sortDepartures(departuresResult.docs as any[]).map((departure) =>
+540	    normalizeDepartureCard(departure, draft),
+541	  )
+542	  const futureDepartures = sortDepartures(getFutureDepartures(allDepartures))
+543	  const visibleDepartures = futureDepartures.length > 0 ? futureDepartures : allDepartures
+544	
+545	  return {
+546	    departures: visibleDepartures,
+547	    marketKey,
+548	    tours: (toursResult.docs as any[]).map((tour): TourCardViewModel => {
+549	      const linkedAll = allDepartures.filter((departure) => {
+550	        const relation =
+551	          typeof departure.tourProduct === 'object'
+552	            ? departure.tourProduct?.id
+553	            : departure.tourProduct
+554	
+555	        return String(relation) === String(tour.id)
+556	      })
+557	      const linkedFuture = getFutureDepartures(linkedAll)
+558	      const hasFutureDepartures = linkedFuture.length > 0
+559	      const linkedVisible = hasFutureDepartures ? linkedFuture : linkedAll
+560	
+561	      return {
+562	        ...tour,
+563	        departureCount: linkedVisible.length,
+564	        hasFutureDepartures,
+565	        lowestPrice: getLowestPrice(linkedVisible),
+566	        nextDeparture: getNextDeparture(linkedVisible),
+567	      }
+568	    }),
+569	  }
+570	}
+571	
+572	export const getTourCampaignBySlug = async ({
+573	  draft,
+574	  locale,
+575	  slug,
+576	}: {
+577	  draft: boolean
+578	  locale?: SupportedLocaleCode
+579	  slug: string
+580	}): Promise<any> => {
+581	  const result = await queryCollection({
+582	    collection: tourCampaignsCollection,
+583	    depth: 3,
+584	    draft,
+585	    limit: 1,
+586	    locale,
+587	    where: {
+588	      slug: {
+589	        equals: slug,
+590	      },
+591	    },
+592	  })
+593	
+594	  const campaign = (result.docs as any[])[0]
+595	
+596	  if (!campaign) {
+597	    return null
+598	  }
+599	
+600	  const linkedTourIDs =
+601	    campaign.linkedTours
+602	      ?.map((tour: { id?: number | string } | number | string) =>
+603	        typeof tour === 'object' ? tour?.id : tour,
+604	      )
+605	      .filter(Boolean) || []
+606	
+607	  const departureResult = await queryCollection({
+608	    collection: tourDeparturesCollection,
+609	    depth: 2,
+610	    draft,
+611	    limit: 100,
+612	    locale,
+613	    where: {
+614	      tourProduct: {
+615	        in: linkedTourIDs,
+616	      },
+617	    },
+618	  })
+619	
+620	  return {
+621	    campaign,
+622	    departures: sortDepartures(departureResult.docs as any[]).map((departure) =>
+623	      normalizeDepartureCard(departure, draft),
+624	    ),
+625	  }
+626	}
+627	
+628	export const getResolvedScheduleData = async ({
+629	  draft,
+630	  locale,
+631	}: {
+632	  draft: boolean
+633	  locale?: SupportedLocaleCode
+634	}): Promise<SchedulePageViewModel> => {
+635	  const result = await queryCollection({
+636	    collection: tourDeparturesCollection,
+637	    depth: 3,
+638	    draft,
+639	    limit: 200,
+640	    locale,
+641	    where: {},
+642	  })
+643	
+644	  const departures = sortDepartures(result.docs as any[]).map((departure) =>
+645	    normalizeDepartureCard(departure, draft),
+646	  )
+647	  const futureDepartures = getFutureDepartures(departures)
+648	  const visibleDepartures = futureDepartures.length > 0 ? futureDepartures : departures
+649	  const featuredDepartures = visibleDepartures
+650	    .filter((departure) => departure.isFeatured)
+651	    .slice(0, 6)
+652	  const markets = new Set(
+653	    visibleDepartures
+654	      .map((departure) => {
+655	        const product = asDoc<Record<string, any>>(departure.tourProduct)
+656	
+657	        return product?.market ? String(product.market) : null
+658	      })
+659	      .filter((value): value is string => Boolean(value)),
+660	  )
+661	  const airlines = new Set(
+662	    visibleDepartures
+663	      .map((departure) => departure.airline)
+664	      .filter((value): value is string => Boolean(value)),
+665	  )
+666	  const statuses = new Set(
+667	    visibleDepartures
+668	      .map((departure) => departure.availabilityStatus)
+669	      .filter((value): value is string => Boolean(value)),
+670	  )
+671	
+672	  return {
+673	    departures: visibleDepartures,
+674	    featuredDepartures:
+675	      featuredDepartures.length > 0 ? featuredDepartures : visibleDepartures.slice(0, 6),
+676	    filtersSeed: {
+677	      airlines: Array.from(airlines),
+678	      markets: Array.from(markets),
+679	      statuses: Array.from(statuses),
+680	    },
+681	    groupedDepartures: groupDeparturesByMonth(visibleDepartures),
+682	    heroStats: {
+683	      lowestPrice: getLowestPrice(visibleDepartures),
+684	      nextDeparture: getNextDeparture(departures),
+685	      openCount: visibleDepartures.length,
+686	    },
+687	    trustSignals: [...scheduleTrustSignals],
+688	  }
+689	}
+690	
+691	export const getSiteScheduleData = async ({
+692	  draft,
+```
+
+**`app/src/tours/types.ts`** — MarketPageViewModel(type_alias)
+
+```typescript
+1	export const tourSectionIDs = [
+2	  'hero',
+3	  'facts',
+4	  'reviews',
+5	  'why-choose',
+6	  'route',
+7	  'itinerary',
+8	  'services',
+9	  'departures',
+10	  'faq',
+11	  'related',
+12	  'sticky-cta',
+13	] as const
+14	
+15	export type TourSectionID = (typeof tourSectionIDs)[number]
+16	
+17	export type TourResolvedData = {
+18	  builderConfig?: Record<string, any> | null
+19	  departures: Array<Record<string, any>>
+20	  featuredDepartures: Array<Record<string, any>>
+21	  nextDeparture: Record<string, any> | null
+22	  sectionOrder: TourSectionID[]
+23	  sectionVisibility: TourSectionID[]
+24	  tour: Record<string, any>
+25	  variants: Array<Record<string, any>>
+26	}
+27	
+28	/**
+29	 * View models describe the normalized shape the renderers depend on, sitting
+30	 * between raw Payload documents and the UI. They keep an index signature so
+31	 * existing field access keeps working while we migrate surfaces off bare
+32	 * Record<string, any> one at a time.
+33	 */
+34	
+35	export type DepartureCardViewModel = {
+36	  airline?: null | string
+37	  availabilityBadge?: null | string
+38	  availabilityStatus?: null | string
+39	  commerceVerified?: boolean
+40	  ctaLabelOverride?: null | string
+41	  currency?: null | string
+42	  departureCity?: null | string
+43	  departureDate?: null | string
+44	  flightNumber?: null | string
+45	  id?: number | string
+46	  isFeatured?: boolean
+47	  loyaltyPoints?: null | number
+48	  originalPrice?: null | number
+49	  priceFrom?: null | number
+50	  promoLabel?: null | string
+51	  returnDate?: null | string
+52	  tourProduct?: Record<string, any> | number | string | null
+53	  urgencyLabel?: null | string
+54	  variantRef?: Record<string, any> | number | string | null
+55	  [key: string]: any
+56	}
+57	
+58	export type TourCardViewModel = {
+59	  departureCount?: number
+60	  hasFutureDepartures?: boolean
+61	  heroMedia?: any
+62	  id?: number | string
+63	  lowestPrice?: null | number
+64	  market?: null | string
+65	  marketCard?: Record<string, any> | null
+66	  nextDeparture?: Record<string, any> | null
+67	  slug?: null | string
+68	  summary?: null | string
+69	  title?: null | string
+70	  [key: string]: any
+71	}
+72	
+73	export type MarketPageViewModel = {
+74	  departures: DepartureCardViewModel[]
+75	  marketKey: string
+76	  tours: TourCardViewModel[]
+77	}
+78	
+79	export type ScheduleHeroStats = {
+80	  lowestPrice?: null | number
+81	  nextDeparture?: Record<string, any> | null
+82	  openCount: number
+83	}
+84	
+85	export type SchedulePageViewModel = {
+86	  departures: DepartureCardViewModel[]
+87	  featuredDepartures: DepartureCardViewModel[]
+88	  filtersSeed?: {
+89	    airlines: string[]
+90	    markets: string[]
+91	    statuses: string[]
+92	  }
+93	  groupedDepartures?: Array<{ items: DepartureCardViewModel[]; key: string; label: string }>
+94	  heroStats: ScheduleHeroStats
+95	  trustSignals: string[]
+96	}
+97	
+98	export type TourDetailViewModel = TourResolvedData
+```
+
+**`app/src/app/(payload)/api/security/csp-report/route.ts`** — GET(function), POST(function)
+
+```typescript
+1	const maxReportBytes = 16 * 1024
+2	
+3	const bounded = (value: unknown): string | undefined =>
+4	  typeof value === 'string' ? value.slice(0, 256) : undefined
+5	
+6	const safeOrigin = (value: unknown): string | undefined => {
+7	  if (typeof value !== 'string') return undefined
+8	  try {
+9	    return new URL(value).origin.slice(0, 256)
+10	  } catch {
+11	    return bounded(value)
+12	  }
+13	}
+14	
+15	const knownDirectives = new Set([
+16	  'base-uri',
+17	  'child-src',
+18	  'connect-src',
+19	  'default-src',
+20	  'font-src',
+21	  'form-action',
+22	  'frame-ancestors',
+23	  'frame-src',
+24	  'img-src',
+25	  'media-src',
+26	  'object-src',
+27	  'script-src',
+28	  'script-src-attr',
+29	  'script-src-elem',
+30	  'style-src',
+31	  'style-src-attr',
+32	  'style-src-elem',
+33	  'worker-src',
+34	])
+35	
+36	const safeDirectiveLabel = (value: unknown): string => {
+37	  const directive = bounded(value)
+38	  if (!directive) return 'unknown'
+39	  const normalized = directive.toLowerCase()
+40	  return knownDirectives.has(normalized) ? normalized : 'other'
+41	}
+42	
+43	export async function POST(request: Request): Promise<Response> {
+44	  const contentType = request.headers.get('content-type') || ''
+45	  if (!/application\/(?:csp-report|reports\+json|json)/i.test(contentType)) {
+46	    return new Response(null, { status: 415 })
+47	  }
+48	
+49	  const body = await request.text()
+50	  if (Buffer.byteLength(body, 'utf8') > maxReportBytes) {
+51	    return new Response(null, { status: 413 })
+52	  }
+53	
+54	  try {
+55	    const parsed = JSON.parse(body)
+56	    const rawReport = Array.isArray(parsed) ? parsed[0]?.body : parsed?.['csp-report'] || parsed
+57	    if (rawReport && typeof rawReport === 'object') {
+58	      const report = rawReport as Record<string, unknown>
+59	      incrementMetric('wingstravel_csp_reports_total', {
+60	        directive: safeDirectiveLabel(report['effective-directive'] || report.effectiveDirective),
+61	      })
+62	      logOperationalEvent('warn', 'csp_violation', {
+63	        blockedOrigin: safeOrigin(report['blocked-uri'] || report.blockedURL),
+64	        directive: bounded(report['effective-directive'] || report.effectiveDirective),
+65	        documentOrigin: safeOrigin(report['document-uri'] || report.documentURL),
+66	        sourceFileOrigin: safeOrigin(report['source-file'] || report.sourceFile),
+67	      })
+68	    }
+69	  } catch {
+70	    return new Response(null, { status: 400 })
+71	  }
+72	
+73	  return new Response(null, {
+74	    headers: { 'Cache-Control': 'no-store' },
+75	    status: 204,
+76	  })
+77	}
+78	
+79	export function GET(): Response {
+80	  return new Response(null, { status: 405 })
+81	}
+82	import { incrementMetric, logOperationalEvent } from '@/observability'
+```
+
+**`app/src/app/(payload)/api/health/live/route.ts`** — GET(function), noStoreHeaders(function), route.ts(file)
+
+```typescript
+1	const noStoreHeaders = (requestID: string) => ({
+2	  'Cache-Control': 'no-store',
+3	  'X-Request-ID': requestID,
+4	})
+5	
+6	export function GET(): Response {
+7	  const requestID = crypto.randomUUID()
+8	
+9	  return Response.json(
+10	    {
+11	      requestId: requestID,
+12	      status: 'ok',
+13	      timestamp: new Date().toISOString(),
+14	    },
+15	    { headers: noStoreHeaders(requestID) },
+16	  )
+17	}
+18	
+19	export const HEAD = GET
+20	
+```
+
+
+... (output truncated to budget; the source above is complete and verbatim — treat it as already Read. For any area not covered, run another codegraph_explore with the specific names — do NOT Read these files.)
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "Get-Item app/tests/component/marketPromotion.component.spec.tsx, app/tests/unit/marketCommercialDeparture.unit.spec.ts, app/tests/unit/marketCommercialDeparture.spec.ts -ErrorAction SilentlyContinue | Select-Object FullName,LastWriteTime; Get-Content app/package.json | Select-String 'test:|vitest|component'" in E:\repo\WingsTravel
+ succeeded in 437ms:
+
+    "test": "pnpm run test:unit && pnpm run test:component && pnpm run test:int && pnpm run test:e2e",
+    "test:component": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.component.config.mts",
+    "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node scripts/run-phase1-e2e.mjs",
+    "test:e2e:sqlite": "cross-env E2E_DATABASE_ENGINE=sqlite NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" node 
+scripts/run-phase1-e2e.mjs",
+    "test:e2e:wingsside:tour-locales": "cross-env WINGSSIDE_FULL_TOUR_LOCALE_GATE=true 
+PLAYWRIGHT_SKIP_PHASE1_SEED=true NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test 
+tests/e2e/wingsside-tour-locale-matrix.e2e.spec.ts",
+    "test:e2e:prepare-db": "cross-env NODE_OPTIONS=--no-deprecation node scripts/prepare-phase1-e2e-db.mjs",
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation node scripts/run-integration-tests.mjs",
+    "test:unit": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.unit.config.mts",
+    "vitest": "4.1.6"
+
+
+codex
+The market card now uses one normalized departure for its price, discount, and badge. The query still has the old `getNextDeparture(linkedVisible)` selection, so agy’s proposed preference is not yet present in the snapshot I’ve read. I’ll check the fallback behavior and re-read before concluding.
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'codegraph explore "app/src/tours/wingsGoCatalog.ts commercial departure selection"' in E:\repo\WingsTravel
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command '$reviewLines = Get-Content app/src/tours/StructuredPages.tsx; $reviewLines[3484..3725]' in E:\repo\WingsTravel
+ succeeded in 315ms:
+    </TourDepartureSelectionProvider>
+  )
+}
+
+const DepartureStrip = ({
+  departures,
+  locale,
+}: {
+  departures: DepartureCardViewModel[]
+  locale: SupportedLocaleCode
+}) => {
+  const items = departures.slice(0, 6)
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-3">
+      {items.map((departure) => {
+        const product = asDoc<Record<string, any>>(departure.tourProduct)
+        const canHoldSeat = Boolean(
+          departure.commerceVerified &&
+          departure.availabilityStatus !== 'sold-out' &&
+          getFutureDepartures([departure]).length > 0 &&
+          normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }),
+        )
+
+        return (
+          <article
+            className="group relative rounded-[28px] border border-border/70 bg-card/95 p-5 shadow-sm transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-1 hover:border-[color:var(--site-accent)]/40 hover:bg-background hover:shadow-[0_20px_52px_color-mix(in_oklch,var(--site-brand)_14%,transparent)]"
+            key={departure.id}
+          >
+            <div>
+              {product?.slug ? (
+                <SiteLink
+                  className="text-sm font-semibold text-foreground no-underline transition-colors duration-200 hover:text-[var(--site-brand)] group-hover:text-[var(--site-brand)]"
+                  href={getTourPath(product.slug)}
+                >
+                  {product.title || 'Tour'}
+                </SiteLink>
+              ) : (
+                <p className="text-sm font-semibold text-foreground">{product?.title || 'Tour'}</p>
+              )}
+              <p className="mt-1 text-sm text-muted-foreground">
+                {[formatTourDate(departure.departureDate, locale), departure.airline]
+                  .filter(Boolean)
+                  .join(' • ')}
+              </p>
+              <p className="mt-4 text-2xl font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+                {canHoldSeat ? (
+                  <PromotionPrice
+                    contactLabel={locale === 'en' ? 'Contact us' : 'Liên hệ'}
+                    currency={departure.currency}
+                    originalPrice={departure.originalPrice}
+                    price={departure.priceFrom}
+                  />
+                ) : (
+                  formatTourPrice(departure.priceFrom, departure.currency) || 'Liên hệ'
+                )}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-foreground">
+                  {departure.availabilityBadge ||
+                    getAvailabilityLabel(departure.availabilityStatus, locale)}
+                </span>
+                {canHoldSeat ? (
+                  <PromotionBadge label={departure.promoLabel} />
+                ) : null}
+              </div>
+              <div className="mt-5 flex gap-3">
+                <SiteLink
+                  className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_color-mix(in_oklch,var(--site-brand)_18%,transparent)]"
+                  href={getTourInquiryPath({
+                    departureId: departure.id,
+                    intent: canHoldSeat ? 'hold-seat' : 'inquiry',
+                    source: 'departure-strip',
+                    tourId: product?.id,
+                    tourSlug: product?.slug,
+                  })}
+                >
+                  {canHoldSeat
+                    ? departure.ctaLabelOverride || (locale === 'en' ? 'Hold a seat' : 'Giữ chỗ')
+                    : locale === 'en' ? 'Request consultation' : 'Liên hệ tư vấn'}
+                </SiteLink>
+                {product?.slug ? (
+                  <SiteLink
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline transition-[transform,color,border-color,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--site-brand)]/30 hover:bg-[var(--site-brand)]/6 hover:text-[var(--site-brand)] hover:shadow-[0_12px_28px_color-mix(in_oklch,var(--site-brand)_10%,transparent)]"
+                    href={getTourPath(product.slug)}
+                  >
+                    Xem tour
+                  </SiteLink>
+                ) : null}
+              </div>
+            </div>
+          </article>
+        )
+      })}
+    </div>
+  )
+}
+
+export const TourMarketPage = ({
+  departures,
+  locale,
+  marketKey,
+  tours,
+}: {
+  departures: DepartureCardViewModel[]
+  locale: 'en' | 'vi'
+  marketKey: string
+  tours: TourCardViewModel[]
+}) => {
+  const market = getMarketConfig(marketKey)
+
+  return (
+    <div className="container space-y-8">
+      <Panel>
+        <SectionHeading
+          eyebrow="Thị trường outbound"
+          level="h1"
+          title={market?.heading || 'Tour outbound'}
+          description="Các line tour được tổ chức theo thị trường để khách so sánh route, mức giá và nhịp khởi hành trước khi đi vào từng tour detail."
+        />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {tours.map((tour) => {
+            const tourBadges = getMarketTourBadges(tour)
+            const departure = tour.nextDeparture
+            const canPromote = Boolean(
+              departure?.commerceVerified === true &&
+              departure.availabilityStatus !== 'sold-out' &&
+              getFutureDepartures([departure]).length > 0 &&
+              normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }),
+            )
+
+            return (
+              <article
+                className="group relative rounded-[24px] border border-border/60 bg-background p-5 shadow-sm transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-1 hover:border-[color:var(--site-accent)]/40 hover:bg-card hover:shadow-[0_18px_46px_color-mix(in_oklch,var(--site-brand)_14%,transparent)]"
+                key={tour.id}
+              >
+                <div className="relative z-10">
+                  <div className="relative mb-4 aspect-[16/10] overflow-hidden rounded-[20px] bg-muted">
+                    <Media
+                      fill
+                      imgClassName="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                      pictureClassName="absolute inset-0"
+                      resource={tour.heroMedia || asArray(tour.gallery)[0] || null}
+                    />
+                    {canPromote ? (
+                      <div className="absolute inset-x-3 top-3 z-10 flex justify-start">
+                        <PromotionBadge label={departure?.promoLabel} />
+                      </div>
+                    ) : null}
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/35 via-black/10 to-transparent p-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/90">
+                        {tour.hasFutureDepartures === false
+                          ? 'Đang cập nhật đợt mới'
+                          : tour.departureCount
+                            ? `${tour.departureCount} đợt đang mở bán`
+                            : 'Line tour đang bán'}
+                      </p>
+                    </div>
+                  </div>
+                  {tourBadges.length > 0 ? (
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      {tourBadges.map((badge) => (
+                        <span
+                          className="rounded-full border border-border/70 bg-muted/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-foreground transition-colors duration-200 group-hover:border-[var(--site-brand)]/20 group-hover:text-[var(--site-brand)]"
+                          key={badge}
+                        >
+                          {badge}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {tour.slug ? (
+                    <SiteLink
+                      className="text-lg font-semibold text-foreground no-underline transition-colors duration-200 group-hover:text-[var(--site-brand)]"
+                      href={getTourPath(tour.slug)}
+                    >
+                      {tour.title}
+                    </SiteLink>
+                  ) : (
+                    <p className="text-lg font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+                      {tour.title}
+                    </p>
+                  )}
+                  <p className="mt-2 text-sm leading-7 text-muted-foreground">{tour.summary}</p>
+                  <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+                    <p className="text-2xl font-semibold text-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+                      {canPromote ? (
+                        <PromotionPrice
+                          contactLabel={locale === 'en' ? 'Contact us' : 'Liên hệ'}
+                          currency={departure?.currency}
+                          originalPrice={departure?.originalPrice}
+                          price={departure?.priceFrom}
+                        />
+                      ) : (locale === 'en' ? 'Contact us' : 'Liên hệ')}
+                    </p>
+                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground transition-colors duration-200 group-hover:text-[var(--site-brand)]">
+                      {locale === 'en' ? 'Selected departure' : 'Giá theo đợt'}
+                    </span>
+                  </div>
+                  {tour.nextDeparture ? (
+                    <div className="mt-3 rounded-[18px] border border-border/60 bg-muted/25 px-4 py-3 transition-colors duration-200 group-hover:border-[var(--site-brand)]/18 group-hover:bg-[var(--site-brand)]/4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        {tour.hasFutureDepartures === false
+                          ? 'Đang cập nhật đợt mới'
+                          : 'Đợt gần nhất'}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {tour.hasFutureDepartures === false
+                          ? 'Liên hệ để nhận lịch khởi hành sắp mở'
+                          : [
+                              formatTourDate(tour.nextDeparture.departureDate, locale),
+                              tour.nextDeparture.airline,
+                            ]
+                              .filter(Boolean)
+                              .join(' • ')}
+                      </p>
+                    </div>
+                  ) : null}
+                  {tour.slug ? (
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <SiteLink
+                        className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold no-underline transition-[transform,color,border-color,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:border-[var(--site-brand)]/30 hover:bg-[var(--site-brand)]/6 hover:text-[var(--site-brand)] hover:shadow-[0_12px_28px_color-mix(in_oklch,var(--site-brand)_10%,transparent)]"
+                        href={getTourPath(tour.slug)}
+                      >
+                        Xem chi tiết tour
+                      </SiteLink>
+                      <SiteLink
+                        className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-4 text-sm font-semibold text-white no-underline transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_color-mix(in_oklch,var(--site-brand)_18%,transparent)]"
+                        href={
+                          tour.nextDeparture
+                            ? `${getTourPath(tour.slug)}#departures`
+                            : getTourPath(tour.slug)
+                        }
+                      >
+                        {tour.nextDeparture ? 'Xem lịch đi gần nhất' : 'Xem đợt đi'}
+                      </SiteLink>
+                    </div>
+                  ) : null}
+                </div>
+              </article>
+            )
+          })}
+
+ succeeded in 1036ms:
+**Exploration: app/src/tours/wingsGoCatalog.ts commercial departure selection**
+
+Found 27 symbols across 1 file.
+
+**Blast radius — what depends on these (update/verify before editing)**
+
+- `Select` (app/src/components/ui/select.tsx:8) — 6 callers in `app/src/blocks/Form/Country/index.tsx`, `app/src/blocks/Form/State/index.tsx`, `app/src/providers/Theme/ThemeSelector/index.tsx`; ⚠️ no covering tests found
+- `WingsGoCatalogSort` (app/src/tours/wingsGoCatalog.ts:12) — 2 callers in `app/src/tours/wingsGoCatalog.ts`; ⚠️ no covering tests found
+- `WingsGoCatalogPage` (app/src/tours/wingsGoCatalog.ts:23) — 7 callers in `app/src/app/(payload)/api/wingsgo/tour-catalog/route.ts`, `app/src/tours/WingsGoTourCatalogSection.tsx`, `app/src/app/(frontend)/cmsPage.tsx`, `app/src/tours/wingsGoCatalog.ts`; ⚠️ no covering tests found
+- `WingsGoCatalogCard` (app/src/tours/wingsGoCatalog.ts:34) — 18 callers in `app/src/tours/WingsGoTourCatalogClient.tsx`, `app/src/heros/RenderHero.tsx`, `app/src/heros/HighImpact/index.tsx`, `app/src/tours/WingsGoHomepageSections.tsx` +2 more; tests: `app/tests/component/wingsGoTourCatalog.component.spec.tsx`, `app/tests/component/promotionPrice.component.spec.tsx`
+
+**Relationships**
+
+**calls:**
+- Country → Select
+- State → Select
+- ThemeSelector → Select
+- Country → countryOptions
+- Country → Width
+- Country → Label
+- Country → SelectTrigger
+- Country → SelectValue
+- Country → SelectContent
+- Country → SelectItem
+- ... and 141 more
+
+**references:**
+- Label → labelVariants
+- Departure → DepartureFormValue
+- blankDeparture → DepartureFormValue
+- defaultInitial → DepartureFormValue
+- TourDepartureForm → DepartureFormValue
+- TourDepartureForm → availabilityLabels
+- TourDepartureForm → DepartureSaveMode
+- WingsGoCatalogFilters → WingsGoCatalogSort
+- compareCards → WingsGoCatalogSort
+- Props → WingsGoCatalogFilters
+- ... and 61 more
+
+**Source Code**
+
+> The code below is the **verbatim, current on-disk source** of these files — re-read from disk on this call and line-numbered, byte-for-byte identical to what the Read tool returns. It is NOT a summary, outline, or stale cache. Treat each block as a Read you have already performed: do not Read a file shown here.
+
+**`app/src/tours/wingsGoCatalog.ts`** — WingsGoCatalogCard(references), relationID(calls), references(references), readSearchParam(calls), sameID(calls), find(calls), parsePositiveNumber(calls), relationIDs(calls), InventoryDeparture(references), InventoryProduct(references), +46 more
+
+```typescript
+4	import { getMediaUrl } from '@/utilities/getMediaUrl'
+5	import { getTourProductPath } from '@/utilities/siteURLs'
+6	
+7	export const WINGSGO_CATALOG_BATCH_SIZE = 6
+8	export const WINGSGO_CATALOG_MAX_FEATURED = 6
+9	/** Maximum source inventory read for the bounded WingsGo catalog contract. */
+10	export const WINGSGO_CATALOG_MAX_INVENTORY = 200
+11	
+12	export type WingsGoCatalogSort = 'next-departure' | 'price' | 'title'
+13	
+14	export type WingsGoCatalogFilters = {
+15	  market?: string
+16	  durationMax?: number
+17	  durationMin?: number
+18	  priceMax?: number
+19	  priceMin?: number
+20	  sort?: WingsGoCatalogSort
+21	}
+22	
+23	export type WingsGoCatalogPage = {
+24	  id: number | string
+25	  pathname?: null | string
+26	  site: number | string | { code?: null | string; id: number | string }
+27	  wingsGoTourCatalog?: {
+28	    enabled?: boolean | null
+29	    curation?: number | string | { id?: number | string | null; featuredTours?: unknown } | null
+30	    featuredTours?: Array<number | string | { id?: number | string | null }> | null
+31	  } | null
+32	}
+33	
+34	export type WingsGoCatalogCard = {
+35	  duration: { days: number; nights: number }
+36	  id: number | string
+37	  image: { alt: string; url: string } | null
+38	  market: string
+39	  nextDeparture: {
+40	    airline: string | null
+41	    date: string
+42	    departureCity: string | null
+43	    promoLabel?: string | null
+44	  }
+45	  price:
+46	    | { currency: string; kind: 'verified'; originalPrice?: number | null; value: number }
+47	    | { kind: 'contact'; label: string }
+48	  slug: string
+49	  summary: string
+50	  title: string
+51	  href: string
+52	}
+53	
+54	export type WingsGoCatalogData = {
+55	  all: WingsGoCatalogCard[]
+56	  featured: WingsGoCatalogCard[]
+57	  hasMore: boolean
+58	  nextOffset: number
+59	}
+60	
+61	type Relation = number | string | { id?: number | string | null } | null | undefined
+62	type InventoryProduct = {
+63	  _status?: null | string
+64	  durationDays?: number | null
+65	  durationNights?: number | null
+66	  gallery?: unknown
+67	  heroMedia?: unknown
+68	  id: number | string
+69	  market?: null | string
+70	  slug?: null | string
+71	  summary?: null | string
+72	  title?: null | string
+73	  wrapperPage?: Relation
+74	  site?: Relation
+75	}
+76	type InventoryMedia = {
+77	  alt?: null | string
+78	  site?: Relation
+79	  url?: null | string
+80	}
+81	type InventoryWrapper = {
+82	  _status?: null | string
+83	  id: number | string
+84	  pathname?: null | string
+85	  site?: Relation
+86	}
+87	type InventoryDeparture = {
+88	  _status?: null | string
+89	  airline?: null | string
+90	  currency?: null | string
+91	  commerceVerified?: boolean | null
+92	  departureCity?: null | string
+93	  departureDate?: null | string
+94	  expiresAt?: null | string
+95	  id: number | string
+96	  priceFrom?: null | number
+97	  originalPrice?: null | number
+98	  originalCurrency?: null | string
+99	  promoLabel?: null | string
+100	  tourProduct?: Relation
+101	  availabilityStatus?: null | string
+102	  verifiedAt?: null | string
+103	  site?: Relation
+104	}
+105	
+106	type SearchParamSource = URLSearchParams | Record<string, string | string[] | undefined>
+107	
+108	const relationID = (value: Relation): number | string | null => {
+109	  if (typeof value === 'number' || typeof value === 'string') return value
+110	  if (value && (typeof value.id === 'number' || typeof value.id === 'string')) return value.id
+111	  return null
+112	}
+113	
+114	const sameID = (left: unknown, right: unknown) => {
+115	  const leftID = relationID(left as Relation)
+116	  const rightID = relationID(right as Relation)
+117	  return leftID !== null && rightID !== null && String(leftID) === String(rightID)
+118	}
+119	
+120	const validDate = (value: unknown): string | null => {
+121	  if (typeof value !== 'string' || !value) return null
+122	  const date = new Date(value)
+123	  return Number.isFinite(date.getTime()) ? value : null
+124	}
+125	
+126	const sortDepartures = (departures: InventoryDeparture[]) =>
+127	  [...departures].sort((left, right) => {
+128	    const dateDelta =
+129	      new Date(left.departureDate || '').getTime() - new Date(right.departureDate || '').getTime()
+130	    if (dateDelta !== 0) return dateDelta
+131	    return String(left.id).localeCompare(String(right.id), 'en')
+132	  })
+133	
+134	const relationIDs = (value: unknown) =>
+135	  (Array.isArray(value) ? value : [])
+136	    .map((item) => relationID(item as Relation))
+137	    .filter((id): id is number | string => id !== null)
+138	
+139	const mediaDTO = (value: unknown, fallbackAlt: string, productSite: Relation) => {
+140	  if (!value || typeof value !== 'object') return null
+141	  const media = value as InventoryMedia
+142	  return media.url && sameID(media.site, productSite)
+143	    ? { alt: media.alt?.trim() || fallbackAlt, url: getMediaUrl(media.url) }
+144	    : null
+145	}
+146	
+147	const firstMedia = (product: InventoryProduct) => {
+148	  const fallbackAlt = product.title || 'Tour WingsGo'
+149	  const hero = mediaDTO(product.heroMedia, fallbackAlt, product.site)
+150	  if (hero) return hero
+151	  const gallery = Array.isArray(product.gallery) ? product.gallery : []
+152	  for (const item of gallery) {
+153	    const media = mediaDTO(item, fallbackAlt, product.site)
+154	    if (media) return media
+155	  }
+156	  return null
+157	}
+158	
+159	export const isEligibleWingsGoCatalogProduct = ({
+160	  departures,
+161	  now = new Date(),
+162	  product,
+163	  siteCode,
+164	  wrapper,
+165	}: {
+166	  departures: InventoryDeparture[]
+167	  now?: Date
+168	  product: InventoryProduct
+169	  siteCode: string
+170	  wrapper?: InventoryWrapper | null
+171	}) => {
+172	  const futureDepartures = departures.filter((departure) => {
+173	    const date = validDate(departure.departureDate)
+174	    return (
+175	      departure._status === 'published' &&
+176	      sameID(departure.tourProduct, product.id) &&
+177	      sameID(departure.site, product.site) &&
+178	      date !== null &&
+179	      new Date(date).getTime() > now.getTime()
+180	    )
+181	  })
+182	
+183	  return (
+184	    siteCode === 'wings-go' &&
+185	    product._status === 'published' &&
+186	    sameID(product.site, wrapper?.site) &&
+187	    wrapper?._status === 'published' &&
+188	    wrapper.pathname === `/tour/${product.slug}` &&
+189	    futureDepartures.length > 0
+190	  )
+191	}
+192	
+193	const buildCard = ({
+194	  departures,
+195	  now,
+196	  product,
+197	  wrapper,
+198	}: {
+199	  departures: InventoryDeparture[]
+200	  now: Date
+201	  product: InventoryProduct
+202	  wrapper: InventoryWrapper | null
+203	}): WingsGoCatalogCard | null => {
+204	  if (
+205	    !product.slug ||
+206	    !product.title ||
+207	    !isEligibleWingsGoCatalogProduct({
+208	      departures,
+209	      now,
+210	      product,
+211	      siteCode: 'wings-go',
+212	      wrapper,
+213	    })
+214	  ) {
+215	    return null
+216	  }
+217	
+218	  const futureDepartures = sortDepartures(departures).filter((departure) => {
+219	    const date = validDate(departure.departureDate)
+220	    return (
+221	      departure._status === 'published' &&
+222	      sameID(departure.tourProduct, product.id) &&
+223	      sameID(departure.site, product.site) &&
+224	      date !== null &&
+225	      new Date(date).getTime() > now.getTime()
+226	    )
+227	  })
+228	  // Align commercial departure: prefer the earliest verified departure with a valid price;
+229	  // if none has verified price, use the earliest valid future departure.
+230	  const verifiedPriceDeparture = futureDepartures
+231	    .filter((departure) => {
+232	      const hasFreshness = Boolean(departure.verifiedAt || departure.expiresAt)
+233	      return departure.commerceVerified !== false &&
+234	        (hasFreshness
+235	          ? isDepartureVerificationCurrent(departure, now.getTime())
+236	          : departure.commerceVerified === true)
+237	    })
+238	    .find((departure) => typeof departure.priceFrom === 'number' && departure.priceFrom > 0)
+239	
+240	  const commercialDeparture = verifiedPriceDeparture || futureDepartures[0]
+241	  if (!commercialDeparture?.departureDate) return null
+242	
+243	  // Payload stores the verification window; commerceVerified is a derived DTO value.
+244	  const commerciallyVerified = Boolean(verifiedPriceDeparture)
+245	  const canShowDiscount =
+246	    commerciallyVerified &&
+247	    commercialDeparture.availabilityStatus !== 'sold-out' &&
+248	    typeof commercialDeparture.priceFrom === 'number' &&
+249	    commercialDeparture.priceFrom > 0 &&
+250	    typeof commercialDeparture.originalPrice === 'number' &&
+251	    commercialDeparture.originalPrice > commercialDeparture.priceFrom &&
+252	    Boolean(commercialDeparture.currency) &&
+253	    (!commercialDeparture.originalCurrency || commercialDeparture.originalCurrency === commercialDeparture.currency)
+254	
+255	  const price = verifiedPriceDeparture && commerciallyVerified
+256	    ? {
+257	        currency: verifiedPriceDeparture.currency || 'VND',
+258	        kind: 'verified' as const,
+259	        originalPrice: canShowDiscount ? commercialDeparture.originalPrice : null,
+260	        value: verifiedPriceDeparture.priceFrom!,
+261	      }
+262	    : { kind: 'contact' as const, label: 'Liên hệ để nhận giá mới nhất' }
+263	
+264	  return {
+265	    duration: {
+266	      days: Number(product.durationDays || 0),
+267	      nights: Number(product.durationNights || 0),
+268	    },
+269	    href: getTourProductPath(product.slug),
+270	    id: product.id,
+271	    image: firstMedia(product),
+272	    market: product.market || 'other',
+273	    nextDeparture: {
+274	      airline: commercialDeparture.airline || null,
+275	      date: commercialDeparture.departureDate,
+276	      departureCity: commercialDeparture.departureCity || null,
+277	      promoLabel:
+278	        price.kind === 'verified' && commercialDeparture.availabilityStatus !== 'sold-out'
+279	          ? commercialDeparture.promoLabel || null
+280	          : null,
+281	    },
+282	    price,
+283	    slug: product.slug,
+284	    summary: product.summary || '',
+285	    title: product.title,
+286	  }
+287	}
+288	
+289	const compareCards = (
+290	  left: WingsGoCatalogCard,
+291	  right: WingsGoCatalogCard,
+292	  sort: WingsGoCatalogSort,
+293	) => {
+294	  if (sort === 'price') {
+295	    const leftPrice = left.price.kind === 'verified' ? left.price.value : Number.MAX_SAFE_INTEGER
+296	    const rightPrice = right.price.kind === 'verified' ? right.price.value : Number.MAX_SAFE_INTEGER
+297	    if (leftPrice !== rightPrice) return leftPrice - rightPrice
+298	  }
+299	
+300	  if (sort === 'title') {
+301	    const titleDelta = left.title.localeCompare(right.title, 'vi')
+302	    if (titleDelta !== 0) return titleDelta
+303	  }
+304	
+305	  const dateDelta =
+306	    new Date(left.nextDeparture.date).getTime() - new Date(right.nextDeparture.date).getTime()
+307	  if (dateDelta !== 0) return dateDelta
+308	  const titleDelta = left.title.localeCompare(right.title, 'vi')
+309	  if (titleDelta !== 0) return titleDelta
+310	  return String(left.id).localeCompare(String(right.id), 'en')
+311	}
+312	
+313	export const selectWingsGoCatalogCards = ({
+314	  cards,
+315	  excludeIDs = [],
+316	  filters = {},
+317	  limit = WINGSGO_CATALOG_BATCH_SIZE,
+318	  offset = 0,
+319	}: {
+320	  cards: WingsGoCatalogCard[]
+321	  excludeIDs?: Array<number | string>
+322	  filters?: WingsGoCatalogFilters
+323	  limit?: number
+324	  offset?: number
+325	}) => {
+326	  const boundedLimit = Math.min(Math.max(limit, 0), WINGSGO_CATALOG_BATCH_SIZE)
+327	  const excluded = new Set(excludeIDs.map(String))
+328	  const filtered = cards
+329	    .filter((card) => !excluded.has(String(card.id)))
+330	    .filter((card) => !filters.market || card.market === filters.market)
+331	    .filter(
+332	      (card) => filters.durationMin === undefined || card.duration.days >= filters.durationMin,
+333	    )
+334	    .filter(
+335	      (card) => filters.durationMax === undefined || card.duration.days <= filters.durationMax,
+336	    )
+337	    .filter((card) => {
+338	      const price = card.price.kind === 'verified' ? card.price.value : null
+339	      return filters.priceMin === undefined || (price !== null && price >= filters.priceMin)
+340	    })
+341	    .filter((card) => {
+342	      const price = card.price.kind === 'verified' ? card.price.value : null
+343	      return filters.priceMax === undefined || (price !== null && price <= filters.priceMax)
+344	    })
+345	
+346	  const seenIDs = new Set<string>()
+347	  const deduped = filtered.filter((card) => {
+348	    const key = String(card.id)
+349	    if (seenIDs.has(key)) return false
+350	    seenIDs.add(key)
+351	    return true
+352	  })
+353	  deduped.sort((left, right) => compareCards(left, right, filters.sort || 'next-departure'))
+354	
+355	  return {
+356	    cards: deduped.slice(offset, offset + boundedLimit),
+357	    hasMore: offset + boundedLimit < deduped.length,
+358	    total: deduped.length,
+359	  }
+360	}
+361	
+362	const readSearchParam = (source: SearchParamSource, key: string) => {
+363	  if (source instanceof URLSearchParams) return source.get(key) || undefined
+364	  const value = source[key]
+365	  return Array.isArray(value) ? value[0] : value
+366	}
+367	
+368	const parsePositiveNumber = (value?: string) => {
+369	  if (!value || !/^\d+(?:\.\d+)?$/u.test(value)) return undefined
+370	  const parsed = Number(value)
+371	  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined
+372	}
+373	
+374	export const parseWingsGoCatalogFilters = (source: SearchParamSource): WingsGoCatalogFilters => {
+375	  const sort = readSearchParam(source, 'sort')
+376	  const durationMin = parsePositiveNumber(readSearchParam(source, 'durationMin'))
+377	  const durationMax = parsePositiveNumber(readSearchParam(source, 'durationMax'))
+378	  const priceMin = parsePositiveNumber(readSearchParam(source, 'priceMin'))
+379	  const priceMax = parsePositiveNumber(readSearchParam(source, 'priceMax'))
+380	
+381	  return {
+382	    ...(readSearchParam(source, 'market') ? { market: readSearchParam(source, 'market') } : {}),
+383	    ...(durationMin === undefined ? {} : { durationMin }),
+384	    ...(durationMax === undefined ? {} : { durationMax }),
+385	    ...(priceMin === undefined ? {} : { priceMin }),
+386	    ...(priceMax === undefined ? {} : { priceMax }),
+387	    ...(sort === 'next-departure' || sort === 'price' || sort === 'title' ? { sort } : {}),
+388	  }
+389	}
+390	
+391	const queryDocs = async (
+392	  payload: Payload,
+393	  collection: 'pages' | 'tour-departures' | 'tour-products',
+394	  where: unknown,
+395	  locale?: string,
+396	) =>
+397	  payload.find({
+398	    collection,
+399	    depth: 2,
+400	    draft: false,
+401	    ...(locale ? { fallbackLocale: 'vi', locale: locale as never } : {}),
+402	    limit: WINGSGO_CATALOG_MAX_INVENTORY,
+403	    overrideAccess: true,
+404	    pagination: false,
+405	    where: where as never,
+406	  })
+407	
+408	export const queryWingsGoTourCatalog = async ({
+409	  filters = {},
+410	  limit = WINGSGO_CATALOG_BATCH_SIZE,
+411	  locale = 'vi',
+412	  now = new Date(),
+413	  offset = 0,
+414	  page,
+415	  payload,
+416	  site,
+417	}: {
+418	  filters?: WingsGoCatalogFilters
+419	  limit?: number
+420	  locale?: string
+421	  now?: Date
+422	  offset?: number
+423	  page: WingsGoCatalogPage
+424	  payload: Payload
+425	  site: { code: string; id: number | string }
+426	}): Promise<WingsGoCatalogData> => {
+427	  if (
+428	    site.code !== 'wings-go' ||
+429	    (!page.wingsGoTourCatalog?.enabled && page.pathname !== '/tour')
+430	  ) {
+431	    return { all: [], featured: [], hasMore: false, nextOffset: 0 }
+432	  }
+433	
+434	  const wrapperResult = await queryDocs(
+435	    payload,
+436	    'pages',
+437	    {
+438	      and: [
+439	        { _status: { equals: 'published' } },
+440	        { site: { equals: site.id } },
+441	        { pathname: { like: '/tour/%' } },
+442	      ],
+443	    },
+444	    locale,
+445	  )
+446	  const wrappers = wrapperResult.docs as unknown as InventoryWrapper[]
+447	  const wrapperIDs = wrappers.map((wrapper) => wrapper.id)
+448	  if (wrapperIDs.length === 0) return { all: [], featured: [], hasMore: false, nextOffset: 0 }
+449	
+450	  const productsResult = await queryDocs(
+451	    payload,
+452	    'tour-products',
+453	    {
+454	      and: [
+455	        { _status: { equals: 'published' } },
+456	        { site: { equals: site.id } },
+457	        { wrapperPage: { in: wrapperIDs } },
+458	      ],
+459	    },
+460	    locale,
+461	  )
+462	  const products = productsResult.docs as unknown as InventoryProduct[]
+463	  const productIDs = products.map((product) => product.id)
+464	  if (productIDs.length === 0) return { all: [], featured: [], hasMore: false, nextOffset: 0 }
+465	
+466	  const departuresResult = await queryDocs(
+467	    payload,
+468	    'tour-departures',
+469	    {
+470	      and: [
+471	        { _status: { equals: 'published' } },
+472	        { site: { equals: site.id } },
+473	        { tourProduct: { in: productIDs } },
+474	        { departureDate: { greater_than: now.toISOString() } },
+475	      ],
+476	    },
+477	    locale,
+478	  )
+479	  const departures = departuresResult.docs as unknown as InventoryDeparture[]
+480	  const wrappersByID = new Map(wrappers.map((wrapper) => [String(wrapper.id), wrapper]))
+481	  const departuresByProduct = new Map<string, InventoryDeparture[]>()
+482	  for (const departure of departures) {
+483	    const productID = relationID(departure.tourProduct)
+484	    if (productID === null) continue
+485	    const current = departuresByProduct.get(String(productID)) || []
+486	    current.push(departure)
+487	    departuresByProduct.set(String(productID), current)
+488	  }
+489	
+490	  const cards = products
+491	    .map((product) =>
+492	      buildCard({
+493	        departures: departuresByProduct.get(String(product.id)) || [],
+494	        now,
+495	        product,
+496	        wrapper: wrappersByID.get(String(relationID(product.wrapperPage))) || null,
+497	      }),
+498	    )
+499	    .filter((card): card is WingsGoCatalogCard => Boolean(card))
+500	
+501	  const configuredIDs = await resolveCuratedTourIDs({
+502	    page,
+503	    payload,
+504	    siteID: site.id,
+505	  })
+506	  const configuredFeatured: WingsGoCatalogCard[] = []
+507	  const configuredSeenIDs = new Set<string>()
+508	  for (const id of configuredIDs) {
+509	    const key = String(id)
+510	    if (configuredSeenIDs.has(key)) continue
+511	    const card = cards.find((candidate) => String(candidate.id) === key)
+512	    if (card) {
+513	      configuredSeenIDs.add(key)
+514	      configuredFeatured.push(card)
+515	    }
+516	  }
+517	  const fallback = selectWingsGoCatalogCards({
+518	    cards,
+519	    excludeIDs: configuredFeatured.map((card) => card.id),
+520	    filters: {},
+521	  }).cards
+522	  const featured = [...configuredFeatured, ...fallback].slice(0, WINGSGO_CATALOG_MAX_FEATURED)
+523	  const featuredIDs = featured.map((card) => card.id)
+524	  const all = selectWingsGoCatalogCards({ cards, excludeIDs: featuredIDs, filters, limit, offset })
+525	
+526	  return {
+527	    all: all.cards,
+528	    featured,
+529	    hasMore: all.hasMore,
+530	    nextOffset: offset + all.cards.length,
+531	  }
+532	}
+533	
+534	export const resolveCuratedTourIDs = async ({
+535	  page,
+536	  payload,
+537	  siteID,
+538	}: {
+539	  page?: WingsGoCatalogPage | null
+540	  payload: Payload
+541	  siteID: number | string
+542	}): Promise<Array<number | string>> => {
+543	  // Tier 1: Page-bound curation
+544	  const pageCurationRef = page?.wingsGoTourCatalog?.curation
+545	  if (pageCurationRef) {
+546	    if (
+547	      typeof pageCurationRef === 'object' &&
+548	      pageCurationRef !== null &&
+549	      'featuredTours' in pageCurationRef &&
+550	      Array.isArray((pageCurationRef as { featuredTours?: unknown }).featuredTours)
+551	    ) {
+552	      const pageCurationSite = relationID((pageCurationRef as { site?: Relation }).site)
+553	      if (!pageCurationSite || String(pageCurationSite) === String(siteID)) {
+554	        const ids = relationIDs((pageCurationRef as { featuredTours?: unknown }).featuredTours)
+555	        if (ids.length > 0) return ids
+556	      }
+557	    }
+558	    const curationID = relationID(pageCurationRef as Relation)
+559	    if (curationID) {
+560	      try {
+561	        const curationDoc = await payload.findByID({
+562	          collection: 'tour-curations',
+563	          depth: 0,
+564	          id: curationID,
+565	          overrideAccess: true,
+566	        })
+567	        if (curationDoc) {
+568	          const curationSite = relationID((curationDoc as { site?: Relation }).site)
+569	          if (!curationSite || String(curationSite) === String(siteID)) {
+570	            const ids = relationIDs((curationDoc as { featuredTours?: unknown }).featuredTours)
+571	            if (ids.length > 0) return ids
+572	          }
+573	        }
+574	      } catch {
+575	        // Fallback to Tier 2
+576	      }
+577	    }
+578	  }
+579	
+580	  // Tier 2: Site default curation
+581	  try {
+582	    const defaultCurationResult = await payload.find({
+583	      collection: 'tour-curations',
+584	      depth: 0,
+585	      limit: 1,
+586	      overrideAccess: true,
+587	      pagination: false,
+588	      where: {
+589	        and: [{ site: { equals: siteID } }, { isDefault: { equals: true } }],
+590	      },
+591	    })
+592	    const defaultDoc = defaultCurationResult.docs[0]
+593	    if (defaultDoc) {
+594	      const ids = relationIDs((defaultDoc as { featuredTours?: unknown }).featuredTours)
+595	      if (ids.length > 0) return ids
+596	    }
+597	  } catch {
+598	    // Fallback to Tier 3
+599	  }
+600	
+601	  // Tier 3: Legacy featuredTours array on page
+602	  const legacyIDs = relationIDs(page?.wingsGoTourCatalog?.featuredTours)
+603	  if (legacyIDs.length > 0) {
+604	    return legacyIDs
+605	  }
+606	
+607	  // Tier 4: Algorithmic fallback
+608	  return []
+609	}
+610	
+611	export const getWingsGoFeaturedTours = async ({
+612	  curationID,
+613	  limit = 4,
+614	  locale = 'vi',
+615	  payload,
+616	  site,
+617	}: {
+618	  curationID?: number | string
+619	  limit?: number
+620	  locale?: string
+
+... (output truncated to budget; the source above is complete and verbatim — treat it as already Read. For any area not covered, run another codegraph_explore with the specific names — do NOT Read these files.)
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'codegraph explore "app/src/tours/wingsGoCatalog.ts buildCard"' in E:\repo\WingsTravel
+ succeeded in 838ms:
+**Exploration: app/src/tours/wingsGoCatalog.ts buildCard**
+
+Found 29 symbols across 1 file.
+
+**Blast radius — what depends on these (update/verify before editing)**
+
+- `buildCard` (app/src/tours/wingsGoCatalog.ts:193) — 1 caller in `app/src/tours/wingsGoCatalog.ts`; ⚠️ no covering tests found
+- `WingsGoCatalogCard` (app/src/tours/wingsGoCatalog.ts:34) — 18 callers in `app/src/tours/WingsGoTourCatalogClient.tsx`, `app/src/heros/RenderHero.tsx`, `app/src/heros/HighImpact/index.tsx`, `app/src/tours/WingsGoHomepageSections.tsx` +2 more; tests: `app/tests/component/wingsGoTourCatalog.component.spec.tsx`, `app/tests/component/promotionPrice.component.spec.tsx`
+- `Card` (app/src/components/Card/index.tsx:24) — 4 callers in `app/src/blocks/RelatedPosts/Component.tsx`, `app/src/components/CollectionArchive/index.tsx`; ⚠️ no covering tests found
+- `WingsGoCatalogSort` (app/src/tours/wingsGoCatalog.ts:12) — 2 callers in `app/src/tours/wingsGoCatalog.ts`; ⚠️ no covering tests found
+- `WingsGoCatalogPage` (app/src/tours/wingsGoCatalog.ts:23) — 7 callers in `app/src/app/(payload)/api/wingsgo/tour-catalog/route.ts`, `app/src/tours/WingsGoTourCatalogSection.tsx`, `app/src/app/(frontend)/cmsPage.tsx`, `app/src/tours/wingsGoCatalog.ts`; ⚠️ no covering tests found
+
+**Relationships**
+
+**calls:**
+- buildCard → isEligibleWingsGoCatalogProduct
+- buildCard → sortDepartures
+- buildCard → validDate
+- buildCard → sameID
+- buildCard → find
+- buildCard → isDepartureVerificationCurrent
+- buildCard → getTourProductPath
+- buildCard → firstMedia
+- queryWingsGoTourCatalog → buildCard
+- isEligibleWingsGoCatalogProduct → validDate
+- ... and 94 more
+
+**references:**
+- buildCard → InventoryDeparture
+- buildCard → InventoryProduct
+- buildCard → InventoryWrapper
+- buildCard → WingsGoCatalogCard
+- isEligibleWingsGoCatalogProduct → InventoryDeparture
+- isEligibleWingsGoCatalogProduct → InventoryProduct
+- isEligibleWingsGoCatalogProduct → InventoryWrapper
+- sortDepartures → InventoryDeparture
+- CatalogGrid → WingsGoCatalogCard
+- makeCard → WingsGoCatalogCard
+- ... and 45 more
+
+**Source Code**
+
+> The code below is the **verbatim, current on-disk source** of these files — re-read from disk on this call and line-numbered, byte-for-byte identical to what the Read tool returns. It is NOT a summary, outline, or stale cache. Treat each block as a Read you have already performed: do not Read a file shown here.
+
+**`app/src/tours/wingsGoCatalog.ts`** — WingsGoCatalogCard(references), relationID(calls), references(references), sameID(calls), readSearchParam(calls), find(calls), parsePositiveNumber(calls), relationIDs(calls), InventoryDeparture(references), InventoryProduct(references), +50 more
+
+```typescript
+4	import { getMediaUrl } from '@/utilities/getMediaUrl'
+5	import { getTourProductPath } from '@/utilities/siteURLs'
+6	
+7	export const WINGSGO_CATALOG_BATCH_SIZE = 6
+8	export const WINGSGO_CATALOG_MAX_FEATURED = 6
+9	/** Maximum source inventory read for the bounded WingsGo catalog contract. */
+10	export const WINGSGO_CATALOG_MAX_INVENTORY = 200
+11	
+12	export type WingsGoCatalogSort = 'next-departure' | 'price' | 'title'
+13	
+14	export type WingsGoCatalogFilters = {
+15	  market?: string
+16	  durationMax?: number
+17	  durationMin?: number
+18	  priceMax?: number
+19	  priceMin?: number
+20	  sort?: WingsGoCatalogSort
+21	}
+22	
+23	export type WingsGoCatalogPage = {
+24	  id: number | string
+25	  pathname?: null | string
+26	  site: number | string | { code?: null | string; id: number | string }
+27	  wingsGoTourCatalog?: {
+28	    enabled?: boolean | null
+29	    curation?: number | string | { id?: number | string | null; featuredTours?: unknown } | null
+30	    featuredTours?: Array<number | string | { id?: number | string | null }> | null
+31	  } | null
+32	}
+33	
+34	export type WingsGoCatalogCard = {
+35	  duration: { days: number; nights: number }
+36	  id: number | string
+37	  image: { alt: string; url: string } | null
+38	  market: string
+39	  nextDeparture: {
+40	    airline: string | null
+41	    date: string
+42	    departureCity: string | null
+43	    promoLabel?: string | null
+44	  }
+45	  price:
+46	    | { currency: string; kind: 'verified'; originalPrice?: number | null; value: number }
+47	    | { kind: 'contact'; label: string }
+48	  slug: string
+49	  summary: string
+50	  title: string
+51	  href: string
+52	}
+53	
+54	export type WingsGoCatalogData = {
+55	  all: WingsGoCatalogCard[]
+56	  featured: WingsGoCatalogCard[]
+57	  hasMore: boolean
+58	  nextOffset: number
+59	}
+60	
+61	type Relation = number | string | { id?: number | string | null } | null | undefined
+62	type InventoryProduct = {
+63	  _status?: null | string
+64	  durationDays?: number | null
+65	  durationNights?: number | null
+66	  gallery?: unknown
+67	  heroMedia?: unknown
+68	  id: number | string
+69	  market?: null | string
+70	  slug?: null | string
+71	  summary?: null | string
+72	  title?: null | string
+73	  wrapperPage?: Relation
+74	  site?: Relation
+75	}
+76	type InventoryMedia = {
+77	  alt?: null | string
+78	  site?: Relation
+79	  url?: null | string
+80	}
+81	type InventoryWrapper = {
+82	  _status?: null | string
+83	  id: number | string
+84	  pathname?: null | string
+85	  site?: Relation
+86	}
+87	type InventoryDeparture = {
+88	  _status?: null | string
+89	  airline?: null | string
+90	  currency?: null | string
+91	  commerceVerified?: boolean | null
+92	  departureCity?: null | string
+93	  departureDate?: null | string
+94	  expiresAt?: null | string
+95	  id: number | string
+96	  priceFrom?: null | number
+97	  originalPrice?: null | number
+98	  originalCurrency?: null | string
+99	  promoLabel?: null | string
+100	  tourProduct?: Relation
+101	  availabilityStatus?: null | string
+102	  verifiedAt?: null | string
+103	  site?: Relation
+104	}
+105	
+106	type SearchParamSource = URLSearchParams | Record<string, string | string[] | undefined>
+107	
+108	const relationID = (value: Relation): number | string | null => {
+109	  if (typeof value === 'number' || typeof value === 'string') return value
+110	  if (value && (typeof value.id === 'number' || typeof value.id === 'string')) return value.id
+111	  return null
+112	}
+113	
+114	const sameID = (left: unknown, right: unknown) => {
+115	  const leftID = relationID(left as Relation)
+116	  const rightID = relationID(right as Relation)
+117	  return leftID !== null && rightID !== null && String(leftID) === String(rightID)
+118	}
+119	
+120	const validDate = (value: unknown): string | null => {
+121	  if (typeof value !== 'string' || !value) return null
+122	  const date = new Date(value)
+123	  return Number.isFinite(date.getTime()) ? value : null
+124	}
+125	
+126	const sortDepartures = (departures: InventoryDeparture[]) =>
+127	  [...departures].sort((left, right) => {
+128	    const dateDelta =
+129	      new Date(left.departureDate || '').getTime() - new Date(right.departureDate || '').getTime()
+130	    if (dateDelta !== 0) return dateDelta
+131	    return String(left.id).localeCompare(String(right.id), 'en')
+132	  })
+133	
+134	const relationIDs = (value: unknown) =>
+135	  (Array.isArray(value) ? value : [])
+136	    .map((item) => relationID(item as Relation))
+137	    .filter((id): id is number | string => id !== null)
+138	
+139	const mediaDTO = (value: unknown, fallbackAlt: string, productSite: Relation) => {
+140	  if (!value || typeof value !== 'object') return null
+141	  const media = value as InventoryMedia
+142	  return media.url && sameID(media.site, productSite)
+143	    ? { alt: media.alt?.trim() || fallbackAlt, url: getMediaUrl(media.url) }
+144	    : null
+145	}
+146	
+147	const firstMedia = (product: InventoryProduct) => {
+148	  const fallbackAlt = product.title || 'Tour WingsGo'
+149	  const hero = mediaDTO(product.heroMedia, fallbackAlt, product.site)
+150	  if (hero) return hero
+151	  const gallery = Array.isArray(product.gallery) ? product.gallery : []
+152	  for (const item of gallery) {
+153	    const media = mediaDTO(item, fallbackAlt, product.site)
+154	    if (media) return media
+155	  }
+156	  return null
+157	}
+158	
+159	export const isEligibleWingsGoCatalogProduct = ({
+160	  departures,
+161	  now = new Date(),
+162	  product,
+163	  siteCode,
+164	  wrapper,
+165	}: {
+166	  departures: InventoryDeparture[]
+167	  now?: Date
+168	  product: InventoryProduct
+169	  siteCode: string
+170	  wrapper?: InventoryWrapper | null
+171	}) => {
+172	  const futureDepartures = departures.filter((departure) => {
+173	    const date = validDate(departure.departureDate)
+174	    return (
+175	      departure._status === 'published' &&
+176	      sameID(departure.tourProduct, product.id) &&
+177	      sameID(departure.site, product.site) &&
+178	      date !== null &&
+179	      new Date(date).getTime() > now.getTime()
+180	    )
+181	  })
+182	
+183	  return (
+184	    siteCode === 'wings-go' &&
+185	    product._status === 'published' &&
+186	    sameID(product.site, wrapper?.site) &&
+187	    wrapper?._status === 'published' &&
+188	    wrapper.pathname === `/tour/${product.slug}` &&
+189	    futureDepartures.length > 0
+190	  )
+191	}
+192	
+193	const buildCard = ({
+194	  departures,
+195	  now,
+196	  product,
+197	  wrapper,
+198	}: {
+199	  departures: InventoryDeparture[]
+200	  now: Date
+201	  product: InventoryProduct
+202	  wrapper: InventoryWrapper | null
+203	}): WingsGoCatalogCard | null => {
+204	  if (
+205	    !product.slug ||
+206	    !product.title ||
+207	    !isEligibleWingsGoCatalogProduct({
+208	      departures,
+209	      now,
+210	      product,
+211	      siteCode: 'wings-go',
+212	      wrapper,
+213	    })
+214	  ) {
+215	    return null
+216	  }
+217	
+218	  const futureDepartures = sortDepartures(departures).filter((departure) => {
+219	    const date = validDate(departure.departureDate)
+220	    return (
+221	      departure._status === 'published' &&
+222	      sameID(departure.tourProduct, product.id) &&
+223	      sameID(departure.site, product.site) &&
+224	      date !== null &&
+225	      new Date(date).getTime() > now.getTime()
+226	    )
+227	  })
+228	  // Align commercial departure: prefer the earliest verified departure with a valid price;
+229	  // if none has verified price, use the earliest valid future departure.
+230	  const verifiedPriceDeparture = futureDepartures
+231	    .filter((departure) => {
+232	      const hasFreshness = Boolean(departure.verifiedAt || departure.expiresAt)
+233	      return departure.commerceVerified !== false &&
+234	        (hasFreshness
+235	          ? isDepartureVerificationCurrent(departure, now.getTime())
+236	          : departure.commerceVerified === true)
+237	    })
+238	    .find((departure) => typeof departure.priceFrom === 'number' && departure.priceFrom > 0)
+239	
+240	  const commercialDeparture = verifiedPriceDeparture || futureDepartures[0]
+241	  if (!commercialDeparture?.departureDate) return null
+242	
+243	  // Payload stores the verification window; commerceVerified is a derived DTO value.
+244	  const commerciallyVerified = Boolean(verifiedPriceDeparture)
+245	  const canShowDiscount =
+246	    commerciallyVerified &&
+247	    commercialDeparture.availabilityStatus !== 'sold-out' &&
+248	    typeof commercialDeparture.priceFrom === 'number' &&
+249	    commercialDeparture.priceFrom > 0 &&
+250	    typeof commercialDeparture.originalPrice === 'number' &&
+251	    commercialDeparture.originalPrice > commercialDeparture.priceFrom &&
+252	    Boolean(commercialDeparture.currency) &&
+253	    (!commercialDeparture.originalCurrency || commercialDeparture.originalCurrency === commercialDeparture.currency)
+254	
+255	  const price = verifiedPriceDeparture && commerciallyVerified
+256	    ? {
+257	        currency: verifiedPriceDeparture.currency || 'VND',
+258	        kind: 'verified' as const,
+259	        originalPrice: canShowDiscount ? commercialDeparture.originalPrice : null,
+260	        value: verifiedPriceDeparture.priceFrom!,
+261	      }
+262	    : { kind: 'contact' as const, label: 'Liên hệ để nhận giá mới nhất' }
+263	
+264	  return {
+265	    duration: {
+266	      days: Number(product.durationDays || 0),
+267	      nights: Number(product.durationNights || 0),
+268	    },
+269	    href: getTourProductPath(product.slug),
+270	    id: product.id,
+271	    image: firstMedia(product),
+272	    market: product.market || 'other',
+273	    nextDeparture: {
+274	      airline: commercialDeparture.airline || null,
+275	      date: commercialDeparture.departureDate,
+276	      departureCity: commercialDeparture.departureCity || null,
+277	      promoLabel:
+278	        price.kind === 'verified' && commercialDeparture.availabilityStatus !== 'sold-out'
+279	          ? commercialDeparture.promoLabel || null
+280	          : null,
+281	    },
+282	    price,
+283	    slug: product.slug,
+284	    summary: product.summary || '',
+285	    title: product.title,
+286	  }
+287	}
+288	
+289	const compareCards = (
+290	  left: WingsGoCatalogCard,
+291	  right: WingsGoCatalogCard,
+292	  sort: WingsGoCatalogSort,
+293	) => {
+294	  if (sort === 'price') {
+295	    const leftPrice = left.price.kind === 'verified' ? left.price.value : Number.MAX_SAFE_INTEGER
+296	    const rightPrice = right.price.kind === 'verified' ? right.price.value : Number.MAX_SAFE_INTEGER
+297	    if (leftPrice !== rightPrice) return leftPrice - rightPrice
+298	  }
+299	
+300	  if (sort === 'title') {
+301	    const titleDelta = left.title.localeCompare(right.title, 'vi')
+302	    if (titleDelta !== 0) return titleDelta
+303	  }
+304	
+305	  const dateDelta =
+306	    new Date(left.nextDeparture.date).getTime() - new Date(right.nextDeparture.date).getTime()
+307	  if (dateDelta !== 0) return dateDelta
+308	  const titleDelta = left.title.localeCompare(right.title, 'vi')
+309	  if (titleDelta !== 0) return titleDelta
+310	  return String(left.id).localeCompare(String(right.id), 'en')
+311	}
+312	
+313	export const selectWingsGoCatalogCards = ({
+314	  cards,
+315	  excludeIDs = [],
+316	  filters = {},
+317	  limit = WINGSGO_CATALOG_BATCH_SIZE,
+318	  offset = 0,
+319	}: {
+320	  cards: WingsGoCatalogCard[]
+321	  excludeIDs?: Array<number | string>
+322	  filters?: WingsGoCatalogFilters
+323	  limit?: number
+324	  offset?: number
+325	}) => {
+326	  const boundedLimit = Math.min(Math.max(limit, 0), WINGSGO_CATALOG_BATCH_SIZE)
+327	  const excluded = new Set(excludeIDs.map(String))
+328	  const filtered = cards
+329	    .filter((card) => !excluded.has(String(card.id)))
+330	    .filter((card) => !filters.market || card.market === filters.market)
+331	    .filter(
+332	      (card) => filters.durationMin === undefined || card.duration.days >= filters.durationMin,
+333	    )
+334	    .filter(
+335	      (card) => filters.durationMax === undefined || card.duration.days <= filters.durationMax,
+336	    )
+337	    .filter((card) => {
+338	      const price = card.price.kind === 'verified' ? card.price.value : null
+339	      return filters.priceMin === undefined || (price !== null && price >= filters.priceMin)
+340	    })
+341	    .filter((card) => {
+342	      const price = card.price.kind === 'verified' ? card.price.value : null
+343	      return filters.priceMax === undefined || (price !== null && price <= filters.priceMax)
+344	    })
+345	
+346	  const seenIDs = new Set<string>()
+347	  const deduped = filtered.filter((card) => {
+348	    const key = String(card.id)
+349	    if (seenIDs.has(key)) return false
+350	    seenIDs.add(key)
+351	    return true
+352	  })
+353	  deduped.sort((left, right) => compareCards(left, right, filters.sort || 'next-departure'))
+354	
+355	  return {
+356	    cards: deduped.slice(offset, offset + boundedLimit),
+357	    hasMore: offset + boundedLimit < deduped.length,
+358	    total: deduped.length,
+359	  }
+360	}
+361	
+362	const readSearchParam = (source: SearchParamSource, key: string) => {
+363	  if (source instanceof URLSearchParams) return source.get(key) || undefined
+364	  const value = source[key]
+365	  return Array.isArray(value) ? value[0] : value
+366	}
+367	
+368	const parsePositiveNumber = (value?: string) => {
+369	  if (!value || !/^\d+(?:\.\d+)?$/u.test(value)) return undefined
+370	  const parsed = Number(value)
+371	  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined
+372	}
+373	
+374	export const parseWingsGoCatalogFilters = (source: SearchParamSource): WingsGoCatalogFilters => {
+375	  const sort = readSearchParam(source, 'sort')
+376	  const durationMin = parsePositiveNumber(readSearchParam(source, 'durationMin'))
+377	  const durationMax = parsePositiveNumber(readSearchParam(source, 'durationMax'))
+378	  const priceMin = parsePositiveNumber(readSearchParam(source, 'priceMin'))
+379	  const priceMax = parsePositiveNumber(readSearchParam(source, 'priceMax'))
+380	
+381	  return {
+382	    ...(readSearchParam(source, 'market') ? { market: readSearchParam(source, 'market') } : {}),
+383	    ...(durationMin === undefined ? {} : { durationMin }),
+384	    ...(durationMax === undefined ? {} : { durationMax }),
+385	    ...(priceMin === undefined ? {} : { priceMin }),
+386	    ...(priceMax === undefined ? {} : { priceMax }),
+387	    ...(sort === 'next-departure' || sort === 'price' || sort === 'title' ? { sort } : {}),
+388	  }
+389	}
+390	
+391	const queryDocs = async (
+392	  payload: Payload,
+393	  collection: 'pages' | 'tour-departures' | 'tour-products',
+394	  where: unknown,
+395	  locale?: string,
+396	) =>
+397	  payload.find({
+398	    collection,
+399	    depth: 2,
+400	    draft: false,
+401	    ...(locale ? { fallbackLocale: 'vi', locale: locale as never } : {}),
+402	    limit: WINGSGO_CATALOG_MAX_INVENTORY,
+403	    overrideAccess: true,
+404	    pagination: false,
+405	    where: where as never,
+406	  })
+407	
+408	export const queryWingsGoTourCatalog = async ({
+409	  filters = {},
+410	  limit = WINGSGO_CATALOG_BATCH_SIZE,
+411	  locale = 'vi',
+412	  now = new Date(),
+413	  offset = 0,
+414	  page,
+415	  payload,
+416	  site,
+417	}: {
+418	  filters?: WingsGoCatalogFilters
+419	  limit?: number
+420	  locale?: string
+421	  now?: Date
+422	  offset?: number
+423	  page: WingsGoCatalogPage
+424	  payload: Payload
+425	  site: { code: string; id: number | string }
+426	}): Promise<WingsGoCatalogData> => {
+427	  if (
+428	    site.code !== 'wings-go' ||
+429	    (!page.wingsGoTourCatalog?.enabled && page.pathname !== '/tour')
+430	  ) {
+431	    return { all: [], featured: [], hasMore: false, nextOffset: 0 }
+432	  }
+433	
+434	  const wrapperResult = await queryDocs(
+435	    payload,
+436	    'pages',
+437	    {
+438	      and: [
+439	        { _status: { equals: 'published' } },
+440	        { site: { equals: site.id } },
+441	        { pathname: { like: '/tour/%' } },
+442	      ],
+443	    },
+444	    locale,
+445	  )
+446	  const wrappers = wrapperResult.docs as unknown as InventoryWrapper[]
+447	  const wrapperIDs = wrappers.map((wrapper) => wrapper.id)
+448	  if (wrapperIDs.length === 0) return { all: [], featured: [], hasMore: false, nextOffset: 0 }
+449	
+450	  const productsResult = await queryDocs(
+451	    payload,
+452	    'tour-products',
+453	    {
+454	      and: [
+455	        { _status: { equals: 'published' } },
+456	        { site: { equals: site.id } },
+457	        { wrapperPage: { in: wrapperIDs } },
+458	      ],
+459	    },
+460	    locale,
+461	  )
+462	  const products = productsResult.docs as unknown as InventoryProduct[]
+463	  const productIDs = products.map((product) => product.id)
+464	  if (productIDs.length === 0) return { all: [], featured: [], hasMore: false, nextOffset: 0 }
+465	
+466	  const departuresResult = await queryDocs(
+467	    payload,
+468	    'tour-departures',
+469	    {
+470	      and: [
+471	        { _status: { equals: 'published' } },
+472	        { site: { equals: site.id } },
+473	        { tourProduct: { in: productIDs } },
+474	        { departureDate: { greater_than: now.toISOString() } },
+475	      ],
+476	    },
+477	    locale,
+478	  )
+479	  const departures = departuresResult.docs as unknown as InventoryDeparture[]
+480	  const wrappersByID = new Map(wrappers.map((wrapper) => [String(wrapper.id), wrapper]))
+481	  const departuresByProduct = new Map<string, InventoryDeparture[]>()
+482	  for (const departure of departures) {
+483	    const productID = relationID(departure.tourProduct)
+484	    if (productID === null) continue
+485	    const current = departuresByProduct.get(String(productID)) || []
+486	    current.push(departure)
+487	    departuresByProduct.set(String(productID), current)
+488	  }
+489	
+490	  const cards = products
+491	    .map((product) =>
+492	      buildCard({
+493	        departures: departuresByProduct.get(String(product.id)) || [],
+494	        now,
+495	        product,
+496	        wrapper: wrappersByID.get(String(relationID(product.wrapperPage))) || null,
+497	      }),
+498	    )
+499	    .filter((card): card is WingsGoCatalogCard => Boolean(card))
+500	
+501	  const configuredIDs = await resolveCuratedTourIDs({
+502	    page,
+503	    payload,
+504	    siteID: site.id,
+505	  })
+506	  const configuredFeatured: WingsGoCatalogCard[] = []
+507	  const configuredSeenIDs = new Set<string>()
+508	  for (const id of configuredIDs) {
+509	    const key = String(id)
+510	    if (configuredSeenIDs.has(key)) continue
+511	    const card = cards.find((candidate) => String(candidate.id) === key)
+512	    if (card) {
+513	      configuredSeenIDs.add(key)
+514	      configuredFeatured.push(card)
+515	    }
+516	  }
+517	  const fallback = selectWingsGoCatalogCards({
+518	    cards,
+519	    excludeIDs: configuredFeatured.map((card) => card.id),
+520	    filters: {},
+521	  }).cards
+522	  const featured = [...configuredFeatured, ...fallback].slice(0, WINGSGO_CATALOG_MAX_FEATURED)
+523	  const featuredIDs = featured.map((card) => card.id)
+524	  const all = selectWingsGoCatalogCards({ cards, excludeIDs: featuredIDs, filters, limit, offset })
+525	
+526	  return {
+527	    all: all.cards,
+528	    featured,
+529	    hasMore: all.hasMore,
+530	    nextOffset: offset + all.cards.length,
+531	  }
+532	}
+533	
+534	export const resolveCuratedTourIDs = async ({
+535	  page,
+536	  payload,
+537	  siteID,
+538	}: {
+539	  page?: WingsGoCatalogPage | null
+540	  payload: Payload
+541	  siteID: number | string
+542	}): Promise<Array<number | string>> => {
+543	  // Tier 1: Page-bound curation
+544	  const pageCurationRef = page?.wingsGoTourCatalog?.curation
+545	  if (pageCurationRef) {
+546	    if (
+547	      typeof pageCurationRef === 'object' &&
+548	      pageCurationRef !== null &&
+549	      'featuredTours' in pageCurationRef &&
+550	      Array.isArray((pageCurationRef as { featuredTours?: unknown }).featuredTours)
+551	    ) {
+552	      const pageCurationSite = relationID((pageCurationRef as { site?: Relation }).site)
+553	      if (!pageCurationSite || String(pageCurationSite) === String(siteID)) {
+554	        const ids = relationIDs((pageCurationRef as { featuredTours?: unknown }).featuredTours)
+555	        if (ids.length > 0) return ids
+556	      }
+557	    }
+558	    const curationID = relationID(pageCurationRef as Relation)
+559	    if (curationID) {
+560	      try {
+561	        const curationDoc = await payload.findByID({
+562	          collection: 'tour-curations',
+563	          depth: 0,
+564	          id: curationID,
+565	          overrideAccess: true,
+566	        })
+567	        if (curationDoc) {
+568	          const curationSite = relationID((curationDoc as { site?: Relation }).site)
+569	          if (!curationSite || String(curationSite) === String(siteID)) {
+570	            const ids = relationIDs((curationDoc as { featuredTours?: unknown }).featuredTours)
+571	            if (ids.length > 0) return ids
+572	          }
+573	        }
+574	      } catch {
+575	        // Fallback to Tier 2
+576	      }
+577	    }
+578	  }
+579	
+580	  // Tier 2: Site default curation
+581	  try {
+582	    const defaultCurationResult = await payload.find({
+583	      collection: 'tour-curations',
+584	      depth: 0,
+585	      limit: 1,
+586	      overrideAccess: true,
+587	      pagination: false,
+588	      where: {
+589	        and: [{ site: { equals: siteID } }, { isDefault: { equals: true } }],
+590	      },
+591	    })
+592	    const defaultDoc = defaultCurationResult.docs[0]
+593	    if (defaultDoc) {
+594	      const ids = relationIDs((defaultDoc as { featuredTours?: unknown }).featuredTours)
+595	      if (ids.length > 0) return ids
+596	    }
+597	  } catch {
+598	    // Fallback to Tier 3
+599	  }
+600	
+601	  // Tier 3: Legacy featuredTours array on page
+602	  const legacyIDs = relationIDs(page?.wingsGoTourCatalog?.featuredTours)
+603	  if (legacyIDs.length > 0) {
+604	    return legacyIDs
+605	  }
+606	
+607	  // Tier 4: Algorithmic fallback
+608	  return []
+609	}
+610	
+
+... (output truncated to budget; the source above is complete and verbatim — treat it as already Read. For any area not covered, run another codegraph_explore with the specific names — do NOT Read these files.)
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Item app/src/tours/queries.ts, app/src/tours/StructuredPages.tsx -ErrorAction Stop | Select-Object FullName,LastWriteTime; Get-Item app/tests/component/marketPromotion.component.spec.tsx, app/tests/unit/marketCommercialDeparture.unit.spec.ts, app/tests/unit/marketCommercialDeparture.spec.ts -ErrorAction SilentlyContinue | Select-Object FullName,LastWriteTime; git diff -- app/src/tours/queries.ts' in E:\repo\WingsTravel
+ succeeded in 375ms:
+
+diff --git a/app/src/tours/queries.ts b/app/src/tours/queries.ts
+index 7ad8c16..efe9199 100644
+--- a/app/src/tours/queries.ts
++++ b/app/src/tours/queries.ts
+@@ -33,6 +33,7 @@ import {
+   selectPublishableDepartures,
+ } from './utils'
+ import { isDepartureVerificationCurrent } from './departureCommerce'
++import { normalizeGovernedTourPrice } from './currency'
+ import {
+   buildTourTaxonomyWhere,
+   type TourDestinationKey,
+@@ -91,7 +92,7 @@ const queryCollection = async ({
+     fallbackLocale,
+     limit,
+     locale,
+-    overrideAccess: true,
++    overrideAccess: draft,
+     pagination: false,
+     where: scopedWhere,
+   })
+@@ -242,9 +243,24 @@ const normalizeDepartureCard = (
+   const hasFreshnessGovernance = Boolean(departure.verifiedAt || departure.expiresAt)
+   const commerceVerified =
+     draft ||
+-    (hasFreshnessGovernance
+-      ? isDepartureVerificationCurrent(departure)
+-      : typeof departure.priceFrom === 'number' && departure.priceFrom > 0)
++    ((departure.commerceVerified === undefined || departure.commerceVerified === true) &&
++      (hasFreshnessGovernance
++        ? isDepartureVerificationCurrent(departure)
++        : departure.commerceVerified === true))
++  const canPromote =
++    commerceVerified &&
++    (draft || hasFreshnessGovernance || departure.commerceVerified === true) &&
++    departure.availabilityStatus !== 'sold-out' &&
++    Boolean(normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }))
++  const originalPrice =
++    canPromote &&
++    typeof departure.originalPrice === 'number' &&
++    Number.isFinite(departure.originalPrice) &&
++    departure.originalPrice > departure.priceFrom &&
++    Boolean(departure.currency) &&
++    (!departure.originalCurrency || departure.originalCurrency === departure.currency)
++      ? departure.originalPrice
++      : null
+ 
+   return {
+     airline: departure.airline,
+@@ -262,9 +278,9 @@ const normalizeDepartureCard = (
+     isFeatured: departure.isFeatured,
+     loyaltyPoints: commerceVerified ? departure.loyaltyPoints : null,
+     note: departure.note,
+-    originalPrice: commerceVerified ? departure.originalPrice : null,
++    originalPrice,
+     priceFrom: commerceVerified ? departure.priceFrom : null,
+-    promoLabel: commerceVerified ? departure.promoLabel : null,
++    promoLabel: canPromote ? departure.promoLabel : null,
+     returnDate: departure.returnDate,
+     tourProduct: normalizeTourProductCard(departure.tourProduct),
+     urgencyLabel: commerceVerified ? departure.urgencyLabel : null,
+@@ -463,7 +479,7 @@ export const getResolvedTourDetailBySlug = async ({
+ 
+   return {
+     builderConfig: resolved.builderConfig,
+-    departures: validPublicDepartures,
++    departures: draft ? departures : getFutureDepartures(departures),
+     featuredDepartures:
+       featuredDepartures.length > 0
+         ? featuredDepartures
+FullName                                                                   LastWriteTime
+--------                                                                   -------------
+E:\repo\WingsTravel\app\src\tours\queries.ts                               10/20/2026 10:39:04 AM
+E:\repo\WingsTravel\app\src\tours\StructuredPages.tsx                      10/21/2026 12:06:04 AM
+E:\repo\WingsTravel\app\tests\component\marketPromotion.component.spec.tsx 10/21/2026 12:06:52 AM
+
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command 'Get-Content app/tests/component/marketPromotion.component.spec.tsx; Get-Content app/vitest.component.config.mts' in E:\repo\WingsTravel
+ succeeded in 407ms:
+import { cleanup, render, screen } from '@testing-library/react'
+import React from 'react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { TourMarketPage } from '@/tours/StructuredPages'
+import type { TourCardViewModel } from '@/tours/types'
+
+vi.mock('@/components/SiteLink', () => ({
+  SiteLink: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={String(href)} {...props}>{children}</a>
+  ),
+}))
+vi.mock('@/blocks/Form/Component', () => ({ FormBlock: () => null }))
+vi.mock('@/components/Media', () => ({ Media: () => null }))
+
+afterEach(cleanup)
+
+const makeMarketTour = (overrides?: Partial<TourCardViewModel>): TourCardViewModel => ({
+  departureCount: 3,
+  hasFutureDepartures: true,
+  id: 101,
+  lowestPrice: 8888888, // Deliberately different from departure price to verify no mixing
+  market: 'japan',
+  nextDeparture: {
+    airline: 'Japan Airlines',
+    availabilityStatus: 'open',
+    commerceVerified: true,
+    currency: 'VND',
+    departureDate: '2030-04-15T00:00:00.000Z',
+    originalPrice: 28000000,
+    priceFrom: 23500000,
+    promoLabel: 'Hoa anh đào 2030',
+  },
+  slug: 'tokyo-kyoto-osaka',
+  summary: 'Hành trình ngắm hoa anh đào qua Tokyo, Kyoto và Osaka.',
+  title: 'Cung đường vàng Nhật Bản',
+  ...overrides,
+})
+
+describe('TourMarketPage Promotion & Pricing Component Tests', () => {
+  it('renders verified future departure promotion with original del before red sale price and image badge', () => {
+    const tour = makeMarketTour()
+    const { container } = render(
+      <TourMarketPage departures={[]} locale="vi" marketKey="japan" tours={[tour]} />,
+    )
+
+    // Image-overlay promo badge
+    expect(screen.getByText('Hoa anh đào 2030')).toBeTruthy()
+
+    // Original price in <del> before red sale price
+    const delEl = container.querySelector('del')
+    expect(delEl).not.toBeNull()
+    expect(delEl?.textContent).toContain('28.000.000')
+
+    const saleSpan = container.querySelector('.text-red-600')
+    expect(saleSpan).not.toBeNull()
+    expect(saleSpan?.textContent).toContain('23.500.000')
+
+    // Verify DOM order: <del> must precede sale price
+    const parent = delEl?.parentElement
+    const children = Array.from(parent?.children || [])
+    expect(children.indexOf(delEl as Element)).toBeLessThan(children.indexOf(saleSpan as Element))
+
+    // Ensure lowestPrice (8.888.888) is NOT mixed or displayed
+    expect(screen.queryByText('8.888.888')).toBeNull()
+    expect(screen.getByText('Giá theo đợt')).toBeTruthy()
+  })
+
+  it('renders English market page with "Selected departure" label and promo prices', () => {
+    const tour = makeMarketTour()
+    const { container } = render(
+      <TourMarketPage departures={[]} locale="en" marketKey="japan" tours={[tour]} />,
+    )
+
+    expect(screen.getByText('Hoa anh đào 2030')).toBeTruthy()
+    expect(screen.getByText('Selected departure')).toBeTruthy()
+
+    const delEl = container.querySelector('del')
+    expect(delEl).not.toBeNull()
+    expect(delEl?.textContent).toContain('28.000.000')
+
+    const saleSpan = container.querySelector('.text-red-600')
+    expect(saleSpan?.textContent).toContain('23.500.000')
+  })
+
+  it('suppresses promo badge when promoLabel is numeric-only but keeps valid discount', () => {
+    const tour = makeMarketTour({
+      nextDeparture: {
+        ...makeMarketTour().nextDeparture,
+        promoLabel: '28000000', // numeric-only should be rejected by isDisplayablePromoLabel
+      },
+    })
+    const { container } = render(
+      <TourMarketPage departures={[]} locale="vi" marketKey="japan" tours={[tour]} />,
+    )
+
+    // Badge with raw numeric string is not displayed
+    expect(screen.queryByText('28000000')).toBeNull()
+
+    // Discount price is still rendered correctly
+    expect(container.querySelector('del')?.textContent).toContain('28.000.000')
+    expect(container.querySelector('.text-red-600')?.textContent).toContain('23.500.000')
+  })
+
+  it('omits <del> and red styling when originalPrice <= priceFrom', () => {
+    const tour = makeMarketTour({
+      nextDeparture: {
+        ...makeMarketTour().nextDeparture,
+        originalPrice: 23500000, // equal to priceFrom
+        priceFrom: 23500000,
+      },
+    })
+    const { container } = render(
+      <TourMarketPage departures={[]} locale="vi" marketKey="japan" tours={[tour]} />,
+    )
+
+    expect(container.querySelector('del')).toBeNull()
+    expect(container.querySelector('.text-red-600')).toBeNull()
+    expect(container.textContent).toContain('23.500.000')
+  })
+
+  it('falls back to contact label and hides promo badge when departure is unverified', () => {
+    const tour = makeMarketTour({
+      nextDeparture: {
+        ...makeMarketTour().nextDeparture,
+        commerceVerified: false,
+      },
+    })
+    const { container } = render(
+      <TourMarketPage departures={[]} locale="vi" marketKey="japan" tours={[tour]} />,
+    )
+
+    expect(container.querySelector('del')).toBeNull()
+    expect(container.querySelector('.text-red-600')).toBeNull()
+    expect(screen.queryByText('Hoa anh đào 2030')).toBeNull()
+    expect(container.textContent).toContain('Liên hệ')
+  })
+
+  it('falls back to contact label and hides promo badge when departure is sold-out', () => {
+    const tour = makeMarketTour({
+      nextDeparture: {
+        ...makeMarketTour().nextDeparture,
+        availabilityStatus: 'sold-out',
+      },
+    })
+    const { container } = render(
+      <TourMarketPage departures={[]} locale="vi" marketKey="japan" tours={[tour]} />,
+    )
+
+    expect(container.querySelector('del')).toBeNull()
+    expect(container.querySelector('.text-red-600')).toBeNull()
+    expect(screen.queryByText('Hoa anh đào 2030')).toBeNull()
+    expect(container.textContent).toContain('Liên hệ')
+  })
+
+  it('falls back to contact label and hides promo badge when departure date is in the past', () => {
+    const tour = makeMarketTour({
+      nextDeparture: {
+        ...makeMarketTour().nextDeparture,
+        departureDate: '2020-05-01T00:00:00.000Z', // past date
+      },
+    })
+    const { container } = render(
+      <TourMarketPage departures={[]} locale="vi" marketKey="japan" tours={[tour]} />,
+    )
+
+    expect(container.querySelector('del')).toBeNull()
+    expect(container.querySelector('.text-red-600')).toBeNull()
+    expect(screen.queryByText('Hoa anh đào 2030')).toBeNull()
+    expect(container.textContent).toContain('Liên hệ')
+  })
+
+  it('falls back to contact label when priceFrom is zero, negative, or currency is missing', () => {
+    const tour = makeMarketTour({
+      nextDeparture: {
+        ...makeMarketTour().nextDeparture,
+        priceFrom: 0,
+      },
+    })
+    const { container } = render(
+      <TourMarketPage departures={[]} locale="vi" marketKey="japan" tours={[tour]} />,
+    )
+
+    expect(container.querySelector('del')).toBeNull()
+    expect(container.querySelector('.text-red-600')).toBeNull()
+    expect(screen.queryByText('Hoa anh đào 2030')).toBeNull()
+    expect(container.textContent).toContain('Liên hệ')
+  })
+
+  it('falls back to contact label in English when nextDeparture is null', () => {
+    const tour = makeMarketTour({ nextDeparture: null })
+    const { container } = render(
+      <TourMarketPage departures={[]} locale="en" marketKey="japan" tours={[tour]} />,
+    )
+
+    expect(container.querySelector('del')).toBeNull()
+    expect(container.querySelector('.text-red-600')).toBeNull()
+    expect(container.textContent).toContain('Contact us')
+  })
+})
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vitest/config'
+import tsconfigPaths from 'vite-tsconfig-paths'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+export default defineConfig({
+  plugins: [tsconfigPaths(), react()],
+  resolve: {
+    alias: {
+      '@payloadcms/ui/icons/Copy': path.resolve(__dirname, 'tests/mocks/emptyNodeSqlite.ts'),
+      'node:sqlite': path.resolve(__dirname, 'tests/mocks/emptyNodeSqlite.ts'),
+    },
+  },
+  test: {
+    environment: 'jsdom',
+    include: ['tests/component/**/*.component.spec.tsx'],
+    setupFiles: ['./vitest.setup.ts'],
+  },
+})
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "@'
+const fs = require('node:fs');
+const vm = require('node:vm');
+const ts = require('typescript');
+const assert = require('node:assert/strict');
+function declarations(filename, names) {
+  const source = ts.createSourceFile(filename, fs.readFileSync(filename, 'utf8'), ts.ScriptTarget.Latest, true);
+  return source.statements.filter(statement => ts.isVariableStatement(statement) && statement.declarationList.declarations.some(declaration => names.includes(declaration.name.getText(source)))).map(statement => statement.getText(source)).join('\\n');
+}
+const querySource = fs.readFileSync('src/tours/queries.ts', 'utf8');
+const queryFile = ts.createSourceFile('queries.ts', querySource, ts.ScriptTarget.Latest, true);
+const queryFunction = queryFile.statements.find(statement => ts.isVariableStatement(statement) && statement.declarationList.declarations.some(declaration => declaration.name.getText(queryFile) === 'getToursByMarketRoute')).getText(queryFile);
+const utils = declarations('src/tours/utils.ts', ['toDateOnly', 'getFutureDepartures', 'getNextDeparture', 'getLowestPrice']);
+const currency = declarations('src/tours/currency.ts', ['supportedTourCurrencyCodes', 'normalizeSupportedTourCurrency', 'normalizeGovernedTourPrice']);
+const departures = [
+  { id: 'unsupported', tourProduct: 1, departureDate: '2099-01-01', commerceVerified: true, availabilityStatus: 'open', currency: 'JPY', priceFrom: 100 },
+  { id: 'eligible', tourProduct: 1, departureDate: '2099-02-01', commerceVerified: true, availabilityStatus: 'open', currency: 'VND', priceFrom: 23500000, originalPrice: 28000000, promoLabel: 'Verified promotion' },
+];
+const context = { exports: {}, marketRouteSlugToKey: { japan: 'japan' }, tourProductsCollection: 'products', tourDeparturesCollection: 'departures', normalizeDepartureCard: value => value, sortDepartures: items => [...items].sort((left, right) => Date.parse(left.departureDate) - Date.parse(right.departureDate)), queryCollection: async ({collection}) => ({ docs: collection === 'products' ? [{id: 1}] : departures }) };
+vm.createContext(context);
+vm.runInContext(ts.transpileModule([utils, currency, queryFunction].join('\\n'), { compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022} }).outputText, context);
+(async () => {
+  const result = await context.exports.getToursByMarketRoute({draft:false, marketRouteSlug:'japan'});
+  const chosen = result.tours[0].nextDeparture;
+  console.log(JSON.stringify({checkedAt: new Date().toISOString(), chosenDeparture: chosen.id, currency: chosen.currency, eligibleDepartureExists: true, patchedCommercialPreferencePresent: querySource.includes('linkedFuture.find')}, null, 2));
+  assert.equal(chosen.id, 'eligible', 'Market selector must prefer governed-price eligible departure');
+})().catch(error => { console.error(error.message); process.exitCode = 1; });
+'@ | node" in E:\repo\WingsTravel\app
+ exited 1 in 895ms:
+{
+  "checkedAt": "2026-10-20T17:07:22.302Z",
+  "chosenDeparture": "unsupported",
+  "currency": "JPY",
+  "eligibleDepartureExists": true,
+  "patchedCommercialPreferencePresent": false
+}
+Market selector must prefer governed-price eligible departure
++ actual - expected
+
++ 'unsupported'
+- 'eligible'
+
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command '$marketReviewLines = Get-Content app/src/tours/queries.ts; for ($marketReviewIndex = 555; $marketReviewIndex -lt 570; $marketReviewIndex++) { '"'{0}: {1}' -f ("'$marketReviewIndex + 1), $marketReviewLines[$marketReviewIndex] }; Get-Item app/tests/unit/marketCommercialDeparture.unit.spec.ts, app/tests/unit/marketCommercialDeparture.spec.ts -ErrorAction SilentlyContinue | Select-Object FullName' in E:\repo\WingsTravel
+ exited 1 in 355ms:
+556:       })
+557:       const linkedFuture = getFutureDepartures(linkedAll)
+558:       const hasFutureDepartures = linkedFuture.length > 0
+559:       const linkedVisible = hasFutureDepartures ? linkedFuture : linkedAll
+560: 
+561:       return {
+562:         ...tour,
+563:         departureCount: linkedVisible.length,
+564:         hasFutureDepartures,
+565:         lowestPrice: getLowestPrice(linkedVisible),
+566:         nextDeparture: getNextDeparture(linkedVisible),
+567:       }
+568:     }),
+569:   }
+570: }
+
+codex
+**P2 — commercial selection patch is still absent** at [queries.ts:566](/E:/repo/WingsTravel/app/src/tours/queries.ts:566). It still calls `getNextDeparture(linkedVisible)`, which can choose an unsupported-currency departure over an eligible VND departure. The new UI then displays Contact and suppresses the eligible promotion.
+
+Read-only reproduction executed the current selector with mocked inventory: selected JPY departure; expected eligible VND departure; assertion **exit 1**. Apply agy’s planned verified, nonsoldout, governed-price preference before release.
+
+No additional actionable findings in the scoped market/strip rendering: currency, original price, sale price, and badge use the same departure.
+
+Limits: component test inspected, not run; optional selector test absent. No edits, delegation, or environment reads.
+Build, ARM64 candidate, and browser gates remain with root; this snapshot is not final release approval.
+tokens used
+66,856
+**P2 — commercial selection patch is still absent** at [queries.ts:566](/E:/repo/WingsTravel/app/src/tours/queries.ts:566). It still calls `getNextDeparture(linkedVisible)`, which can choose an unsupported-currency departure over an eligible VND departure. The new UI then displays Contact and suppresses the eligible promotion.
+
+Read-only reproduction executed the current selector with mocked inventory: selected JPY departure; expected eligible VND departure; assertion **exit 1**. Apply agy’s planned verified, nonsoldout, governed-price preference before release.
+
+No additional actionable findings in the scoped market/strip rendering: currency, original price, sale price, and badge use the same departure.
+
+Limits: component test inspected, not run; optional selector test absent. No edits, delegation, or environment reads.
+Build, ARM64 candidate, and browser gates remain with root; this snapshot is not final release approval.

@@ -1,0 +1,7 @@
+ Container wingstravel-app-1 Recreate 
+ Container wingstravel-app-1 Recreated 
+ Container wingstravel-app-1 Starting 
+ Container wingstravel-app-1 Started 
+curl: (56) Recv failure: Connection reset by peer
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":18,"requestId":"96373e25-f901-4f1b-9114-6c254ed2e5e8","status":"ready","timestamp":"2026-10-23T08:11:58.342Z"}{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":241,"requestId":"86b71f10-b81b-4765-9948-007b3f41baaf","status":"ready","timestamp":"2026-10-23T08:12:01.742Z"}sha256:54821addabf22f01d90986cc1fcea3e00e4d842627bf4738729b14d2f3c0b962 2026-10-23T08:11:58.94950006Z 0
+Cutover completed: 2026-10-23T08:12:01Z

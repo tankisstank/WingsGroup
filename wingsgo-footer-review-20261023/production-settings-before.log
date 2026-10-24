@@ -1,0 +1,9 @@
+/home/ubuntu/wings-travel/releases/release-us085-footer-d6057d4
+sha256:b189e9f428e6e1c372916d378108198376a9cdf528e26c1a838167bb670eee3d
+{"site": "wing-side", "settingsID": 9, "fingerprint": "03ab0df7a32d3f760ea1a088de7e6d86", "supportPhone": "0912910101"}
+{"site": "wings-care", "settingsID": 12, "fingerprint": "cb75f8789e3717bc67f2f4a6abc7d2b7", "supportPhone": "+84 903 000 555"}
+{"site": "wings-go", "settingsID": 16, "fingerprint": "5b22891a36f945dd2dd8aa781a09e39a", "supportPhone": "0912910101"}
+{"site": "wings-group", "settingsID": 14, "fingerprint": "5ef60a7cc06d287d1769daabfc24e640", "supportPhone": "0948786775"}
+{"site": "wings-pass", "settingsID": 10, "fingerprint": "28d9ffc27f3e7c866033db332ca6abd9", "supportPhone": "+84 903 000 333"}
+{"site": "wings-plus", "settingsID": 15, "fingerprint": "71d03a693e92cb29ebe7c2709a171110", "supportPhone": "+84 903 000 444"}
+{"count": 4, "table": "site_settings_additional_hotlines", "fingerprint": "8d69583193003dd0417f7ac0a17313c0"}

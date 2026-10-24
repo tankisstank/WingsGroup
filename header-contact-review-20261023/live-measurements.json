@@ -1,0 +1,1382 @@
+[
+  {
+    "brand": {
+      "height": 68,
+      "left": 92.5,
+      "right": 183.08,
+      "top": 3.5,
+      "width": 90.58
+    },
+    "brandNavOverlap": 33.61,
+    "contentLeft": 149.46875,
+    "documentWidth": 1425,
+    "headerLinks": [
+      {
+        "height": 68,
+        "href": "/",
+        "label": null,
+        "left": 92.5,
+        "right": 183.08,
+        "text": "",
+        "top": 3.5,
+        "width": 90.58
+      },
+      {
+        "height": 42,
+        "href": "/#home",
+        "label": null,
+        "left": 149.47,
+        "right": 221.16,
+        "text": "Trang chủ",
+        "top": 16.5,
+        "width": 71.69
+      },
+      {
+        "height": 42,
+        "href": "/nang-luc-dich-vu",
+        "label": null,
+        "left": 233.39,
+        "right": 287.61,
+        "text": "Dịch vụ",
+        "top": 16.5,
+        "width": 54.22
+      },
+      {
+        "height": 42,
+        "href": "/he-sinh-thai",
+        "label": null,
+        "left": 299.84,
+        "right": 386.11,
+        "text": "Hệ sinh thái",
+        "top": 16.5,
+        "width": 86.27
+      },
+      {
+        "height": 42,
+        "href": "/ve-wingsgroup",
+        "label": null,
+        "left": 398.34,
+        "right": 511.09,
+        "text": "Về WingsGroup",
+        "top": 16.5,
+        "width": 112.75
+      },
+      {
+        "height": 42,
+        "href": "/tin-tuc",
+        "label": null,
+        "left": 523.33,
+        "right": 596.52,
+        "text": "Cẩm nang",
+        "top": 16.5,
+        "width": 73.19
+      },
+      {
+        "height": 42,
+        "href": "/#contact",
+        "label": null,
+        "left": 608.75,
+        "right": 660.88,
+        "text": "Liên hệ",
+        "top": 16.5,
+        "width": 52.13
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": 673.11,
+        "right": 826.45,
+        "text": "Trao đổi nhu cầu",
+        "top": 15.5,
+        "width": 153.34
+      },
+      {
+        "height": 40,
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGroup 0912 910 101",
+        "left": 838.69,
+        "right": 966.23,
+        "text": "☎0912 910 101",
+        "top": 17.5,
+        "width": 127.55
+      },
+      {
+        "height": 40,
+        "href": null,
+        "label": "Danh sách hotline bổ sung",
+        "left": 966.23,
+        "right": 994.69,
+        "text": "▼",
+        "top": 17.5,
+        "width": 28.45
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Mở Zalo OA",
+        "left": 1006.92,
+        "right": 1074.95,
+        "text": "Zalo OA",
+        "top": 15.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": "/",
+        "label": null,
+        "left": 1107.19,
+        "right": 1217.31,
+        "text": "Tiếng Việt (vi)",
+        "top": 15.5,
+        "width": 110.13
+      },
+      {
+        "height": 44,
+        "href": "/en",
+        "label": null,
+        "left": 1221.31,
+        "right": 1332.5,
+        "text": "ENGLISH (en)",
+        "top": 15.5,
+        "width": 111.19
+      }
+    ],
+    "nav": {
+      "height": 44,
+      "left": 195.08,
+      "right": 1332.5,
+      "top": 15.5,
+      "width": 1137.42
+    },
+    "primaryVisible": true,
+    "timestamp": "2026-10-23T03:51:21.89Z",
+    "url": "https://wingsgroup.vn/",
+    "viewport": 1440
+  },
+  {
+    "brand": {
+      "height": 68,
+      "left": 32,
+      "right": 122.58,
+      "top": 3.5,
+      "width": 90.58
+    },
+    "brandNavOverlap": 60.38,
+    "contentLeft": 62.203125,
+    "documentWidth": 1265,
+    "headerLinks": [
+      {
+        "height": 68,
+        "href": "/",
+        "label": null,
+        "left": 32,
+        "right": 122.58,
+        "text": "",
+        "top": 3.5,
+        "width": 90.58
+      },
+      {
+        "height": 42,
+        "href": "/#home",
+        "label": null,
+        "left": 62.2,
+        "right": 133.89,
+        "text": "Trang chủ",
+        "top": 16.5,
+        "width": 71.69
+      },
+      {
+        "height": 42,
+        "href": "/nang-luc-dich-vu",
+        "label": null,
+        "left": 144.77,
+        "right": 198.98,
+        "text": "Dịch vụ",
+        "top": 16.5,
+        "width": 54.22
+      },
+      {
+        "height": 42,
+        "href": "/he-sinh-thai",
+        "label": null,
+        "left": 209.86,
+        "right": 296.13,
+        "text": "Hệ sinh thái",
+        "top": 16.5,
+        "width": 86.27
+      },
+      {
+        "height": 42,
+        "href": "/ve-wingsgroup",
+        "label": null,
+        "left": 307,
+        "right": 419.75,
+        "text": "Về WingsGroup",
+        "top": 16.5,
+        "width": 112.75
+      },
+      {
+        "height": 42,
+        "href": "/tin-tuc",
+        "label": null,
+        "left": 430.63,
+        "right": 503.81,
+        "text": "Cẩm nang",
+        "top": 16.5,
+        "width": 73.19
+      },
+      {
+        "height": 42,
+        "href": "/#contact",
+        "label": null,
+        "left": 514.69,
+        "right": 566.81,
+        "text": "Liên hệ",
+        "top": 16.5,
+        "width": 52.13
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": 577.69,
+        "right": 731.03,
+        "text": "Trao đổi nhu cầu",
+        "top": 15.5,
+        "width": 153.34
+      },
+      {
+        "height": 40,
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGroup 0912 910 101",
+        "left": 741.91,
+        "right": 869.45,
+        "text": "☎0912 910 101",
+        "top": 17.5,
+        "width": 127.55
+      },
+      {
+        "height": 40,
+        "href": null,
+        "label": "Danh sách hotline bổ sung",
+        "left": 869.45,
+        "right": 897.91,
+        "text": "▼",
+        "top": 17.5,
+        "width": 28.45
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Mở Zalo OA",
+        "left": 908.78,
+        "right": 976.81,
+        "text": "Zalo OA",
+        "top": 15.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": "/",
+        "label": null,
+        "left": 1007.69,
+        "right": 1117.81,
+        "text": "Tiếng Việt (vi)",
+        "top": 15.5,
+        "width": 110.13
+      },
+      {
+        "height": 44,
+        "href": "/en",
+        "label": null,
+        "left": 1121.81,
+        "right": 1233,
+        "text": "ENGLISH (en)",
+        "top": 15.5,
+        "width": 111.19
+      }
+    ],
+    "nav": {
+      "height": 44,
+      "left": 134.58,
+      "right": 1233,
+      "top": 15.5,
+      "width": 1098.42
+    },
+    "primaryVisible": true,
+    "timestamp": "2026-10-23T03:51:22.336Z",
+    "url": "https://wingsgroup.vn/",
+    "viewport": 1280
+  },
+  {
+    "brand": {
+      "height": 68,
+      "left": 32,
+      "right": 122.58,
+      "top": 3.5,
+      "width": 90.58
+    },
+    "brandNavOverlap": 134.19,
+    "contentLeft": -11.609375,
+    "documentWidth": 1185,
+    "headerLinks": [
+      {
+        "height": 68,
+        "href": "/",
+        "label": null,
+        "left": 32,
+        "right": 122.58,
+        "text": "",
+        "top": 3.5,
+        "width": 90.58
+      },
+      {
+        "height": 42,
+        "href": "/#home",
+        "label": null,
+        "left": -11.61,
+        "right": 60.08,
+        "text": "Trang chủ",
+        "top": 16.5,
+        "width": 71.69
+      },
+      {
+        "height": 42,
+        "href": "/nang-luc-dich-vu",
+        "label": null,
+        "left": 70.27,
+        "right": 124.48,
+        "text": "Dịch vụ",
+        "top": 16.5,
+        "width": 54.22
+      },
+      {
+        "height": 42,
+        "href": "/he-sinh-thai",
+        "label": null,
+        "left": 134.67,
+        "right": 220.94,
+        "text": "Hệ sinh thái",
+        "top": 16.5,
+        "width": 86.27
+      },
+      {
+        "height": 42,
+        "href": "/ve-wingsgroup",
+        "label": null,
+        "left": 231.13,
+        "right": 343.88,
+        "text": "Về WingsGroup",
+        "top": 16.5,
+        "width": 112.75
+      },
+      {
+        "height": 42,
+        "href": "/tin-tuc",
+        "label": null,
+        "left": 354.06,
+        "right": 427.25,
+        "text": "Cẩm nang",
+        "top": 16.5,
+        "width": 73.19
+      },
+      {
+        "height": 42,
+        "href": "/#contact",
+        "label": null,
+        "left": 437.44,
+        "right": 489.56,
+        "text": "Liên hệ",
+        "top": 16.5,
+        "width": 52.13
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": 499.75,
+        "right": 653.09,
+        "text": "Trao đổi nhu cầu",
+        "top": 15.5,
+        "width": 153.34
+      },
+      {
+        "height": 40,
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGroup 0912 910 101",
+        "left": 663.28,
+        "right": 790.83,
+        "text": "☎0912 910 101",
+        "top": 17.5,
+        "width": 127.55
+      },
+      {
+        "height": 40,
+        "href": null,
+        "label": "Danh sách hotline bổ sung",
+        "left": 790.83,
+        "right": 819.28,
+        "text": "▼",
+        "top": 17.5,
+        "width": 28.45
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Mở Zalo OA",
+        "left": 829.47,
+        "right": 897.5,
+        "text": "Zalo OA",
+        "top": 15.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": "/",
+        "label": null,
+        "left": 927.69,
+        "right": 1037.81,
+        "text": "Tiếng Việt (vi)",
+        "top": 15.5,
+        "width": 110.13
+      },
+      {
+        "height": 44,
+        "href": "/en",
+        "label": null,
+        "left": 1041.81,
+        "right": 1153,
+        "text": "ENGLISH (en)",
+        "top": 15.5,
+        "width": 111.19
+      }
+    ],
+    "nav": {
+      "height": 44,
+      "left": 134.58,
+      "right": 1153,
+      "top": 15.5,
+      "width": 1018.42
+    },
+    "primaryVisible": true,
+    "timestamp": "2026-10-23T03:51:22.741Z",
+    "url": "https://wingsgroup.vn/",
+    "viewport": 1200
+  },
+  {
+    "brand": {
+      "height": 64,
+      "left": 32,
+      "right": 117.25,
+      "top": -0.5,
+      "width": 85.25
+    },
+    "brandNavOverlap": 0,
+    "contentLeft": null,
+    "documentWidth": 1009,
+    "headerLinks": [
+      {
+        "height": 64,
+        "href": "/",
+        "label": null,
+        "left": 32,
+        "right": 117.25,
+        "text": "",
+        "top": -0.5,
+        "width": 85.25
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": 643.63,
+        "right": 796.97,
+        "text": "Trao đổi nhu cầu",
+        "top": 9.5,
+        "width": 153.34
+      },
+      {
+        "height": 44,
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGroup 0912 910 101",
+        "left": 804.97,
+        "right": 848.97,
+        "text": "☎",
+        "top": 9.5,
+        "width": 44
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Mở Zalo OA",
+        "left": 856.97,
+        "right": 925,
+        "text": "Zalo OA",
+        "top": 9.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": null,
+        "label": "Mở điều hướng",
+        "left": 933,
+        "right": 977,
+        "text": "",
+        "top": 9.5,
+        "width": 44
+      }
+    ],
+    "nav": {
+      "height": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "width": 0
+    },
+    "primaryVisible": false,
+    "timestamp": "2026-10-23T03:51:23.162Z",
+    "url": "https://wingsgroup.vn/",
+    "viewport": 1024
+  },
+  {
+    "brand": {
+      "height": 64,
+      "left": 16,
+      "right": 101.25,
+      "top": -0.5,
+      "width": 85.25
+    },
+    "brandNavOverlap": 0,
+    "contentLeft": null,
+    "documentWidth": 375,
+    "headerLinks": [
+      {
+        "height": 64,
+        "href": "/",
+        "label": null,
+        "left": 16,
+        "right": 101.25,
+        "text": "",
+        "top": -0.5,
+        "width": 85.25
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": 25.63,
+        "right": 178.97,
+        "text": "Trao đổi nhu cầu",
+        "top": 9.5,
+        "width": 153.34
+      },
+      {
+        "height": 44,
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGroup 0912 910 101",
+        "left": 186.97,
+        "right": 230.97,
+        "text": "☎",
+        "top": 9.5,
+        "width": 44
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Mở Zalo OA",
+        "left": 238.97,
+        "right": 307,
+        "text": "Zalo OA",
+        "top": 9.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": null,
+        "label": "Mở điều hướng",
+        "left": 315,
+        "right": 359,
+        "text": "",
+        "top": 9.5,
+        "width": 44
+      }
+    ],
+    "nav": {
+      "height": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "width": 0
+    },
+    "primaryVisible": false,
+    "timestamp": "2026-10-23T03:51:23.585Z",
+    "url": "https://wingsgroup.vn/",
+    "viewport": 390
+  },
+  {
+    "brand": {
+      "height": 64,
+      "left": 16,
+      "right": 101.25,
+      "top": -0.5,
+      "width": 85.25
+    },
+    "brandNavOverlap": 0,
+    "contentLeft": null,
+    "documentWidth": 318,
+    "headerLinks": [
+      {
+        "height": 64,
+        "href": "/",
+        "label": null,
+        "left": 16,
+        "right": 101.25,
+        "text": "",
+        "top": -0.5,
+        "width": 85.25
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": -44.38,
+        "right": 108.97,
+        "text": "Trao đổi nhu cầu",
+        "top": 9.5,
+        "width": 153.34
+      },
+      {
+        "height": 44,
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGroup 0912 910 101",
+        "left": 116.97,
+        "right": 160.97,
+        "text": "☎",
+        "top": 9.5,
+        "width": 44
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Mở Zalo OA",
+        "left": 168.97,
+        "right": 237,
+        "text": "Zalo OA",
+        "top": 9.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": null,
+        "label": "Mở điều hướng",
+        "left": 245,
+        "right": 289,
+        "text": "",
+        "top": 9.5,
+        "width": 44
+      }
+    ],
+    "nav": {
+      "height": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "width": 0
+    },
+    "primaryVisible": false,
+    "timestamp": "2026-10-23T03:51:23.972Z",
+    "url": "https://wingsgroup.vn/",
+    "viewport": 320
+  },
+  {
+    "brand": {
+      "height": 68,
+      "left": 92.5,
+      "right": 183.08,
+      "top": 3.5,
+      "width": 90.58
+    },
+    "brandNavOverlap": 99.28,
+    "contentLeft": 83.796875,
+    "documentWidth": 1425,
+    "headerLinks": [
+      {
+        "height": 68,
+        "href": "/en",
+        "label": null,
+        "left": 92.5,
+        "right": 183.08,
+        "text": "",
+        "top": 3.5,
+        "width": 90.58
+      },
+      {
+        "height": 42,
+        "href": "/en#home",
+        "label": null,
+        "left": 83.8,
+        "right": 125.98,
+        "text": "Home",
+        "top": 16.5,
+        "width": 42.19
+      },
+      {
+        "height": 42,
+        "href": "/en/nang-luc-dich-vu",
+        "label": null,
+        "left": 138.22,
+        "right": 202.14,
+        "text": "Services",
+        "top": 16.5,
+        "width": 63.92
+      },
+      {
+        "height": 42,
+        "href": "/en/he-sinh-thai",
+        "label": null,
+        "left": 214.38,
+        "right": 324.75,
+        "text": "Our ecosystem",
+        "top": 16.5,
+        "width": 110.38
+      },
+      {
+        "height": 42,
+        "href": "/en/ve-wingsgroup",
+        "label": null,
+        "left": 336.98,
+        "right": 474.75,
+        "text": "About WingsGroup",
+        "top": 16.5,
+        "width": 137.77
+      },
+      {
+        "height": 42,
+        "href": "/en/tin-tuc",
+        "label": null,
+        "left": 486.98,
+        "right": 542.55,
+        "text": "Journal",
+        "top": 16.5,
+        "width": 55.56
+      },
+      {
+        "height": 42,
+        "href": "/en#contact",
+        "label": null,
+        "left": 554.78,
+        "right": 613.47,
+        "text": "Contact",
+        "top": 16.5,
+        "width": 58.69
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": 625.7,
+        "right": 826.45,
+        "text": "Speak with a specialist",
+        "top": 15.5,
+        "width": 200.75
+      },
+      {
+        "height": 40,
+        "href": "tel:0912910101",
+        "label": "Call WingsGroup 0912 910 101",
+        "left": 838.69,
+        "right": 966.23,
+        "text": "☎0912 910 101",
+        "top": 17.5,
+        "width": 127.55
+      },
+      {
+        "height": 40,
+        "href": null,
+        "label": "Additional hotlines",
+        "left": 966.23,
+        "right": 994.69,
+        "text": "▼",
+        "top": 17.5,
+        "width": 28.45
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Open Zalo OA",
+        "left": 1006.92,
+        "right": 1074.95,
+        "text": "Zalo OA",
+        "top": 15.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": "/",
+        "label": null,
+        "left": 1107.19,
+        "right": 1217.31,
+        "text": "Tiếng Việt (vi)",
+        "top": 15.5,
+        "width": 110.13
+      },
+      {
+        "height": 44,
+        "href": "/en",
+        "label": null,
+        "left": 1221.31,
+        "right": 1332.5,
+        "text": "ENGLISH (en)",
+        "top": 15.5,
+        "width": 111.19
+      }
+    ],
+    "nav": {
+      "height": 44,
+      "left": 195.08,
+      "right": 1332.5,
+      "top": 15.5,
+      "width": 1137.42
+    },
+    "primaryVisible": true,
+    "timestamp": "2026-10-23T03:51:25.374Z",
+    "url": "https://wingsgroup.vn/en",
+    "viewport": 1440
+  },
+  {
+    "brand": {
+      "height": 68,
+      "left": 32,
+      "right": 122.58,
+      "top": 3.5,
+      "width": 90.58
+    },
+    "brandNavOverlap": 126.05,
+    "contentLeft": -3.46875,
+    "documentWidth": 1265,
+    "headerLinks": [
+      {
+        "height": 68,
+        "href": "/en",
+        "label": null,
+        "left": 32,
+        "right": 122.58,
+        "text": "",
+        "top": 3.5,
+        "width": 90.58
+      },
+      {
+        "height": 42,
+        "href": "/en#home",
+        "label": null,
+        "left": -3.47,
+        "right": 38.72,
+        "text": "Home",
+        "top": 16.5,
+        "width": 42.19
+      },
+      {
+        "height": 42,
+        "href": "/en/nang-luc-dich-vu",
+        "label": null,
+        "left": 49.59,
+        "right": 113.52,
+        "text": "Services",
+        "top": 16.5,
+        "width": 63.92
+      },
+      {
+        "height": 42,
+        "href": "/en/he-sinh-thai",
+        "label": null,
+        "left": 124.39,
+        "right": 234.77,
+        "text": "Our ecosystem",
+        "top": 16.5,
+        "width": 110.38
+      },
+      {
+        "height": 42,
+        "href": "/en/ve-wingsgroup",
+        "label": null,
+        "left": 245.64,
+        "right": 383.41,
+        "text": "About WingsGroup",
+        "top": 16.5,
+        "width": 137.77
+      },
+      {
+        "height": 42,
+        "href": "/en/tin-tuc",
+        "label": null,
+        "left": 394.28,
+        "right": 449.84,
+        "text": "Journal",
+        "top": 16.5,
+        "width": 55.56
+      },
+      {
+        "height": 42,
+        "href": "/en#contact",
+        "label": null,
+        "left": 460.72,
+        "right": 519.41,
+        "text": "Contact",
+        "top": 16.5,
+        "width": 58.69
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": 530.28,
+        "right": 731.03,
+        "text": "Speak with a specialist",
+        "top": 15.5,
+        "width": 200.75
+      },
+      {
+        "height": 40,
+        "href": "tel:0912910101",
+        "label": "Call WingsGroup 0912 910 101",
+        "left": 741.91,
+        "right": 869.45,
+        "text": "☎0912 910 101",
+        "top": 17.5,
+        "width": 127.55
+      },
+      {
+        "height": 40,
+        "href": null,
+        "label": "Additional hotlines",
+        "left": 869.45,
+        "right": 897.91,
+        "text": "▼",
+        "top": 17.5,
+        "width": 28.45
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Open Zalo OA",
+        "left": 908.78,
+        "right": 976.81,
+        "text": "Zalo OA",
+        "top": 15.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": "/",
+        "label": null,
+        "left": 1007.69,
+        "right": 1117.81,
+        "text": "Tiếng Việt (vi)",
+        "top": 15.5,
+        "width": 110.13
+      },
+      {
+        "height": 44,
+        "href": "/en",
+        "label": null,
+        "left": 1121.81,
+        "right": 1233,
+        "text": "ENGLISH (en)",
+        "top": 15.5,
+        "width": 111.19
+      }
+    ],
+    "nav": {
+      "height": 44,
+      "left": 134.58,
+      "right": 1233,
+      "top": 15.5,
+      "width": 1098.42
+    },
+    "primaryVisible": true,
+    "timestamp": "2026-10-23T03:51:25.772Z",
+    "url": "https://wingsgroup.vn/en",
+    "viewport": 1280
+  },
+  {
+    "brand": {
+      "height": 68,
+      "left": 32,
+      "right": 122.58,
+      "top": 3.5,
+      "width": 90.58
+    },
+    "brandNavOverlap": 199.86,
+    "contentLeft": -77.28125,
+    "documentWidth": 1185,
+    "headerLinks": [
+      {
+        "height": 68,
+        "href": "/en",
+        "label": null,
+        "left": 32,
+        "right": 122.58,
+        "text": "",
+        "top": 3.5,
+        "width": 90.58
+      },
+      {
+        "height": 42,
+        "href": "/en#home",
+        "label": null,
+        "left": -77.28,
+        "right": -35.09,
+        "text": "Home",
+        "top": 16.5,
+        "width": 42.19
+      },
+      {
+        "height": 42,
+        "href": "/en/nang-luc-dich-vu",
+        "label": null,
+        "left": -24.91,
+        "right": 39.02,
+        "text": "Services",
+        "top": 16.5,
+        "width": 63.92
+      },
+      {
+        "height": 42,
+        "href": "/en/he-sinh-thai",
+        "label": null,
+        "left": 49.2,
+        "right": 159.58,
+        "text": "Our ecosystem",
+        "top": 16.5,
+        "width": 110.38
+      },
+      {
+        "height": 42,
+        "href": "/en/ve-wingsgroup",
+        "label": null,
+        "left": 169.77,
+        "right": 307.53,
+        "text": "About WingsGroup",
+        "top": 16.5,
+        "width": 137.77
+      },
+      {
+        "height": 42,
+        "href": "/en/tin-tuc",
+        "label": null,
+        "left": 317.72,
+        "right": 373.28,
+        "text": "Journal",
+        "top": 16.5,
+        "width": 55.56
+      },
+      {
+        "height": 42,
+        "href": "/en#contact",
+        "label": null,
+        "left": 383.47,
+        "right": 442.16,
+        "text": "Contact",
+        "top": 16.5,
+        "width": 58.69
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": 452.34,
+        "right": 653.09,
+        "text": "Speak with a specialist",
+        "top": 15.5,
+        "width": 200.75
+      },
+      {
+        "height": 40,
+        "href": "tel:0912910101",
+        "label": "Call WingsGroup 0912 910 101",
+        "left": 663.28,
+        "right": 790.83,
+        "text": "☎0912 910 101",
+        "top": 17.5,
+        "width": 127.55
+      },
+      {
+        "height": 40,
+        "href": null,
+        "label": "Additional hotlines",
+        "left": 790.83,
+        "right": 819.28,
+        "text": "▼",
+        "top": 17.5,
+        "width": 28.45
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Open Zalo OA",
+        "left": 829.47,
+        "right": 897.5,
+        "text": "Zalo OA",
+        "top": 15.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": "/",
+        "label": null,
+        "left": 927.69,
+        "right": 1037.81,
+        "text": "Tiếng Việt (vi)",
+        "top": 15.5,
+        "width": 110.13
+      },
+      {
+        "height": 44,
+        "href": "/en",
+        "label": null,
+        "left": 1041.81,
+        "right": 1153,
+        "text": "ENGLISH (en)",
+        "top": 15.5,
+        "width": 111.19
+      }
+    ],
+    "nav": {
+      "height": 44,
+      "left": 134.58,
+      "right": 1153,
+      "top": 15.5,
+      "width": 1018.42
+    },
+    "primaryVisible": true,
+    "timestamp": "2026-10-23T03:51:26.177Z",
+    "url": "https://wingsgroup.vn/en",
+    "viewport": 1200
+  },
+  {
+    "brand": {
+      "height": 64,
+      "left": 32,
+      "right": 117.25,
+      "top": -0.5,
+      "width": 85.25
+    },
+    "brandNavOverlap": 0,
+    "contentLeft": null,
+    "documentWidth": 1009,
+    "headerLinks": [
+      {
+        "height": 64,
+        "href": "/en",
+        "label": null,
+        "left": 32,
+        "right": 117.25,
+        "text": "",
+        "top": -0.5,
+        "width": 85.25
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": 596.22,
+        "right": 796.97,
+        "text": "Speak with a specialist",
+        "top": 9.5,
+        "width": 200.75
+      },
+      {
+        "height": 44,
+        "href": "tel:0912910101",
+        "label": "Call WingsGroup 0912 910 101",
+        "left": 804.97,
+        "right": 848.97,
+        "text": "☎",
+        "top": 9.5,
+        "width": 44
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Open Zalo OA",
+        "left": 856.97,
+        "right": 925,
+        "text": "Zalo OA",
+        "top": 9.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": null,
+        "label": "Open navigation",
+        "left": 933,
+        "right": 977,
+        "text": "",
+        "top": 9.5,
+        "width": 44
+      }
+    ],
+    "nav": {
+      "height": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "width": 0
+    },
+    "primaryVisible": false,
+    "timestamp": "2026-10-23T03:51:26.574Z",
+    "url": "https://wingsgroup.vn/en",
+    "viewport": 1024
+  },
+  {
+    "brand": {
+      "height": 64,
+      "left": 16,
+      "right": 101.25,
+      "top": -0.5,
+      "width": 85.25
+    },
+    "brandNavOverlap": 0,
+    "contentLeft": null,
+    "documentWidth": 375,
+    "headerLinks": [
+      {
+        "height": 64,
+        "href": "/en",
+        "label": null,
+        "left": 16,
+        "right": 101.25,
+        "text": "",
+        "top": -0.5,
+        "width": 85.25
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": -21.78,
+        "right": 178.97,
+        "text": "Speak with a specialist",
+        "top": 9.5,
+        "width": 200.75
+      },
+      {
+        "height": 44,
+        "href": "tel:0912910101",
+        "label": "Call WingsGroup 0912 910 101",
+        "left": 186.97,
+        "right": 230.97,
+        "text": "☎",
+        "top": 9.5,
+        "width": 44
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Open Zalo OA",
+        "left": 238.97,
+        "right": 307,
+        "text": "Zalo OA",
+        "top": 9.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": null,
+        "label": "Open navigation",
+        "left": 315,
+        "right": 359,
+        "text": "",
+        "top": 9.5,
+        "width": 44
+      }
+    ],
+    "nav": {
+      "height": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "width": 0
+    },
+    "primaryVisible": false,
+    "timestamp": "2026-10-23T03:51:26.991Z",
+    "url": "https://wingsgroup.vn/en",
+    "viewport": 390
+  },
+  {
+    "brand": {
+      "height": 64,
+      "left": 16,
+      "right": 101.25,
+      "top": -0.5,
+      "width": 85.25
+    },
+    "brandNavOverlap": 0,
+    "contentLeft": null,
+    "documentWidth": 305,
+    "headerLinks": [
+      {
+        "height": 64,
+        "href": "/en",
+        "label": null,
+        "left": 16,
+        "right": 101.25,
+        "text": "",
+        "top": -0.5,
+        "width": 85.25
+      },
+      {
+        "height": 44,
+        "href": "#consultation-dialog",
+        "label": null,
+        "left": -91.78,
+        "right": 108.97,
+        "text": "Speak with a specialist",
+        "top": 9.5,
+        "width": 200.75
+      },
+      {
+        "height": 44,
+        "href": "tel:0912910101",
+        "label": "Call WingsGroup 0912 910 101",
+        "left": 116.97,
+        "right": 160.97,
+        "text": "☎",
+        "top": 9.5,
+        "width": 44
+      },
+      {
+        "height": 44,
+        "href": "https://zalo.me/4142059657526524531",
+        "label": "Open Zalo OA",
+        "left": 168.97,
+        "right": 237,
+        "text": "Zalo OA",
+        "top": 9.5,
+        "width": 68.03
+      },
+      {
+        "height": 44,
+        "href": null,
+        "label": "Open navigation",
+        "left": 245,
+        "right": 289,
+        "text": "",
+        "top": 9.5,
+        "width": 44
+      }
+    ],
+    "nav": {
+      "height": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "width": 0
+    },
+    "primaryVisible": false,
+    "timestamp": "2026-10-23T03:51:27.37Z",
+    "url": "https://wingsgroup.vn/en",
+    "viewport": 320
+  }
+]

@@ -1,0 +1,127 @@
+TAP version 13
+# Subtest: the governed register has the immutable expected inventory and records the approved source contracts
+not ok 1 - the governed register has the immutable expected inventory and records the approved source contracts
+  ---
+  duration_ms: 3.298
+  type: 'test'
+  location: 'E:\\repo\\WingsTravel\\app\\scripts\\wingsgroup-v3-release-gates.test.mjs:43:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + '2026-09-26'
+    - '2026-08-24'
+             ^
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: '2026-08-24'
+  actual: '2026-09-26'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///E:/repo/WingsTravel/app/scripts/wingsgroup-v3-release-gates.test.mjs:51:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: approved mandatory gates require non-sensitive evidence references
+ok 2 - approved mandatory gates require non-sensitive evidence references
+  ---
+  duration_ms: 0.6527
+  type: 'test'
+  ...
+# Subtest: configured consultation channels require their complete operational contract
+ok 3 - configured consultation channels require their complete operational contract
+  ---
+  duration_ms: 0.3615
+  type: 'test'
+  ...
+# Subtest: the complete optional consultation-channel gate may remain pending without blocking release
+ok 4 - the complete optional consultation-channel gate may remain pending without blocking release
+  ---
+  duration_ms: 0.5016
+  type: 'test'
+  ...
+# Subtest: approved privacy gate requires the complete stakeholder-approved contract
+ok 5 - approved privacy gate requires the complete stakeholder-approved contract
+  ---
+  duration_ms: 0.4159
+  type: 'test'
+  ...
+# Subtest: the fully evidenced expected inventory can pass the release-gate contract
+ok 6 - the fully evidenced expected inventory can pass the release-gate contract
+  ---
+  duration_ms: 0.8933
+  type: 'test'
+  ...
+# Subtest: pending ecosystem deep links remain non-blocking while their CTAs stay fail-closed
+ok 7 - pending ecosystem deep links remain non-blocking while their CTAs stay fail-closed
+  ---
+  duration_ms: 0.3386
+  type: 'test'
+  ...
+# Subtest: pending proof publication remains non-blocking while every proof stays fail-closed
+ok 8 - pending proof publication remains non-blocking while every proof stays fail-closed
+  ---
+  duration_ms: 0.2337
+  type: 'test'
+  ...
+# Subtest: upgrading ecosystem deep links to mandatory violates their locked P2 classification
+ok 9 - upgrading ecosystem deep links to mandatory violates their locked P2 classification
+  ---
+  duration_ms: 0.4379
+  type: 'test'
+  ...
+# Subtest: omitting any expected gate fails closed
+ok 10 - omitting any expected gate fails closed
+  ---
+  duration_ms: 0.965
+  type: 'test'
+  ...
+# Subtest: downgrading a mandatory publication gate to optional fails closed
+ok 11 - downgrading a mandatory publication gate to optional fails closed
+  ---
+  duration_ms: 0.2614
+  type: 'test'
+  ...
+# Subtest: upgrading proof publication to a release blocker violates its locked classification
+ok 12 - upgrading proof publication to a release blocker violates its locked classification
+  ---
+  duration_ms: 0.1509
+  type: 'test'
+  ...
+# Subtest: upgrading the optional consultation gate to mandatory also violates its locked classification
+ok 13 - upgrading the optional consultation gate to mandatory also violates its locked classification
+  ---
+  duration_ms: 0.1467
+  type: 'test'
+  ...
+# Subtest: extra, duplicate, and renamed gates fail closed
+ok 14 - extra, duplicate, and renamed gates fail closed
+  ---
+  duration_ms: 0.3005
+  type: 'test'
+  ...
+# Subtest: consultation-channel inventory rejects omissions, extras, and duplicates
+ok 15 - consultation-channel inventory rejects omissions, extras, and duplicates
+  ---
+  duration_ms: 0.7777
+  type: 'test'
+  ...
+# Subtest: ecosystem deep-link inventory is immutable
+ok 16 - ecosystem deep-link inventory is immutable
+  ---
+  duration_ms: 0.2011
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 15
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 128.6594

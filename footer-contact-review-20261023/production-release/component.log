@@ -1,0 +1,20 @@
+
+> website@1.0.0 test:component E:\repo\WingsTravel\deploy\oracle\us085-footer-20261023\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.component.config.mts "tests/component/wingsGroupHeaderOptionA.component.spec.tsx" "tests/component/headerHotlines.component.spec.tsx" "tests/component/siteContactFab.component.spec.tsx" "tests/component/wingsSideHiFiChrome.component.spec.tsx" "tests/component/wingsGroupV3Homepage.component.spec.tsx" "tests/component/footerHotlines.component.spec.tsx"
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.6 [39m[90mE:/repo/WingsTravel/deploy/oracle/us085-footer-20261023/app[39m
+
+ [32m✓[39m tests/component/siteContactFab.component.spec.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 287[2mms[22m[39m
+ [32m✓[39m tests/component/footerHotlines.component.spec.tsx [2m([22m[2m11 tests[22m[2m)[22m[32m 95[2mms[22m[39m
+ [32m✓[39m tests/component/headerHotlines.component.spec.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 227[2mms[22m[39m
+ [32m✓[39m tests/component/wingsSideHiFiChrome.component.spec.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 371[2mms[22m[39m
+Not implemented: navigation to another Document
+ [32m✓[39m tests/component/wingsGroupHeaderOptionA.component.spec.tsx [2m([22m[2m12 tests[22m[2m)[22m[33m 421[2mms[22m[39m
+ [32m✓[39m tests/component/wingsGroupV3Homepage.component.spec.tsx [2m([22m[2m26 tests[22m[2m)[22m[33m 820[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m59 passed[39m[22m[90m (59)[39m
+[2m   Start at [22m 21:15:08
+[2m   Duration [22m 32.49s[2m (transform 4.03s, setup 558ms, import 35.07s, tests 2.22s, environment 96.38s)[22m
+

@@ -551,7 +551,7 @@ describe('WingsGroup corporate route contract', () => {
   it('seeds polished English metadata and the required direct contact values', () => {
     expect(wingsGroupSettingsSeed.en.salesEmail).toBe('sales@wingsgroup.vn')
     expect(wingsGroupSettingsSeed.en.supportEmail).toBe('info@wingsgroup.vn')
-    expect(wingsGroupSettingsSeed.en.supportPhone).toBe('0912910101')
+    expect(wingsGroupSettingsSeed.en.supportPhone).toBe('0948786775')
 
     for (const route of buildWingsGroupCorporateRouteSeeds().filter(({ policy }) => !policy)) {
       expect(route.en.title, route.path).not.toMatch(/[à-ỹ]/i)

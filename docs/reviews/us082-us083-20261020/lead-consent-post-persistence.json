@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-10-20T12:10:29.905Z",
+  "marker": "us082-root-3c250203-b6d1-4b7b-bb26-3ccd641c3a59",
+  "response": {
+    "status": 202,
+    "body": "{\"status\":\"accepted\"}"
+  },
+  "stored": [
+    {
+      "id": 7,
+      "site_id": 1,
+      "form_id": 1,
+      "wings_group_lead_locale": "en",
+      "wings_group_lead_source_path": "/",
+      "wings_group_lead_consent_version": "wingsgroup-contact-v1",
+      "delivery_status": "queued"
+    }
+  ]
+}

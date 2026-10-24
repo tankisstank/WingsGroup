@@ -1,0 +1,34 @@
+(node:48600) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[22:19:01] [33mWARN[39m: [36mNo email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.[39m
+{
+  "timestamp": "2026-10-23T15:19:01.672Z",
+  "status": "PASS",
+  "environment": "owned local SQLite snapshot only",
+  "originalFixturePhone": "+84 903 000 111",
+  "reproducedProductionPhone": "0912910101",
+  "settingsCompared": 6,
+  "plan": {
+    "siteCode": "wings-go",
+    "settingsID": 18,
+    "previousPhone": "0912910101",
+    "currentPhone": "0948786775",
+    "status": "planned"
+  },
+  "apply": {
+    "siteCode": "wings-go",
+    "settingsID": 18,
+    "previousPhone": "0912910101",
+    "currentPhone": "0948786775",
+    "status": "updated"
+  },
+  "repeat": {
+    "siteCode": "wings-go",
+    "settingsID": 18,
+    "previousPhone": "0948786775",
+    "currentPhone": "0948786775",
+    "status": "noop"
+  },
+  "otherFieldsAndTenantsUnchanged": true,
+  "repeatDoesNotChangeUpdatedAt": true
+}

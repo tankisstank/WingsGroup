@@ -1,0 +1,42 @@
+✓ Done
+✓ WingsGo | Outbound Tours
+  https://wingsgo.vn/
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-cms-promotion-20261020/prod-home-desktop.png
+PASS desktop https://wingsgo.vn/ width=1425/1440
+✓ Tour WingsGo | Outbound Tours
+  https://wingsgo.vn/tour
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-cms-promotion-20261020/prod-tour-desktop.png
+PASS desktop https://wingsgo.vn/tour width=1425/1440
+✓ Tour Hàn Quốc | Outbound Tours | WingsGo
+  https://wingsgo.vn/thi-truong/han-quoc
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-cms-promotion-20261020/prod-hanquoc-desktop.png
+PASS desktop https://wingsgo.vn/thi-truong/han-quoc width=1425/1440
+✓ Tour Nhật Bản | Outbound Tours | WingsGo
+  https://wingsgo.vn/thi-truong/nhat-ban
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-cms-promotion-20261020/prod-nhatban-desktop.png
+PASS desktop https://wingsgo.vn/thi-truong/nhat-ban width=1425/1440
+✓ WingsGroup — Connected travel expertise | Travel Ecosystem
+  https://wingsgroup.vn/en
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-cms-promotion-20261020/prod-wingsgroup-en-desktop.png
+PASS desktop https://wingsgroup.vn/en width=1425/1440
+✓ Done
+✓ WingsGo | Outbound Tours
+  https://wingsgo.vn/
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-cms-promotion-20261020/prod-home-mobile.png
+PASS mobile https://wingsgo.vn/ width=375/390
+✓ Tour WingsGo | Outbound Tours
+  https://wingsgo.vn/tour
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-cms-promotion-20261020/prod-tour-mobile.png
+PASS mobile https://wingsgo.vn/tour width=375/390
+✓ Tour Hàn Quốc | Outbound Tours | WingsGo
+  https://wingsgo.vn/thi-truong/han-quoc
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-cms-promotion-20261020/prod-hanquoc-mobile.png
+PASS mobile https://wingsgo.vn/thi-truong/han-quoc width=375/390
+✓ Tour Nhật Bản | Outbound Tours | WingsGo
+  https://wingsgo.vn/thi-truong/nhat-ban
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-cms-promotion-20261020/prod-nhatban-mobile.png
+PASS mobile https://wingsgo.vn/thi-truong/nhat-ban width=375/390
+✓ WingsGroup — Connected travel expertise | Travel Ecosystem
+  https://wingsgroup.vn/en
+✓ Screenshot saved to E:/repo/WingsTravel/docs/reviews/us083-cms-promotion-20261020/prod-wingsgroup-en-mobile.png
+PASS mobile https://wingsgroup.vn/en width=375/390

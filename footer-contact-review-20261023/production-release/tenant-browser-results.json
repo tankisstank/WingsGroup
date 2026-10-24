@@ -1,0 +1,182 @@
+[
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101",
+      "tel:0915250101",
+      "tel:0915260101"
+    ],
+    "footerZalo": true,
+    "locale": "vi",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T14:43:01.45Z",
+    "url": "https://wingsgo.vn/",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101",
+      "tel:0915250101",
+      "tel:0915260101"
+    ],
+    "footerZalo": true,
+    "locale": "vi",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Gọi hotline WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T14:43:02.114Z",
+    "url": "https://wingsgo.vn/",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101",
+      "tel:0915250101",
+      "tel:0915260101"
+    ],
+    "footerZalo": true,
+    "locale": "en",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T14:43:27.785Z",
+    "url": "https://wingsgo.vn/en",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101",
+      "tel:0915250101",
+      "tel:0915260101"
+    ],
+    "footerZalo": true,
+    "locale": "en",
+    "overflow": false,
+    "phones": [
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      },
+      {
+        "href": "tel:0912910101",
+        "label": "Call WingsGo 0912 910 101"
+      }
+    ],
+    "site": "wings-go",
+    "timestamp": "2026-10-23T14:43:28.184Z",
+    "url": "https://wingsgo.vn/en",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101"
+    ],
+    "footerZalo": false,
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T14:43:47.869Z",
+    "url": "https://wingside.vn/",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101"
+    ],
+    "footerZalo": false,
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T14:43:48.266Z",
+    "url": "https://wingside.vn/",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 0
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101"
+    ],
+    "footerZalo": false,
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T14:44:25.751Z",
+    "url": "https://wingside.vn/",
+    "width": 390,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 1
+  },
+  {
+    "footerPhones": [
+      "tel:0912910101",
+      "tel:0912910101"
+    ],
+    "footerZalo": false,
+    "locale": "en",
+    "overflow": false,
+    "phones": [],
+    "site": "wing-side",
+    "timestamp": "2026-10-23T14:44:26.144Z",
+    "url": "https://wingside.vn/",
+    "width": 1280,
+    "wingsGroupControls": 0,
+    "passed": true,
+    "navigationExit": 1
+  }
+]

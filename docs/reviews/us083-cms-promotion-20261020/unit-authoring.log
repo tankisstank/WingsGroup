@@ -1,0 +1,13 @@
+
+> website@1.0.0 test:unit E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.unit.config.mts "tourAuthoring.unit.spec.ts" "tourAuthoringRoute.unit.spec.ts"
+
+
+ RUN  v4.1.6 E:/repo/WingsTravel/app
+
+
+ Test Files  2 passed (2)
+      Tests  18 passed (18)
+   Start at  21:16:34
+   Duration  6.84s (transform 444ms, setup 292ms, import 5.40s, tests 39ms, environment 4.02s)
+

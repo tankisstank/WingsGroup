@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-10-20T04:16:56.353Z",
+  "snapshots": {
+    "baseline": {
+      "statusCode": 200,
+      "price": {
+        "currency": "VND",
+        "kind": "verified",
+        "originalPrice": 15900000,
+        "value": 12900000
+      },
+      "nextDeparture": {
+        "airline": null,
+        "date": "2026-11-15T00:00:00.000Z",
+        "departureCity": "Hà Nội",
+        "promoLabel": "Flash Sale Mùa Thu"
+      }
+    },
+    "afterPriceUpdate": {
+      "statusCode": 200,
+      "price": {
+        "currency": "VND",
+        "kind": "verified",
+        "originalPrice": 14900000,
+        "value": 9900000
+      },
+      "nextDeparture": {
+        "airline": null,
+        "date": "2026-11-15T00:00:00.000Z",
+        "departureCity": "Hà Nội",
+        "promoLabel": "Siêu Giảm Giá Mùa Thu"
+      }
+    },
+    "afterDepartureDelete": {
+      "statusCode": 200,
+      "itemPresent": false,
+      "featuredCount": 0
+    }
+  }
+}

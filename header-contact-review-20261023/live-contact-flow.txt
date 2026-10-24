@@ -1,0 +1,17 @@
+Captured at 2026-10-23T10:52:28.5013667+07:00
+- heading "Speak with a specialist." [level=2, ref=e1]
+- button "Close channel chooser" [ref=e2]
+- link "Open WingsGroup Zalo OA" [ref=e3]
+- link "Call hotline 0912 910 101" [ref=e4]
+- link "Call Tư vấn tour 0915 250 101" [ref=e5]
+- link "Call Hỗ trợ dịch vụ 0915 260 101" [ref=e6]
+- button "Share your plans Our specialists will guide the next step." [ref=e7]
+- heading "Speak with a specialist." [level=2, ref=e1]
+- button "Close channel chooser" [ref=e2]
+- link "Open WingsGroup Zalo OA" [ref=e3]
+- link "Call hotline 0912 910 101" [ref=e4]
+- link "Call Tư vấn tour 0915 250 101" [ref=e5]
+- link "Call Hỗ trợ dịch vụ 0915 260 101" [ref=e6]
+- button "Share your plans Our specialists will guide the next step." [ref=e7]
+✓ Done
+"{\"dialogClosed\":true,\"focus\":\"Speak with a specialist\"}"

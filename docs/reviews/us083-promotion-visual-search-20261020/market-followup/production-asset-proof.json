@@ -1,0 +1,9 @@
+{
+  "sha256": "942168d0912a9474b4315ebb2f02780ed5a309781ae496c859dfd60e0502aef6",
+  "buildID": "Jbkhivn63kcHi42C2Be4O",
+  "assetPath": "static/chunks/0-2pc54y_pauc.js",
+  "timestamp": "2026-10-20T17:25:18.925Z",
+  "actualSHA256": "942168d0912a9474b4315ebb2f02780ed5a309781ae496c859dfd60e0502aef6",
+  "bytes": 437257,
+  "assertions": "PASS exact public asset bytes match verified promotion build"
+}

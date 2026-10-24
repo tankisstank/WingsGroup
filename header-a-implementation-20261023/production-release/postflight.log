@@ -1,0 +1,12 @@
+(node:1) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"status":"verified","mode":"inspect","releaseSha":"6a0dac015340f7279bfe352e377193c38b3d0d91","targetDatabase":"wingstravel","timestamp":"2026-10-23T08:12:58.031Z","siteID":1,"settingsID":14,"sitesVerified":6,"settingsVerified":6,"beforePhone":"0948786775","result":null,"additionalHotlines":[{"id":"wingsgroup-14-hotline-2","phoneNumber":"0915250101","label":"Tư vấn tour"},{"id":"wingsgroup-14-hotline-3","phoneNumber":"0915260101","label":"Hỗ trợ dịch vụ"}],"otherTenantsAndFieldsUnchanged":false,"rowLockUsed":false,"idempotencyVerified":false}
+▲ Next.js 16.2.6
+(node:1) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+- Local:         http://86fc3a590cbb:3000
+- Network:       http://86fc3a590cbb:3000
+✓ Ready in 0ms
+{"action":"readiness_checked","level":"info","message":"readiness_checked","timestamp":"2026-10-23T08:12:01.742Z","duration_ms":240,"leadDelivery":"configured","redis":"up","request_id":"86b71f10-b81b-4765-9948-007b3f41baaf","status_code":200}
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        45G   41G  3.6G  93% /

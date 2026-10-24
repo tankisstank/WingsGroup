@@ -1,0 +1,540 @@
+{
+  "timestamp": "2026-10-23T08:11:26.6278767Z",
+  "totalCases": 4,
+  "layoutFailures": 0,
+  "englishMobileMixedLabelCases": 0,
+  "results": [
+    {
+      "callLabel": "Gọi ngay 0912 910 101",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 8,
+          "right": 93.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 54.5,
+          "height": 46,
+          "left": 108.796875,
+          "right": 247,
+          "top": 8.5,
+          "width": 138.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 253,
+          "right": 297,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "languageLabels": [
+        {
+          "after": "none",
+          "text": "VI"
+        },
+        {
+          "after": "none",
+          "text": "EN"
+        }
+      ],
+      "languageLabelsCorrect": true,
+      "locale": "vi",
+      "mainHref": "tel:0912910101",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 318,
+        "height": 255.5,
+        "left": 35,
+        "right": 295,
+        "top": 62.5,
+        "width": 260
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 53.5,
+        "height": 44,
+        "left": 202,
+        "right": 246,
+        "top": 9.5,
+        "width": 44
+      },
+      "targets": [
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 109.796875,
+          "right": 202,
+          "top": 9.5,
+          "width": 92.203125
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 202,
+          "right": 246,
+          "top": 9.5,
+          "width": 44
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 253,
+          "right": 297,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "targetsFit": true,
+      "timestamp": "2026-10-23T08:11:23.025Z",
+      "url": "http://localhost:31086/",
+      "width": 320
+    },
+    {
+      "callLabel": "Gọi ngay 0912 910 101",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tư vấn tour"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Hỗ trợ dịch vụ"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat ZaloNhắn tin với WingsGroup"
+        },
+        {
+          "href": "/lien-he#contact-form",
+          "text": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 433.921875,
+          "right": 505.609375,
+          "top": 16.5,
+          "width": 71.6875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 516.484375,
+          "right": 570.703125,
+          "top": 16.5,
+          "width": 54.21875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 581.578125,
+          "right": 667.84375,
+          "top": 16.5,
+          "width": 86.265625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 678.71875,
+          "right": 791.46875,
+          "top": 16.5,
+          "width": 112.75
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 802.34375,
+          "right": 875.53125,
+          "top": 16.5,
+          "width": 73.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 886.40625,
+          "right": 938.53125,
+          "top": 16.5,
+          "width": 52.125
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 949.40625,
+          "right": 1125.234375,
+          "top": 14.5,
+          "width": 175.828125
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1136.109375,
+          "right": 1233,
+          "top": 15.5,
+          "width": 96.890625
+        }
+      ],
+      "languageLabels": [
+        {
+          "after": "none",
+          "text": "VI"
+        },
+        {
+          "after": "none",
+          "text": "EN"
+        }
+      ],
+      "languageLabelsCorrect": true,
+      "locale": "vi",
+      "mainHref": "tel:0912910101",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 837.234375,
+        "right": 1125.234375,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1080.234375,
+        "right": 1124.234375,
+        "top": 15.5,
+        "width": 44
+      },
+      "targets": [
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 950.40625,
+          "right": 1080.234375,
+          "top": 15.5,
+          "width": 129.828125
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1080.234375,
+          "right": 1124.234375,
+          "top": 15.5,
+          "width": 44
+        }
+      ],
+      "targetsFit": true,
+      "timestamp": "2026-10-23T08:11:23.525Z",
+      "url": "http://localhost:31086/",
+      "width": 1280
+    },
+    {
+      "callLabel": "Call now 0912 910 101",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": false,
+      "groups": [
+        {
+          "bottom": 63.5,
+          "height": 64,
+          "left": 8,
+          "right": 93.25,
+          "top": -0.5,
+          "width": 85.25
+        },
+        {
+          "bottom": 54.5,
+          "height": 46,
+          "left": 109.5,
+          "right": 247,
+          "top": 8.5,
+          "width": 137.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 253,
+          "right": 297,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "languageLabels": [
+        {
+          "after": "none",
+          "text": "VI"
+        },
+        {
+          "after": "none",
+          "text": "EN"
+        }
+      ],
+      "languageLabelsCorrect": true,
+      "locale": "en",
+      "mainHref": "tel:0912910101",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 318,
+        "height": 255.5,
+        "left": 35,
+        "right": 295,
+        "top": 62.5,
+        "width": 260
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 53.5,
+        "height": 44,
+        "left": 202,
+        "right": 246,
+        "top": 9.5,
+        "width": 44
+      },
+      "targets": [
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 110.5,
+          "right": 202,
+          "top": 9.5,
+          "width": 91.5
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 202,
+          "right": 246,
+          "top": 9.5,
+          "width": 44
+        },
+        {
+          "bottom": 53.5,
+          "height": 44,
+          "left": 253,
+          "right": 297,
+          "top": 9.5,
+          "width": 44
+        }
+      ],
+      "targetsFit": true,
+      "timestamp": "2026-10-23T08:11:26.11Z",
+      "url": "http://localhost:31086/en",
+      "width": 320
+    },
+    {
+      "callLabel": "Call now 0912 910 101",
+      "channels": [
+        {
+          "href": "tel:0915250101",
+          "text": "0915 250 101Tour consultation"
+        },
+        {
+          "href": "tel:0915260101",
+          "text": "0915 260 101Travel support"
+        },
+        {
+          "href": "https://zalo.me/4142059657526524531",
+          "text": "ZChat on ZaloMessage the WingsGroup team"
+        },
+        {
+          "href": "/en/lien-he#contact-form",
+          "text": "Send an inquiryLet our specialists get back to you"
+        }
+      ],
+      "clippedGroups": [],
+      "collisions": [],
+      "desktop": true,
+      "groups": [
+        {
+          "bottom": 71.5,
+          "height": 68,
+          "left": 32,
+          "right": 122.578125,
+          "top": 3.5,
+          "width": 90.578125
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 415.65625,
+          "right": 457.84375,
+          "top": 16.5,
+          "width": 42.1875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 468.71875,
+          "right": 532.640625,
+          "top": 16.5,
+          "width": 63.921875
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 543.515625,
+          "right": 653.890625,
+          "top": 16.5,
+          "width": 110.375
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 664.765625,
+          "right": 802.53125,
+          "top": 16.5,
+          "width": 137.765625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 813.40625,
+          "right": 868.96875,
+          "top": 16.5,
+          "width": 55.5625
+        },
+        {
+          "bottom": 58.5,
+          "height": 42,
+          "left": 879.84375,
+          "right": 938.53125,
+          "top": 16.5,
+          "width": 58.6875
+        },
+        {
+          "bottom": 60.5,
+          "height": 46,
+          "left": 949.40625,
+          "right": 1125.234375,
+          "top": 14.5,
+          "width": 175.828125
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1136.109375,
+          "right": 1233,
+          "top": 15.5,
+          "width": 96.890625
+        }
+      ],
+      "languageLabels": [
+        {
+          "after": "none",
+          "text": "VI"
+        },
+        {
+          "after": "none",
+          "text": "EN"
+        }
+      ],
+      "languageLabelsCorrect": true,
+      "locale": "en",
+      "mainHref": "tel:0912910101",
+      "overflow": false,
+      "passed": true,
+      "popupBox": {
+        "bottom": 324,
+        "height": 255.5,
+        "left": 837.234375,
+        "right": 1125.234375,
+        "top": 68.5,
+        "width": 288
+      },
+      "popupFits": true,
+      "primaryLinksCount": 6,
+      "targetSize": {
+        "bottom": 59.5,
+        "height": 44,
+        "left": 1080.234375,
+        "right": 1124.234375,
+        "top": 15.5,
+        "width": 44
+      },
+      "targets": [
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 950.40625,
+          "right": 1080.234375,
+          "top": 15.5,
+          "width": 129.828125
+        },
+        {
+          "bottom": 59.5,
+          "height": 44,
+          "left": 1080.234375,
+          "right": 1124.234375,
+          "top": 15.5,
+          "width": 44
+        }
+      ],
+      "targetsFit": true,
+      "timestamp": "2026-10-23T08:11:26.585Z",
+      "url": "http://localhost:31086/en",
+      "width": 1280
+    }
+  ]
+}

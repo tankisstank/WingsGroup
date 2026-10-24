@@ -139,7 +139,7 @@ describe('WingSide hi-fi header chrome (site isolation)', () => {
     expect(container.querySelector('a[href="/search"]')).toBeNull()
     expect(container.textContent).toContain('Home')
     expect(container.textContent).toContain('Departure schedule')
-    expect(container.textContent).toContain('0912 910 101')
+    expect(container.textContent).toContain('0948 786 775')
     unmount()
   })
 

@@ -593,6 +593,26 @@ Server Component props.
 
 ## Validation Expectations
 
+### WingsGo contact surfaces — follow-up 2026-10-23
+
+- Main hotline is `0948786775`, displayed as `0948 786 775`, sourced from
+  site-settings through resolveSiteHotlines. The fallback and bootstrap seed
+  use the new number; valid custom CMS values remain authoritative.
+- Footer has one direct-call link and one preferred email (support, then sales).
+  Remove repeated supplementary phone links, Zalo/advice CTAs and the public
+  light/dark selector. Keep office addresses and footer navigation.
+- Header and contact dialogs retain supplementary hotlines and shared Zalo OA.
+  The floating contact trigger hides while the WingsGo footer is in view;
+  an open dialog remains available and Escape restores an appropriate focus.
+- The WingsGo contact form consumes the existing hotlines prop; no separate
+  hardcoded phone. Explicit empty props remain empty.
+- The CMS old-to-new update is site-scoped, planned by default and rejects
+  unexpected custom values. No schema changes or global replacement across
+  tenants. See US-081 and wingsgo-footer-review-20261023 for proof and rollout
+  status; the prior WingsGroup release does not establish WingsGo delivery.
+
+### Existing tour validation
+
 - Type-safe collection schemas exist for tour product records.
 - Public pages render dense decision-friendly tour detail information on desktop
   and mobile.

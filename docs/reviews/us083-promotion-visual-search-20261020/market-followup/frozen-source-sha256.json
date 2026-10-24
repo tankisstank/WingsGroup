@@ -1,0 +1,30 @@
+[
+  {
+    "path": "app/src/collections/TourDepartures.ts",
+    "sha256": "19612fd5a2d97d7ec02e5e85c7d79a74949e9f2dabb3c1a25255dab555810e13"
+  },
+  {
+    "path": "app/src/tours/PromotionPrice.tsx",
+    "sha256": "cde924a41d3e23cd906ec6588e80b3c41819ab463d1620a82d6fdf3f259b24de"
+  },
+  {
+    "path": "app/src/tours/WingsGoTourCard.tsx",
+    "sha256": "c29ab2ee3e0a22e1e3d66832edecfae50f4256c924b97799b9083299ad5c8cf3"
+  },
+  {
+    "path": "app/src/tours/WingsGoHomepageSections.tsx",
+    "sha256": "f96eefe3fbc2bb69d5859c83d00a74a556912c8364d8987c015ef8abdea51db7"
+  },
+  {
+    "path": "app/src/tours/StructuredPages.tsx",
+    "sha256": "54b0a3342bfdad6a1ef65d89291a88a7677e487c523674b242fe314c6f7637fc"
+  },
+  {
+    "path": "app/src/tours/queries.ts",
+    "sha256": "b66840712f366b1b25bceaebda489fdac2a12fb55c17f2929e998ff748762b69"
+  },
+  {
+    "path": "app/src/heros/HighImpact/index.tsx",
+    "sha256": "9491fe98035e3446eb195856e5e9e6e735138789529ef373fe862a7d1c9eb415"
+  }
+]

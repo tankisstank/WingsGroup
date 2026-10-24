@@ -16,13 +16,13 @@ describe('US-081 site hotline resolution', () => {
     const hotlines = resolveSiteHotlines(null, 'wings-go')
 
     expect(phoneNumbers(hotlines)).toEqual([
-      '0912910101',
+      '0948786775',
       '0915250101',
       '0915260101',
     ])
     expect(phoneNumbers(hotlines)).toEqual(WINGSGO_DEFAULT_HOTLINES)
     expect(hotlines.map((hotline) => hotline.href)).toEqual([
-      'tel:0912910101',
+      'tel:0948786775',
       'tel:0915250101',
       'tel:0915260101',
     ])
@@ -34,7 +34,7 @@ describe('US-081 site hotline resolution', () => {
       'wings-go',
     )
 
-    expect(phoneNumbers(hotlines)).toEqual(WINGSGO_DEFAULT_HOTLINES)
+    expect(phoneNumbers(hotlines)).toEqual(['0912910101', '0915250101', '0915260101'])
   })
 
   it.each([[], null])('respects an explicitly empty supplementary list: %j', (additionalHotlines) => {
@@ -110,7 +110,7 @@ describe('US-081 site hotline resolution', () => {
       'wings-go',
     )
 
-    expect(phoneNumbers(hotlines)).toEqual(['0912910101'])
+    expect(phoneNumbers(hotlines)).toEqual(['0948786775'])
   })
 
   it('does not leak WingsGo defaults into another tenant or an unspecified tenant', () => {

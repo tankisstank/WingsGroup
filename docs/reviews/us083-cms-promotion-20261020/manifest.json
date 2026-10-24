@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-10-20T14:32:23.9424468Z",
+  "scope": "US-083 per-departure CMS promotion",
+  "buildID": "GHux1OjjppK42suiKM04m",
+  "deployedThisExtension": true,
+  "harnessTrace": 303,
+  "intake": 144,
+  "checks": {
+    "postgresDraftSaveClear": "passed",
+    "authoringUnit": "18/18",
+    "authoringComponent": "17/17",
+    "build": 0,
+    "tsc": 0,
+    "desktop": "1440x900",
+    "mobile": "390x844",
+    "component": "247/247",
+    "scopedLint": 0
+  },
+  "source": [
+    {
+      "sha256": "4461C2FABD09925BE10F3B511A2A77E34EB3C96FCC77256F67DCE4757DB1807D",
+      "path": "app/src/components/TourAuthoring/TourDepartureForm.tsx"
+    },
+    {
+      "sha256": "904282A002553BA7B0E633C70D744C4485BDF8F2EE7B2F66D1BA625331759FD7",
+      "path": "app/src/components/TourAuthoring/TourDepartureManager.tsx"
+    },
+    {
+      "sha256": "3E17E305BE525DA63C8DBCFBB52E74C932BE3106ECC7860D2E603B0AD71E905D",
+      "path": "app/src/components/TourAuthoring/TourAuthoringReadiness.tsx"
+    },
+    {
+      "sha256": "9B5970677DF0F1901014C99605CAAC30F2ECDF2F202BD1135CC813F2F7DF863B",
+      "path": "app/src/components/TourAuthoring/index.tsx"
+    },
+    {
+      "sha256": "AED29293922F7F151A2E5CF1D4E27AA4B235B62F3B1721C6787E061874768748",
+      "path": "app/tests/component/tourDeparturePromotion.component.spec.tsx"
+    },
+    {
+      "sha256": "B94AA6B62B12182BE89260BDBE41CDCE9B708D2516AE9F443C2C3DFC3D82A626",
+      "path": "app/tests/component/tourAuthoring.component.spec.tsx"
+    }
+  ],
+  "retainedLocalServer": {
+    "pid": 8420,
+    "port": 3102
+  },
+  "fixtures": "deleted; SQL counts 0 users / 0 products / 0 departures",
+  "release": {
+    "name": "release-us083-cms-promotion-20261020-150000",
+    "buildID": "GHux1OjjppK42suiKM04m",
+    "image": "sha256:8756cce56b9bf7978f2586d382e0039a16075962463248bbc39f7beeb3d3541f",
+    "rollbackImage": "wingstravel-app:rollback-release-us083-cms-promotion-20261020-150000",
+    "backupSha256": "4fd0c527e3e78a226e61e0948d0a1f595f518aeb6a0b8ce4ec99580a5eea1881",
+    "activatedAt": "2026-10-20T15:05:39Z"
+  }
+}

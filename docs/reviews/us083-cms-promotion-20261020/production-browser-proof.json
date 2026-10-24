@@ -1,0 +1,176 @@
+{
+  "pageErrors": 0,
+  "buildID": "GHux1OjjppK42suiKM04m",
+  "readOnly": true,
+  "results": [
+    {
+      "screenshot": "prod-home-desktop.png",
+      "dom": {
+        "bodyLength": 8431,
+        "deletedPrices": 0,
+        "documentWidth": 1425,
+        "h1": "WingsGo - Du lịch Outbound Trọn Gói & Khởi Hành Đúng Lịch",
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "WingsGo | Outbound Tours",
+        "url": "https://wingsgo.vn/",
+        "width": 1440
+      },
+      "viewport": "desktop"
+    },
+    {
+      "screenshot": "prod-tour-desktop.png",
+      "dom": {
+        "bodyLength": 8257,
+        "deletedPrices": 0,
+        "documentWidth": 1425,
+        "h1": "Tour outbound nổi bật: giá, lịch và điểm nhấn rõ ràng",
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour WingsGo | Outbound Tours",
+        "url": "https://wingsgo.vn/tour",
+        "width": 1440
+      },
+      "viewport": "desktop"
+    },
+    {
+      "screenshot": "prod-hanquoc-desktop.png",
+      "dom": {
+        "bodyLength": 5225,
+        "deletedPrices": 0,
+        "documentWidth": 1425,
+        "h1": "Tour Hàn Quốc",
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour Hàn Quốc | Outbound Tours | WingsGo",
+        "url": "https://wingsgo.vn/thi-truong/han-quoc",
+        "width": 1440
+      },
+      "viewport": "desktop"
+    },
+    {
+      "screenshot": "prod-nhatban-desktop.png",
+      "dom": {
+        "bodyLength": 7734,
+        "deletedPrices": 0,
+        "documentWidth": 1425,
+        "h1": "Tour Nhật Bản",
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour Nhật Bản | Outbound Tours | WingsGo",
+        "url": "https://wingsgo.vn/thi-truong/nhat-ban",
+        "width": 1440
+      },
+      "viewport": "desktop"
+    },
+    {
+      "screenshot": "prod-wingsgroup-en-desktop.png",
+      "dom": {
+        "bodyLength": 4429,
+        "deletedPrices": 0,
+        "documentWidth": 1425,
+        "h1": "Find the right service for your journey.",
+        "overflow": false,
+        "privacyLinks": [
+          {
+            "href": "/en/chinh-sach-bao-mat",
+            "text": "Read the Privacy Policy"
+          },
+          {
+            "href": "/en/chinh-sach-bao-mat",
+            "text": "Customer Privacy Policy"
+          }
+        ],
+        "title": "WingsGroup — Connected travel expertise | Travel Ecosystem",
+        "url": "https://wingsgroup.vn/en",
+        "width": 1440
+      },
+      "viewport": "desktop"
+    },
+    {
+      "screenshot": "prod-home-mobile.png",
+      "dom": {
+        "bodyLength": 8355,
+        "deletedPrices": 0,
+        "documentWidth": 375,
+        "h1": "WingsGo - Du lịch Outbound Trọn Gói & Khởi Hành Đúng Lịch",
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "WingsGo | Outbound Tours",
+        "url": "https://wingsgo.vn/",
+        "width": 390
+      },
+      "viewport": "mobile"
+    },
+    {
+      "screenshot": "prod-tour-mobile.png",
+      "dom": {
+        "bodyLength": 8181,
+        "deletedPrices": 0,
+        "documentWidth": 375,
+        "h1": "Tour outbound nổi bật: giá, lịch và điểm nhấn rõ ràng",
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour WingsGo | Outbound Tours",
+        "url": "https://wingsgo.vn/tour",
+        "width": 390
+      },
+      "viewport": "mobile"
+    },
+    {
+      "screenshot": "prod-hanquoc-mobile.png",
+      "dom": {
+        "bodyLength": 5149,
+        "deletedPrices": 0,
+        "documentWidth": 375,
+        "h1": "Tour Hàn Quốc",
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour Hàn Quốc | Outbound Tours | WingsGo",
+        "url": "https://wingsgo.vn/thi-truong/han-quoc",
+        "width": 390
+      },
+      "viewport": "mobile"
+    },
+    {
+      "screenshot": "prod-nhatban-mobile.png",
+      "dom": {
+        "bodyLength": 7658,
+        "deletedPrices": 0,
+        "documentWidth": 375,
+        "h1": "Tour Nhật Bản",
+        "overflow": false,
+        "privacyLinks": [],
+        "title": "Tour Nhật Bản | Outbound Tours | WingsGo",
+        "url": "https://wingsgo.vn/thi-truong/nhat-ban",
+        "width": 390
+      },
+      "viewport": "mobile"
+    },
+    {
+      "screenshot": "prod-wingsgroup-en-mobile.png",
+      "dom": {
+        "bodyLength": 4324,
+        "deletedPrices": 0,
+        "documentWidth": 375,
+        "h1": "Find the right service for your journey.",
+        "overflow": false,
+        "privacyLinks": [
+          {
+            "href": "/en/chinh-sach-bao-mat",
+            "text": "Read the Privacy Policy"
+          },
+          {
+            "href": "/en/chinh-sach-bao-mat",
+            "text": "Customer Privacy Policy"
+          }
+        ],
+        "title": "WingsGroup — Connected travel expertise | Travel Ecosystem",
+        "url": "https://wingsgroup.vn/en",
+        "width": 390
+      },
+      "viewport": "mobile"
+    }
+  ],
+  "timestamp": "2026-10-20T15:39:58.4218340Z"
+}

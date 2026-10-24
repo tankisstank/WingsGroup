@@ -1,0 +1,13 @@
+
+> website@1.0.0 test:unit E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.unit.config.mts "tests/unit/wingsGroupV3FidelityContract.unit.spec.ts"
+
+
+ RUN  v4.1.6 E:/repo/WingsTravel/app
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  14:19:09
+   Duration  1.05s (transform 74ms, setup 59ms, import 66ms, tests 11ms, environment 675ms)
+

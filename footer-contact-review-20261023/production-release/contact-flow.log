@@ -1,0 +1,156 @@
+{
+  "timestamp": "2026-10-23T14:41:31.3928110Z",
+  "passed": false,
+  "results": [
+    {
+      "locale": "vi",
+      "before": {
+        "focusInside": true,
+        "links": [
+          {
+            "href": "tel:0915250101",
+            "label": "0915 250 101Tư vấn tour"
+          },
+          {
+            "href": "tel:0915260101",
+            "label": "0915 260 101Hỗ trợ dịch vụ"
+          },
+          {
+            "href": "https://zalo.me/4142059657526524531",
+            "label": "ZChat ZaloNhắn tin với WingsGroup"
+          },
+          {
+            "href": "/lien-he#contact-form",
+            "label": "Gửi nhu cầuĐể chuyên viên liên hệ với bạn"
+          }
+        ],
+        "open": true
+      },
+      "after": {
+        "closed": true,
+        "focusRestored": true
+      },
+      "form": {
+        "configKeys": [
+          "available",
+          "enabled",
+          "channels",
+          "consentCopy",
+          "consentVersion",
+          "policyHref",
+          "retentionMonths"
+        ],
+        "configStatus": 200,
+        "hasForm": true,
+        "inputs": [
+          {
+            "name": "_website",
+            "required": false,
+            "type": "text"
+          },
+          {
+            "name": "full-name",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "name": "email",
+            "required": false,
+            "type": "email"
+          },
+          {
+            "name": "phone",
+            "required": false,
+            "type": "tel"
+          },
+          {
+            "name": "brief",
+            "required": true,
+            "type": "textarea"
+          }
+        ],
+        "privacyLinks": [
+          "/chinh-sach-bao-mat"
+        ],
+        "timestamp": "2026-10-23T14:41:27.557Z",
+        "url": "https://wingsgroup.vn/lien-he"
+      },
+      "passed": false
+    },
+    {
+      "locale": "en",
+      "before": {
+        "focusInside": true,
+        "links": [
+          {
+            "href": "tel:0915250101",
+            "label": "0915 250 101Tour consultation"
+          },
+          {
+            "href": "tel:0915260101",
+            "label": "0915 260 101Travel support"
+          },
+          {
+            "href": "https://zalo.me/4142059657526524531",
+            "label": "ZChat on ZaloMessage the WingsGroup team"
+          },
+          {
+            "href": "/en/lien-he#contact-form",
+            "label": "Send an inquiryLet our specialists get back to you"
+          }
+        ],
+        "open": true
+      },
+      "after": {
+        "closed": true,
+        "focusRestored": true
+      },
+      "form": {
+        "configKeys": [
+          "available",
+          "enabled",
+          "channels",
+          "consentCopy",
+          "consentVersion",
+          "policyHref",
+          "retentionMonths"
+        ],
+        "configStatus": 200,
+        "hasForm": true,
+        "inputs": [
+          {
+            "name": "_website",
+            "required": false,
+            "type": "text"
+          },
+          {
+            "name": "full-name",
+            "required": true,
+            "type": "text"
+          },
+          {
+            "name": "email",
+            "required": false,
+            "type": "email"
+          },
+          {
+            "name": "phone",
+            "required": false,
+            "type": "tel"
+          },
+          {
+            "name": "brief",
+            "required": true,
+            "type": "textarea"
+          }
+        ],
+        "privacyLinks": [
+          "/en/chinh-sach-bao-mat"
+        ],
+        "timestamp": "2026-10-23T14:41:31.383Z",
+        "url": "https://wingsgroup.vn/en/lien-he"
+      },
+      "passed": false
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+sha256:54821addabf22f01d90986cc1fcea3e00e4d842627bf4738729b14d2f3c0b962 true 0
+/home/ubuntu/wings-travel/releases/release-us085-6a0dac0
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":21,"requestId":"80e57e8c-d9b4-490e-a03b-3fb7a936c604","status":"ready","timestamp":"2026-10-23T08:19:35.287Z"}{"action":"readiness_checked","level":"info","message":"readiness_checked","timestamp":"2026-10-23T08:12:01.742Z","duration_ms":240,"leadDelivery":"configured","redis":"up","request_id":"86b71f10-b81b-4765-9948-007b3f41baaf","status_code":200}
+[08:15:01] [32mINFO[39m: [36mRunning 1 jobs.[39m
+    [35mnew[39m: 1
+    [35mretrying[39m: 0
+{"action":"readiness_checked","level":"info","message":"readiness_checked","timestamp":"2026-10-23T08:19:35.286Z","duration_ms":20,"leadDelivery":"configured","redis":"up","request_id":"80e57e8c-d9b4-490e-a03b-3fb7a936c604","status_code":200}

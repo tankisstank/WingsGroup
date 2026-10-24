@@ -1,0 +1,9 @@
+{
+  "activeLabel": null,
+  "activeTag": "BODY",
+  "drawerClosed": true,
+  "expectedFocus": "button[aria-controls=\"mobile-primary-navigation\"]",
+  "focusRestored": false,
+  "timestamp": "2026-10-23T05:54:24.995Z",
+  "url": "http://localhost:3000/wingsgroup/en/ve-wingsgroup"
+}

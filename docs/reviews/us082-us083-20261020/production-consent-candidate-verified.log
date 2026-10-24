@@ -1,0 +1,7 @@
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":25,"requestId":"11daa2ee-68d5-45d7-af9b-9bafa98ce71e","status":"ready","timestamp":"2026-10-20T12:17:54.212Z"}
+ARM64 libsql { native_ok: 1 }
+ARM64 sharp/libvips bytes 90
+Verified candidate image sha256:15ee80cde57fb60e478b015da903d8e3b70cf52ecb815700f7032723dbbf12b4
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":6,"requestId":"b60b4958-5a95-4865-8ca2-84c4a727ce13","status":"ready","timestamp":"2026-10-20T12:17:54.545Z"}
+PASS candidate identity, readiness and native ARM64; current still previous release
+2026-10-20T12:17:54+00:00

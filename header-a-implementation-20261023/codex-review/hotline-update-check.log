@@ -1,0 +1,88 @@
+{
+  "timestamp": "2026-10-23T05:51:51.638Z",
+  "allAdditionalPreserved": false,
+  "allNoopsTruthful": false,
+  "emptyMainIsPreserved": false,
+  "results": [
+    {
+      "scenario": "new main + intentionally empty additional",
+      "preservesAdditional": false,
+      "truthfulNoop": false,
+      "result": {
+        "siteCode": "wings-group",
+        "status": "noop",
+        "previousPhone": "0948786775",
+        "currentPhone": "0948786775",
+        "message": "Hotline is already up-to-date (0948786775). No change needed."
+      },
+      "updates": [
+        {
+          "additionalHotlines": [
+            {
+              "phoneNumber": "0915250101",
+              "label": "Tư vấn tour"
+            },
+            {
+              "phoneNumber": "0915260101",
+              "label": "Hỗ trợ dịch vụ"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": "old main + intentionally empty additional",
+      "preservesAdditional": false,
+      "truthfulNoop": true,
+      "result": {
+        "siteCode": "wings-group",
+        "status": "updated",
+        "previousPhone": "0912910101",
+        "currentPhone": "0948786775",
+        "message": "Updated WingsGroup hotline from 0912910101 to 0948786775."
+      },
+      "updates": [
+        {
+          "supportPhone": "0948786775",
+          "additionalHotlines": [
+            {
+              "phoneNumber": "0915250101",
+              "label": "Tư vấn tour"
+            },
+            {
+              "phoneNumber": "0915260101",
+              "label": "Hỗ trợ dịch vụ"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scenario": "old main + custom additional",
+      "preservesAdditional": true,
+      "truthfulNoop": true,
+      "result": {
+        "siteCode": "wings-group",
+        "status": "updated",
+        "previousPhone": "0912910101",
+        "currentPhone": "0948786775",
+        "message": "Updated WingsGroup hotline from 0912910101 to 0948786775."
+      },
+      "updates": [
+        {
+          "supportPhone": "0948786775"
+        }
+      ]
+    }
+  ],
+  "emptyMain": {
+    "shouldUpdate": true,
+    "result": {
+      "siteCode": "wings-group",
+      "status": "updated",
+      "previousPhone": null,
+      "currentPhone": "0948786775",
+      "message": "Updated WingsGroup hotline from (empty) to 0948786775."
+    }
+  }
+}

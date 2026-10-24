@@ -1,0 +1,4 @@
+(node:41288) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[00:17:21] [33mWARN[39m: [36mNo email adapter provided. Email will be written to console. More info at https://payloadcms.com/docs/email/overview.[39m
+{"beforePhone":"0948786775","mode":"inspect","otherSettingsUnchanged":true,"releaseSha":"d6057d41c2b3897b27cbd656356f83873d652870","result":null,"rowLockUsed":false,"settingsCompared":6,"siteCode":"wings-go","status":"verified","writes":0}

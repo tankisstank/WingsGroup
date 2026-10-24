@@ -1,0 +1,500 @@
+{
+  "timestamp": "2026-10-23T14:30:50.1983813Z",
+  "baseUrl": "https://wingsgroup.vn",
+  "cases": 24,
+  "failures": 0,
+  "results": [
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Gọi ngay: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Bạn muốn trao đổi trực tiếp?\nGọi ngay: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/",
+      "scrollWidth": 318,
+      "url": "https://wingsgroup.vn/",
+      "width": 320
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Gọi ngay: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Bạn muốn trao đổi trực tiếp?\nGọi ngay: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/",
+      "scrollWidth": 375,
+      "url": "https://wingsgroup.vn/",
+      "width": 390
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Gọi ngay: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Bạn muốn trao đổi trực tiếp?\nGọi ngay: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/",
+      "scrollWidth": 753,
+      "url": "https://wingsgroup.vn/",
+      "width": 768
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Gọi ngay: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Bạn muốn trao đổi trực tiếp?\nGọi ngay: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/",
+      "scrollWidth": 1265,
+      "url": "https://wingsgroup.vn/",
+      "width": 1280
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/en",
+      "scrollWidth": 305,
+      "url": "https://wingsgroup.vn/en",
+      "width": 320
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/en",
+      "scrollWidth": 375,
+      "url": "https://wingsgroup.vn/en",
+      "width": 390
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/en",
+      "scrollWidth": 753,
+      "url": "https://wingsgroup.vn/en",
+      "width": 768
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/en",
+      "scrollWidth": 1265,
+      "url": "https://wingsgroup.vn/en",
+      "width": 1280
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Gọi ngay: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Bạn muốn trao đổi trực tiếp?\nGọi ngay: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/lien-he",
+      "scrollWidth": 305,
+      "url": "https://wingsgroup.vn/lien-he",
+      "width": 320
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Gọi ngay: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Bạn muốn trao đổi trực tiếp?\nGọi ngay: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/lien-he",
+      "scrollWidth": 375,
+      "url": "https://wingsgroup.vn/lien-he",
+      "width": 390
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Gọi ngay: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Bạn muốn trao đổi trực tiếp?\nGọi ngay: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/lien-he",
+      "scrollWidth": 753,
+      "url": "https://wingsgroup.vn/lien-he",
+      "width": 768
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Gọi ngay: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Bạn muốn trao đổi trực tiếp?\nGọi ngay: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/lien-he",
+      "scrollWidth": 1265,
+      "url": "https://wingsgroup.vn/lien-he",
+      "width": 1280
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Call now: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Prefer a direct conversation?\nCall now: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/en/lien-he",
+      "scrollWidth": 305,
+      "url": "https://wingsgroup.vn/en/lien-he",
+      "width": 320
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Call now: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Prefer a direct conversation?\nCall now: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/en/lien-he",
+      "scrollWidth": 375,
+      "url": "https://wingsgroup.vn/en/lien-he",
+      "width": 390
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Call now: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Prefer a direct conversation?\nCall now: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/en/lien-he",
+      "scrollWidth": 753,
+      "url": "https://wingsgroup.vn/en/lien-he",
+      "width": 768
+    },
+    {
+      "directLinks": [
+        {
+          "height": 44,
+          "href": "tel:0948786775",
+          "label": "Call now: 0948 786 775"
+        }
+      ],
+      "directPassed": true,
+      "directText": "Prefer a direct conversation?\nCall now: 0948 786 775",
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": true,
+      "passed": true,
+      "path": "/en/lien-he",
+      "scrollWidth": 1265,
+      "url": "https://wingsgroup.vn/en/lien-he",
+      "width": 1280
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": false,
+      "passed": true,
+      "path": "/ve-wingsgroup",
+      "scrollWidth": 305,
+      "url": "https://wingsgroup.vn/ve-wingsgroup",
+      "width": 320
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": false,
+      "passed": true,
+      "path": "/ve-wingsgroup",
+      "scrollWidth": 375,
+      "url": "https://wingsgroup.vn/ve-wingsgroup",
+      "width": 390
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": false,
+      "passed": true,
+      "path": "/ve-wingsgroup",
+      "scrollWidth": 753,
+      "url": "https://wingsgroup.vn/ve-wingsgroup",
+      "width": 768
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": false,
+      "passed": true,
+      "path": "/ve-wingsgroup",
+      "scrollWidth": 1265,
+      "url": "https://wingsgroup.vn/ve-wingsgroup",
+      "width": 1280
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": false,
+      "passed": true,
+      "path": "/en/ve-wingsgroup",
+      "scrollWidth": 308,
+      "url": "https://wingsgroup.vn/en/ve-wingsgroup",
+      "width": 320
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": false,
+      "passed": true,
+      "path": "/en/ve-wingsgroup",
+      "scrollWidth": 375,
+      "url": "https://wingsgroup.vn/en/ve-wingsgroup",
+      "width": 390
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": false,
+      "passed": true,
+      "path": "/en/ve-wingsgroup",
+      "scrollWidth": 753,
+      "url": "https://wingsgroup.vn/en/ve-wingsgroup",
+      "width": 768
+    },
+    {
+      "directLinks": [],
+      "directPassed": true,
+      "footerEmailLinks": [
+        "mailto:info@wingsgroup.vn"
+      ],
+      "footerPhoneHeight": 44,
+      "footerPhoneLinks": [
+        "tel:0948786775"
+      ],
+      "hasForm": false,
+      "passed": true,
+      "path": "/en/ve-wingsgroup",
+      "scrollWidth": 1265,
+      "url": "https://wingsgroup.vn/en/ve-wingsgroup",
+      "width": 1280
+    }
+  ]
+}

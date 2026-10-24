@@ -1,0 +1,8 @@
+ Container wingstravel-app-1 Recreate 
+ Container wingstravel-app-1 Recreated 
+ Container wingstravel-app-1 Starting 
+ Container wingstravel-app-1 Started 
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":183,"requestId":"3687f5c1-11f1-4db5-8b1f-adc86baacacc","status":"ready","timestamp":"2026-10-20T12:18:28.950Z"}
+Activated current: /home/ubuntu/wings-travel/releases/release-us082-us083-consent-20261020-120500
+Activated image sha256:15ee80cde57fb60e478b015da903d8e3b70cf52ecb815700f7032723dbbf12b4
+2026-10-20T12:18:29+00:00

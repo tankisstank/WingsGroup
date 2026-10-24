@@ -1,0 +1,18 @@
+
+> website@1.0.0 plane:preview E:\repo\WingsTravel\app
+> cross-env NODE_OPTIONS=--no-deprecation node scripts/plane-import.mjs preview
+
+{
+  "initiative": "Nền tảng CMS WingsGroup",
+  "projectCount": 7,
+  "moduleCount": 13,
+  "epicCount": 10,
+  "milestoneCount": 5,
+  "stateCount": 8,
+  "propertyCount": 8,
+  "pageCount": 8,
+  "storyCount": 1,
+  "childTaskCount": 4
+}
+
+US-085 | Nền tảng lõi WingsGroup | Giao diện và nhận diện thương hiệu | Đã bàn giao | child=4

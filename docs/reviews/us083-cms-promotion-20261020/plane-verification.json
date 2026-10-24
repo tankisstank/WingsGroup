@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-10-20T14:32:44.697Z",
+  "findings": [
+    {
+      "storyID": "US-082",
+      "project": "Nền tảng lõi WingsGroup",
+      "epic": "E09 - Trải nghiệm public WingsGroup v3",
+      "parentVerified": true,
+      "state": "Đã bàn giao",
+      "start_date": "2026-10-19",
+      "target_date": "2026-10-19",
+      "children": 0,
+      "missingDates": 0,
+      "genericChildNames": 0
+    },
+    {
+      "storyID": "US-083",
+      "project": "WingsGo",
+      "epic": "E07 - Nền tảng sản phẩm tour WingsGo",
+      "parentVerified": true,
+      "state": "Chờ xác nhận",
+      "start_date": "2026-10-19",
+      "target_date": "2026-10-19",
+      "children": 0,
+      "missingDates": 0,
+      "genericChildNames": 0
+    }
+  ]
+}

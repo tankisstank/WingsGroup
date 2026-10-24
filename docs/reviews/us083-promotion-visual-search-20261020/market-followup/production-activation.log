@@ -1,0 +1,8 @@
+ Container wingstravel-app-1 Recreate 
+ Container wingstravel-app-1 Recreated 
+ Container wingstravel-app-1 Starting 
+ Container wingstravel-app-1 Started 
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":325,"requestId":"f6d9c481-3c1d-41e7-bfd8-44228cd5e225","status":"ready","timestamp":"2026-10-20T17:25:01.965Z"}
+Activated current: /home/ubuntu/wings-travel/releases/release-us083-promotion-search-market-20261020-172000
+Activated image sha256:bf1387fd6dfb057b8ac2774f85746708683e0f40b373aff7fac14b43d7f6703f
+2026-10-20T17:25:02+00:00
