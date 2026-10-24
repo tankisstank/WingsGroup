@@ -1,0 +1,6 @@
+wings-rainbow-643a40d
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":18,"requestId":"526c1c5e-20b2-4fac-b69d-1265acb04ead","status":"ready","timestamp":"2026-10-24T09:01:42.300Z"}sha256:0ef04a9a1cfded2efec835f32d68e0cac72cc05f1314530871a949493f9c523b 2026-10-24T08:56:25.498045229Z 0
+sha256:6ff0106b45f4eba6a5019e502891903a7103105ca893a65602bbabac5e1a8f27
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        45G   43G  1.1G  98% /
+Final runtime verified: 2026-10-24T09:01:42Z

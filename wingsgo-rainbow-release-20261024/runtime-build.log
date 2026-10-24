@@ -1,0 +1,89 @@
+#0 building with "wingstravel-arm64" instance using docker-container driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 686B done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/node:22.17.0-alpine
+#2 DONE 1.4s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.1s
+
+#4 [internal] load build context
+#4 DONE 0.0s
+
+#5 [ 1/12] FROM docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed
+#5 resolve docker.io/library/node:22.17.0-alpine@sha256:fc3e945f920b7e3000cd1af86c4ae406ec70c72f328b667baf0f3a8910d69eed 0.1s done
+#5 DONE 0.1s
+
+#6 [ 2/12] WORKDIR /app
+#6 CACHED
+
+#4 [internal] load build context
+#4 ...
+
+#7 [ 3/12] RUN addgroup --system --gid 1001 nodejs
+#7 DONE 0.7s
+
+#4 [internal] load build context
+#4 ...
+
+#8 [ 4/12] RUN adduser --system --uid 1001 nextjs
+#8 DONE 0.4s
+
+#4 [internal] load build context
+#4 transferring context: 14.31MB 4.9s
+#4 transferring context: 59.59MB 10.0s
+#4 transferring context: 112.67MB 15.0s
+#4 transferring context: 160.82MB 20.0s
+#4 transferring context: 178.67MB 25.1s
+#4 transferring context: 242.70MB 30.1s
+#4 transferring context: 289.97MB 35.2s
+#4 transferring context: 299.25MB 40.3s
+#4 transferring context: 308.86MB 45.5s
+#4 transferring context: 321.75MB 50.5s
+#4 transferring context: 338.85MB 55.4s done
+#4 DONE 55.6s
+
+#9 [ 5/12] COPY public ./public
+#9 DONE 0.2s
+
+#10 [ 6/12] COPY .next ./.next
+#10 DONE 0.5s
+
+#11 [ 7/12] COPY node_modules ./node_modules
+#11 DONE 3.0s
+
+#12 [ 8/12] COPY package.json ./package.json
+#12 DONE 0.2s
+
+#13 [ 9/12] COPY server.js ./server.js
+#13 DONE 0.1s
+
+#14 [10/12] COPY relink.sh ./relink.sh
+#14 DONE 0.3s
+
+#15 [11/12] RUN chmod +x ./relink.sh && ./relink.sh && rm ./relink.sh
+#15 DONE 9.9s
+
+#16 [12/12] RUN chown -R nextjs:nodejs /app
+#16 DONE 20.8s
+
+#17 exporting to docker image format
+#17 exporting layers
+#17 exporting layers 8.6s done
+#17 exporting manifest sha256:0ef04a9a1cfded2efec835f32d68e0cac72cc05f1314530871a949493f9c523b 0.0s done
+#17 exporting config sha256:c0e848b6c278cbbe43b9e1f2a5ffc73b5b7a465599fd5ee74a68235c6e19396a 0.0s done
+#17 sending tarball
+#17 sending tarball 2.3s done
+#17 DONE 11.0s
+
+View build details: docker-desktop://dashboard/build/wingstravel-arm64/wingstravel-arm640/z8cqkmmz0hq0ns2g9t8um4ohu
+
+ 4 warnings found (use docker --debug to expand):
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 4)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 5)
+ - UndefinedVar: Usage of undefined variable '$LD_LIBRARY_PATH' (line 6)
+ - LegacyKeyValueFormat: "ENV key=value" should be used instead of legacy "ENV key value" format (line 6)

@@ -1,0 +1,113 @@
+
+> website@1.0.0 build E:\repo\WingsTravel\wingsgo-rainbow-release-20261024\candidate\app
+> cross-env NODE_OPTIONS=--no-deprecation next build
+
+▲ Next.js 16.2.6 (Turbopack)
+- Environments: .env
+- Experiments (use with caution):
+  ⨯ turbopackServerFastRefresh
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 32.8s
+  Running TypeScript ...
+  Finished TypeScript in 66s ...
+  Collecting page data using 19 workers ...
+(node:41440) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:44976) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5052) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:44100) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3232) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24908) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:60512) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:25744) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:12812) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:48140) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:62868) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17632) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:33000) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:59396) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:58840) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:57284) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:14636) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:59692) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:37624) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+  Generating static pages using 19 workers (0/20) ...
+  Generating static pages using 19 workers (5/20) 
+  Generating static pages using 19 workers (10/20) 
+  Generating static pages using 19 workers (15/20) 
+✓ Generating static pages using 19 workers (20/20) in 785ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /[...slug]
+├ ƒ /admin/[[...segments]]
+├ ƒ /api/[...slug]
+├ ƒ /api/form-submissions/[id]/triage
+├ ƒ /api/graphql
+├ ƒ /api/graphql-playground
+├ ƒ /api/health/live
+├ ƒ /api/health/ready
+├ ƒ /api/lead-submissions
+├ ƒ /api/localization-status
+├ ƒ /api/localization-titles
+├ ƒ /api/operations/metrics
+├ ƒ /api/page-wizard
+├ ƒ /api/public-media/[filename]
+├ ƒ /api/security/csp-report
+├ ƒ /api/site-review
+├ ƒ /api/tour-authoring/[id]
+├ ƒ /api/wingsgo/tour-catalog
+├ ƒ /journeys
+├ ƒ /llms-full.txt
+├ ƒ /llms.txt
+├ ƒ /next/exit-preview
+├ ƒ /next/preview
+├ ƒ /next/preview/handoff
+├ ƒ /next/seed
+├ ƒ /pages-sitemap.xml
+├ ƒ /posts
+├ ƒ /posts-sitemap.xml
+├ ƒ /posts/[slug]
+├ ƒ /posts/page/[pageNumber]
+├ ƒ /robots.txt
+├ ƒ /search
+├ ƒ /sitemap.xml
+└ ƒ /tin-tuc/[slug]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> website@1.0.0 postbuild E:\repo\WingsTravel\wingsgo-rainbow-release-20261024\candidate\app
+> node scripts/prepare-standalone.mjs
+
+Copied .next\static -> .next\standalone\.next\static
+Copied public -> .next\standalone\public
+Copied node_modules\.pnpm\node_modules\libsql -> .next\standalone\node_modules\libsql
+Copied node_modules\.pnpm\node_modules\@libsql -> .next\standalone\node_modules\@libsql
+Copied node_modules\.pnpm\node_modules\@neon-rs -> .next\standalone\node_modules\@neon-rs
+Copied node_modules\.pnpm\node_modules\detect-libc -> .next\standalone\node_modules\detect-libc

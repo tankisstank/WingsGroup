@@ -1,0 +1,12 @@
+{"backup":"/backups/wingstravel-2026-10-24T08-50-46-953Z.dump.age","manifest":"/backups/wingstravel-2026-10-24T08-50-46-953Z.dump.age.json","status":"ok"}
+{
+  "checksumSha256": "66f4478073189a632a2e7fd533ecfc222d8d03329c9d9b7e15c1716b2ddcfaf5",
+  "createdAt": "2026-10-24T08:50:48.241Z",
+  "database": "wingstravel",
+  "encrypted": true,
+  "file": "wingstravel-2026-10-24T08-50-46-953Z.dump.age",
+  "format": "postgres-custom",
+  "sizeBytes": 4786558
+}
+{"activeSites":6,"backupChecksumSha256":"66f4478073189a632a2e7fd533ecfc222d8d03329c9d9b7e15c1716b2ddcfaf5","durationSeconds":13,"homepages":6,"assertionProfile":null,"scope":"full-site","scopedEvidence":null,"profileEvidence":null,"restoreListVerified":true,"verifiedAt":"2026-10-24T08:51:01.359Z","status":"ok","targetDatabase":"rainbow_restore_643a40d"}
+Backup and disposable restore completed: 2026-10-24T08:51:01Z

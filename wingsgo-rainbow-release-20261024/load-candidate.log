@@ -1,0 +1,8 @@
+Loaded image: wingstravel-app:release-rainbow-643a40d
+ Container wings-rainbow-643a40d Creating 
+ Container wings-rainbow-643a40d Created 
+1218d246e6926106c6532703323a746483e94524310e761d2ffab563dc6ef95f
+curl: (56) Recv failure: Connection reset by peer
+ARM64 libsql/sharp PASS arm64 90
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":178,"requestId":"0045773d-683b-4e2d-abb2-0c201888e649","status":"ready","timestamp":"2026-10-24T08:54:44.938Z"}Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        45G   44G  390M 100% /

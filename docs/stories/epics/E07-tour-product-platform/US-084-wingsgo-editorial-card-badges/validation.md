@@ -162,3 +162,15 @@ Toàn bộ 8 Tiêu chí Chấp nhận (AC1 - AC8) của US-084 đã được hi�
 - Production current: `/home/ubuntu/wings-travel/releases/release-513238bc483f`.
 - Readiness: database up, Redis up, lead delivery configured.
 - Browser smoke: production homepage, `/tour`, Japan market, and tour detail passed on desktop and mobile; mobile `scrollWidth=375`, viewport width `390`, no overflow; browser errors empty.
+
+## Rainbow orbit follow-up — production 2026-10-24
+
+User authorized push/deploy. Master commit `1c71d71`; isolated production candidate `643a40d` on previous live `16ff60a`. Only CSS changed: registered angle `--hot-rainbow-angle` drives the seven-color conic gradient over 5 seconds, while card/mask geometry remains fixed. Reduced-motion still disables animation. The earlier whole-frame rotation was corrected before release.
+
+Fresh proof: standalone build/postbuild exit 0; 24/24 component tests; independent Codex review no P1/P2/P3; exact-candidate ARM64 operations image; encrypted production backup and real disposable restore (6 sites/6 homepages); read-only migration status 28/28 applied; actual ARM64 libsql/sharp smoke pass. No migrations or production CMS writes.
+
+Cutover completed at 15:56:28+07. Runtime immutable image `sha256:0ef04a9a1cfded2efec835f32d68e0cac72cc05f1314530871a949493f9c523b`; expected BUILD_ID matched, restart0, readiness database/Redis up and lead delivery configured. Public browser checked homepage/catalog/Japan-market at 390/1280 plus reduced-motion: angle advances, transform none, focus pass, no overflow; fresh screenshots viewed. Previous runtime pinned for rollback.
+
+On-VPS build hit disk full during chown; production stayed unchanged. The same standalone package/Dockerfile was successfully built locally for ARM64 and uploaded as a complete image. Only this session's extraction and exact failed-build cache IDs were removed. VPS remains low on space (~1.1GB available).
+
+Full commands, review findings, backup checksum, rollback and limits: `wingsgo-rainbow-release-20261024/release-report.md`; fresh logs and screenshots beside that report. No full suite, real devices, Safari/Firefox or sustained performance profile.

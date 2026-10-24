@@ -1,0 +1,65 @@
+
+> website@1.0.0 payload /app
+> cross-env NODE_OPTIONS=--no-deprecation payload migrate:status
+
+(node:41) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[08:52:36] [32mINFO[39m: [36mReading migration files from /app/src/migrations[39m
+┌───────────────────────────────────────────────────────┬───────┬─────┐
+│[37m [0m[01m                                                 Name[0m │[37m [0m[01mBatch[0m │[37m [0m[01mRan[0m │
+├───────────────────────────────────────────────────────┼───────┼─────┤
+│[37m [0m[32m                                      20260614_142513[0m │[37m [0m[32m    1[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                20260615_170207_layout_preset_library[0m │[37m [0m[32m    2[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                          20260615_hero_presentations[0m │[37m [0m[32m    2[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m          20260619_114500_site_settings_favicon_image[0m │[37m [0m[32m    3[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                20260620_090000_wings_group_root_site[0m │[37m [0m[32m    4[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                  20260623_hero_presentation_platform[0m │[37m [0m[32m    5[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                 20260710_145706_tour_platform_schema[0m │[37m [0m[32m    6[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                 20260711_090000_lead_delivery_status[0m │[37m [0m[32m    6[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m        20260711_100000_testimonial_rating_provenance[0m │[37m [0m[32m    6[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m            20260714_120000_testimonial_note_metadata[0m │[37m [0m[32m    7[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m               20260717_150000_tour_import_provenance[0m │[37m [0m[32m    8[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m        20260721_180000_wings_side_hifi_page_contract[0m │[37m [0m[32m    8[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m   20260722_010000_wings_side_plan_content_completion[0m │[37m [0m[32m    8[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m           20260722_020046_credentials_carousel_block[0m │[37m [0m[32m    8[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m            20260722_230000_wing_side_tenant_identity[0m │[37m [0m[32m    8[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m           20260723_170000_wing_side_release_identity[0m │[37m [0m[32m    8[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m             20260723_183000_wing_side_style_seo_copy[0m │[37m [0m[32m    8[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m    20260723_190000_wing_side_public_contact_identity[0m │[37m [0m[32m    8[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m         20260724_090000_credentials_catalog_metadata[0m │[37m [0m[32m    9[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m          20260724_110000_wing_side_supported_locales[0m │[37m [0m[32m   10[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                20260724_120000_tour_product_taxonomy[0m │[37m [0m[32m   11[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m              20260724_130000_wing_side_display_brand[0m │[37m [0m[32m   11[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m        20260725_090000_wings_side_home_tour_curation[0m │[37m [0m[32m   12[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m          20260728_090000_wings_side_why_travel_tours[0m │[37m [0m[32m   13[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                 20260728_100000_lead_enquiry_context[0m │[37m [0m[32m   13[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m       20260729_150000_wings_side_home_why_tour_slots[0m │[37m [0m[32m   14[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m               20260730_120000_wings_side_journeys_v2[0m │[37m [0m[32m   14[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m 20260730_130000_wings_side_enquiry_discovery_context[0m │[37m [0m[32m   14[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m     20260731_090000_tour_commerce_freshness_identity[0m │[37m [0m[32m   14[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m     20260731_100000_tour_departure_source_provenance[0m │[37m [0m[32m   14[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m   20260806_090000_backfill_wingsgo_legacy_tour_sites[0m │[37m [0m[32m   15[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m        20260813_193226_wingsgroup_v3_data_foundation[0m │[37m [0m[32m   16[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m           20260814_090000_wingsgroup_lead_governance[0m │[37m [0m[32m   16[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m20260814_120000_wingsgroup_corporate_route_governance[0m │[37m [0m[32m   16[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m 20260814_130000_wingsgroup_policy_release_governance[0m │[37m [0m[32m   16[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m20260814_140000_wingsgroup_settings_content_integrity[0m │[37m [0m[32m   16[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m          20260823_090000_wingsgroup_callback_channel[0m │[37m [0m[32m   16[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m   20260823_110000_wingsgroup_public_contact_identity[0m │[37m [0m[32m   16[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m            20260824_150000_wingsgroup_v3_media_sizes[0m │[37m [0m[32m   16[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m 20260824_160000_wingsgroup_ecosystem_route_archetype[0m │[37m [0m[32m   16[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m          20260906_081500_lead_notification_job_tasks[0m │[37m [0m[32m   17[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                    20260906_083000_payload_jobs_meta[0m │[37m [0m[32m   18[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                   20260906_084000_payload_jobs_stats[0m │[37m [0m[32m   19[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                 20260909_090000_wingsgo_tour_catalog[0m │[37m [0m[32m   20[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                20260914_090000_cms_admin_lead_triage[0m │[37m [0m[32m   21[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                   20260920_090000_wingsgroup_gallery[0m │[37m [0m[32m   22[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m       20260921_090000_wingsgo_departure_lead_context[0m │[37m [0m[32m   23[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m         20260923_090000_tour_authoring_redirect_type[0m │[37m [0m[32m   24[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m               20261015_090000_wingsgo_tour_curations[0m │[37m [0m[32m   25[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m      20261015_120000_tour_itinerary_content_richtext[0m │[37m [0m[32m   26[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m               20261019_100000_site_settings_hotlines[0m │[37m [0m[32m   27[0m │[37m [0m[32mYes[0m │
+│[37m [0m[32m                20261021_120000_tour_editorial_badges[0m │[37m [0m[32m   28[0m │[37m [0m[32mYes[0m │
+└───────────────────────────────────────────────────────┴───────┴─────┘
+[08:52:36] [32mINFO[39m: [36mDone.[39m
+{"checks":{"database":"up","leadDelivery":"configured","redis":"up"},"durationMs":15,"requestId":"4b225725-b43e-47f0-95c7-f487e8101922","status":"ready","timestamp":"2026-10-24T08:52:37.007Z"}
