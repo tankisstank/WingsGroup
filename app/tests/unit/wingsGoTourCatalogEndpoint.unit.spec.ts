@@ -510,6 +510,15 @@ describe('WingsGo tour catalog endpoint', () => {
       expect(pageSite.all).toEqual([])
     })
 
+    it('reports nextOffset from page 1 when a rejected cursor arrives with a stale offset', async () => {
+      const res = await GET(
+        new Request('http://localhost/api/wingsgo/tour-catalog?limit=4&offset=60&cursor=garbage'),
+      )
+      const data = (await res.json()) as WingsGoCatalogData
+      expect(data.all.map((c) => c.id)).toEqual([7, 8, 9, 10])
+      expect(data.nextOffset).toBe(4)
+    })
+
     it('treats tampered or malformed cursors as no cursor, returning page 1 with 200 and no-store', async () => {
       const res1 = await GET(new Request('http://localhost/api/wingsgo/tour-catalog?limit=4'))
       const page1 = (await res1.json()) as WingsGoCatalogData

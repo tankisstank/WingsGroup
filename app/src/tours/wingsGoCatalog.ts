@@ -1005,7 +1005,7 @@ export const queryWingsGoTourCatalog = async ({
     hasMore: all.hasMore,
     markets,
     nextCursor,
-    nextOffset: offset + all.cards.length,
+    nextOffset: effectiveOffset + all.cards.length,
     upcoming,
   }
 }
