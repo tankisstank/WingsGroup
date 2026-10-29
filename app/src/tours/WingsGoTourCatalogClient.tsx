@@ -1,9 +1,15 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+  type ComponentProps,
+} from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-
-import { getCopyLocale } from '@/utilities/locales'
 
 import type {
   WingsGoCatalogCard,
@@ -11,13 +17,13 @@ import type {
   WingsGoCatalogFilters,
 } from './wingsGoCatalog'
 import { WINGSGO_CATALOG_BATCH_SIZE } from './wingsGoCatalog'
-import { getWingsGoCatalogCopy } from './wingsGoCatalogCopy'
+import { getWingsGoCatalogCopy, resolveWingsGoCopyLocale } from './wingsGoCatalogCopy'
 import { WingsGoTourCard } from './WingsGoTourCard'
 
 type Props = {
   initial: WingsGoCatalogData
   initialFilters: WingsGoCatalogFilters
-  locale?: string
+  locale?: string | null
 }
 
 const filterKey = (filters: WingsGoCatalogFilters) => JSON.stringify(filters)
@@ -42,10 +48,16 @@ const SkeletonCard = () => (
   </div>
 )
 
-const CatalogGrid = ({ cards, locale }: { cards: WingsGoCatalogCard[]; locale: string }) => (
+const CatalogGrid = ({
+  cards,
+  locale,
+}: {
+  cards: WingsGoCatalogCard[]
+  locale?: ComponentProps<typeof WingsGoTourCard>['locale']
+}) => (
   <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
     {cards.map((card) => (
-      <WingsGoTourCard card={card} key={String(card.id)} locale={locale as never} />
+      <WingsGoTourCard card={card} key={String(card.id)} locale={locale} />
     ))}
   </div>
 )
@@ -54,7 +66,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
   const router = useRouter()
   const pathname = usePathname()
   const copy = getWingsGoCatalogCopy(locale)
-  const copyLocale = getCopyLocale(locale)
+  const copyLocale = resolveWingsGoCopyLocale(locale)
   const [isPending, startTransition] = useTransition()
   const [cards, setCards] = useState(initial.all)
   const [offset, setOffset] = useState(initial.nextOffset)

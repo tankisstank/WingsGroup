@@ -10,7 +10,8 @@ Phase 0 of US-092 (WingsGo Tour Catalog v2) has been executed strictly within `E
 
 ### Core Implementation
 1. **`app/src/tours/wingsGoCatalogCopy.ts` (new):**
-   - Centralized Vietnamese/English copy module (`WINGSGO_CATALOG_COPY`, `getWingsGoCatalogCopy`).
+   - Centralized Vietnamese/English copy module (`WINGSGO_CATALOG_COPY`, `getWingsGoCatalogCopy`, `resolveWingsGoCopyLocale`).
+   - Default fallback for omitted, null, or undefined locale safely resolves to `'vi'`.
    - Covers contact price label, featured section headings/kickers/descriptions, catalog section headers, filter labels, market options (South Korea, Japan, China), sort options, duration/price inputs & placeholders, retry/error states, load more button, and empty filter messaging.
 2. **`app/src/tours/businessCalendar.ts` (new):**
    - Pure business calendar helper for `Asia/Ho_Chi_Minh` (UTC+7).

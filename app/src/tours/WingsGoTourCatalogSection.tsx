@@ -2,7 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
 import type { Site } from '@/payload-types'
-import { getCopyLocale, type CopyLocaleCode } from '@/utilities/locales'
+import type { CopyLocaleCode } from '@/utilities/locales'
 
 import { WingsGoTourCatalogClient } from './WingsGoTourCatalogClient'
 import {
@@ -10,6 +10,7 @@ import {
   queryWingsGoTourCatalog,
   type WingsGoCatalogPage,
 } from './wingsGoCatalog'
+import { resolveWingsGoCopyLocale } from './wingsGoCatalogCopy'
 
 export const WingsGoTourCatalogSection = async ({
   locale,
@@ -24,7 +25,7 @@ export const WingsGoTourCatalogSection = async ({
 }) => {
   const payload = await getPayload({ config: configPromise })
   const filters = parseWingsGoCatalogFilters(searchParams)
-  const copyLocale = getCopyLocale(locale)
+  const copyLocale = resolveWingsGoCopyLocale(locale)
   const initial = await queryWingsGoTourCatalog({
     filters,
     limit: 6,

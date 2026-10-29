@@ -130,7 +130,12 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
   },
 }
 
+export const resolveWingsGoCopyLocale = (locale?: null | string): CopyLocaleCode => {
+  if (!locale) return 'vi'
+  return getCopyLocale(locale)
+}
+
 export const getWingsGoCatalogCopy = (locale?: null | string): WingsGoCatalogCopy => {
-  const copyLocale = getCopyLocale(locale)
+  const copyLocale = resolveWingsGoCopyLocale(locale)
   return WINGSGO_CATALOG_COPY[copyLocale]
 }
