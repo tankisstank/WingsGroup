@@ -34,15 +34,26 @@ Story chỉ đóng khi mỗi phase có bằng chứng từ code, test và trình
 
 | Finding | Quyết định của orchestrator | Trạng thái |
 |---|---|---|
-| P1.1 Phân trang offset làm mất card khi curation hoặc eligibility thay đổi giữa hai request | Sửa ở Phase 1b bằng cursor keyset không lưu trạng thái (dùng lại `compareCards`), client gửi lại ID featured đã render. Không dùng snapshot Redis vì cần thêm hạ tầng, trong khi keyset đã chặn được lỗi bỏ sót do dịch vị trí | Đang sửa |
-| P2.1 Ảnh market phụ thuộc thứ tự trả về của Payload | Sắp xếp ứng viên theo `id` rồi `url` trước khi lấy modulo | Đang sửa |
+| P1.1 Phân trang offset làm mất card khi curation hoặc eligibility thay đổi giữa hai request | Sửa ở Phase 1b bằng cursor keyset không lưu trạng thái (dùng lại `compareCards`). Không dùng snapshot Redis vì cần thêm hạ tầng, trong khi keyset đã chặn được lỗi bỏ sót do dịch vị trí. Phase 1c gắn cursor với ngữ cảnh request và nhúng ID featured vào cursor (xem cổng 2) | Đã sửa (`ef5f2f4`, `16adb69`) |
+| P2.1 Ảnh market phụ thuộc thứ tự trả về của Payload | Sắp xếp ứng viên theo `id` rồi `url` trước khi lấy modulo | Đã sửa (`ef5f2f4`) |
 | P2.2 Ba lần đọc tuần tự không nằm trong một transaction | Ghi nhận là giới hạn đã chấp nhận: cursor ở P1.1 chặn lỗi bỏ sót card; nếu một lần ghi xen giữa ba lần đọc, DTO có thể ghép các trạng thái khác nhau trong một request, và lần render sau sẽ tự đúng lại | Chấp nhận, đã ghi rõ |
-| P2.3 Quy tắc `enabled` khác nhau giữa SSR, API và query | `queryWingsGoTourCatalog` chỉ chạy khi `enabled === true`; homepage giữ việc ghi đè tường minh trong `getWingsGoFeaturedTours` | Đang sửa |
+| P2.3 Quy tắc `enabled` khác nhau giữa SSR, API và query | `queryWingsGoTourCatalog` chỉ chạy khi `enabled === true`; homepage giữ việc ghi đè tường minh trong `getWingsGoFeaturedTours` | Đã sửa (`ef5f2f4`; route thống nhất ở `16adb69`) |
 | P2.4 Chưa có bằng chứng dạng ngày trên production | Người dùng đã đồng ý; truy vấn chỉ đọc ngày 2026-10-29: 323 departure, 100% `00:00:00Z`, 0 lệch ngày (chi tiết ở `phase0-date-audit.md` mục 6). Trang detail chuyển sang helper lịch VN cùng Phase 2, kèm snapshot WingSide | Đã có bằng chứng |
 | P3.1 Các field DTO mới là bắt buộc | Giữ bắt buộc, vì đây là hợp đồng v2; JSON consumer cũ không bị ảnh hưởng | Chấp nhận |
-| P3.2 Homepage gọi resolver curation hai lần | Trả trực tiếp `catalog.featured`, bỏ lần resolve thứ hai | Đang sửa |
+| P3.2 Homepage gọi resolver curation hai lần | Trả trực tiếp `catalog.featured`, bỏ lần resolve thứ hai | Đã sửa (`ef5f2f4`) |
 | P3.3 Chạm trần inventory chỉ ghi log warning | Giữ warning; metric/alert để Phase 6 hoặc vận hành | Hoãn |
-| `git diff --check` báo khoảng trắng thừa | Sửa | Đang sửa |
+| `git diff --check` báo khoảng trắng thừa | Sửa | Đã sửa |
+
+- Cổng 2 (Phase 1b, `ef5f2f4`), 2026-10-29 19:26: Codex `gpt-6.1-sol`. **VERDICT: NO-GO.** Biên bản: `docs/consultations/2026-10-29-us092-phase1b-codex-gate.md`. Xử lý:
+
+| Finding | Quyết định của orchestrator | Trạng thái |
+|---|---|---|
+| P1.1 Cursor không gắn site, locale, filter | Cursor v2 có `ctx` = FNV-1a của site, locale, sort và filter chuẩn hóa; sai ngữ cảnh thì bắt đầu lại từ đầu. Không dùng HMAC: catalog là dữ liệu công khai, sửa cursor chỉ đổi kết quả của chính người gửi | Đã sửa (`16adb69`) |
+| P1.2 `exclude` cho phép loại card tùy ý | Bỏ param `exclude`; ID featured nằm trong cursor (`x`). Orchestrator sửa thêm: cursor các trang sau mang tiếp `x` của trang 1, không lấy featured hiện tại (có test 3 trang) | Đã sửa (`16adb69`, commit kế tiếp) |
+| P2.1 Card tự đổi khóa sort ra trước cursor thì không hiện ở trang sau | Giới hạn của keyset, ghi trong `phase1c-report.md`; card khác không bị bỏ sót | Chấp nhận, đã ghi rõ |
+| P2.2 Route và query dùng hai biểu thức `enabled` khác nhau | Route dùng `enabled !== true`; có test giá trị truthy không phải boolean | Đã sửa (`16adb69`) |
+| P2.3 Test API chỉ mock query | Thêm test API chạy qua query thật: phân trang, ba kiểu đổi dữ liệu, sai ngữ cảnh, cursor giả mạo | Đã sửa (`16adb69`) |
+| P2.4 Ba lần đọc không chung snapshot DB | Rủi ro còn lại khi release, ghi trong `phase1c-report.md` | Chấp nhận, đã ghi rõ |
 
 ### Review của orchestrator
 
