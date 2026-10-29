@@ -130,7 +130,7 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     marketTilesKicker: 'Điểm đến phổ biến',
     marketTilesTitle: 'Khám phá theo thị trường',
     marketTilesDescription:
-      'Lựa chọn các tuyến tour trọng điểm theo từng điểm đến với mức giá tốt nhất.',
+      'Xem số tour và giá thấp nhất đang mở bán ở từng điểm đến.',
     marketToursCount: (count: number) => `${count} tour`,
     marketAllLabel: 'Tất cả thị trường',
     marketLowestPriceFrom: 'Giá từ',
@@ -219,7 +219,7 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     marketTilesKicker: 'Popular destinations',
     marketTilesTitle: 'Explore by market',
     marketTilesDescription:
-      'Browse our key tour destinations with verified best available pricing.',
+      'See how many tours and the lowest open price for each destination.',
     marketToursCount: (count: number) => (count === 1 ? '1 tour' : `${count} tours`),
     marketAllLabel: 'All markets',
     marketLowestPriceFrom: 'From',
