@@ -30,6 +30,19 @@ Story chỉ đóng khi mỗi phase có bằng chứng từ code, test và trình
 ### Cổng tham vấn Codex (AGENTS.md)
 
 - Trước Phase 1: **Chưa có kết quả, đã ghi nhận sai lệch.** Ngày 2026-10-29, `codext exec -m gpt-6.1-sol -s read-only` lỗi "Selected model is at capacity" ở mọi lần chạy (từ khoảng 07:45Z đến 08:28Z, 7 lần). Người dùng chỉ định chỉ dùng `gpt-6.1-sol`, sau đó yêu cầu "tiếp tục", nên Phase 1 được làm trên branch local `feat/us-092-tour-catalog-v2` (không push, không deploy) song song với việc tiếp tục thử lại Codex. Bù đắp: cổng Codex phải chạy trên diff Phase 0 và Phase 1 trước khi bắt đầu Phase 2 và trước khi merge. Biên bản lưu ở `docs/consultations/2026-10-29-us092-phase1-codex-gate.md`.
+- Cổng bù đắp (Phase 0 + Phase 1), 2026-10-29 17:10: Codex `gpt-6.1-sol`, chạy tương tác qua herdr. **VERDICT: NO-GO.** Xử lý:
+
+| Finding | Quyết định của orchestrator | Trạng thái |
+|---|---|---|
+| P1.1 Phân trang offset làm mất card khi curation hoặc eligibility thay đổi giữa hai request | Sửa ở Phase 1b bằng cursor keyset không lưu trạng thái (dùng lại `compareCards`), client gửi lại ID featured đã render. Không dùng snapshot Redis vì cần thêm hạ tầng, trong khi keyset đã chặn được lỗi bỏ sót do dịch vị trí | Đang sửa |
+| P2.1 Ảnh market phụ thuộc thứ tự trả về của Payload | Sắp xếp ứng viên theo `id` rồi `url` trước khi lấy modulo | Đang sửa |
+| P2.2 Ba lần đọc tuần tự không nằm trong một transaction | Ghi nhận là giới hạn đã chấp nhận: cursor ở P1.1 chặn lỗi bỏ sót card; nếu một lần ghi xen giữa ba lần đọc, DTO có thể ghép các trạng thái khác nhau trong một request, và lần render sau sẽ tự đúng lại | Chấp nhận, đã ghi rõ |
+| P2.3 Quy tắc `enabled` khác nhau giữa SSR, API và query | `queryWingsGoTourCatalog` chỉ chạy khi `enabled === true`; homepage giữ việc ghi đè tường minh trong `getWingsGoFeaturedTours` | Đang sửa |
+| P2.4 Chưa có bằng chứng dạng ngày trên production | Cần người dùng đồng ý chạy truy vấn chỉ đọc; trang detail giữ nguyên cho tới khi có kết quả | Chờ người dùng |
+| P3.1 Các field DTO mới là bắt buộc | Giữ bắt buộc, vì đây là hợp đồng v2; JSON consumer cũ không bị ảnh hưởng | Chấp nhận |
+| P3.2 Homepage gọi resolver curation hai lần | Trả trực tiếp `catalog.featured`, bỏ lần resolve thứ hai | Đang sửa |
+| P3.3 Chạm trần inventory chỉ ghi log warning | Giữ warning; metric/alert để Phase 6 hoặc vận hành | Hoãn |
+| `git diff --check` báo khoảng trắng thừa | Sửa | Đang sửa |
 
 ### Review của orchestrator
 
