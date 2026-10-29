@@ -76,6 +76,17 @@ Story chỉ đóng khi mỗi phase có bằng chứng từ code, test và trình
     - `/tour?season=autumn`: hero không có thẻ tour và section nổi bật bị ẩn (D6).
     - `/en/tour`: copy hero toàn tiếng Anh. Catalog rỗng vì DB local không có bản dịch EN (query EN dùng `fallbackLocale: false` từ baseline); cần kiểm lại ở Phase 6 với dữ liệu có bản dịch.
   - Lỗi phát hiện khi kiểm tra trên server và đã sửa (`3eb80ec`): bảng nhãn market được export từ module `'use client'`, nên server component chỉ nhận client reference và hiện mã thô "japan". Test component không bắt được lỗi này.
+- Phase 3 (`65f4aaf`, `18a12e8`, `8dfc391`, commit sửa nhãn chip kế tiếp): đạt.
+  - Snapshot card grid commit trước khi đổi card và giữ nguyên.
+  - Orchestrator tự chạy lại: unit WingsGo/SEO 140/140, component catalog/card/hero 48/48, `git diff --check` đạt.
+  - Kiểm tra trên dev server local (`wingsgo.local`):
+    - `/tour`: không có thẻ robots, canonical `https://wingsgo.vn/tour`; có chip market/mùa/sort, select tháng; "Tour nổi bật" là 3 card wide.
+    - `/tour?season=autumn&priceMax=1000` và `/tour?sort=price`: `noindex, follow`, canonical `/tour`. Empty state giải thích tour giá "Liên hệ" không tham gia lọc ngân sách, có nút "Xóa bộ lọc" và "Bỏ lọc ngân sách".
+    - `/en/tour?priceMax=1000&durationMax=6`: `noindex, follow`, canonical `/en/tour`; chip, empty state và nút không có tiếng Việt.
+  - Lỗi orchestrator phát hiện và đã sửa:
+    - `pendingParamsRef` chỉ bị xóa khi filter đổi; sau một thao tác chip không đổi URL, thao tác chip kế tiếp ghi đè params mà hero hoặc nút Back vừa đặt. Sửa bằng cách xóa ref khi transition kết thúc; test mới thất bại trên code cũ (`8dfc391`).
+    - Chip khoảng giá/số ngày dùng nhãn "Giá từ"/"Số ngày tối thiểu" cả khi là cận trên ("Giá từ: ≤ 1.000"). Đổi sang "Ngân sách"/"Số ngày" (EN "Budget"/"Duration"), có test.
+  - Để Phase 6 kiểm tra trên trình duyệt: hiệu ứng hover `-translate-y-1` của card (có từ baseline) khi bật reduced motion; layout 390px.
 - Trước staging/production: **Chưa chạy.**
 
 ## Kiểm tra chi tiết theo tiêu chí chấp nhận
