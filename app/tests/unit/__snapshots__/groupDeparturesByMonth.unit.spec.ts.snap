@@ -1,0 +1,70 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`groupDeparturesByMonth regression snapshots > groups WingSide 00:00:00Z dates across months and year boundary stably 1`] = `
+[
+  {
+    "items": [
+      {
+        "departureDate": "2026-10-15T00:00:00.000Z",
+        "id": 101,
+      },
+    ],
+    "key": "2026-10",
+    "label": "tháng 10 năm 2026",
+  },
+  {
+    "items": [
+      {
+        "departureDate": "2026-11-01T00:00:00.000Z",
+        "id": 102,
+      },
+      {
+        "departureDate": "2026-11-20T00:00:00.000Z",
+        "id": 103,
+      },
+    ],
+    "key": "2026-11",
+    "label": "tháng 11 năm 2026",
+  },
+  {
+    "items": [
+      {
+        "departureDate": "2026-12-31T00:00:00.000Z",
+        "id": 104,
+      },
+    ],
+    "key": "2026-12",
+    "label": "tháng 12 năm 2026",
+  },
+  {
+    "items": [
+      {
+        "departureDate": "2027-01-01T00:00:00.000Z",
+        "id": 105,
+      },
+    ],
+    "key": "2027-01",
+    "label": "tháng 1 năm 2027",
+  },
+  {
+    "items": [
+      {
+        "departureDate": "2027-02-14T00:00:00.000Z",
+        "id": 106,
+      },
+    ],
+    "key": "2027-02",
+    "label": "tháng 2 năm 2027",
+  },
+  {
+    "items": [
+      {
+        "departureDate": null,
+        "id": 107,
+      },
+    ],
+    "key": "undated",
+    "label": "Chưa có ngày cụ thể",
+  },
+]
+`;
