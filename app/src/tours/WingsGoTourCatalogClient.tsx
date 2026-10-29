@@ -122,15 +122,6 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
     if (cursor) {
       params.set('cursor', cursor)
     }
-    if (!initial.filtersActive && initial.featured.length > 0) {
-      const excludeParam = initial.featured
-        .map((card) => String(card.id))
-        .slice(0, 6)
-        .join(',')
-      if (excludeParam) {
-        params.set('exclude', excludeParam)
-      }
-    }
     for (const key of [
       'market',
       'durationMin',
@@ -174,8 +165,6 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
     copyLocale,
     cursor,
     hasMore,
-    initial.featured,
-    initial.filtersActive,
     initialFilters,
     loading,
     offset,

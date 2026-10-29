@@ -102,12 +102,14 @@ export type WingsGoCatalogData = {
 }
 
 export type CatalogCursorPayload = {
+  ctx: string
   date: string
   id: number | string
   price: number | null
   sort: WingsGoCatalogSort
   title: string
-  v: 1
+  v: 2
+  x: string[]
 }
 
 type Relation = number | string | { id?: number | string | null } | null | undefined
@@ -427,17 +429,69 @@ const compareCards = (
   return String(left.id).localeCompare(String(right.id), 'en')
 }
 
+export const buildCatalogCursorContext = ({
+  filters,
+  locale,
+  siteID,
+}: {
+  filters?: WingsGoCatalogFilters
+  locale: string
+  siteID: number | string
+}): string => {
+  const sort = filters?.sort || 'next-departure'
+  const filterParts: string[] = []
+  if (filters) {
+    const keys: Array<keyof WingsGoCatalogFilters> = [
+      'departureMonth',
+      'durationMax',
+      'durationMin',
+      'market',
+      'priceMax',
+      'priceMin',
+      'season',
+    ]
+    for (const key of keys) {
+      const val = filters[key]
+      if (val !== undefined && val !== null && val !== '') {
+        filterParts.push(`${key}=${val}`)
+      }
+    }
+  }
+  const canonicalFilters = filterParts.join('&')
+  const canonical = `${siteID}|${locale}|${sort}|${canonicalFilters}`
+  return (fnv1a32(canonical) >>> 0).toString(16)
+}
+
 export const encodeCatalogCursor = (
   card: WingsGoCatalogCard,
-  sort: WingsGoCatalogSort = 'next-departure',
+  {
+    ctx,
+    featuredIDs = [],
+    filtersActive = false,
+    sort = 'next-departure',
+  }: {
+    ctx: string
+    featuredIDs?: Array<number | string>
+    filtersActive?: boolean
+    sort?: WingsGoCatalogSort
+  },
 ): string => {
+  const x = filtersActive
+    ? []
+    : featuredIDs
+        .slice(0, 6)
+        .map(String)
+        .filter((id) => /^[A-Za-z0-9_-]{1,64}$/.test(id))
+
   const payload: CatalogCursorPayload = {
+    ctx,
     date: card.nextDeparture.date,
     id: card.id,
     price: card.price.kind === 'verified' ? card.price.value : null,
     sort,
     title: card.title,
-    v: 1,
+    v: 2,
+    x,
   }
   const json = JSON.stringify(payload)
   if (typeof Buffer !== 'undefined') {
@@ -451,7 +505,7 @@ export const encodeCatalogCursor = (
 
 export const decodeCatalogCursor = (value: unknown): CatalogCursorPayload | null => {
   if (typeof value !== 'string') return null
-  if (!value || value.length > 512) return null
+  if (!value || value.length > 1024) return null
   if (!/^[A-Za-z0-9_-]+$/.test(value)) return null
   try {
     let json: string
@@ -466,12 +520,19 @@ export const decodeCatalogCursor = (value: unknown): CatalogCursorPayload | null
     if (
       parsed &&
       typeof parsed === 'object' &&
-      parsed.v === 1 &&
+      parsed.v === 2 &&
+      typeof parsed.ctx === 'string' &&
+      parsed.ctx.length <= 16 &&
       (parsed.sort === 'next-departure' || parsed.sort === 'price' || parsed.sort === 'title') &&
       typeof parsed.date === 'string' &&
       (typeof parsed.price === 'number' || parsed.price === null) &&
       typeof parsed.title === 'string' &&
-      (typeof parsed.id === 'string' || typeof parsed.id === 'number')
+      (typeof parsed.id === 'string' || typeof parsed.id === 'number') &&
+      Array.isArray(parsed.x) &&
+      parsed.x.length <= 6 &&
+      parsed.x.every(
+        (item: unknown) => typeof item === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(item),
+      )
     ) {
       return parsed as CatalogCursorPayload
     }
@@ -479,16 +540,6 @@ export const decodeCatalogCursor = (value: unknown): CatalogCursorPayload | null
   } catch {
     return null
   }
-}
-
-export const parseExcludeParam = (raw: unknown): string[] => {
-  if (typeof raw !== 'string' || !raw) return []
-  const idRegex = /^[A-Za-z0-9_-]{1,64}$/
-  return raw
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => idRegex.test(s))
-    .slice(0, 6)
 }
 
 const createCursorStubCard = (after: CatalogCursorPayload): WingsGoCatalogCard => ({
@@ -694,7 +745,6 @@ const queryDocs = async (
 
 export const queryWingsGoTourCatalog = async ({
   cursor,
-  exclude,
   filters = {},
   limit = WINGSGO_CATALOG_BATCH_SIZE,
   locale = 'vi',
@@ -705,7 +755,6 @@ export const queryWingsGoTourCatalog = async ({
   site,
 }: {
   cursor?: string | null
-  exclude?: Array<number | string> | null
   filters?: WingsGoCatalogFilters
   limit?: number
   locale?: string
@@ -858,20 +907,27 @@ export const queryWingsGoTourCatalog = async ({
   const featured = [...configuredFeatured, ...fallback].slice(0, WINGSGO_CATALOG_MAX_FEATURED)
   const featuredIDs = featured.map((card) => card.id)
 
+  const currentCtx = buildCatalogCursorContext({
+    filters,
+    locale,
+    siteID: site.id,
+  })
   const decodedCursor = cursor ? decodeCatalogCursor(cursor) : null
-  const effectiveSort = filters.sort || 'next-departure'
-  const validCursor = decodedCursor && decodedCursor.sort === effectiveSort ? decodedCursor : null
-  const hasCursor = Boolean(validCursor)
+  const validCursor =
+    decodedCursor && decodedCursor.ctx === currentCtx ? decodedCursor : null
+  const hasValidCursor = Boolean(validCursor)
   const filtersActive = hasActiveCatalogFilters(filters)
 
   let excludeIDsFromFeatured: Array<number | string> = []
-  if (hasCursor && !filtersActive) {
-    excludeIDsFromFeatured = Array.isArray(exclude) ? exclude : []
+  if (hasValidCursor && !filtersActive) {
+    excludeIDsFromFeatured = validCursor!.x
   } else if (!filtersActive) {
     excludeIDsFromFeatured = featuredIDs
   } else {
     excludeIDsFromFeatured = []
   }
+
+  const effectiveOffset = cursor ? 0 : offset
 
   const all = selectWingsGoCatalogCards({
     after: validCursor,
@@ -879,11 +935,20 @@ export const queryWingsGoTourCatalog = async ({
     excludeIDs: excludeIDsFromFeatured,
     filters,
     limit,
-    offset,
+    offset: effectiveOffset,
   })
 
   const lastCard = all.cards[all.cards.length - 1]
-  const nextCursor = all.hasMore && lastCard ? encodeCatalogCursor(lastCard, effectiveSort) : null
+  const effectiveSort = filters.sort || 'next-departure'
+  const nextCursor =
+    all.hasMore && lastCard
+      ? encodeCatalogCursor(lastCard, {
+          ctx: currentCtx,
+          featuredIDs,
+          filtersActive,
+          sort: effectiveSort,
+        })
+      : null
 
   // Market summaries from unfilteredCards
   const marketMap = new Map<string, WingsGoCatalogCard[]>()

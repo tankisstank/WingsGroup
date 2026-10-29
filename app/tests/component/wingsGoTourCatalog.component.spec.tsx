@@ -228,7 +228,7 @@ describe('WingsGoTourCatalogClient', () => {
     expect(screen.queryByText('Tour 99')).toBeNull()
   })
 
-  it('sends cursor and exclude query params on load-more when available', async () => {
+  it('sends cursor on load-more when available without exclude query param', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify(data([7, 8], false, null)), { status: 200 }),
     )
@@ -251,6 +251,6 @@ describe('WingsGoTourCatalogClient', () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalled())
     const calledUrl = fetchMock.mock.calls[0][0] as string
     expect(calledUrl).toContain('cursor=cursor_token_123')
-    expect(calledUrl).toContain('exclude=10%2C20')
+    expect(calledUrl).not.toContain('exclude=')
   })
 })

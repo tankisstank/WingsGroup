@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
+  buildCatalogCursorContext,
   decodeCatalogCursor,
   encodeCatalogCursor,
   getWingsGoFeaturedTours,
   hasActiveCatalogFilters,
-  parseExcludeParam,
   parseWingsGoCatalogFilters,
   isEligibleWingsGoCatalogProduct,
   queryWingsGoTourCatalog,
@@ -2109,68 +2109,171 @@ describe('WingsGo dynamic catalog constraints', () => {
       })
     })
 
-    describe('Phase 1b: Keyset cursor and Codex gate fixes', () => {
-      it('encodes and decodes catalog cursors across sorts and prices', () => {
+    describe('Phase 1b & 1c: Context-bound Keyset cursor and Codex gate fixes', () => {
+      it('builds canonical cursor context hash based on siteID, locale, sort, and sorted filters', () => {
+        const ctx1 = buildCatalogCursorContext({
+          filters: { departureMonth: '2026-11', market: 'korea', sort: 'price' },
+          locale: 'vi',
+          siteID: 7,
+        })
+        const ctx2 = buildCatalogCursorContext({
+          filters: { market: 'korea', departureMonth: '2026-11', sort: 'price' },
+          locale: 'vi',
+          siteID: 7,
+        })
+        // Filter key order does not alter the hash
+        expect(ctx1).toBe(ctx2)
+        expect(typeof ctx1).toBe('string')
+        expect(ctx1.length).toBeLessThanOrEqual(16)
+
+        // Different locale => different ctx
+        const ctxEn = buildCatalogCursorContext({
+          filters: { departureMonth: '2026-11', market: 'korea', sort: 'price' },
+          locale: 'en',
+          siteID: 7,
+        })
+        expect(ctxEn).not.toBe(ctx1)
+
+        // Different site => different ctx
+        const ctxSite8 = buildCatalogCursorContext({
+          filters: { departureMonth: '2026-11', market: 'korea', sort: 'price' },
+          locale: 'vi',
+          siteID: 8,
+        })
+        expect(ctxSite8).not.toBe(ctx1)
+
+        // Different sort => different ctx
+        const ctxSortDate = buildCatalogCursorContext({
+          filters: { departureMonth: '2026-11', market: 'korea', sort: 'next-departure' },
+          locale: 'vi',
+          siteID: 7,
+        })
+        expect(ctxSortDate).not.toBe(ctx1)
+
+        // Different market filter => different ctx
+        const ctxMarketJapan = buildCatalogCursorContext({
+          filters: { departureMonth: '2026-11', market: 'japan', sort: 'price' },
+          locale: 'vi',
+          siteID: 7,
+        })
+        expect(ctxMarketJapan).not.toBe(ctx1)
+      })
+
+      it('encodes and decodes v2 catalog cursors with ctx and featured exclude array x', () => {
         const verifiedCard = {
           ...card(10, '2026-11-15T00:00:00.000Z', 'Seoul Delight'),
           price: { currency: 'VND', kind: 'verified' as const, originalPrice: null, value: 15900000 },
         }
 
-        const encodedVerified = encodeCatalogCursor(verifiedCard, 'price')
+        const encodedVerified = encodeCatalogCursor(verifiedCard, {
+          ctx: 'ctx_abc123',
+          featuredIDs: [1, 2],
+          filtersActive: false,
+          sort: 'price',
+        })
         const decodedVerified = decodeCatalogCursor(encodedVerified)
 
         expect(decodedVerified).toEqual({
+          ctx: 'ctx_abc123',
           date: '2026-11-15T00:00:00.000Z',
           id: 10,
           price: 15900000,
           sort: 'price',
           title: 'Seoul Delight',
-          v: 1,
+          v: 2,
+          x: ['1', '2'],
         })
 
         const contactCard = card(11, '2026-12-01T00:00:00.000Z', 'Jeju Island')
-        const encodedContact = encodeCatalogCursor(contactCard, 'next-departure')
+        const encodedContact = encodeCatalogCursor(contactCard, {
+          ctx: 'ctx_def456',
+          featuredIDs: [1, 2],
+          filtersActive: true, // Filters active => x is empty
+          sort: 'next-departure',
+        })
         const decodedContact = decodeCatalogCursor(encodedContact)
 
         expect(decodedContact).toEqual({
+          ctx: 'ctx_def456',
           date: '2026-12-01T00:00:00.000Z',
           id: 11,
           price: null,
           sort: 'next-departure',
           title: 'Jeju Island',
-          v: 1,
+          v: 2,
+          x: [],
         })
       })
 
-      it('safely rejects tampered, oversized, invalid version, or malformed cursors without throwing', () => {
+      it('safely rejects tampered, oversized, v1, invalid version, or malformed cursors without throwing', () => {
         expect(decodeCatalogCursor(null)).toBeNull()
         expect(decodeCatalogCursor(undefined)).toBeNull()
         expect(decodeCatalogCursor('')).toBeNull()
         expect(decodeCatalogCursor(12345)).toBeNull()
-        expect(decodeCatalogCursor('a'.repeat(513))).toBeNull()
+        expect(decodeCatalogCursor('a'.repeat(1025))).toBeNull()
         expect(decodeCatalogCursor('tampered!characters==')).toBeNull()
 
-        // Wrong version
-        const wrongVersion = Buffer.from(JSON.stringify({ v: 2, sort: 'next-departure', id: 1 })).toString('base64url')
-        expect(decodeCatalogCursor(wrongVersion)).toBeNull()
-
-        // Invalid sort
-        const invalidSort = Buffer.from(
-          JSON.stringify({ v: 1, sort: 'random-order', date: '2026-01-01', id: 1, price: null, title: 'T' }),
+        // v: 1 cursors MUST return null in Phase 1c
+        const v1Cursor = Buffer.from(
+          JSON.stringify({
+            date: '2026-01-01',
+            id: 1,
+            price: null,
+            sort: 'next-departure',
+            title: 'T',
+            v: 1,
+          }),
         ).toString('base64url')
-        expect(decodeCatalogCursor(invalidSort)).toBeNull()
+        expect(decodeCatalogCursor(v1Cursor)).toBeNull()
+
+        // v: 3 cursor
+        const v3Cursor = Buffer.from(
+          JSON.stringify({
+            ctx: 'ctx1',
+            date: '2026-01-01',
+            id: 1,
+            price: null,
+            sort: 'next-departure',
+            title: 'T',
+            v: 3,
+            x: [],
+          }),
+        ).toString('base64url')
+        expect(decodeCatalogCursor(v3Cursor)).toBeNull()
+
+        // ctx too long (> 16 chars)
+        const longCtx = Buffer.from(
+          JSON.stringify({
+            ctx: 'a'.repeat(17),
+            date: '2026-01-01',
+            id: 1,
+            price: null,
+            sort: 'next-departure',
+            title: 'T',
+            v: 2,
+            x: [],
+          }),
+        ).toString('base64url')
+        expect(decodeCatalogCursor(longCtx)).toBeNull()
+
+        // x with invalid id format or > 6 items
+        const invalidX = Buffer.from(
+          JSON.stringify({
+            ctx: 'ctx1',
+            date: '2026-01-01',
+            id: 1,
+            price: null,
+            sort: 'next-departure',
+            title: 'T',
+            v: 2,
+            x: ['1', '2', '3', '4', '5', '6', '7'],
+          }),
+        ).toString('base64url')
+        expect(decodeCatalogCursor(invalidX)).toBeNull()
 
         // Malformed JSON inside valid base64url
         const brokenJson = Buffer.from('{ bad json ').toString('base64url')
         expect(decodeCatalogCursor(brokenJson)).toBeNull()
-      })
-
-      it('parses exclude parameter safely, dropping invalid tokens and capping at 6 entries', () => {
-        expect(parseExcludeParam(null)).toEqual([])
-        expect(parseExcludeParam('')).toEqual([])
-        expect(parseExcludeParam('1,2,abc_123,valid-id')).toEqual(['1', '2', 'abc_123', 'valid-id'])
-        expect(parseExcludeParam('1,,bad!id,2,spaces not allowed,3')).toEqual(['1', '2', '3'])
-        expect(parseExcludeParam('1,2,3,4,5,6,7,8')).toEqual(['1', '2', '3', '4', '5', '6'])
       })
 
       it('ignores cursor and resets to start when cursor sort differs from request sort', () => {
@@ -2180,12 +2283,14 @@ describe('WingsGo dynamic catalog constraints', () => {
           card(3, '2026-05-01T00:00:00.000Z', 'C'),
         ]
         const cursorStub = {
+          ctx: 'ctx1',
           date: '2026-04-01T00:00:00.000Z',
           id: 2,
           price: null,
           sort: 'price' as const, // Different from filter sort 'next-departure'
           title: 'B',
-          v: 1 as const,
+          v: 2 as const,
+          x: [],
         }
 
         const result = selectWingsGoCatalogCards({
@@ -2217,7 +2322,14 @@ describe('WingsGo dynamic catalog constraints', () => {
         const page1 = selectWingsGoCatalogCards({ cards: originalCards, limit: 6, offset: 0 })
         expect(page1.cards.map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 6])
         const page1LastCard = page1.cards[page1.cards.length - 1]!
-        const cursor = decodeCatalogCursor(encodeCatalogCursor(page1LastCard, 'next-departure'))
+        const cursor = decodeCatalogCursor(
+          encodeCatalogCursor(page1LastCard, {
+            ctx: 'ctx1',
+            featuredIDs: [],
+            filtersActive: false,
+            sort: 'next-departure',
+          }),
+        )
 
         // Mutation between requests: Card 2 is removed from inventory
         const mutatedCards = originalCards.filter((c) => c.id !== 2)
@@ -2257,7 +2369,12 @@ describe('WingsGo dynamic catalog constraints', () => {
         })
         expect(page1.cards.map((c) => c.id)).toEqual([2, 3, 4, 5])
         const cursor = decodeCatalogCursor(
-          encodeCatalogCursor(page1.cards[page1.cards.length - 1]!, 'next-departure'),
+          encodeCatalogCursor(page1.cards[page1.cards.length - 1]!, {
+            ctx: 'ctx1',
+            featuredIDs: [1],
+            filtersActive: false,
+            sort: 'next-departure',
+          }),
         )
 
         // Curation changes: card 1 is no longer featured.
@@ -2271,11 +2388,11 @@ describe('WingsGo dynamic catalog constraints', () => {
         })
         expect(offsetPage2.cards.map((c) => c.id)).toEqual([5, 6, 7, 8]) // Card 5 duplicate!
 
-        // With keyset cursor + client exclude IDs ([1]):
+        // With keyset cursor + cursor-embedded exclude IDs (cursor.x):
         const cursorPage2 = selectWingsGoCatalogCards({
           after: cursor,
           cards: allCards,
-          excludeIDs: [1],
+          excludeIDs: cursor!.x,
           limit: 4,
         })
         expect(cursorPage2.cards.map((c) => c.id)).toEqual([6, 7, 8]) // Clean continuation, no duplicate, no skip!
@@ -2295,7 +2412,12 @@ describe('WingsGo dynamic catalog constraints', () => {
 
         const page1 = selectWingsGoCatalogCards({ cards: originalCards, limit: 6, offset: 0 })
         const cursor = decodeCatalogCursor(
-          encodeCatalogCursor(page1.cards[page1.cards.length - 1]!, 'next-departure'),
+          encodeCatalogCursor(page1.cards[page1.cards.length - 1]!, {
+            ctx: 'ctx1',
+            featuredIDs: [],
+            filtersActive: false,
+            sort: 'next-departure',
+          }),
         )
 
         // Card 3 departure expired, leaving 7 cards total
