@@ -3,17 +3,21 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 
+import { getCopyLocale } from '@/utilities/locales'
+
 import type {
   WingsGoCatalogCard,
   WingsGoCatalogData,
   WingsGoCatalogFilters,
 } from './wingsGoCatalog'
 import { WINGSGO_CATALOG_BATCH_SIZE } from './wingsGoCatalog'
+import { getWingsGoCatalogCopy } from './wingsGoCatalogCopy'
 import { WingsGoTourCard } from './WingsGoTourCard'
 
 type Props = {
   initial: WingsGoCatalogData
   initialFilters: WingsGoCatalogFilters
+  locale?: string
 }
 
 const filterKey = (filters: WingsGoCatalogFilters) => JSON.stringify(filters)
@@ -38,17 +42,19 @@ const SkeletonCard = () => (
   </div>
 )
 
-const CatalogGrid = ({ cards }: { cards: WingsGoCatalogCard[] }) => (
+const CatalogGrid = ({ cards, locale }: { cards: WingsGoCatalogCard[]; locale: string }) => (
   <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
     {cards.map((card) => (
-      <WingsGoTourCard card={card} key={String(card.id)} />
+      <WingsGoTourCard card={card} key={String(card.id)} locale={locale as never} />
     ))}
   </div>
 )
 
-export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => {
+export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi' }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
+  const copy = getWingsGoCatalogCopy(locale)
+  const copyLocale = getCopyLocale(locale)
   const [isPending, startTransition] = useTransition()
   const [cards, setCards] = useState(initial.all)
   const [offset, setOffset] = useState(initial.nextOffset)
@@ -98,6 +104,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
     const params = new URLSearchParams()
     params.set('limit', String(WINGSGO_CATALOG_BATCH_SIZE))
     params.set('offset', String(offset))
+    params.set('locale', copyLocale)
     for (const key of [
       'market',
       'durationMin',
@@ -115,7 +122,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
         headers: { Accept: 'application/json' },
         signal: controller.signal,
       })
-      if (!response.ok) throw new Error('Không tải thêm được catalog tour.')
+      if (!response.ok) throw new Error(copy.loadMoreError)
       const data = (await response.json()) as WingsGoCatalogData
       if (requestGeneration !== requestGenerationRef.current) return
       setCards((current) => {
@@ -126,14 +133,14 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
       setHasMore(data.hasMore)
     } catch (loadError) {
       if (requestGeneration !== requestGenerationRef.current || controller.signal.aborted) return
-      setError(loadError instanceof Error ? loadError.message : 'Không tải thêm được catalog tour.')
+      setError(loadError instanceof Error ? loadError.message : copy.loadMoreError)
     } finally {
       if (requestControllerRef.current === controller) {
         requestControllerRef.current = null
         setLoading(false)
       }
     }
-  }, [hasMore, initialFilters, loading, offset])
+  }, [copy.loadMoreError, copyLocale, hasMore, initialFilters, loading, offset])
 
   useEffect(() => {
     const sentinel = sentinelRef.current
@@ -158,24 +165,23 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
       <section aria-labelledby="wingsgo-featured-tours">
         <div className="mb-5">
           <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
-            Gợi ý chọn nhanh
+            {copy.featuredKicker}
           </p>
           <h2
             className="mt-2 text-2xl font-semibold text-foreground md:text-3xl"
             id="wingsgo-featured-tours"
           >
-            Tour nổi bật
+            {copy.featuredTitle}
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">
-            Những line tour được biên tập theo thứ tự ưu tiên; nếu chưa đủ sáu, hệ thống tự bổ sung
-            tour đủ điều kiện mà không thay đổi lựa chọn trong CMS.
+            {copy.featuredDescription}
           </p>
         </div>
         {initial.featured.length > 0 ? (
-          <CatalogGrid cards={initial.featured} />
+          <CatalogGrid cards={initial.featured} locale={copyLocale} />
         ) : (
           <p className="rounded-[20px] border border-border/60 bg-muted/20 p-5 text-sm text-muted-foreground">
-            Hiện chưa có tour đủ điều kiện hiển thị.
+            {copy.featuredEmpty}
           </p>
         )}
       </section>
@@ -184,89 +190,89 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
         <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
-              Catalog WingsGo
+              {copy.catalogKicker}
             </p>
             <h2
               className="mt-2 text-2xl font-semibold text-foreground md:text-3xl"
               id="wingsgo-all-tours"
             >
-              Tất cả tour
+              {copy.catalogTitle}
             </h2>
           </div>
           <div
-            aria-label="Bộ lọc catalog tour"
+            aria-label={copy.filtersAriaLabel}
             className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
             role="group"
           >
             <label className="text-xs font-semibold text-muted-foreground">
-              Thị trường
+              {copy.filterMarket}
               <select
                 className="mt-1 block min-h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
                 onChange={(event) => updateFilter('market', event.target.value)}
                 value={queryValue(initialFilters, 'market')}
               >
-                <option value="">Tất cả</option>
-                <option value="korea">Hàn Quốc</option>
-                <option value="japan">Nhật Bản</option>
-                <option value="china">Trung Quốc</option>
+                <option value="">{copy.allMarkets}</option>
+                <option value="korea">{copy.marketKorea}</option>
+                <option value="japan">{copy.marketJapan}</option>
+                <option value="china">{copy.marketChina}</option>
               </select>
             </label>
             <label className="text-xs font-semibold text-muted-foreground">
-              Sắp xếp
+              {copy.filterSort}
               <select
                 className="mt-1 block min-h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
                 onChange={(event) => updateFilter('sort', event.target.value)}
                 value={queryValue(initialFilters, 'sort')}
               >
-                <option value="next-departure">Ngày đi gần nhất</option>
-                <option value="price">Giá thấp đến cao</option>
-                <option value="title">Tên tour</option>
+                <option value="next-departure">{copy.sortNextDeparture}</option>
+                <option value="price">{copy.sortPrice}</option>
+                <option value="title">{copy.sortTitle}</option>
               </select>
             </label>
             <label className="text-xs font-semibold text-muted-foreground">
-              Số ngày tối thiểu
+              {copy.filterDurationMin}
               <input
                 className="mt-1 block min-h-10 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground"
                 inputMode="numeric"
                 min="1"
                 onChange={(event) => updateFilter('durationMin', event.target.value)}
-                placeholder="Ví dụ 3"
+                placeholder={copy.durationMinPlaceholder}
                 type="number"
                 value={queryValue(initialFilters, 'durationMin')}
               />
             </label>
             <label className="text-xs font-semibold text-muted-foreground">
-              Số ngày tối đa
+              {copy.filterDurationMax}
               <input
                 className="mt-1 block min-h-10 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground"
                 inputMode="numeric"
                 min="1"
                 onChange={(event) => updateFilter('durationMax', event.target.value)}
-                placeholder="Ví dụ 6"
+                placeholder={copy.durationMaxPlaceholder}
                 type="number"
                 value={queryValue(initialFilters, 'durationMax')}
               />
             </label>
             <label className="text-xs font-semibold text-muted-foreground">
-              Giá từ (VND)
+              {copy.filterPriceMin}
               <input
                 className="mt-1 block min-h-10 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground"
                 inputMode="numeric"
                 min="0"
                 onChange={(event) => updateFilter('priceMin', event.target.value)}
-                placeholder="Ví dụ 10000000"
+                placeholder={copy.priceMinPlaceholder}
                 type="number"
                 value={queryValue(initialFilters, 'priceMin')}
               />
             </label>
             <label className="text-xs font-semibold text-muted-foreground">
-              Giá đến (VND)
+              {copy.filterPriceMax}
               <input
                 className="mt-1 block min-h-10 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground"
                 inputMode="numeric"
                 min="0"
                 onChange={(event) => updateFilter('priceMax', event.target.value)}
-                placeholder="Ví dụ 30000000"
+                placeholder={copy.priceMaxPlaceholder}
                 type="number"
                 value={queryValue(initialFilters, 'priceMax')}
               />
@@ -274,10 +280,10 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
           </div>
         </div>
         {cards.length > 0 ? (
-          <CatalogGrid cards={cards} />
+          <CatalogGrid cards={cards} locale={copyLocale} />
         ) : (
           <p className="rounded-[20px] border border-border/60 bg-muted/20 p-5 text-sm text-muted-foreground">
-            Không có tour phù hợp bộ lọc.
+            {copy.emptyFiltered}
           </p>
         )}
         <div aria-live="polite" className="mt-6 space-y-4">
@@ -299,7 +305,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
                 onClick={retry}
                 type="button"
               >
-                Thử lại
+                {copy.retry}
               </button>
             </div>
           ) : null}
@@ -310,11 +316,11 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters }: Props) => 
               onClick={() => void loadMore()}
               type="button"
             >
-              {loading || isPending ? 'Đang tải…' : 'Tải thêm 6 tour'}
+              {loading || isPending ? copy.loading : copy.loadMore(WINGSGO_CATALOG_BATCH_SIZE)}
             </button>
           ) : cards.length > 0 ? (
             <p className="text-center text-sm text-muted-foreground">
-              Đã hiển thị hết tour phù hợp.
+              {copy.allLoaded}
             </p>
           ) : null}
           <div aria-hidden="true" className="h-px" ref={sentinelRef} />

@@ -4,6 +4,7 @@ import type { Payload } from 'payload'
 import { isDepartureVerificationCurrent } from './departureCommerce'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { getTourProductPath } from '@/utilities/siteURLs'
+import { getWingsGoCatalogCopy } from './wingsGoCatalogCopy'
 
 export const WINGSGO_CATALOG_BATCH_SIZE = 6
 export const WINGSGO_CATALOG_MAX_FEATURED = 6
@@ -276,7 +277,7 @@ const buildCard = ({
         originalPrice: canShowDiscount ? lowestPriceDeparture.originalPrice : null,
         value: lowestPriceDeparture.priceFrom!,
       }
-    : { kind: 'contact' as const, label: 'Liên hệ để nhận giá mới nhất' }
+    : { kind: 'contact' as const, label: getWingsGoCatalogCopy(locale).contactPriceLabel }
 
   const { editorialBadges, hasHotEditorialBadge } = normalizeEditorialBadges(
     product.editorialBadges,

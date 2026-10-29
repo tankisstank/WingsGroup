@@ -9,6 +9,7 @@ import {
   WINGSGO_CATALOG_BATCH_SIZE,
   type WingsGoCatalogPage,
 } from '@/tours/wingsGoCatalog'
+import { getCopyLocale, type CopyLocaleCode } from '@/utilities/locales'
 import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
 
 const emptyCatalog = {
@@ -53,7 +54,11 @@ export async function GET(request: Request) {
   try {
     const payload = await getPayload({ config: configPromise })
     const site = await getCurrentSite()
-    const locale = await getCurrentLocale()
+    const requestedLocaleParam = url.searchParams.get('locale')
+    const resolvedLocale: CopyLocaleCode =
+      requestedLocaleParam === 'en' || requestedLocaleParam === 'vi'
+        ? requestedLocaleParam
+        : getCopyLocale(await getCurrentLocale())
 
     if (!site || site.code !== 'wings-go') return jsonNoStore(emptyCatalog)
 
@@ -61,9 +66,9 @@ export async function GET(request: Request) {
       collection: 'pages',
       depth: 2,
       draft: false,
-      fallbackLocale: false,
+      fallbackLocale: resolvedLocale === 'en' ? false : 'vi',
       limit: 1,
-      locale,
+      locale: resolvedLocale,
       overrideAccess: true,
       pagination: false,
       where: {
@@ -81,6 +86,7 @@ export async function GET(request: Request) {
     const data = await queryWingsGoTourCatalog({
       filters: parseWingsGoCatalogFilters(url.searchParams),
       limit: requestedLimit,
+      locale: resolvedLocale,
       offset,
       page,
       payload,

@@ -135,4 +135,52 @@ describe('WingsGoTourCatalogClient', () => {
     expect(screen.getByText('Khám phá mùa thu vàng')).toBeTruthy()
     expect(screen.getByText('Xem tour →')).toBeTruthy()
   })
+
+  it('renders all catalog sections, filters, and cards in English when locale is en', async () => {
+    render(<WingsGoTourCatalogClient initial={data([1, 2], true)} initialFilters={{}} locale="en" />)
+
+    // Featured section
+    expect(screen.getByText('Quick picks')).toBeTruthy()
+    expect(screen.getByRole('heading', { level: 2, name: 'Featured tours' })).toBeTruthy()
+
+    // Catalog section
+    expect(screen.getByText('WingsGo catalog')).toBeTruthy()
+    expect(screen.getByRole('heading', { level: 2, name: 'All tours' })).toBeTruthy()
+
+    // Filter controls
+    expect(screen.getByRole('group', { name: 'Tour catalog filters' })).toBeTruthy()
+    expect(screen.getByText('Market')).toBeTruthy()
+    expect(screen.getByText('Sort by')).toBeTruthy()
+    expect(screen.getByText('Min duration (days)')).toBeTruthy()
+    expect(screen.getByText('Max duration (days)')).toBeTruthy()
+    expect(screen.getByText('Price from (VND)')).toBeTruthy()
+    expect(screen.getByText('Price to (VND)')).toBeTruthy()
+
+    // Select options
+    expect(screen.getByRole('option', { name: 'South Korea' })).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'Japan' })).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'China' })).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'Earliest departure' })).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'Price: low to high' })).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'Tour name' })).toBeTruthy()
+
+    // Buttons and card labels
+    expect(screen.getByRole('button', { name: 'Load 6 more tours' })).toBeTruthy()
+    expect(screen.getAllByText('View tour →')).toHaveLength(2)
+    expect(screen.getAllByText('From')).toHaveLength(2)
+    expect(screen.getAllByText('Next departure')).toHaveLength(2)
+  })
+
+  it('renders English empty-state message when filters match zero tours', async () => {
+    render(
+      <WingsGoTourCatalogClient
+        initial={{ all: [], featured: [], hasMore: false, nextOffset: 0 }}
+        initialFilters={{ market: 'china' }}
+        locale="en"
+      />,
+    )
+
+    expect(screen.getByText('No tours match your filters.')).toBeTruthy()
+    expect(screen.getByText('No eligible tours to display right now.')).toBeTruthy()
+  })
 })

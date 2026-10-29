@@ -564,6 +564,54 @@ describe('WingsGo dynamic catalog constraints', () => {
       expect(card?.nextDeparture.promoLabel).toBeNull()
     })
 
+    it('formats contact price in English when locale is en', async () => {
+      const tour = product({ id: 511, slug: 'sold-out-tour-en', title: 'Sold Out Tour', wrapperPage: 1511 })
+      const wrap = wrapper({ id: 1511, pathname: '/tour/sold-out-tour-en' })
+      const deps = [
+        departure({
+          id: 5111,
+          tourProduct: 511,
+          departureDate: '2026-11-01T00:00:00.000Z',
+          priceFrom: 12000000,
+          originalPrice: 15000000,
+          currency: 'VND',
+          promoLabel: 'Sale',
+          availabilityStatus: 'sold-out',
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') return { docs: [tour] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        locale: 'en',
+        now: new Date('2026-01-01T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const card = [...result.featured, ...result.all].find((c) => c.id === 511)
+      expect(card).toBeDefined()
+      expect(card?.price).toEqual({
+        kind: 'contact',
+        label: 'Contact us for latest pricing',
+      })
+    })
+
     it('degrades to contact price when commerceVerified is false or unverified', async () => {
       const tour = product({ id: 52, slug: 'unverified-tour', title: 'Tour Chưa Xác Thực', wrapperPage: 152 })
       const wrap = wrapper({ id: 152, pathname: '/tour/unverified-tour' })

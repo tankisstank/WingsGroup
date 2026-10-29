@@ -453,6 +453,7 @@ export async function renderCmsPageByPath({
           ) : null}
           {useWingsGoTourCatalog ? (
             <WingsGoTourCatalogSection
+              locale={getCopyLocale(locale)}
               page={page as unknown as WingsGoCatalogPage}
               searchParams={searchParams}
               site={site}
