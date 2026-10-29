@@ -944,7 +944,8 @@ export const queryWingsGoTourCatalog = async ({
     all.hasMore && lastCard
       ? encodeCatalogCursor(lastCard, {
           ctx: currentCtx,
-          featuredIDs,
+          // Carry the featured IDs rendered with page 1, not the current ones.
+          featuredIDs: validCursor ? validCursor.x : featuredIDs,
           filtersActive,
           sort: effectiveSort,
         })

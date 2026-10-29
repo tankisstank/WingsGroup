@@ -459,6 +459,27 @@ describe('WingsGo tour catalog endpoint', () => {
       expect(page2C.all.map((c) => c.id)).toEqual([11, 12, 13, 14]) // Remaining cards after cursor in order
     })
 
+    it('keeps the page-1 featured IDs in later cursors when curation changes mid-pagination', async () => {
+      const res1 = await GET(new Request('http://localhost/api/wingsgo/tour-catalog?limit=3'))
+      const page1 = (await res1.json()) as WingsGoCatalogData
+      expect(page1.all.map((c) => c.id)).toEqual([7, 8, 9])
+
+      // Card 13 becomes featured after page 1 rendered; the visitor never saw it as featured.
+      pageDoc!.wingsGoTourCatalog.featuredTours = [13, 1, 2, 3, 4, 5]
+
+      const res2 = await GET(
+        new Request(`http://localhost/api/wingsgo/tour-catalog?limit=3&cursor=${page1.nextCursor}`),
+      )
+      const page2 = (await res2.json()) as WingsGoCatalogData
+      expect(page2.all.map((c) => c.id)).toEqual([10, 11, 12])
+
+      const res3 = await GET(
+        new Request(`http://localhost/api/wingsgo/tour-catalog?limit=3&cursor=${page2.nextCursor}`),
+      )
+      const page3 = (await res3.json()) as WingsGoCatalogData
+      expect(page3.all.map((c) => c.id)).toEqual([13, 14])
+    })
+
     it('resets to page 1 when cursor is reused with mismatched context (locale, filters, site)', async () => {
       const res1 = await GET(new Request('http://localhost/api/wingsgo/tour-catalog?limit=4'))
       const page1 = (await res1.json()) as WingsGoCatalogData
