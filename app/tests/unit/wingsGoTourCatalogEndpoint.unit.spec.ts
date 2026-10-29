@@ -58,6 +58,7 @@ describe('WingsGo tour catalog endpoint', () => {
       filtersActive: false,
       hasMore: false,
       markets: [],
+      nextCursor: null,
       nextOffset: 0,
       upcoming: [],
     })
@@ -77,6 +78,7 @@ describe('WingsGo tour catalog endpoint', () => {
       filtersActive: false,
       hasMore: false,
       markets: [],
+      nextCursor: null,
       nextOffset: 0,
       upcoming: [],
     })
@@ -188,6 +190,67 @@ describe('WingsGo tour catalog endpoint', () => {
         now: expect.any(Date),
       }),
     )
+  })
+
+  it('forwards cursor and valid exclude params to queryWingsGoTourCatalog', async () => {
+    getCurrentLocale.mockResolvedValue('vi')
+    const mockFind = vi.fn().mockResolvedValue({
+      docs: [{ id: 10, pathname: '/tour', wingsGoTourCatalog: { enabled: true } }],
+    })
+    getPayload.mockResolvedValue({ find: mockFind })
+    const successData = {
+      all: [{ id: 2, title: 'Tour 2' }],
+      featured: [],
+      filtersActive: false,
+      hasMore: false,
+      markets: [],
+      nextCursor: null,
+      nextOffset: 1,
+      upcoming: [],
+    }
+    queryWingsGoTourCatalog.mockResolvedValue(successData)
+
+    const response = await GET(
+      new Request(
+        'http://localhost/api/wingsgo/tour-catalog?limit=6&cursor=valid_cursor_token&exclude=101,102,bad!id',
+      ),
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(await response.json()).toEqual(successData)
+
+    expect(queryWingsGoTourCatalog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cursor: 'valid_cursor_token',
+        exclude: ['101', '102'],
+        limit: 6,
+      }),
+    )
+  })
+
+  it('returns safe empty DTO when published page has wingsGoTourCatalog.enabled = false', async () => {
+    getCurrentLocale.mockResolvedValue('vi')
+    const mockFind = vi.fn().mockResolvedValue({
+      docs: [{ id: 10, pathname: '/tour', wingsGoTourCatalog: { enabled: false } }],
+    })
+    getPayload.mockResolvedValue({ find: mockFind })
+
+    const response = await GET(new Request('http://localhost/api/wingsgo/tour-catalog?limit=6'))
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(await response.json()).toEqual({
+      all: [],
+      featured: [],
+      filtersActive: false,
+      hasMore: false,
+      markets: [],
+      nextCursor: null,
+      nextOffset: 0,
+      upcoming: [],
+    })
+    expect(queryWingsGoTourCatalog).not.toHaveBeenCalled()
   })
 
   it('returns 500 with Cache-Control: no-store when catalog query throws', async () => {

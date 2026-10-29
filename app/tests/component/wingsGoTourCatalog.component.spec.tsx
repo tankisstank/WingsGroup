@@ -28,14 +28,19 @@ const makeCard = (id: number): WingsGoCatalogCard => ({
   title: `Tour ${id}`,
 })
 
-const data = (ids: number[], hasMore = true): WingsGoCatalogData => ({
+const data = (
+  ids: number[],
+  hasMore = true,
+  nextCursor: string | null = null,
+): WingsGoCatalogData => ({
   all: ids.map(makeCard),
   featured: [],
   filtersActive: false,
   hasMore,
   markets: [],
-  upcoming: [],
+  nextCursor,
   nextOffset: ids.length,
+  upcoming: [],
 })
 
 class TestIntersectionObserver {
@@ -177,7 +182,16 @@ describe('WingsGoTourCatalogClient', () => {
   it('renders English empty-state message when filters match zero tours', async () => {
     render(
       <WingsGoTourCatalogClient
-        initial={{ all: [], featured: [], filtersActive: false, hasMore: false, markets: [], nextOffset: 0, upcoming: [] }}
+        initial={{
+          all: [],
+          featured: [],
+          filtersActive: false,
+          hasMore: false,
+          markets: [],
+          nextCursor: null,
+          nextOffset: 0,
+          upcoming: [],
+        }}
         initialFilters={{ market: 'china' }}
         locale="en"
       />,
@@ -198,6 +212,7 @@ describe('WingsGoTourCatalogClient', () => {
           filtersActive: true,
           hasMore: false,
           markets: [],
+          nextCursor: null,
           nextOffset: 1,
           upcoming: [],
         }}
@@ -211,5 +226,31 @@ describe('WingsGoTourCatalogClient', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'Tất cả tour' })).toBeTruthy()
     expect(screen.getByText('Tour 1')).toBeTruthy()
     expect(screen.queryByText('Tour 99')).toBeNull()
+  })
+
+  it('sends cursor and exclude query params on load-more when available', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(data([7, 8], false, null)), { status: 200 }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const initialData: WingsGoCatalogData = {
+      all: [makeCard(1), makeCard(2), makeCard(3), makeCard(4), makeCard(5), makeCard(6)],
+      featured: [makeCard(10), makeCard(20)],
+      filtersActive: false,
+      hasMore: true,
+      markets: [],
+      nextCursor: 'cursor_token_123',
+      nextOffset: 6,
+      upcoming: [],
+    }
+
+    render(<WingsGoTourCatalogClient initial={initialData} initialFilters={{}} />)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Tải thêm 6 tour' })[0]!)
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+    const calledUrl = fetchMock.mock.calls[0][0] as string
+    expect(calledUrl).toContain('cursor=cursor_token_123')
+    expect(calledUrl).toContain('exclude=10%2C20')
   })
 })

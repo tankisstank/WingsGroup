@@ -1,8 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
+  decodeCatalogCursor,
+  encodeCatalogCursor,
   getWingsGoFeaturedTours,
   hasActiveCatalogFilters,
+  parseExcludeParam,
   parseWingsGoCatalogFilters,
   isEligibleWingsGoCatalogProduct,
   queryWingsGoTourCatalog,
@@ -2024,6 +2027,441 @@ describe('WingsGo dynamic catalog constraints', () => {
         expect(featured[0]?.price.kind).toBe('verified')
         expect(featured[1]?.id).toBe(702)
         expect(featured[1]?.title).toBe('Featured 2')
+      })
+
+      it('calls curation resolution only once per call to getWingsGoFeaturedTours', async () => {
+        let curationQueryCount = 0
+        const products = [
+          product({ id: 801, slug: 'featured-801', title: 'Featured 801', wrapperPage: 8010 }),
+          product({ id: 802, slug: 'featured-802', title: 'Featured 802', wrapperPage: 8020 }),
+        ]
+        const wrappers = products.map((p) =>
+          wrapper({ id: p.wrapperPage, pathname: `/tour/${p.slug}` }),
+        )
+        const deps = products.map((p, i) =>
+          departure({
+            id: 8001 + i,
+            tourProduct: p.id,
+            departureDate: '2026-12-01T00:00:00.000Z',
+            priceFrom: 12000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        )
+
+        const payload = {
+          find: vi.fn(
+            async ({
+              collection,
+              where,
+            }: {
+              collection: string
+              where?: { and?: Array<{ pathname?: { equals?: string } }> }
+            }) => {
+              if (collection === 'pages') {
+                const hasCatalogPath = where?.and?.some(
+                  (cond) => cond.pathname?.equals === '/tour',
+                )
+                if (hasCatalogPath) {
+                  return {
+                    docs: [
+                      {
+                        id: 99,
+                        pathname: '/tour',
+                        site: 7,
+                        _status: 'published',
+                        wingsGoTourCatalog: { curationSlot: 'homepage-slot', enabled: true },
+                      },
+                    ],
+                  }
+                }
+                return { docs: wrappers }
+              }
+              if (collection === 'tour-curations') {
+                curationQueryCount++
+                return {
+                  docs: [
+                    {
+                      id: 88,
+                      _status: 'published',
+                      featuredTours: [801, 802],
+                      site: 7,
+                      slot: 'homepage-slot',
+                    },
+                  ],
+                }
+              }
+              if (collection === 'tour-products') return { docs: products }
+              return { docs: deps }
+            },
+          ),
+        }
+
+        const featured = await getWingsGoFeaturedTours({
+          limit: 4,
+          locale: 'vi',
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+
+        expect(featured).toHaveLength(2)
+        expect(curationQueryCount).toBe(1)
+      })
+    })
+
+    describe('Phase 1b: Keyset cursor and Codex gate fixes', () => {
+      it('encodes and decodes catalog cursors across sorts and prices', () => {
+        const verifiedCard = {
+          ...card(10, '2026-11-15T00:00:00.000Z', 'Seoul Delight'),
+          price: { currency: 'VND', kind: 'verified' as const, originalPrice: null, value: 15900000 },
+        }
+
+        const encodedVerified = encodeCatalogCursor(verifiedCard, 'price')
+        const decodedVerified = decodeCatalogCursor(encodedVerified)
+
+        expect(decodedVerified).toEqual({
+          date: '2026-11-15T00:00:00.000Z',
+          id: 10,
+          price: 15900000,
+          sort: 'price',
+          title: 'Seoul Delight',
+          v: 1,
+        })
+
+        const contactCard = card(11, '2026-12-01T00:00:00.000Z', 'Jeju Island')
+        const encodedContact = encodeCatalogCursor(contactCard, 'next-departure')
+        const decodedContact = decodeCatalogCursor(encodedContact)
+
+        expect(decodedContact).toEqual({
+          date: '2026-12-01T00:00:00.000Z',
+          id: 11,
+          price: null,
+          sort: 'next-departure',
+          title: 'Jeju Island',
+          v: 1,
+        })
+      })
+
+      it('safely rejects tampered, oversized, invalid version, or malformed cursors without throwing', () => {
+        expect(decodeCatalogCursor(null)).toBeNull()
+        expect(decodeCatalogCursor(undefined)).toBeNull()
+        expect(decodeCatalogCursor('')).toBeNull()
+        expect(decodeCatalogCursor(12345)).toBeNull()
+        expect(decodeCatalogCursor('a'.repeat(513))).toBeNull()
+        expect(decodeCatalogCursor('tampered!characters==')).toBeNull()
+
+        // Wrong version
+        const wrongVersion = Buffer.from(JSON.stringify({ v: 2, sort: 'next-departure', id: 1 })).toString('base64url')
+        expect(decodeCatalogCursor(wrongVersion)).toBeNull()
+
+        // Invalid sort
+        const invalidSort = Buffer.from(
+          JSON.stringify({ v: 1, sort: 'random-order', date: '2026-01-01', id: 1, price: null, title: 'T' }),
+        ).toString('base64url')
+        expect(decodeCatalogCursor(invalidSort)).toBeNull()
+
+        // Malformed JSON inside valid base64url
+        const brokenJson = Buffer.from('{ bad json ').toString('base64url')
+        expect(decodeCatalogCursor(brokenJson)).toBeNull()
+      })
+
+      it('parses exclude parameter safely, dropping invalid tokens and capping at 6 entries', () => {
+        expect(parseExcludeParam(null)).toEqual([])
+        expect(parseExcludeParam('')).toEqual([])
+        expect(parseExcludeParam('1,2,abc_123,valid-id')).toEqual(['1', '2', 'abc_123', 'valid-id'])
+        expect(parseExcludeParam('1,,bad!id,2,spaces not allowed,3')).toEqual(['1', '2', '3'])
+        expect(parseExcludeParam('1,2,3,4,5,6,7,8')).toEqual(['1', '2', '3', '4', '5', '6'])
+      })
+
+      it('ignores cursor and resets to start when cursor sort differs from request sort', () => {
+        const cards = [
+          card(1, '2026-03-01T00:00:00.000Z', 'A'),
+          card(2, '2026-04-01T00:00:00.000Z', 'B'),
+          card(3, '2026-05-01T00:00:00.000Z', 'C'),
+        ]
+        const cursorStub = {
+          date: '2026-04-01T00:00:00.000Z',
+          id: 2,
+          price: null,
+          sort: 'price' as const, // Different from filter sort 'next-departure'
+          title: 'B',
+          v: 1 as const,
+        }
+
+        const result = selectWingsGoCatalogCards({
+          after: cursorStub,
+          cards,
+          filters: { sort: 'next-departure' },
+          limit: 2,
+        })
+
+        // Resets to beginning: returns card 1 and card 2
+        expect(result.cards.map((c) => c.id)).toEqual([1, 2])
+      })
+
+      it('demonstrates cursor stability vs offset skip on inventory mutation (remove card on page 1)', () => {
+        const originalCards = [
+          card(1, '2026-01-01T00:00:00.000Z'),
+          card(2, '2026-02-01T00:00:00.000Z'),
+          card(3, '2026-03-01T00:00:00.000Z'),
+          card(4, '2026-04-01T00:00:00.000Z'),
+          card(5, '2026-05-01T00:00:00.000Z'),
+          card(6, '2026-06-01T00:00:00.000Z'),
+          card(7, '2026-07-01T00:00:00.000Z'),
+          card(8, '2026-08-01T00:00:00.000Z'),
+          card(9, '2026-09-01T00:00:00.000Z'),
+          card(10, '2026-10-01T00:00:00.000Z'),
+        ]
+
+        // First page (limit 6)
+        const page1 = selectWingsGoCatalogCards({ cards: originalCards, limit: 6, offset: 0 })
+        expect(page1.cards.map((c) => c.id)).toEqual([1, 2, 3, 4, 5, 6])
+        const page1LastCard = page1.cards[page1.cards.length - 1]!
+        const cursor = decodeCatalogCursor(encodeCatalogCursor(page1LastCard, 'next-departure'))
+
+        // Mutation between requests: Card 2 is removed from inventory
+        const mutatedCards = originalCards.filter((c) => c.id !== 2)
+
+        // Old offset approach (offset 6): Card 7 is SKIPPED because list shifted
+        const offsetPage2 = selectWingsGoCatalogCards({ cards: mutatedCards, limit: 6, offset: 6 })
+        expect(offsetPage2.cards.map((c) => c.id)).toEqual([8, 9, 10])
+        expect(offsetPage2.cards.some((c) => c.id === 7)).toBe(false) // Regression proven!
+
+        // New keyset cursor approach: Card 7 is preserved and returned in order
+        const cursorPage2 = selectWingsGoCatalogCards({
+          after: cursor,
+          cards: mutatedCards,
+          limit: 6,
+        })
+        expect(cursorPage2.cards.map((c) => c.id)).toEqual([7, 8, 9, 10])
+      })
+
+      it('demonstrates cursor stability vs offset skip when curation changes between requests', () => {
+        const allCards = [
+          card(1, '2026-01-01T00:00:00.000Z'),
+          card(2, '2026-02-01T00:00:00.000Z'),
+          card(3, '2026-03-01T00:00:00.000Z'),
+          card(4, '2026-04-01T00:00:00.000Z'),
+          card(5, '2026-05-01T00:00:00.000Z'),
+          card(6, '2026-06-01T00:00:00.000Z'),
+          card(7, '2026-07-01T00:00:00.000Z'),
+          card(8, '2026-08-01T00:00:00.000Z'),
+        ]
+
+        // Page 1 excluded featured card 1
+        const page1 = selectWingsGoCatalogCards({
+          cards: allCards,
+          excludeIDs: [1],
+          limit: 4,
+          offset: 0,
+        })
+        expect(page1.cards.map((c) => c.id)).toEqual([2, 3, 4, 5])
+        const cursor = decodeCatalogCursor(
+          encodeCatalogCursor(page1.cards[page1.cards.length - 1]!, 'next-departure'),
+        )
+
+        // Curation changes: card 1 is no longer featured.
+        // With old offset + recomputed excludeIDs (excludeIDs is now []):
+        // allCards[offset 4] returns card 5 (duplicate of page 1), and cards shift
+        const offsetPage2 = selectWingsGoCatalogCards({
+          cards: allCards,
+          excludeIDs: [], // recomputed
+          limit: 4,
+          offset: 4,
+        })
+        expect(offsetPage2.cards.map((c) => c.id)).toEqual([5, 6, 7, 8]) // Card 5 duplicate!
+
+        // With keyset cursor + client exclude IDs ([1]):
+        const cursorPage2 = selectWingsGoCatalogCards({
+          after: cursor,
+          cards: allCards,
+          excludeIDs: [1],
+          limit: 4,
+        })
+        expect(cursorPage2.cards.map((c) => c.id)).toEqual([6, 7, 8]) // Clean continuation, no duplicate, no skip!
+      })
+
+      it('demonstrates cursor stability when a departure on a page-1 card expires between requests', () => {
+        const originalCards = [
+          card(1, '2026-01-01T00:00:00.000Z'),
+          card(2, '2026-02-01T00:00:00.000Z'),
+          card(3, '2026-03-01T00:00:00.000Z'),
+          card(4, '2026-04-01T00:00:00.000Z'),
+          card(5, '2026-05-01T00:00:00.000Z'),
+          card(6, '2026-06-01T00:00:00.000Z'),
+          card(7, '2026-07-01T00:00:00.000Z'),
+          card(8, '2026-08-01T00:00:00.000Z'),
+        ]
+
+        const page1 = selectWingsGoCatalogCards({ cards: originalCards, limit: 6, offset: 0 })
+        const cursor = decodeCatalogCursor(
+          encodeCatalogCursor(page1.cards[page1.cards.length - 1]!, 'next-departure'),
+        )
+
+        // Card 3 departure expired, leaving 7 cards total
+        const expiredCards = originalCards.filter((c) => c.id !== 3)
+
+        // Offset 6 skips card 7
+        const offsetPage2 = selectWingsGoCatalogCards({ cards: expiredCards, limit: 6, offset: 6 })
+        expect(offsetPage2.cards.map((c) => c.id)).toEqual([8])
+
+        // Keyset cursor returns card 7 and 8
+        const cursorPage2 = selectWingsGoCatalogCards({ after: cursor, cards: expiredCards, limit: 6 })
+        expect(cursorPage2.cards.map((c) => c.id)).toEqual([7, 8])
+      })
+
+      it('P2.1: selects deterministic market image regardless of input card ordering', async () => {
+        const createProductWithImage = (id: number, imgUrl: string) =>
+          product({
+            id,
+            slug: `p-${id}`,
+            title: `Product ${id}`,
+            wrapperPage: id * 10,
+            heroMedia: { site: 7, url: imgUrl },
+          })
+
+        const p1 = createProductWithImage(1, '/media/img1.jpg')
+        const p2 = createProductWithImage(2, '/media/img2.jpg')
+        const p3 = createProductWithImage(3, '/media/img3.jpg')
+
+        const createPayload = (productList: typeof p1[]) => ({
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') {
+              return {
+                docs: [
+                  {
+                    id: 99,
+                    pathname: '/tour',
+                    site: 7,
+                    _status: 'published',
+                    wingsGoTourCatalog: { enabled: true },
+                  },
+                  ...productList.map((p) => wrapper({ id: p.wrapperPage, pathname: `/tour/${p.slug}` })),
+                ],
+              }
+            }
+            if (collection === 'tour-products') return { docs: productList }
+            if (collection === 'tour-curations') return { docs: [] }
+            return {
+              docs: productList.map((p) =>
+                departure({
+                  id: 100 + p.id,
+                  tourProduct: p.id,
+                  departureDate: `2026-12-0${p.id}T00:00:00.000Z`,
+                  commerceVerified: true,
+                  availabilityStatus: 'open',
+                }),
+              ),
+            }
+          }),
+        })
+
+        // Run query with order [p1, p2, p3]
+        const resultA = await queryWingsGoTourCatalog({
+          now: new Date('2026-06-01T00:00:00.000Z'),
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: createPayload([p1, p2, p3]) as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        // Run query with order [p3, p1, p2]
+        const resultB = await queryWingsGoTourCatalog({
+          now: new Date('2026-06-01T00:00:00.000Z'),
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: createPayload([p3, p1, p2]) as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        const koreaMarketA = resultA.markets.find((m) => m.market === 'korea')
+        const koreaMarketB = resultB.markets.find((m) => m.market === 'korea')
+
+        expect(koreaMarketA?.image?.url).toBeTruthy()
+        expect(koreaMarketA?.image?.url).toEqual(koreaMarketB?.image?.url)
+      })
+
+      it('P2.3: returns empty catalog when enabled is false, even if pathname is /tour', async () => {
+        const payload = {
+          find: vi.fn(async () => ({ docs: [] })),
+        }
+
+        const result = await queryWingsGoTourCatalog({
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: false } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        expect(result).toEqual({
+          all: [],
+          featured: [],
+          filtersActive: false,
+          hasMore: false,
+          markets: [],
+          nextCursor: null,
+          nextOffset: 0,
+          upcoming: [],
+        })
+        expect(payload.find).not.toHaveBeenCalled()
+      })
+
+      it('P2.3: getWingsGoFeaturedTours still returns cards when catalog page has enabled=false', async () => {
+        const products = [
+          product({ id: 901, slug: 'featured-901', title: 'Featured 901', wrapperPage: 9010 }),
+        ]
+        const wrappers = [wrapper({ id: 9010, pathname: '/tour/featured-901' })]
+        const deps = [
+          departure({
+            id: 9001,
+            tourProduct: 901,
+            departureDate: '2026-12-01T00:00:00.000Z',
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(
+            async ({
+              collection,
+              where,
+            }: {
+              collection: string
+              where?: { and?: Array<{ pathname?: { equals?: string } }> }
+            }) => {
+              if (collection === 'pages') {
+                const hasCatalogPath = where?.and?.some(
+                  (cond) => cond.pathname?.equals === '/tour',
+                )
+                if (hasCatalogPath) {
+                  return {
+                    docs: [
+                      {
+                        id: 99,
+                        pathname: '/tour',
+                        site: 7,
+                        _status: 'published',
+                        wingsGoTourCatalog: { enabled: false, featuredTours: [901] },
+                      },
+                    ],
+                  }
+                }
+                return { docs: wrappers }
+              }
+              if (collection === 'tour-products') return { docs: products }
+              if (collection === 'tour-curations') return { docs: [] }
+              return { docs: deps }
+            },
+          ),
+        }
+
+        const featured = await getWingsGoFeaturedTours({
+          limit: 4,
+          locale: 'vi',
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+
+        expect(featured).toHaveLength(1)
+        expect(featured[0]?.id).toBe(901)
       })
     })
   })

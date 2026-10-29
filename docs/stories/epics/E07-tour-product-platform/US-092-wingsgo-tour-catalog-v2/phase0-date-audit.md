@@ -13,7 +13,7 @@
 
 ### Query 1: Time-of-day distribution
 ```sql
-SELECT 
+SELECT
   substr(departure_date, 12, 8) AS time_part,
   count(*) AS count
 FROM tour_departures
@@ -23,7 +23,7 @@ ORDER BY count DESC;
 
 ### Query 2: Discrepancy count per site (VN calendar day vs UTC day)
 ```sql
-SELECT 
+SELECT
   s.id AS site_id,
   s.code AS site_code,
   s.name AS site_name,
@@ -37,7 +37,7 @@ ORDER BY s.id;
 
 ### Query 3: Time distribution by site
 ```sql
-SELECT 
+SELECT
   s.code AS site_code,
   substr(td.departure_date, 12, 8) AS time_part,
   count(td.id) AS count
@@ -81,7 +81,7 @@ For running on staging / production PostgreSQL instances (e.g., via `psql` or re
 
 ```sql
 -- Query A: Global time-of-day distribution in UTC
-SELECT 
+SELECT
   TO_CHAR(departure_date AT TIME ZONE 'UTC', 'HH24:MI:SS') AS time_of_day_utc,
   COUNT(*) AS count,
   ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS percentage
@@ -90,16 +90,16 @@ GROUP BY time_of_day_utc
 ORDER BY count DESC;
 
 -- Query B: Site breakdown and VN vs UTC date discrepancy
-SELECT 
+SELECT
   s.id AS site_id,
   s.code AS site_code,
   s.name AS site_name,
   COUNT(td.id) AS total_departures,
   SUM(
-    CASE 
+    CASE
       WHEN DATE(td.departure_date AT TIME ZONE 'UTC') <> DATE(td.departure_date AT TIME ZONE 'Asia/Ho_Chi_Minh')
-      THEN 1 
-      ELSE 0 
+      THEN 1
+      ELSE 0
     END
   ) AS vn_differs_utc_count,
   SUM(CASE WHEN TO_CHAR(td.departure_date AT TIME ZONE 'UTC', 'HH24:MI:SS') = '00:00:00' THEN 1 ELSE 0 END) AS count_00_00_z,

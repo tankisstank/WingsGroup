@@ -70,6 +70,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
   const [isPending, startTransition] = useTransition()
   const [cards, setCards] = useState(initial.all)
   const [offset, setOffset] = useState(initial.nextOffset)
+  const [cursor, setCursor] = useState<string | null>(initial.nextCursor ?? null)
   const [hasMore, setHasMore] = useState(initial.hasMore)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -87,6 +88,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
     requestControllerRef.current = null
     setCards(initial.all)
     setOffset(initial.nextOffset)
+    setCursor(initial.nextCursor ?? null)
     setHasMore(initial.hasMore)
     setError(null)
     setLoading(false)
@@ -117,6 +119,18 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
     params.set('limit', String(WINGSGO_CATALOG_BATCH_SIZE))
     params.set('offset', String(offset))
     params.set('locale', copyLocale)
+    if (cursor) {
+      params.set('cursor', cursor)
+    }
+    if (!initial.filtersActive && initial.featured.length > 0) {
+      const excludeParam = initial.featured
+        .map((card) => String(card.id))
+        .slice(0, 6)
+        .join(',')
+      if (excludeParam) {
+        params.set('exclude', excludeParam)
+      }
+    }
     for (const key of [
       'market',
       'durationMin',
@@ -144,6 +158,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
         return [...current, ...data.all.filter((card) => !seen.has(String(card.id)))]
       })
       setOffset(data.nextOffset)
+      setCursor(data.nextCursor ?? null)
       setHasMore(data.hasMore)
     } catch (loadError) {
       if (requestGeneration !== requestGenerationRef.current || controller.signal.aborted) return
@@ -154,7 +169,17 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
         setLoading(false)
       }
     }
-  }, [copy.loadMoreError, copyLocale, hasMore, initialFilters, loading, offset])
+  }, [
+    copy.loadMoreError,
+    copyLocale,
+    cursor,
+    hasMore,
+    initial.featured,
+    initial.filtersActive,
+    initialFilters,
+    loading,
+    offset,
+  ])
 
   useEffect(() => {
     const sentinel = sentinelRef.current

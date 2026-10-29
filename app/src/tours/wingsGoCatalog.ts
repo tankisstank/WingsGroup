@@ -96,8 +96,18 @@ export type WingsGoCatalogData = {
   filtersActive: boolean
   hasMore: boolean
   markets: WingsGoCatalogMarketSummary[]
+  nextCursor: string | null
   nextOffset: number
   upcoming: WingsGoCatalogCard[]
+}
+
+export type CatalogCursorPayload = {
+  date: string
+  id: number | string
+  price: number | null
+  sort: WingsGoCatalogSort
+  title: string
+  v: 1
 }
 
 type Relation = number | string | { id?: number | string | null } | null | undefined
@@ -417,13 +427,100 @@ const compareCards = (
   return String(left.id).localeCompare(String(right.id), 'en')
 }
 
+export const encodeCatalogCursor = (
+  card: WingsGoCatalogCard,
+  sort: WingsGoCatalogSort = 'next-departure',
+): string => {
+  const payload: CatalogCursorPayload = {
+    date: card.nextDeparture.date,
+    id: card.id,
+    price: card.price.kind === 'verified' ? card.price.value : null,
+    sort,
+    title: card.title,
+    v: 1,
+  }
+  const json = JSON.stringify(payload)
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(json, 'utf8').toString('base64url')
+  }
+  return btoa(unescape(encodeURIComponent(json)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+}
+
+export const decodeCatalogCursor = (value: unknown): CatalogCursorPayload | null => {
+  if (typeof value !== 'string') return null
+  if (!value || value.length > 512) return null
+  if (!/^[A-Za-z0-9_-]+$/.test(value)) return null
+  try {
+    let json: string
+    if (typeof Buffer !== 'undefined') {
+      json = Buffer.from(value, 'base64url').toString('utf8')
+    } else {
+      let base64 = value.replace(/-/g, '+').replace(/_/g, '/')
+      while (base64.length % 4) base64 += '='
+      json = decodeURIComponent(escape(atob(base64)))
+    }
+    const parsed = JSON.parse(json)
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      parsed.v === 1 &&
+      (parsed.sort === 'next-departure' || parsed.sort === 'price' || parsed.sort === 'title') &&
+      typeof parsed.date === 'string' &&
+      (typeof parsed.price === 'number' || parsed.price === null) &&
+      typeof parsed.title === 'string' &&
+      (typeof parsed.id === 'string' || typeof parsed.id === 'number')
+    ) {
+      return parsed as CatalogCursorPayload
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+export const parseExcludeParam = (raw: unknown): string[] => {
+  if (typeof raw !== 'string' || !raw) return []
+  const idRegex = /^[A-Za-z0-9_-]{1,64}$/
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => idRegex.test(s))
+    .slice(0, 6)
+}
+
+const createCursorStubCard = (after: CatalogCursorPayload): WingsGoCatalogCard => ({
+  duration: { days: 0, nights: 0 },
+  href: '',
+  id: after.id,
+  image: null,
+  market: 'other',
+  nextDeparture: {
+    airline: null,
+    date: after.date,
+    daysUntilDeparture: null,
+    departureCity: null,
+  },
+  price:
+    after.price !== null
+      ? { currency: 'VND', kind: 'verified', originalPrice: null, value: after.price }
+      : { kind: 'contact', label: '' },
+  slug: '',
+  summary: '',
+  title: after.title,
+})
+
 export const selectWingsGoCatalogCards = ({
+  after,
   cards,
   excludeIDs = [],
   filters = {},
   limit = WINGSGO_CATALOG_BATCH_SIZE,
   offset = 0,
 }: {
+  after?: CatalogCursorPayload | null
   cards: WingsGoCatalogCard[]
   excludeIDs?: Array<number | string>
   filters?: WingsGoCatalogFilters
@@ -457,7 +554,26 @@ export const selectWingsGoCatalogCards = ({
     seenIDs.add(key)
     return true
   })
-  deduped.sort((left, right) => compareCards(left, right, filters.sort || 'next-departure'))
+
+  const sort = filters.sort || 'next-departure'
+  deduped.sort((left, right) => compareCards(left, right, sort))
+
+  if (after) {
+    if (after.sort === sort) {
+      const stub = createCursorStubCard(after)
+      const afterCards = deduped.filter((card) => compareCards(card, stub, sort) > 0)
+      return {
+        cards: afterCards.slice(0, boundedLimit),
+        hasMore: afterCards.length > boundedLimit,
+        total: deduped.length,
+      }
+    }
+    return {
+      cards: deduped.slice(0, boundedLimit),
+      hasMore: boundedLimit < deduped.length,
+      total: deduped.length,
+    }
+  }
 
   return {
     cards: deduped.slice(offset, offset + boundedLimit),
@@ -546,7 +662,12 @@ const selectDeterministicMarketImage = ({
   const nonFeatured = featuredSlot1ID
     ? cardsWithImage.filter((card) => String(card.id) !== String(featuredSlot1ID))
     : cardsWithImage
-  const candidates = nonFeatured.length > 0 ? nonFeatured : cardsWithImage
+  const candidates = [...(nonFeatured.length > 0 ? nonFeatured : cardsWithImage)]
+  candidates.sort((left, right) => {
+    const idDiff = String(left.id).localeCompare(String(right.id), 'en')
+    if (idDiff !== 0) return idDiff
+    return String(left.image.url).localeCompare(String(right.image.url), 'en')
+  })
 
   const calendarDay = toBusinessCalendarDay(now) || ''
   const seed = `${siteID}|${market}|${calendarDay}`
@@ -572,6 +693,8 @@ const queryDocs = async (
   })
 
 export const queryWingsGoTourCatalog = async ({
+  cursor,
+  exclude,
   filters = {},
   limit = WINGSGO_CATALOG_BATCH_SIZE,
   locale = 'vi',
@@ -581,6 +704,8 @@ export const queryWingsGoTourCatalog = async ({
   payload,
   site,
 }: {
+  cursor?: string | null
+  exclude?: Array<number | string> | null
   filters?: WingsGoCatalogFilters
   limit?: number
   locale?: string
@@ -596,14 +721,12 @@ export const queryWingsGoTourCatalog = async ({
     filtersActive: false,
     hasMore: false,
     markets: [],
+    nextCursor: null,
     nextOffset: 0,
     upcoming: [],
   }
 
-  if (
-    site.code !== 'wings-go' ||
-    (!page.wingsGoTourCatalog?.enabled && page.pathname !== '/tour')
-  ) {
+  if (site.code !== 'wings-go' || page.wingsGoTourCatalog?.enabled !== true) {
     return emptyCatalog
   }
 
@@ -735,14 +858,32 @@ export const queryWingsGoTourCatalog = async ({
   const featured = [...configuredFeatured, ...fallback].slice(0, WINGSGO_CATALOG_MAX_FEATURED)
   const featuredIDs = featured.map((card) => card.id)
 
+  const decodedCursor = cursor ? decodeCatalogCursor(cursor) : null
+  const effectiveSort = filters.sort || 'next-departure'
+  const validCursor = decodedCursor && decodedCursor.sort === effectiveSort ? decodedCursor : null
+  const hasCursor = Boolean(validCursor)
   const filtersActive = hasActiveCatalogFilters(filters)
+
+  let excludeIDsFromFeatured: Array<number | string> = []
+  if (hasCursor && !filtersActive) {
+    excludeIDsFromFeatured = Array.isArray(exclude) ? exclude : []
+  } else if (!filtersActive) {
+    excludeIDsFromFeatured = featuredIDs
+  } else {
+    excludeIDsFromFeatured = []
+  }
+
   const all = selectWingsGoCatalogCards({
+    after: validCursor,
     cards: windowCards,
-    excludeIDs: filtersActive ? [] : featuredIDs,
+    excludeIDs: excludeIDsFromFeatured,
     filters,
     limit,
     offset,
   })
+
+  const lastCard = all.cards[all.cards.length - 1]
+  const nextCursor = all.hasMore && lastCard ? encodeCatalogCursor(lastCard, effectiveSort) : null
 
   // Market summaries from unfilteredCards
   const marketMap = new Map<string, WingsGoCatalogCard[]>()
@@ -797,6 +938,7 @@ export const queryWingsGoTourCatalog = async ({
     filtersActive,
     hasMore: all.hasMore,
     markets,
+    nextCursor,
     nextOffset: offset + all.cards.length,
     upcoming,
   }
@@ -940,13 +1082,5 @@ export const getWingsGoFeaturedTours = async ({
   })
   if (!catalog) return []
 
-  const configuredIDs = await resolveCuratedTourIDs({
-    page: effectivePage,
-    payload,
-    siteID: site.id,
-  })
-  const curatedTourIDs = new Set(configuredIDs.map(String))
-  const curatedMatches = catalog.featured.filter((tour) => curatedTourIDs.has(String(tour.id)))
-  const fallbackFeatured = catalog.featured.filter((tour) => !curatedTourIDs.has(String(tour.id)))
-  return [...curatedMatches, ...fallbackFeatured].slice(0, limit)
+  return catalog.featured.slice(0, limit)
 }

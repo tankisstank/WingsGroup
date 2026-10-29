@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 
 import type { Site } from '@/payload-types'
 import {
+  parseExcludeParam,
   parseWingsGoCatalogFilters,
   queryWingsGoTourCatalog,
   WINGSGO_CATALOG_BATCH_SIZE,
@@ -18,6 +19,7 @@ const emptyCatalog = {
   filtersActive: false,
   hasMore: false,
   markets: [],
+  nextCursor: null,
   nextOffset: 0,
   upcoming: [],
 } as const
@@ -88,8 +90,12 @@ export async function GET(request: Request) {
 
     const now = new Date()
     const filters = parseWingsGoCatalogFilters(url.searchParams, now)
+    const cursor = url.searchParams.get('cursor') || undefined
+    const exclude = parseExcludeParam(url.searchParams.get('exclude'))
 
     const data = await queryWingsGoTourCatalog({
+      cursor,
+      exclude,
       filters,
       limit: requestedLimit,
       locale: resolvedLocale,
