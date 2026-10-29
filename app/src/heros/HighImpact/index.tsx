@@ -1,4 +1,3 @@
-
 'use client'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import React, { useEffect } from 'react'
@@ -14,8 +13,6 @@ import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 import type { SupportedLocaleCode } from '@/utilities/locales'
 import type { WingsGoCatalogCard } from '@/tours/wingsGoCatalog'
 import { WingsGoHeroTourRow } from '@/heros/WingsGoCommerceHero'
-
-
 import {
   BadgeCheckIcon,
   CalendarDaysIcon,
@@ -388,7 +385,6 @@ export const HighImpactHero: React.FC<
   }, [setHeaderTheme])
 
   const catalogTours = props.heroFeaturedTours || []
-
 
   const businessPanel = isRetailDepartures ? (
     <aside
