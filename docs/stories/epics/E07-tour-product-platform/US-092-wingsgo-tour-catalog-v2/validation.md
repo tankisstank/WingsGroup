@@ -55,6 +55,15 @@ Story chỉ đóng khi mỗi phase có bằng chứng từ code, test và trình
 | P2.3 Test API chỉ mock query | Thêm test API chạy qua query thật: phân trang, ba kiểu đổi dữ liệu, sai ngữ cảnh, cursor giả mạo | Đã sửa (`16adb69`) |
 | P2.4 Ba lần đọc không chung snapshot DB | Rủi ro còn lại khi release, ghi trong `phase1c-report.md` | Chấp nhận, đã ghi rõ |
 
+- Cổng 3 (Phase 1c, `16adb69`..`ea6236e`), 2026-10-29 19:56: Codex `gpt-6.1-sol`. **VERDICT: GO** cho Phase 2. Biên bản: `docs/consultations/2026-10-29-us092-phase1c-codex-gate.md`. Không có P1. Xử lý:
+
+| Finding | Quyết định của orchestrator | Trạng thái |
+|---|---|---|
+| P2.1 `nextOffset` tính từ offset của client khi cursor bị từ chối | Dùng `effectiveOffset`; có test | Đã sửa (commit kế tiếp sau `ea6236e`) |
+| P2.2 `ctx` dùng FNV-1a 32-bit, không bảo đảm toàn vẹn | Chấp nhận cho dữ liệu công khai, API no-store. Xem lại nếu cursor dùng cho dữ liệu riêng tư, cache dùng chung hoặc phân quyền | Chấp nhận, đã ghi rõ |
+| P2.3 Ba lần đọc không chung snapshot DB | Rủi ro còn lại khi release; xem lại trước production nếu cần snapshot nghiêm ngặt | Chấp nhận, đã ghi rõ |
+| Khoảng trống test: SSR integration kiểm tra `initial.nextCursor` | Bổ sung trong Phase 2 (Phase 2 sửa SSR page) | Hoãn sang Phase 2 |
+
 ### Review của orchestrator
 
 - Phase 0 (`59fcbbb`, `abaa7ab`): đạt. Đã yêu cầu sửa lỗi locale thiếu bị rơi về EN; bản sửa có test.
@@ -120,7 +129,7 @@ pnpm run build
 | Mục | Kết quả |
 |---|---|
 | Truy vấn Phase 0: số departure có ngày VN khác ngày UTC, theo site | Local: 164/164 `00:00Z`, 0 lệch. Production 2026-10-29: 323/323 `00:00Z`, 0 lệch |
-| Biên bản tham vấn Codex trước Phase 1 | Chưa có |
+| Biên bản tham vấn Codex trước Phase 1 | Cổng bù đắp chạy sau Phase 1: NO-GO (17:10) → NO-GO (19:26) → GO (19:56), biên bản trong `docs/consultations/2026-10-29-us092-phase1*-codex-gate.md` |
 | Exit code của các lệnh kiểm tra | Chưa có |
 | Ảnh chụp và log trình duyệt | Chưa có |
 | Bằng chứng dynamic/no-store | Chưa có |
