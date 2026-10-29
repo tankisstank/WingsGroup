@@ -92,7 +92,15 @@ Story chỉ đóng khi mỗi phase có bằng chứng từ code, test và trình
   - `upcoming` loại toàn bộ ID featured (slot #1–#6), rỗng khi có filter (D10). Ô thị trường render trong client catalog, trước "Tour nổi bật"; bấm ô đặt `?market=`, giữ filter khác, xóa `cursor`/`offset`, `window.scrollTo` tới "Tất cả tour".
   - Dev server local (`wingsgo.local`): `/tour` hiện dải "Sắp cất cánh" 6 tour có badge "Khởi hành sau N ngày", rồi ô thị trường (Hàn Quốc 9, Nhật Bản 6, Trung Quốc 2), rồi "Tour nổi bật". `/en/tour` không có dải và ô vì DB local thiếu bản dịch EN (đã ghi ở Phase 2).
   - Orchestrator sửa copy mô tả ô thị trường: "với mức giá tốt nhất" / "verified best available pricing" là khẳng định không kiểm chứng được; đổi thành mô tả đúng dữ liệu (số tour và giá thấp nhất đang mở bán).
-- Trước staging/production: **Chưa chạy.**
+- Release production 2026-10-30 (Phase 0–4 + D11), release `release-us092-cd58ca0`:
+  - Đối chiếu trước deploy: `app/src` của release đang chạy (`wingsgo-price-20261029`) giống hệt baseline `8980e23` (chỉ khác `payload-types.ts` sinh tự động), nên release không gỡ mất thay đổi nào đang chạy.
+  - Truy vấn chỉ đọc trên production: 184 departure tương lai đã publish (92% trần 200), 49 product, 50 wrapper, **0/49 product có title EN** ⇒ D11.
+  - Migration: release diff không có migration; 52/52 migration trong code đã ghi trong `payload_migrations` (đọc trực tiếp DB). Lưu ý runbook: `migrate:status` chạy với `--env-file shared/.env` không có `DATABASE_URI` nên đọc SQLite rỗng trong container và báo `No` hết (ops image của release trước cũng vậy); cần sửa runbook.
+  - App image `sha256:d787de72…`, ops image `sha256:662b79c9…` (revision `cd58ca0` đã xác minh). Readiness: database up, Redis up, leadDelivery configured.
+  - Rollback: `previous` = `releases/wingsgo-price-20261029`, image bất biến `sha256:d5352f45…` (ghi trong `current/PREVIOUS_IMAGE_ID` và `current/rollback-compose.yml`). Không có schema mới nên rollback chỉ cần đổi image.
+  - Smoke sau cutover: wingsgo.vn `/`, `/en`, `/tour`, `/en/tour`, `/tour?season=autumn`, API catalog, wingside.vn, wingsgroup.vn đều 200. `/tour` và `/en/tour` 17 card (trước `/en/tour` 13). Homepage EN có lại tour. URL có lọc `noindex, follow`. API WingSide trả DTO rỗng. Thời gian phản hồi `/tour` khoảng 2,1–3,4s (trước khoảng 1,9–2,4s), `/en/tour` khoảng 2,4–2,6s (trước khoảng 1,7–2,0s).
+  - Theo dõi sau release: thời gian phản hồi `/tour`/`/en/tour` (EN thêm một query VI), log `[wingsgo-catalog] ... reached maximum cap`, nhãn promo bị cắt trong thumbnail ô phụ hero (component dùng chung với homepage, có từ trước).
+- Chưa làm: Phase 5 (Live Simulator) và E2E đầy đủ Phase 6.
 
 ## Kiểm tra chi tiết theo tiêu chí chấp nhận
 
@@ -154,7 +162,7 @@ pnpm run build
 |---|---|
 | Truy vấn Phase 0: số departure có ngày VN khác ngày UTC, theo site | Local: 164/164 `00:00Z`, 0 lệch. Production 2026-10-29: 323/323 `00:00Z`, 0 lệch |
 | Biên bản tham vấn Codex trước Phase 1 | Cổng bù đắp chạy sau Phase 1: NO-GO (17:10) → NO-GO (19:26) → GO (19:56), biên bản trong `docs/consultations/2026-10-29-us092-phase1*-codex-gate.md` |
-| Exit code của các lệnh kiểm tra | Chưa có |
-| Ảnh chụp và log trình duyệt | Chưa có |
-| Bằng chứng dynamic/no-store | Chưa có |
-| Release review bằng Codex | Chưa có |
+| Exit code của các lệnh kiểm tra | Commit release `cd58ca0`: `pnpm run lint` 0 (0 error), `pnpm run build` 0, `test:unit` 1370/1371 (lỗi duy nhất `wingsGroupV3Shell` có từ baseline), `test:component` 418/418, `tsc` chỉ 2 lỗi baseline |
+| Ảnh chụp và log trình duyệt | Production 2026-10-30: `agent-browser` `/tour` 1440px và 390px, không lỗi console, không cuộn ngang ở 390px. Chưa làm E2E đầy đủ Phase 6 (reduced motion, bàn phím, đổi curation) |
+| Bằng chứng dynamic/no-store | Production: API trả `Cache-Control: private, no-cache, no-store, max-age=0, must-revalidate`; `/tour` `force-dynamic` (guard test) |
+| Release review bằng Codex | Lần 1 NO-GO (P1 lint) → sửa → lần 2 **GO**. Biên bản `docs/consultations/2026-10-30-us092-release-review.md` |
