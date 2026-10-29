@@ -68,6 +68,14 @@ Story chỉ đóng khi mỗi phase có bằng chứng từ code, test và trình
 
 - Phase 0 (`59fcbbb`, `abaa7ab`): đạt. Đã yêu cầu sửa lỗi locale thiếu bị rơi về EN; bản sửa có test.
 - Phase 1 (`853e0bc`): đạt. Orchestrator tự chạy lại test WingsGo: 104/104 unit, 29/29 component. Lỗi `wingsGroupV3Shell.unit.spec.ts` cũng xảy ra trên baseline `8980e23`, nên là lỗi có từ trước. Phát hiện một lỗ hổng trong design (Hero vẫn hiện slot #1–#3 khi đang lọc, gây trùng card với "Tất cả tour"); đã xử lý bằng cách cập nhật D6 và giao cho Phase 2.
+- Phase 2 (`9992ee0`, `754d95f`, `68afa86`, `3eb80ec`): đạt.
+  - Snapshot hồi quy (panel homepage VI/EN và `groupDeparturesByMonth` với dữ liệu kiểu WingSide) được commit trước khi refactor và giữ nguyên sau refactor.
+  - Orchestrator tự chạy lại: unit WingsGo 114/114, component hero/catalog 29/29, eslint 0 lỗi, `git diff --check` đạt.
+  - Kiểm tra trên dev server local (SQLite, host `wingsgo.local`):
+    - `/tour` VI: hero có slot #1 (badge hot, sticker, "Khởi hành sau N ngày") và hai ô phụ; form tìm nhanh; "Tour nổi bật" từ slot #4.
+    - `/tour?season=autumn`: hero không có thẻ tour và section nổi bật bị ẩn (D6).
+    - `/en/tour`: copy hero toàn tiếng Anh. Catalog rỗng vì DB local không có bản dịch EN (query EN dùng `fallbackLocale: false` từ baseline); cần kiểm lại ở Phase 6 với dữ liệu có bản dịch.
+  - Lỗi phát hiện khi kiểm tra trên server và đã sửa (`3eb80ec`): bảng nhãn market được export từ module `'use client'`, nên server component chỉ nhận client reference và hiện mã thô "japan". Test component không bắt được lỗi này.
 - Trước staging/production: **Chưa chạy.**
 
 ## Kiểm tra chi tiết theo tiêu chí chấp nhận
