@@ -3,6 +3,9 @@ $ErrorActionPreference = "Stop"
 
 Write-Host ">>> 1. Sinh relink.sh chứa binary ARM64 và pnpm symlinks..." -ForegroundColor Cyan
 node deploy/oracle/generate-symlinks.js
+if ($LASTEXITCODE -ne 0) {
+    throw "generate-symlinks.js failed with exit code $LASTEXITCODE"
+}
 
 Write-Host ">>> 2. Chuẩn bị thư mục tạm để đóng gói..." -ForegroundColor Cyan
 $tempDir = "deploy/oracle/temp-release"
@@ -10,11 +13,14 @@ if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir }
 New-Item -ItemType Directory -Path $tempDir | Out-Null
 
 # Copy standalone .next, node_modules, server.js, package.json
-Copy-Item -Recurse "app/.next/standalone/.next" "$tempDir/.next"
-Copy-Item -Recurse "app/.next/standalone/node_modules" "$tempDir/node_modules"
+node deploy/oracle/copy-release-tree.cjs .next
+if ($LASTEXITCODE -ne 0) { throw "Failed to copy standalone .next" }
+node deploy/oracle/copy-release-tree.cjs node_modules
+if ($LASTEXITCODE -ne 0) { throw "Failed to copy standalone node_modules" }
 Copy-Item "app/.next/standalone/server.js" "$tempDir/server.js"
 Copy-Item "app/.next/standalone/package.json" "$tempDir/package.json"
 Copy-Item "deploy/oracle/relink.sh" "$tempDir/relink.sh"
+Copy-Item "deploy/oracle/verify-sharp-arm64.cjs" "$tempDir/verify-sharp-arm64.cjs"
 
 # Copy public static assets (loại trừ public/media)
 New-Item -ItemType Directory -Path "$tempDir/public" | Out-Null

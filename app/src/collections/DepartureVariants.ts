@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
+import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrAnyone } from '@/access/siteScope'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
@@ -309,6 +309,6 @@ export const DepartureVariants: CollectionConfig = {
   hooks: {
     afterChange: [revalidateTourVariant],
     afterDelete: [revalidateTourVariantDelete],
-    beforeChange: [enforceSiteAccess, preventEditorPublish],
+    beforeChange: [enforceSiteAccess],
   },
 }

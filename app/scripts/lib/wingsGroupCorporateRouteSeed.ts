@@ -8,6 +8,7 @@ import {
   WINGSGROUP_RELATIONSHIP_STATEMENT_EN,
   WINGSGROUP_SITE_CODE,
   type WingsGroupRouteDefinition,
+  type WingsGroupCorporateRouteDefinition,
 } from '../../src/wingsgroup/corporateRoutes'
 import {
   WINGSGROUP_CONSENT_VERSION,
@@ -27,7 +28,7 @@ type LocalizedRouteSeed = {
   title: string
 }
 
-export type WingsGroupCorporateRouteSeed = WingsGroupRouteDefinition & {
+export type WingsGroupCorporateRouteSeed = WingsGroupCorporateRouteDefinition & {
   en: LocalizedRouteSeed
   preserveExisting: boolean
   vi: LocalizedRouteSeed
@@ -372,7 +373,7 @@ const ecosystemRoute = (locale: Locale): LocalizedRouteSeed => ({
 })
 
 const routeContent: Record<
-  Exclude<WingsGroupRouteDefinition['path'], '/'>,
+  Exclude<WingsGroupCorporateRouteDefinition['path'], '/'>,
   { en: LocalizedRouteSeed; vi: LocalizedRouteSeed }
 > = {
   '/ve-wingsgroup': {

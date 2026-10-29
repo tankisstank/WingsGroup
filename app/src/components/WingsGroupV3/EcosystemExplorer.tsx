@@ -30,7 +30,7 @@ const copyByLocale = {
     mediaFallback: 'A governed service image will appear here when available.',
     proof: 'Client feedback:',
     verified: 'Verified information is available.',
-    railDescription: 'Select a team to see how it can accompany your next step.',
+    railDescription: 'Select a brand to view its introduction below.',
     railTitle: 'Choose a service team',
     exploreCapabilities: 'Explore capabilities and services',
     exploreEcosystem: 'Explore the five-brand ecosystem',
@@ -40,7 +40,7 @@ const copyByLocale = {
     mediaFallback: 'Hình ảnh dịch vụ được kiểm soát sẽ xuất hiện khi sẵn sàng.',
     proof: 'Phản hồi sau dịch vụ:',
     verified: 'Đã có thông tin được xác minh.',
-    railDescription: 'Từ chuyến đi xa đến những nhu cầu rất riêng — luôn có một Wings dành cho bạn.',
+    railDescription: 'Chọn thương hiệu để xem giới thiệu ngay bên dưới.',
     railTitle: 'Chọn dịch vụ phù hợp với hành trình của bạn.',
     exploreCapabilities: 'Xem chi tiết năng lực và dịch vụ',
     exploreEcosystem: 'Tìm hiểu hệ sinh thái 5 thương hiệu',
@@ -212,7 +212,7 @@ export const EcosystemExplorer = ({
                 className={styles.unifiedStageImage}
                 fill
                 imgClassName={styles.unifiedStageImage}
-                priority={activeIndex === 0}
+                loading="lazy"
                 resource={media}
                 size="(max-width: 850px) 100vw, 58vw"
               />
@@ -261,7 +261,7 @@ export const EcosystemExplorer = ({
                     <small>{profile.serviceScope[0]?.label || presentation?.category}</small>
                   </span>
                   <span className={styles.unifiedBrandAction}>
-                    {locale === 'en' ? 'Explore' : 'Khám phá'}
+                    {locale === 'en' ? 'View introduction' : 'Xem giới thiệu'}
                   </span>
                 </button>
               ))}
@@ -291,7 +291,7 @@ export const EcosystemExplorer = ({
                       <li key={`${service.label}-${service.id || index}`}>{service.label}</li>
                     ))}
                   </ul>
-                  {cta.href.startsWith('https://') ? (
+                  {!cta.isFallback ? (
                     <a
                       className={styles.unifiedDetailCta}
                       data-cta-state="approved-deep-link"

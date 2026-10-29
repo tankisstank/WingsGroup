@@ -14,7 +14,6 @@ import {
   contentCreateAccess,
   contentDeleteAccess,
   normalizeRelationID,
-  preventEditorPublish,
 } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
 import { Banner } from '../../blocks/Banner/config'
@@ -317,7 +316,7 @@ export const Posts: CollectionConfig<'posts'> = {
   hooks: {
     afterChange: [revalidatePost],
     afterRead: [populateAuthors],
-    beforeChange: [enforceSiteAccess, preventEditorPublish],
+    beforeChange: [enforceSiteAccess],
     afterDelete: [revalidateDelete],
   },
   versions: {

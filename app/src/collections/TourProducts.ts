@@ -1,7 +1,7 @@
 import type { CollectionBeforeValidateHook, CollectionConfig, PayloadRequest } from 'payload'
 import type { Site } from '@/payload-types'
 
-import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
+import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
@@ -1212,7 +1212,7 @@ export const TourProducts: CollectionConfig = {
     afterChange: [revalidateTourProduct],
     afterDelete: [revalidateTourProductDelete],
     beforeValidate: [normalizeTourProductSlug],
-    beforeChange: [enforceSiteAccess, enforceTourProductPublishSite, preventEditorPublish],
+    beforeChange: [enforceSiteAccess, enforceTourProductPublishSite],
   },
   versions: {
     drafts: {

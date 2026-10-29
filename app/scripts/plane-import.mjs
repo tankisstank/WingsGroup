@@ -237,6 +237,21 @@ const STORY_TITLE_MAP = {
 }
 
 const CHILD_TASK_TEXT = {
+  'US-086': {
+    5: {
+      title: 'Tối ưu tốc độ tải, ảnh và kiểm chứng sau phát hành.',
+      description: [
+        'AC6 bao gồm tối ưu hiện tại và ngăn tái phát trong CMS. Đặc tả nguồn: source/strategy/us086-ac6-media-20261024/AC6.md; giải pháp: CMS-DESIGN.md; vận hành: OPERATIONS.md; phản biện: review-resolution.md cùng thư mục.',
+        'AC6.1–3: freeze sáu cấu hình x ba lượt theo baseline18 Lighthouse; Go dùng biến thể/srcset/sizes đúng slot/DPR và width thật; Group không tải kép JPEG/AVIF, không high-priority dưới fold, không dùng output1440px cho yêu cầu640; xử lý CLS ecosystem và JS/TTFB còn chậm.',
+        'AC6.4: poster trong HTML đầu, không URL video tải được trước gate DOM/poster/visible/idle; một nguồn active, fallback reduced-motion/SaveData/play error, keyboard/pause; MIME video/mp4 và GET200/range206/416/seek thực tại origin và CDN. Dùng MP4 chuẩn bị sẵn nếu chưa có encoder, không hứa tự transcode.',
+        'AC6.5–6: CMS tự tạo/kiểm bản web khi upload/replace. QUYẾT ĐỊNH USER: mọi ảnh editor upload vào WingsGo đều public-on-upload; original và derivative không cần duyệt/publish/rights riêng hoặc trang tham chiếu, không thêm private/draft schema; readiness không cản public ảnh gốc. Giữ site ownership và EXACT sáu size/rights/publication của Group. G-Async đo upload ARM trước; đủ thì giữ sync, vẫn test concurrent replace/crash recovery. Nếu chọn jobs mới cần runner/resource cap, conditional commit nguyên tử theo revision/quyền, chống stale worker/retry/disk-full.',
+        'AC6.7–8: phục vụ ảnhGo theo policy public-on-upload của user; original/derivative theo parent/site. Private/draft/publication chỉ áp tenant có mô hình đó như Group, không áp gate mới cho ảnhGo. Chống cross-site/forged header; cache/revalidate/revoke theo loại media và quyền đã chốt. Backfill dry-run/canary/resume giữ nguồn/mediaID/quan hệ/alt/rights; rollback có mục tiêu, không restore DB mất lead. Shared changes smoke sáu tenant.',
+        'AC6.9: mục tiêu lab đề xuất để chốt trước code: LCP median≤2,5s; CLS từng lượt≤0,1; TBT median mobile≤200ms/desktop≤150ms; critical transfer mobile≤2MiB. Ba lượt sạch mỗi cấu hình, công bố median/range/warnings và byte cửa sổ5/10s; timeout là finding, không bỏ lượt chậm. Field CWV chưa có=N/A, TBT không thay INP.',
+        'Budget file: thumb≤50KiB/card≤150KiB/hero-poster≤250KiB, MP4 web mobile≤3MiB/desktop≤5MiB; ngoại lệ chất lượng theo media revision/slot/người duyệt, không miễn gate trang. AC6.10: upload/replace/publish staging thật, tests phù hợp, release review và production evidence mới; thiếu gate còn mởAC6. Intake162: production8278868 phát hành21:29ICT ngày2026-10-25; ARM64 CMS canary trên DB riêng,28unit+42component, backup/restore6sites và public9request gate đạt. Retest172URL,40ảnh ghép mẫu;18LH cùng baseline exit0, warning0/HTTPerror0. Group mẫu ảnh giảm40,995%; Go legacy0%. Go home LCP mobile giảm66,2%, desktop49,1%; Group mobile chậm24,6%, Go listing chậm17,5%; TBT/CLS/page gates chưa đạt đầy đủ. Legacy450Go/13Group và MP4 khoảng11MiB còn mở. Báo cáo us086-production-20261025/REPORT.md; Claude final review ở us086-ac6-implementation-20261024/claude-review/final-review.md. Whole-USproof0, AC6 in_progress; AC1–5 chưa bắt đầu, lịch đề xuất đến2026-11-06.',
+        'Tham vấn Claude Code qua herdr, claude --dangerously-skip-permissions: source/strategy/us086-ac6-media-20261024/claude-review/result.md và resolution.md. Đồng ý P2 nhưng thu gọn: reuse derivatives/renderer trước, chưa ép worker/schema mới; Group legacy1440 inventory, Go TTFB/Group long tasks và protocol video cần proof. Media gate/page gate theo dõi riêng, không nới ngưỡng hoặc tự chấp nhận finding đã fix.',
+      ].join('\n\n'),
+    },
+  },
   'US-071': [
     {
       title: 'Canonicalize English WingsGroup routes',
@@ -1539,7 +1554,14 @@ function deriveRecordDates(story, childCount = 0) {
   return baseDates
 }
 
-function deriveChildDates(story, childIndex, childCount = 0) {
+function deriveChildDates(story, childIndex, childCount = 0, mapping = {}) {
+  const override = mapping.childDateOverrides?.[childIndex + 1]
+  if (override?.startDate && override?.targetDate) {
+    return {
+      startDate: toDateOnly(override.startDate),
+      targetDate: toDateOnly(override.targetDate),
+    }
+  }
   const recordDates = deriveRecordDates(story, childCount)
   if (recordDates.startDate && childCount > 0) {
     const spanDays = diffDays(recordDates.startDate, recordDates.targetDate)
@@ -1643,6 +1665,11 @@ function buildStoryRecords(manifest, { ignoreStoryFilter = false } = {}) {
         childTasks: acceptanceCriteria.map((criterion, index) => ({
           externalId: `${story.id}-ac-${index + 1}`,
           originalCriterion: criterion,
+          planeStateName: toPlaneStateName(story, {
+            ...mapping,
+            planeStateOverride:
+              mapping.childStateOverrides?.[index + 1] || mapping.planeStateOverride,
+          }),
           title: buildChildTitle(story.id, index, criterion),
           descriptionHtml: buildChildDescription(story.id, index, criterion, sourcePath),
         })),
@@ -2565,8 +2592,14 @@ async function ensureHistory(client, manifest, projectMap) {
   )
   const projectWorkItems = new Map()
   const projectSetup = new Map()
+  const targetProjectKeys = storyIdFilter.size
+    ? new Set(storyRecords.map((record) => record.mapping.projectKey))
+    : null
 
   for (const projectConfig of manifest.projects) {
+    if (targetProjectKeys && !targetProjectKeys.has(projectConfig.key)) {
+      continue
+    }
     const project = projectMap.get(projectConfig.key)
     if (project.skipHistorySync) {
       continue
@@ -2702,7 +2735,7 @@ async function ensureHistory(client, manifest, projectMap) {
     )
 
     for (const [index, childTask] of record.childTasks.entries()) {
-      const childDates = deriveChildDates(record.story, index, record.childTasks.length)
+      const childDates = deriveChildDates(record.story, index, record.childTasks.length, record.mapping)
       let child =
         workItems.find((item) => item.external_id === `child:${childTask.externalId}`) ||
         workItems.find((item) => item.parent === parent.id && item.name === childTask.title)
@@ -2711,7 +2744,7 @@ async function ensureHistory(client, manifest, projectMap) {
         name: toPlaneItemName(childTask.title),
         description_html: childTask.descriptionHtml,
         priority: record.story.risk_lane === 'high_risk' ? 'high' : 'medium',
-        state: desiredStateId,
+        state: setup.stateMap.get(childTask.planeStateName)?.id || desiredStateId,
         start_date: childDates.startDate,
         target_date: childDates.targetDate,
         parent: parent.id,
@@ -2747,7 +2780,10 @@ async function ensureHistory(client, manifest, projectMap) {
     }
   }
 
-  await ensureEpicGroupings(client, manifest, projectMap, storyRecords)
+  const affectedEpicKeys = storyIdFilter.size
+    ? new Set(storyRecords.map((record) => record.mapping.epicKey))
+    : undefined
+  await ensureEpicGroupings(client, manifest, projectMap, storyRecords, affectedEpicKeys)
 }
 
 async function syncHistoryDates(client, manifest, projectMap) {
@@ -2799,7 +2835,7 @@ async function syncHistoryDates(client, manifest, projectMap) {
       await patchDates(
         project,
         child,
-        deriveChildDates(record.story, index, record.childTasks.length),
+        deriveChildDates(record.story, index, record.childTasks.length, record.mapping),
       )
     }
   }
@@ -2846,7 +2882,7 @@ async function syncWingsGoItems(client, manifest, projectMap) {
 
     for (const [index, childTask] of record.childTasks.entries()) {
       const child = workItems.find((item) => item.external_id === `child:${childTask.externalId}`)
-      const childDates = deriveChildDates(record.story, index, record.childTasks.length)
+      const childDates = deriveChildDates(record.story, index, record.childTasks.length, record.mapping)
       await patchItem(child, {
         name: toPlaneItemName(childTask.title),
         description_html: childTask.descriptionHtml,
@@ -2914,11 +2950,12 @@ async function syncImportedWorkItems(client, manifest, projectMap) {
 
       for (const [index, childTask] of record.childTasks.entries()) {
         const child = workItems.find((item) => item.external_id === `child:${childTask.externalId}`)
-        const childDates = deriveChildDates(record.story, index, record.childTasks.length)
+        const childDates = deriveChildDates(record.story, index, record.childTasks.length, record.mapping)
+        const childStateId = stateMap.get(childTask.planeStateName) || desiredStateId
         await patchItem(project, child, {
           name: toPlaneItemName(childTask.title),
           description_html: childTask.descriptionHtml,
-          ...(desiredStateId ? { state: desiredStateId } : {}),
+          ...(childStateId ? { state: childStateId } : {}),
           start_date: childDates.startDate,
           target_date: childDates.targetDate,
         })

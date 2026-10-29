@@ -2292,6 +2292,8 @@
   .heroStage {
     grid-column: auto;
     min-height: 275px;
+    width: 100%;
+    min-width: 0;
   }
 
   .sectionHeader {

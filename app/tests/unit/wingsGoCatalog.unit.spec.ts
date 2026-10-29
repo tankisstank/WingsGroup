@@ -515,7 +515,7 @@ describe('WingsGo dynamic catalog constraints', () => {
       expect(card?.nextDeparture.promoLabel).toBe('Ưu đãi mùa thu')
     })
 
-    it('suppresses discount and promoLabel when departure is sold-out', async () => {
+    it('suppresses discount and promoLabel and falls back to contact when departure is sold-out', async () => {
       const tour = product({ id: 51, slug: 'sold-out-tour', title: 'Tour Hết Chỗ', wrapperPage: 151 })
       const wrap = wrapper({ id: 151, pathname: '/tour/sold-out-tour' })
       const deps = [
@@ -558,10 +558,8 @@ describe('WingsGo dynamic catalog constraints', () => {
       const card = [...result.featured, ...result.all].find((c) => c.id === 51)
       expect(card).toBeDefined()
       expect(card?.price).toEqual({
-        currency: 'VND',
-        kind: 'verified',
-        originalPrice: null,
-        value: 12000000,
+        kind: 'contact',
+        label: 'Liên hệ để nhận giá mới nhất',
       })
       expect(card?.nextDeparture.promoLabel).toBeNull()
     })
@@ -684,6 +682,424 @@ describe('WingsGo dynamic catalog constraints', () => {
         kind: 'verified',
         originalPrice: null,
         value: 15000000,
+      })
+    })
+  })
+
+  describe('WingsGo lowest price catalog card rules (US-091)', () => {
+    it('reproduces product 132: shows 18.5m from 11 Dec 2026 while nextDeparture remains 10 Dec 2026', async () => {
+      const tour = product({
+        id: 132,
+        slug: 'ha-noi-busan-seoul-truot-tuyet-incheon-tau-dien-ven-bien-vj',
+        title: 'HÀ NỘI – BUSAN – SEOUL – TRƯỢT TUYẾT – INCHEON – TÀU ĐIỆN VEN BIỂN (VJ)',
+        wrapperPage: 1320,
+      })
+      const wrap = wrapper({
+        id: 1320,
+        pathname: '/tour/ha-noi-busan-seoul-truot-tuyet-incheon-tau-dien-ven-bien-vj',
+      })
+      const deps = [
+        departure({
+          id: 208,
+          tourProduct: 132,
+          departureDate: '2026-12-10T00:00:00.000Z',
+          departureCity: 'Hà Nội',
+          airline: 'Vietjet (về chuyến 06h25)',
+          priceFrom: 19900000,
+          originalPrice: null,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+        departure({
+          id: 204,
+          tourProduct: 132,
+          departureDate: '2026-12-11T00:00:00.000Z',
+          departureCity: 'Hà Nội',
+          airline: 'Vietjet',
+          priceFrom: 18500000,
+          originalPrice: null,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') return { docs: [tour] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-10-28T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [132] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const card = [...result.featured, ...result.all].find((c) => c.id === 132)
+      expect(card).toBeDefined()
+      // Nearest future departure date remains preserved
+      expect(card?.nextDeparture.date).toBe('2026-12-10T00:00:00.000Z')
+      expect(card?.nextDeparture.airline).toBe('Vietjet (về chuyến 06h25)')
+      expect(card?.nextDeparture.departureCity).toBe('Hà Nội')
+      // Price displays the lowest verified future price (18.5m)
+      expect(card?.price).toEqual({
+        currency: 'VND',
+        kind: 'verified',
+        originalPrice: null,
+        value: 18500000,
+      })
+    })
+
+    it('selects cheaper later departure with discount and promoLabel while keeping nextDeparture independent', async () => {
+      const tour = product({ id: 133, slug: 'tour-with-promo', title: 'Tour Có Ưu Đãi', wrapperPage: 1330 })
+      const wrap = wrapper({ id: 1330, pathname: '/tour/tour-with-promo' })
+      const deps = [
+        departure({
+          id: 301,
+          tourProduct: 133,
+          departureDate: '2026-11-01T00:00:00.000Z',
+          airline: 'Vietnam Airlines',
+          departureCity: 'Hà Nội',
+          priceFrom: 20000000,
+          originalPrice: null,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+        departure({
+          id: 302,
+          tourProduct: 133,
+          departureDate: '2026-11-20T00:00:00.000Z',
+          airline: 'Vietjet',
+          departureCity: 'Đà Nẵng',
+          priceFrom: 15000000,
+          originalPrice: 18000000,
+          promoLabel: 'Flash Sale 11.20',
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') return { docs: [tour] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-10-01T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const card = [...result.featured, ...result.all].find((c) => c.id === 133)
+      expect(card).toBeDefined()
+      expect(card?.nextDeparture.date).toBe('2026-11-01T00:00:00.000Z')
+      expect(card?.nextDeparture.airline).toBe('Vietnam Airlines')
+      expect(card?.nextDeparture.departureCity).toBe('Hà Nội')
+      expect(card?.nextDeparture.promoLabel).toBe('Flash Sale 11.20')
+      expect(card?.price).toEqual({
+        currency: 'VND',
+        kind: 'verified',
+        originalPrice: 18000000,
+        value: 15000000,
+      })
+    })
+
+    it('falls back to higher valid price when cheaper later departure is sold-out', async () => {
+      const tour = product({ id: 134, slug: 'tour-sold-out-later', title: 'Tour Hết Chỗ Đợt Sau', wrapperPage: 1340 })
+      const wrap = wrapper({ id: 1340, pathname: '/tour/tour-sold-out-later' })
+      const deps = [
+        departure({
+          id: 401,
+          tourProduct: 134,
+          departureDate: '2026-11-05T00:00:00.000Z',
+          priceFrom: 19900000,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+        departure({
+          id: 402,
+          tourProduct: 134,
+          departureDate: '2026-11-15T00:00:00.000Z',
+          priceFrom: 16500000,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'sold-out', // Sold out should NOT be used
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') return { docs: [tour] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-10-01T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const card = [...result.featured, ...result.all].find((c) => c.id === 134)
+      expect(card).toBeDefined()
+      expect(card?.nextDeparture.date).toBe('2026-11-05T00:00:00.000Z')
+      expect(card?.price).toEqual({
+        currency: 'VND',
+        kind: 'verified',
+        originalPrice: null,
+        value: 19900000,
+      })
+    })
+
+    it('preserves nearest departure date when earlier departure is sold-out and takes price from open later departure', async () => {
+      const tour = product({ id: 135, slug: 'tour-sold-out-earlier', title: 'Tour Hết Chỗ Đợt Trước', wrapperPage: 1350 })
+      const wrap = wrapper({ id: 1350, pathname: '/tour/tour-sold-out-earlier' })
+      const deps = [
+        departure({
+          id: 501,
+          tourProduct: 135,
+          departureDate: '2026-11-01T00:00:00.000Z',
+          airline: 'Bamboo Airways',
+          departureCity: 'Hà Nội',
+          priceFrom: 14000000,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'sold-out',
+        }),
+        departure({
+          id: 502,
+          tourProduct: 135,
+          departureDate: '2026-12-01T00:00:00.000Z',
+          airline: 'Vietjet',
+          departureCity: 'TP.HCM',
+          priceFrom: 17500000,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') return { docs: [tour] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-10-01T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const card = [...result.featured, ...result.all].find((c) => c.id === 135)
+      expect(card).toBeDefined()
+      // Nearest departure remains 2026-11-01
+      expect(card?.nextDeparture.date).toBe('2026-11-01T00:00:00.000Z')
+      expect(card?.nextDeparture.airline).toBe('Bamboo Airways')
+      expect(card?.nextDeparture.departureCity).toBe('Hà Nội')
+      // Price takes the open departure (17.5m)
+      expect(card?.price).toEqual({
+        currency: 'VND',
+        kind: 'verified',
+        originalPrice: null,
+        value: 17500000,
+      })
+    })
+
+    it('falls back to contact pricing when all future departures are sold-out or unverified', async () => {
+      const tour = product({ id: 136, slug: 'tour-all-sold-out', title: 'Tour Hết Chỗ Mọi Đợt', wrapperPage: 1360 })
+      const wrap = wrapper({ id: 1360, pathname: '/tour/tour-all-sold-out' })
+      const deps = [
+        departure({
+          id: 601,
+          tourProduct: 136,
+          departureDate: '2026-11-01T00:00:00.000Z',
+          airline: 'Vietjet',
+          departureCity: 'Hà Nội',
+          priceFrom: 15000000,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'sold-out',
+        }),
+        departure({
+          id: 602,
+          tourProduct: 136,
+          departureDate: '2026-12-01T00:00:00.000Z',
+          airline: 'Vietjet',
+          departureCity: 'Hà Nội',
+          priceFrom: 14000000,
+          currency: 'VND',
+          commerceVerified: false, // unverified
+          availabilityStatus: 'open',
+        }),
+        departure({
+          id: 603,
+          tourProduct: 136,
+          departureDate: '2026-12-15T00:00:00.000Z',
+          airline: 'Vietjet',
+          departureCity: 'Hà Nội',
+          priceFrom: 13000000,
+          currency: 'VND',
+          verifiedAt: '2025-01-01T00:00:00.000Z',
+          expiresAt: '2025-12-31T00:00:00.000Z', // expired
+          availabilityStatus: 'open',
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') return { docs: [tour] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-10-01T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const card = [...result.featured, ...result.all].find((c) => c.id === 136)
+      expect(card).toBeDefined()
+      // Nearest departure remains 2026-11-01
+      expect(card?.nextDeparture.date).toBe('2026-11-01T00:00:00.000Z')
+      expect(card?.nextDeparture.airline).toBe('Vietjet')
+      expect(card?.nextDeparture.departureCity).toBe('Hà Nội')
+      expect(card?.nextDeparture.promoLabel).toBeNull()
+      // Price falls back to contact
+      expect(card?.price).toEqual({
+        kind: 'contact',
+        label: 'Liên hệ để nhận giá mới nhất',
+      })
+    })
+
+    it('ignores departures belonging to a different tour or site', async () => {
+      const tour = product({ id: 137, slug: 'tour-correct', title: 'Tour Đúng Site', site: 7, wrapperPage: 1370 })
+      const wrap = wrapper({ id: 1370, pathname: '/tour/tour-correct', site: 7 })
+      const deps = [
+        departure({
+          id: 701,
+          tourProduct: 137,
+          site: 7,
+          departureDate: '2026-11-10T00:00:00.000Z',
+          priceFrom: 20000000,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+        // Cheaper departure belonging to different tour
+        departure({
+          id: 702,
+          tourProduct: 999,
+          site: 7,
+          departureDate: '2026-11-12T00:00:00.000Z',
+          priceFrom: 10000000,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+        // Cheaper departure belonging to different site
+        departure({
+          id: 703,
+          tourProduct: 137,
+          site: 8,
+          departureDate: '2026-11-14T00:00:00.000Z',
+          priceFrom: 9000000,
+          currency: 'VND',
+          commerceVerified: true,
+          availabilityStatus: 'open',
+        }),
+      ]
+
+      const payload = {
+        find: vi.fn(async ({ collection }: { collection: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') return { docs: [tour] }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        now: new Date('2026-10-01T00:00:00.000Z'),
+        offset: 0,
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      const card = [...result.featured, ...result.all].find((c) => c.id === 137)
+      expect(card).toBeDefined()
+      expect(card?.price).toEqual({
+        currency: 'VND',
+        kind: 'verified',
+        originalPrice: null,
+        value: 20000000,
       })
     })
   })

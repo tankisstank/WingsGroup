@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import {
   buildWingsGroupPublicPageAccessWhere,
+  getWingsGroupRouteDefinition,
+  isWingsGroupScopedInternalHref,
   findWingsGroupPublicJargon,
   getWingsGroupRoutePublicationState,
   hasApprovedWingsGroupPrivacyGovernance,
@@ -40,6 +42,7 @@ import {
 import { contentPresentationDefinitions } from '@/blocks/presentations'
 import { isRuntimeResolvablePage } from '@/utilities/pageRuntimeResolvable'
 import { getPageCanonicalPath } from '@/utilities/siteURLs'
+import { getSiteAliasFromPathname } from '@/utilities/sitePaths'
 
 const governedPage = (path = '/ve-wingsgroup') => ({
   pathname: path,
@@ -84,6 +87,87 @@ const trustedSettings = ({
 })
 
 describe('WingsGroup corporate route contract', () => {
+  it('admits only the governed WingsPlus introduction without expanding the corporate seed inventory', async () => {
+    expect(getSiteAliasFromPathname('/gioi-thieu-wingsplus')).toBeNull()
+    expect(getSiteAliasFromPathname('/wingsplus')).toBe('wingsplus')
+    const settings = trustedSettings({ englishPublicationState: 'approved' })
+    const page = governedPage()
+    page.pathname = '/gioi-thieu-wingsplus'
+    expect(getWingsGroupRouteDefinition('/gioi-thieu-wingsplus')).toEqual({
+      archetype: 'corporate',
+      path: '/gioi-thieu-wingsplus',
+      policy: false,
+    })
+    expect(isWingsGroupV3SurfacePath('/gioi-thieu-wingsplus')).toBe(true)
+    expect(isWingsGroupScopedInternalHref('/gioi-thieu-wingsplus')).toBe(true)
+    expect(buildWingsGroupCorporateRouteSeeds()).toHaveLength(10)
+    for (const locale of ['vi', 'en'] as const) {
+      expect(isWingsGroupRoutePublic({ page, locale, settings, siteCode: 'wings-group' })).toBe(
+        true,
+      )
+      expect(JSON.stringify(buildWingsGroupPublicPageAccessWhere(locale, settings))).toContain(
+        '"equals":"/gioi-thieu-wingsplus"',
+      )
+      await expect(
+        isRuntimeResolvablePage({
+          page: {
+            ...page,
+            title: 'WingsPlus',
+            hero: { type: 'none' },
+            layout: [{ blockType: 'featureGrid', items: [{ title: 'MICE' }] }],
+          },
+          locale,
+          pathname: '/gioi-thieu-wingsplus',
+          settings,
+          siteCode: 'wings-group',
+        }),
+      ).resolves.toBe(true)
+    }
+    expect(
+      isWingsGroupRoutePublic({
+        page,
+        locale: 'en',
+        settings: trustedSettings(),
+        siteCode: 'wings-group',
+      }),
+    ).toBe(false)
+    expect(
+      isWingsGroupRoutePublic({
+        page: { ...page, wingsGroupRoute: {} },
+        locale: 'vi',
+        settings,
+        siteCode: 'wings-group',
+      }),
+    ).toBe(false)
+    for (const path of ['/gioi-thieu-wingsplus/extra', '/wingscare', '/arbitrary']) {
+      expect(getWingsGroupRouteDefinition(path)).toBeNull()
+      expect(
+        isWingsGroupV3PublicSurfacePathAllowed({
+          locale: 'vi',
+          path,
+          settings,
+          siteCode: 'wings-group',
+        }),
+      ).toBe(false)
+    }
+    expect(
+      isWingsGroupV3PublicSurfacePathAllowed({
+        locale: 'lo',
+        path: '/gioi-thieu-wingsplus',
+        settings,
+        siteCode: 'wings-group',
+      }),
+    ).toBe(false)
+    expect(
+      isWingsGroupV3PublicSurfacePathAllowed({
+        locale: 'vi',
+        path: '/unchanged-other-tenant',
+        settings,
+        siteCode: 'wings-go',
+      }),
+    ).toBe(true)
+  })
+
   it('defines exactly the ten accepted paths and only three policy paths', () => {
     expect(WINGSGROUP_PUBLIC_LOCALE_CODES).toEqual(['vi', 'en'])
     expect(WINGSGROUP_CORPORATE_ROUTES.map(({ path }) => path)).toEqual([

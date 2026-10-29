@@ -1,4 +1,5 @@
 import type { Block } from 'payload'
+import { isSafeHTTPSURL } from '@/utilities/isSafeHTTPSURL'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -24,16 +25,7 @@ export const validateEcosystemProfiles = (value: unknown): true | string => {
 
     const cta = asRecord(profile.cta)
     if (cta.state === 'approved-deep-link') {
-      if (!/^https:\/\//i.test(text(cta.url))) return 'Deep link approved phải là URL HTTPS.'
-      for (const field of [
-        'owner',
-        'httpEvidence',
-        'canonicalEvidence',
-        'trackingEvidence',
-        'ownerApprovalEvidence',
-      ]) {
-        if (!text(cta[field])) return `Deep link approved thiếu ${field}.`
-      }
+      if (!isSafeHTTPSURL(cta.url)) return 'Đường dẫn phải là URL HTTPS hợp lệ, không chứa thông tin đăng nhập.'
     }
   }
 
@@ -113,22 +105,17 @@ export const WingsGroupEcosystem: Block = {
             {
               name: 'state',
               dbName: 'wg_eco_cta_state',
-              label: 'Trạng thái',
+              label: 'Đích đến',
               type: 'select',
               defaultValue: 'contact-fallback',
               required: true,
               options: [
                 { label: 'Về form liên hệ', value: 'contact-fallback' },
-                { label: 'Deep link đã duyệt', value: 'approved-deep-link' },
+                { label: 'Đến trang web', value: 'approved-deep-link' },
               ],
             },
             { name: 'contactPath', label: 'Đường dẫn form', type: 'text' },
             { name: 'url', label: 'URL HTTPS', type: 'text' },
-            { name: 'owner', label: 'Owner', type: 'text' },
-            { name: 'httpEvidence', label: 'HTTP 200 evidence', type: 'text' },
-            { name: 'canonicalEvidence', label: 'Canonical evidence', type: 'text' },
-            { name: 'trackingEvidence', label: 'Tracking evidence', type: 'text' },
-            { name: 'ownerApprovalEvidence', label: 'Owner approval', type: 'text' },
           ],
         },
       ],

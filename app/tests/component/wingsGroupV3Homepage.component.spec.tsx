@@ -315,6 +315,37 @@ describe('WingsGroup v3 public components', () => {
     ).toBe('/lien-he#contact-form')
   })
 
+  it('renders a configured WingsPlus website CTA without evidence and preserves contact fallback', () => {
+    render(
+      <WingsGroupEcosystemComponent
+        blockType="wingsGroupEcosystem"
+        locale="vi"
+        profiles={[
+          profile('wingsgo', 'WingsGo'),
+          profile('wingsplus', 'WingsPlus', {
+            cta: {
+              label: 'Xem trang WingsPlus',
+              state: 'approved-deep-link',
+              url: 'HTTPS://wingsplus.vn/',
+            },
+          }),
+        ]}
+        title="Một hệ sinh thái, nhiều nhu cầu"
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('tab', { name: /WingsPlus/ }))
+    const link = screen.getByRole('link', { name: 'Xem trang WingsPlus' })
+    expect(link.getAttribute('href')).toBe('HTTPS://wingsplus.vn/')
+    expect(link.getAttribute('data-cta-state')).toBe('approved-deep-link')
+    expect(link.getAttribute('rel')).toBe('noopener noreferrer')
+
+    fireEvent.click(screen.getByRole('tab', { name: /WingsGo/ }))
+    expect(screen.queryByRole('link', { name: 'Xem trang WingsPlus' })).toBeNull()
+    expect(screen.getByRole('link', { name: /Trao đổi với chuyên viên/ }).getAttribute('href'))
+      .toBe('/lien-he#contact-form')
+  })
+
   it('renders the English explorer rail and service presentation as a parallel locale', () => {
     render(
       <WingsGroupEcosystemComponent
@@ -327,7 +358,8 @@ describe('WingsGroup v3 public components', () => {
 
     expect(screen.getByText('OUTBOUND TRAVEL')).toBeTruthy()
     expect(screen.getByText('Go further, prepared.')).toBeTruthy()
-    expect(screen.getByRole('tab', { name: /Explore/ })).toBeTruthy()
+    expect(screen.getByRole('tab', { name: /View introduction/ })).toBeTruthy()
+    expect(screen.getByText('Select a brand to view its introduction below.')).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Speak with a WingsGroup specialist' })).toBeTruthy()
     expect(screen.queryByText('Being updated')).toBeNull()
     expect(screen.queryByText(/publication review|endpoint|Service feedback/i)).toBeNull()
@@ -351,6 +383,8 @@ describe('WingsGroup v3 public components', () => {
     )
 
     expect(screen.getByTestId('wingsgroup-ecosystem').dataset.profileCount).toBe('5')
+    expect(screen.getAllByRole('tab', { name: /Xem giới thiệu/ })).toHaveLength(5)
+    expect(screen.getByText('Chọn thương hiệu để xem giới thiệu ngay bên dưới.')).toBeTruthy()
     expect(screen.getAllByRole('tab').map((tab) => tab.querySelector('b')?.textContent)).toEqual([
       'WingsGo',
       'WingSide',

@@ -38,7 +38,16 @@ export const WINGSGROUP_CORPORATE_ROUTES = [
 export const WINGSGROUP_PUBLIC_LOCALE_CODES = ['vi', 'en'] as const
 export type WingsGroupPublicLocale = (typeof WINGSGROUP_PUBLIC_LOCALE_CODES)[number]
 
-export type WingsGroupRouteDefinition = (typeof WINGSGROUP_CORPORATE_ROUTES)[number]
+export const WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE = {
+  archetype: 'corporate',
+  path: '/gioi-thieu-wingsplus',
+  policy: false,
+} as const
+
+export type WingsGroupCorporateRouteDefinition = (typeof WINGSGROUP_CORPORATE_ROUTES)[number]
+export type WingsGroupRouteDefinition =
+  | WingsGroupCorporateRouteDefinition
+  | typeof WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE
 export type WingsGroupRouteArchetype = WingsGroupRouteDefinition['archetype']
 export type WingsGroupRoutePath = WingsGroupRouteDefinition['path']
 export type WingsGroupPublicationState = 'approved' | 'hidden' | 'pending'
@@ -84,7 +93,12 @@ export const normalizeCorporateRoutePath = (value: unknown): string => {
 
 export const getWingsGroupRouteDefinition = (value: unknown): WingsGroupRouteDefinition | null => {
   const path = normalizeCorporateRoutePath(value)
-  return WINGSGROUP_CORPORATE_ROUTES.find((route) => route.path === path) || null
+  return (
+    WINGSGROUP_CORPORATE_ROUTES.find((route) => route.path === path) ||
+    (path === WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE.path
+      ? WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE
+      : null)
+  )
 }
 
 /**
@@ -481,14 +495,16 @@ export const buildWingsGroupPublicPageAccessWhere = (locale: unknown, settings: 
         )
       : []
   const routeClauses: Where[] = [
-    ...WINGSGROUP_CORPORATE_ROUTES.filter(({ policy }) => !policy).map(
-      ({ archetype, path }): Where => ({
-        and: [
-          { pathname: { equals: path } },
-          { 'wingsGroupRoute.archetype': { equals: archetype } },
-        ],
-      }),
-    ),
+    ...[...WINGSGROUP_CORPORATE_ROUTES, WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE]
+      .filter(({ policy }) => !policy)
+      .map(
+        ({ archetype, path }): Where => ({
+          and: [
+            { pathname: { equals: path } },
+            { 'wingsGroupRoute.archetype': { equals: archetype } },
+          ],
+        }),
+      ),
     ...policyRoutes,
   ]
 

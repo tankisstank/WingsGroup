@@ -231,39 +231,50 @@ const buildCard = ({
       new Date(date).getTime() > now.getTime()
     )
   })
-  // Align commercial departure: prefer the earliest verified departure with a valid price;
-  // if none has verified price, use the earliest valid future departure.
-  const verifiedPriceDeparture = futureDepartures
-    .filter((departure) => {
-      const hasFreshness = Boolean(departure.verifiedAt || departure.expiresAt)
-      return departure.commerceVerified !== false &&
-        (hasFreshness
-          ? isDepartureVerificationCurrent(departure, now.getTime())
-          : departure.commerceVerified === true)
-    })
-    .find((departure) => typeof departure.priceFrom === 'number' && departure.priceFrom > 0)
+  const nearestDeparture = futureDepartures[0]
+  if (!nearestDeparture?.departureDate) return null
 
-  const commercialDeparture = verifiedPriceDeparture || futureDepartures[0]
-  if (!commercialDeparture?.departureDate) return null
+  // US-091: Card price displays the lowest price among future published same-site
+  // departures with current commerce verification and not sold-out.
+  // The nearest valid future departure remains independent as nextDeparture.
+  const verifiedPriceDepartures = futureDepartures.filter((departure) => {
+    if (departure.availabilityStatus === 'sold-out') return false
+    if (typeof departure.priceFrom !== 'number' || departure.priceFrom <= 0) return false
+
+    const hasFreshness = Boolean(departure.verifiedAt || departure.expiresAt)
+    return (
+      departure.commerceVerified !== false &&
+      (hasFreshness
+        ? isDepartureVerificationCurrent(departure, now.getTime())
+        : departure.commerceVerified === true)
+    )
+  })
+
+  let lowestPriceDeparture: InventoryDeparture | null = null
+  for (const departure of verifiedPriceDepartures) {
+    if (
+      !lowestPriceDeparture ||
+      (departure.priceFrom as number) < (lowestPriceDeparture.priceFrom as number)
+    ) {
+      lowestPriceDeparture = departure
+    }
+  }
 
   // Payload stores the verification window; commerceVerified is a derived DTO value.
-  const commerciallyVerified = Boolean(verifiedPriceDeparture)
   const canShowDiscount =
-    commerciallyVerified &&
-    commercialDeparture.availabilityStatus !== 'sold-out' &&
-    typeof commercialDeparture.priceFrom === 'number' &&
-    commercialDeparture.priceFrom > 0 &&
-    typeof commercialDeparture.originalPrice === 'number' &&
-    commercialDeparture.originalPrice > commercialDeparture.priceFrom &&
-    Boolean(commercialDeparture.currency) &&
-    (!commercialDeparture.originalCurrency || commercialDeparture.originalCurrency === commercialDeparture.currency)
+    lowestPriceDeparture !== null &&
+    typeof lowestPriceDeparture.originalPrice === 'number' &&
+    lowestPriceDeparture.originalPrice > (lowestPriceDeparture.priceFrom as number) &&
+    Boolean(lowestPriceDeparture.currency) &&
+    (!lowestPriceDeparture.originalCurrency ||
+      lowestPriceDeparture.originalCurrency === lowestPriceDeparture.currency)
 
-  const price = verifiedPriceDeparture && commerciallyVerified
+  const price = lowestPriceDeparture
     ? {
-        currency: verifiedPriceDeparture.currency || 'VND',
+        currency: lowestPriceDeparture.currency || 'VND',
         kind: 'verified' as const,
-        originalPrice: canShowDiscount ? commercialDeparture.originalPrice : null,
-        value: verifiedPriceDeparture.priceFrom!,
+        originalPrice: canShowDiscount ? lowestPriceDeparture.originalPrice : null,
+        value: lowestPriceDeparture.priceFrom!,
       }
     : { kind: 'contact' as const, label: 'Liên hệ để nhận giá mới nhất' }
 
@@ -284,12 +295,12 @@ const buildCard = ({
     image: firstMedia(product),
     market: product.market || 'other',
     nextDeparture: {
-      airline: commercialDeparture.airline || null,
-      date: commercialDeparture.departureDate,
-      departureCity: commercialDeparture.departureCity || null,
+      airline: nearestDeparture.airline || null,
+      date: nearestDeparture.departureDate,
+      departureCity: nearestDeparture.departureCity || null,
       promoLabel:
-        price.kind === 'verified' && commercialDeparture.availabilityStatus !== 'sold-out'
-          ? commercialDeparture.promoLabel || null
+        price.kind === 'verified' && lowestPriceDeparture?.promoLabel
+          ? lowestPriceDeparture.promoLabel
           : null,
     },
     price,

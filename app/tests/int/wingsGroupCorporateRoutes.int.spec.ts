@@ -102,6 +102,106 @@ const request = (role = 'super-admin', settings = trustedSettings()) => ({
 })
 
 describe('WingsGroup corporate route integration', () => {
+  it('returns public actionable errors for changed content and missing Vietnamese review', async () => {
+    const approved = routeData({
+      wingsGroupRoute: {
+        archetype: 'corporate',
+        contentApproval: {
+          en: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+          vi: WINGSGROUP_CONTENT_VALIDATION_MARKER,
+        },
+        managedBy: 'wingsgroup-v3',
+        publication: { en: 'approved', vi: 'approved' },
+      },
+    })
+    await expect(
+      validateWingsGroupV3Governance({
+        data: { title: 'Changed Company Trip image content' },
+        originalDoc: approved,
+        req: { ...request('guest'), locale: 'vi' },
+      } as never),
+    ).rejects.toMatchObject({
+      status: 400,
+      isPublic: true,
+      message: expect.stringMatching(/lưu bản nháp.*người có quyền duyệt/),
+    })
+
+    const draft = {
+      ...approved,
+      _status: 'draft',
+      wingsGroupRoute: {
+        ...approved.wingsGroupRoute,
+        contentApproval: { en: WINGSGROUP_CONTENT_VALIDATION_MARKER, vi: null },
+      },
+    }
+    for (const locale of ['vi', 'en']) {
+      await expect(
+        validateWingsGroupV3Governance({
+          data: { _status: 'published' },
+          originalDoc: draft,
+          req: {
+            ...request('site-manager', trustedSettings({ englishPublicationState: 'approved' })),
+            locale,
+          },
+        } as never),
+      ).rejects.toMatchObject({
+        status: 400,
+        isPublic: true,
+        message: expect.stringMatching(/chưa qua publication gate/),
+      })
+    }
+    const approvedEnglish = await validateWingsGroupV3Governance({
+      data: { _status: 'published' },
+      originalDoc: approved,
+      req: {
+        ...request('site-manager', trustedSettings({ englishPublicationState: 'approved' })),
+        locale: 'en',
+      },
+    } as never)
+    expect(approvedEnglish.wingsGroupRoute.contentApproval.vi).toBe(
+      WINGSGROUP_CONTENT_VALIDATION_MARKER,
+    )
+    await expect(
+      validateWingsGroupV3Governance({
+        data: { _status: 'published' },
+        originalDoc: approved,
+        req: {
+          ...request('site-manager', {
+            ...trustedSettings(),
+            wingsGroupV3: { enabled: false },
+          } as never),
+          locale: 'vi',
+        },
+      } as never),
+    ).rejects.toMatchObject({
+      status: 400,
+      isPublic: true,
+      message: expect.stringMatching(/cấu hình xuất bản tiếng Việt hoặc phê duyệt chính sách/),
+    })
+  })
+
+  it('publishes a governed WingsPlus introduction while rejecting unknown descendants and cross-tenant governance', async () => {
+    const result = await validateWingsGroupV3Governance({
+      data: routeData({ pathname: '/gioi-thieu-wingsplus', title: 'WingsPlus' }),
+      req: request(),
+    } as never)
+    expect(result.wingsGroupRoute.contentApproval.vi).toBe(WINGSGROUP_CONTENT_VALIDATION_MARKER)
+    await expect(
+      validateWingsGroupV3Governance({
+        data: routeData({ pathname: '/gioi-thieu-wingsplus/extra' }),
+        req: request(),
+      } as never),
+    ).rejects.toThrow(/đường dẫn/)
+    const otherTenant = request()
+    otherTenant.payload.findByID = async ({ id }) => ({ code: 'wings-plus', id }) as never
+    await expect(
+      validateWingsGroupV3Governance({
+        data: routeData({ pathname: '/gioi-thieu-wingsplus', site: 5 }),
+        req: otherTenant,
+      } as never),
+    ).rejects.toThrow(/tenant khác/)
+  })
+
   it('registers the Page route governance field and additive PostgreSQL migration', () => {
     expect(
       Pages.fields.find((field) => 'name' in field && field.name === 'wingsGroupRoute'),
@@ -426,7 +526,7 @@ describe('WingsGroup corporate route integration', () => {
         originalDoc: {},
         req: request(),
       } as never),
-    ).rejects.toThrow(/trusted privacy|publication gate/)
+    ).rejects.toThrow(/trusted privacy|phê duyệt chính sách/)
   })
 
   it('binds an approved policy snapshot to the trusted privacy and legal settings', async () => {
@@ -478,9 +578,9 @@ describe('WingsGroup corporate route integration', () => {
       validateWingsGroupV3Governance({
         data: { title: 'Nội dung About đã thay đổi' },
         originalDoc: approvedAbout,
-        req: { ...request('site-manager'), locale: 'vi' },
+        req: { ...request('guest'), locale: 'vi' },
       } as never),
-    ).rejects.toThrow(/draft.*super-admin/)
+    ).rejects.toThrow(/lưu bản nháp.*người có quyền duyệt/)
 
     for (const mutation of [
       { hero: null },
@@ -493,9 +593,9 @@ describe('WingsGroup corporate route integration', () => {
         validateWingsGroupV3Governance({
           data: mutation,
           originalDoc: approvedAbout,
-          req: { ...request('site-manager'), locale: 'vi' },
+          req: { ...request('guest'), locale: 'vi' },
         } as never),
-      ).rejects.toThrow(/draft.*super-admin/)
+      ).rejects.toThrow(/lưu bản nháp.*người có quyền duyệt/)
     }
 
     const draftEdit = await validateWingsGroupV3Governance({
@@ -510,7 +610,7 @@ describe('WingsGroup corporate route integration', () => {
       validateWingsGroupV3Governance({
         data: { _status: 'published' },
         originalDoc: { ...approvedAbout, ...draftEdit },
-        req: { ...request('site-manager'), locale: 'vi' },
+        req: { ...request('guest'), locale: 'vi' },
       } as never),
     ).rejects.toThrow(/publication gate/)
 
@@ -592,9 +692,9 @@ describe('WingsGroup corporate route integration', () => {
           validateWingsGroupV3Governance({
             data: mutation,
             originalDoc,
-            req: { ...request('site-manager', settings), locale },
+            req: { ...request('guest', settings), locale },
           } as never),
-        ).rejects.toThrow(/draft.*super-admin/)
+        ).rejects.toThrow(/lưu bản nháp.*người có quyền duyệt/)
       }
     }
 
@@ -707,9 +807,7 @@ describe('WingsGroup corporate route integration', () => {
   })
 
   it('seeds the ecosystem CTA with matching Vietnamese and English copy', () => {
-    const route = buildWingsGroupCorporateRouteSeeds().find(
-      ({ path }) => path === '/he-sinh-thai',
-    )
+    const route = buildWingsGroupCorporateRouteSeeds().find(({ path }) => path === '/he-sinh-thai')
     expect(route).toBeDefined()
     if (!route) throw new Error('Missing /he-sinh-thai route seed.')
 
@@ -1179,3 +1277,4 @@ describe('WingsGroup corporate route integration', () => {
     expect(pendingPrimary.state.pageCreates).toBe(0)
   })
 })
+

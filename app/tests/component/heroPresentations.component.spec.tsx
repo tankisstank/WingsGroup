@@ -13,10 +13,15 @@ import { heroPresentationDefinitions } from '@/heros/presentations/registry'
 import { defaultHeroBehavior } from '@/heros/presentations/registry'
 
 vi.mock('@/components/Media', () => ({
-  Media: ({ resource }: { resource?: { alt?: string; url?: string } }) => (
-    // eslint-disable-next-line @next/next/no-img-element -- test mock for Payload Media output
-    <img alt={resource?.alt || 'hero visual'} src={resource?.url || '/media/test.jpg'} />
-  ),
+  Media: ({ onLoad, resource }: { onLoad?: () => void; resource?: { alt?: string; url?: string } }) => {
+    React.useEffect(() => {
+      onLoad?.()
+    }, [onLoad])
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- test mock for Payload Media output
+      <img alt={resource?.alt || 'hero visual'} onLoad={onLoad} src={resource?.url || '/media/test.jpg'} />
+    )
+  },
 }))
 
 vi.mock('@/components/RichText', () => ({
@@ -38,6 +43,20 @@ const media = (id: number, alt: string) =>
 describe('hero presentation components', () => {
   beforeEach(() => {
     vi.useRealTimers()
+    window.IntersectionObserver = class {
+      callback: IntersectionObserverCallback
+      constructor(callback: IntersectionObserverCallback) {
+        this.callback = callback
+      }
+      observe(target: Element) {
+        this.callback([{ isIntersecting: true, target } as IntersectionObserverEntry], this as unknown as IntersectionObserver)
+      }
+      disconnect() {}
+      unobserve() {}
+      takeRecords() {
+        return []
+      }
+    } as unknown as typeof IntersectionObserver
   })
 
   afterEach(() => {
@@ -135,6 +154,49 @@ describe('hero presentation components', () => {
     fireEvent.click(screen.getByLabelText('Pause carousel'))
     act(() => vi.advanceTimersByTime(6000))
     expect(screen.getByLabelText('Slide 1 of 2').getAttribute('data-active')).toBe('true')
+  })
+
+  it('configures VideoBackgroundHero with pointer-events-none content shell and pointer-events-auto copy to preserve controls hit-testing', () => {
+    render(
+      <VideoBackgroundHero
+        badge="Vietnam in motion"
+        behavior={defaultHeroBehavior}
+        links={[
+          {
+            link: {
+              label: 'Explore Vietnam',
+              type: 'custom',
+              url: '/tours/vietnam',
+            },
+          },
+        ]}
+        postcards={[]}
+        resolvedLocale="en"
+        video={{
+          desktopVideo: {
+            id: 10,
+            mimeType: 'video/mp4',
+            url: '/media/hero.mp4',
+          } as never,
+          poster: media(11, 'Video poster'),
+        }}
+      />,
+    )
+
+    const contentShell = document.querySelector('.hero-presentation__video-content')
+    expect(contentShell?.classList.contains('pointer-events-none')).toBe(true)
+
+    const copyWrapper = contentShell?.firstElementChild
+    expect(copyWrapper?.classList.contains('pointer-events-auto')).toBe(true)
+
+    // CTA interaction preserved
+    const ctaLink = screen.getByRole('link', { name: 'Explore Vietnam' })
+    expect(ctaLink).toBeTruthy()
+    expect(ctaLink.closest('.pointer-events-auto')).toBeTruthy()
+
+    // Control button is accessible with resolvedLocale="en" label propagated from caller
+    const controlButton = screen.getByRole('button', { name: /pause hero video|play hero video/i })
+    expect(controlButton).toBeTruthy()
   })
 
   it('uses the poster as video fallback after a playback error', () => {

@@ -1148,6 +1148,7 @@ const TourDecisionHeader = ({
             pictureClassName="absolute inset-0"
             priority
             resource={heroMedia}
+            size="(max-width: 1024px) 100vw, 50vw"
           />
           {heroCaption ? (
             <span className="absolute bottom-4 left-4 max-w-[calc(100%-2rem)] rounded-full bg-white/90 px-3 py-2 text-xs font-medium text-foreground shadow-sm backdrop-blur">
@@ -1358,6 +1359,7 @@ const TourDecisionHeader = ({
                   pictureClassName="absolute inset-0"
                   priority
                   resource={heroImage}
+                  size="(max-width: 768px) 67vw, (max-width: 1280px) 55vw, 850px"
                 />
               </div>
               <div className="grid grid-rows-2 gap-1.5 h-full">
@@ -1367,6 +1369,7 @@ const TourDecisionHeader = ({
                     imgClassName="object-cover"
                     pictureClassName="absolute inset-0"
                     resource={galleryImages[1] as any}
+                    size="(max-width: 768px) 33vw, (max-width: 1280px) 25vw, 420px"
                   />
                 </div>
                 <div className="relative h-full bg-muted">
@@ -1375,6 +1378,7 @@ const TourDecisionHeader = ({
                     imgClassName="object-cover"
                     pictureClassName="absolute inset-0"
                     resource={galleryImages[2] as any}
+                    size="(max-width: 768px) 33vw, (max-width: 1280px) 25vw, 420px"
                   />
                 </div>
               </div>
@@ -1387,6 +1391,7 @@ const TourDecisionHeader = ({
                 pictureClassName="absolute inset-0"
                 priority
                 resource={heroImage}
+                size="(max-width: 768px) 100vw, (max-width: 1280px) 80vw, 1200px"
               />
             </div>
           )}
@@ -1629,6 +1634,7 @@ const TourJourneyGallerySection = ({
               imgClassName="object-cover"
               pictureClassName="absolute inset-0"
               resource={media as MediaType}
+              size={index === 0 ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 50vw, 25vw"}
             />
           </div>
         ))}
@@ -2023,6 +2029,7 @@ const TourItinerarySection = ({
                             imgClassName="object-cover"
                             pictureClassName="absolute inset-0"
                             resource={gallery[0] as any}
+                            size="(max-width: 1024px) 100vw, 360px"
                           />
                         </div>
                       </div>
@@ -2220,6 +2227,7 @@ const TourItinerarySection = ({
                                 imgClassName="object-cover"
                                 pictureClassName="absolute inset-0"
                                 resource={item as any}
+                                size="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 360px"
                               />
                             </div>
                           ))}
@@ -2879,6 +2887,7 @@ const TourRelatedSection = ({
                   imgClassName="object-cover"
                   pictureClassName="absolute inset-0"
                   resource={item.media as MediaType}
+                  size="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 400px"
                 />
               </div>
             ) : null}
@@ -3639,6 +3648,7 @@ export const TourMarketPage = ({
                       imgClassName="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       pictureClassName="absolute inset-0"
                       resource={tour.heroMedia || asArray(tour.gallery)[0] || null}
+                      size="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 400px"
                     />
                     {cornerStickers.length > 0 || canPromote ? (
                       <div className="absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2 pointer-events-none">

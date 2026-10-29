@@ -1,0 +1,154 @@
+# US-086 / AC6 independent consultation — October 24, 2026
+
+**Recommendation: P2, conditional on the plan corrections below.** Reuse Media, existing derivatives, shared rendering and tenant delivery. Introduce a Payload media task only where measured processing cost requires it. No new dependency, collection, Redis queue, transform service or platform migration is needed in the baseline.
+
+**Keep US-086 Planned and retain its six Plane children.** This consultation supports planning; it does not establish implementation or AC6 acceptance.
+
+## P1 — Resolve before implementation or acceptance
+
+### 1. Replacement needs an atomic commit condition
+
+“Switch only if the source revision is current” must mean an **atomic conditional update**, not a read followed by an update.
+
+Required plan corrections:
+
+- Key work by site, media ID, source revision/hash, profile version and normalized crop.
+- Distinguish desired generation, active ready generation and individual processing attempts.
+- Write to private temporary files; validate; finalize unique filenames; then conditionally switch the active pointer.
+- Recheck source revision **and current publication/rights state** at commit. A worker must never restore publication after an editor revokes it.
+- A stale worker must not overwrite the new generation’s status or error.
+- Retry after a crash must reconcile finalized files and database state without exposing partial outputs.
+
+“Failed replacement retains previous ready version” should apply only while that previous version remains authorized. Rights revocation overrides availability.
+
+**Acceptance gap:** concurrent replacements finishing out of order; crop changes during processing; duplicate execution; unpublish during processing; crash before and after pointer switch.
+
+### 2. Public delivery authorization is not yet generic
+
+The inspected [public route](</E:/repo/WingsTravel/app/src/app/(payload)/api/public-media/[filename]/route.ts:104>) resolves originals and six Group derivative names, uses `overrideAccess: true`, and applies the explicit publication validator only when `managedBy === 'wingsgroup-v3'`.
+
+This does **not prove a WingsGo disclosure**, but it means tenant matching alone cannot establish the proposed private/draft/public policy.
+
+Required corrections:
+
+- Define WingsGo’s public-media eligibility separately from Group governance.
+- Resolve allowed derivatives through the owning media record and its authorized generation.
+- Require authorization for each file response, including original files.
+- Cover `/media/`, the named public API route, Payload file URLs and any storage/CDN exposure.
+- Do not add arbitrary filesystem lookup as a fallback when a derivative is missing.
+
+**Acceptance gap:** anonymous draft/private access, another tenant’s filenames, forged site headers, direct original/derivative requests, and authenticated preview responses crossing into public cache. Alternate-route behavior remains unverified.
+
+### 3. Revocation conflicts with preserving old URLs indefinitely
+
+The current route emits `max-age=300`, `s-maxage=3600` and `stale-while-revalidate=86400`; denial responses already use `no-store`. See [response headers](</E:/repo/WingsTravel/app/src/app/(payload)/api/public-media/[filename]/route.ts:152>).
+
+Correct the plan to distinguish:
+
+- **Retaining original bytes and historical filenames**, for rollback.
+- **Continuing public authorization**, which can end.
+
+Require a documented revocation bound covering browser caches, CDN caches, aliases, originals and every retained derivative generation. CDN purge cannot recall bytes already downloaded by a browser.
+
+Prevent in-flight old responses from repopulating caches after purge; define ordering, retries and failure reporting. Verify denied responses are not negatively cached by CDN rules.
+
+**Acceptance gap:** warm-cache unpublish, purge failure, concurrent requests during revocation, and old generation URLs after replacement or withdrawal.
+
+### 4. “No upscale” conflicts with Group’s fixed width contract
+
+The [Group validator](</E:/repo/WingsTravel/app/src/fields/wingsGroupV3.ts:146>) requires exactly six entries keyed by **actual numeric widths** 640/960/1440 and format. The [renderer](</E:/repo/WingsTravel/app/src/components/Media/ImageMedia/index.tsx:38>) currently derives width from the profile name rather than output metadata.
+
+Recommended baseline:
+
+- Preserve Group’s exact six-entry contract.
+- For new Group sources, require sufficient effective width after orientation/crop for genuine 1440px output.
+- Otherwise leave the replacement draft and retain an authorized previous generation.
+- For Go, use actual decoded widths and omit or deduplicate unavailable candidates.
+- Never advertise a 320px file as `640w`.
+
+A 160/320 thumb profile is reasonable only after checking actual slot size and supported DPR. It is not sufficient for a 363px card at DPR 1.75, which needs approximately 635 physical pixels.
+
+**Acceptance gap:** small sources, portrait crops, orientation, duplicate capped widths and truthful `srcset` descriptors. Supporting smaller Group sources would require a separately reviewed contract change.
+
+## P2 — Tighten the implementation and test plan
+
+### 5. Keep the sustainable baseline small
+
+The [Media configuration](</E:/repo/WingsTravel/app/src/collections/Media.ts:178>) already generates standard sizes and six Group sizes globally. First inventory and reuse valid outputs; add 160/320 WebP only for demonstrated thumbnail gaps. Scope any new profile rather than multiplying every upload’s outputs.
+
+Use existing metadata for synchronous readiness where sufficient. Persist additional generation state only when asynchronous replacement requires it; do not borrow Group’s publication or derivative state for Go.
+
+The [jobs configuration](</E:/repo/WingsTravel/app/src/payload.config.ts:262>) registers lead tasks. A media task still needs an explicit runner and queue selection; registering a task alone does not execute it. Payload documents queueing and execution separately. ([payloadcms.com](https://payloadcms.com/docs/jobs-queue/overview))
+
+Specify one media worker across the deployment initially, resource limits, stale-work recovery, retry backoff, and whether “three retries” means four total attempts. Keep media work from starving lead jobs. Verify concurrency controls against installed **3.84.1** before relying on current documentation.
+
+### 6. Match rendering and preload to the selected asset
+
+[ImageMedia](</E:/repo/WingsTravel/app/src/components/Media/ImageMedia/index.tsx:130>) combines Group picture sources with `NextImage priority` on the fallback original.
+
+Prefer one shared rendering policy that uses verified derivative metadata and preserves the existing tenant-safe delivery path. For the initial candidate, use eager loading and appropriate fetch priority; add preload only when it matches responsive selection. Next’s current Image documentation distinguishes preload from fetch priority and deprecates `priority` starting in Next 16. ([nextjs.org](https://nextjs.org/docs/app/api-reference/components/image))
+
+**Acceptance gap:** rendered `currentSrc`, decoded dimensions, selected DPR, no redundant original preload, below-fold requests, and actual resize output. Removing an attribute alone is insufficient evidence.
+
+### 7. Define video readiness without a circular wait
+
+[VideoBackgroundHero](</E:/repo/WingsTravel/app/src/heros/presentations/index.tsx:501>) initially permits video before its reduced-motion effect runs and mounts two video elements. [DeviceMockupSplitHero](</E:/repo/WingsTravel/app/src/heros/presentations/index.tsx:641>) supplies an immediate MP4 source without using the existing video poster fields.
+
+Required corrections:
+
+- Define “critical content ready” using observable content/poster readiness and a documented scheduling condition. Do not wait for a final LCP result or a load event that video can itself delay.
+- Initially render the poster without video URLs; select one active source after eligibility checks.
+- Treat unavailable network information conservatively without breaking playback.
+- Cover rejected `play()` promises, source errors, keyboard play/pause and visibility changes.
+- Explicitly scope the other video variants present in the same file.
+- Separate range behavior from playback: verify exact bytes for ordinary GET, bounded/open-ended/suffix ranges and unsatisfiable ranges at origin and CDN.
+
+The inspected route has no Range parsing, and [MIME mapping](</E:/repo/WingsTravel/app/src/utilities/publicMediaDelivery.ts:23>) lacks MP4. The reported CDN two-byte probe proves only that specific CDN response.
+
+Use prepared compliant MP4 files in the baseline. Automated transcoding requires a separate capability and capacity decision if no suitable encoder is already available.
+
+### 8. Freeze a reproducible performance contract
+
+The supplied [report](</E:/repo/WingsTravel/seo-audit-20261024/performance-images/REPORT.md>) supports prioritizing media work, but also identifies Group CLS, long tasks and document response time. Media optimization alone cannot promise the proposed page thresholds.
+
+Keep the proposed thresholds as provisional targets, then freeze before implementation:
+
+- Exact six scenarios, URLs, content revision, build and Lighthouse/browser configuration.
+- Separate browser-cold runs from CDN cold/warm diagnostics.
+- Three valid runs per scenario, metric medians **and ranges**, with every warning retained.
+- A predefined rerun rule; no silently discarding slow runs.
+- The aggregation rule for CLS/TBT as well as LCP.
+- A fixed initial-byte observation window or event, unique network requests, cache treatment and separate deferred-video bytes.
+- Per-slot quality review at supported DPR.
+
+If any required scenario misses the frozen gate, leave AC6 open and identify the residual cause. Field data remains N/A; these lab targets do not establish field CWV.
+
+### 9. Make rollout and rollback concrete
+
+Add acceptance cases for:
+
+- Original-only imports, preview mode and missing legacy derivatives.
+- Backward-compatible metadata deployment before enforcing readiness.
+- Unrelated edits to legacy published content without introducing a global block.
+- Readiness checks at the server publication boundary, including localized required slots.
+- Revalidation after generation switches across affected sites, locales and referencing documents.
+- Backfill interruption, resume, disk exhaustion and targeted rollback.
+
+Retaining files alone does not preserve usable old URLs: the delivery lookup must still resolve retained authorized generations. Schema reversibility and pointer rollback must be demonstrated without restoring the entire database.
+
+## P3 — Documentation and editor clarity
+
+- Separate generation errors, rights/publication errors and quality warnings.
+- State which slots are required and which legacy exceptions remain temporary.
+- Give each quality exception a media revision, slot, reason and review condition.
+- Report duplicate hashes only; keep tenant ownership and deletion decisions separate.
+- Track these details within AC6 and the existing six children; no additional child is necessary.
+
+## Proposed AC6 clarification
+
+> AC6 requires appropriately selected, verified media for the measured layouts; tenant-safe and publication-aware delivery; poster-first deferred video; compatible legacy conversion and rollback; and passing evidence against the frozen six-scenario lab protocol. Generation readiness does not authorize publication. Planning, queued work, HTTP 200 responses and warning-bearing measurements do not establish acceptance.
+
+**Review evidence:** read the eight named repository files using `Get-Content` and targeted `rg`; commands exited 0. No files or Plane records changed.
+
+Not checked: live access/cache behavior, raw measurement artifacts, application suites, or the original story/Plane records.  
+Remaining risk: P2 is suitable for planning, but race safety, revocation and performance remain unproven until implementation tests pass.

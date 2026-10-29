@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { validateEcosystemProfiles } from '@/blocks/WingsGroupEcosystem/config'
 
 import {
   areAllHeroMediaGoverned,
@@ -233,7 +234,7 @@ describe('WingsGroup v3 public view model', () => {
     expect(isSafeSameSiteHref('#ecosystem')).toBe(true)
   })
 
-  it('fails deep links closed and never emits the legacy WingSide slug', () => {
+  it('uses configured HTTPS links without evidence and never emits the legacy WingSide slug', () => {
     expect(
       resolveEcosystemCTA(
         profile({
@@ -242,22 +243,17 @@ describe('WingsGroup v3 public view model', () => {
         'en',
       ),
     ).toEqual({
-      href: '/lien-he#contact-form',
-      isFallback: true,
-      label: 'Speak with a WingsGroup specialist',
+      href: 'https://wingside.vn',
+      isFallback: false,
+      label: 'WingSide',
     })
 
     expect(
       resolveEcosystemCTA(
         profile({
           cta: {
-            canonicalEvidence: 'canonical-check',
-            httpEvidence: 'http-200',
             label: 'WingSide',
-            owner: 'Destination owner',
-            ownerApprovalEvidence: 'owner-approval',
             state: 'approved-deep-link',
-            trackingEvidence: 'tracking-qa',
             url: 'https://wingside.vn',
           },
         }),
@@ -275,6 +271,51 @@ describe('WingsGroup v3 public view model', () => {
         'en',
       )[0].url,
     ).toBe('/wing-side/tour')
+  })
+
+  it.each([
+    ['https://wingsplus.vn/', true],
+    [' HTTPS://wingsplus.vn/?source=group#services ', true],
+    ['https://wingsplus.vn:443/hanh-trinh', true],
+    ['', false],
+    ['https://', false],
+    ['https:///wingsplus.vn', false],
+    ['https://wingsplus.vn:invalid/', false],
+    ['https://user:password@wingsplus.vn/', false],
+    ['https://user@wingsplus.vn/', false],
+    ['http://wingsplus.vn/', false],
+    ['javascript:alert(1)', false],
+    ['/wingsplus', false],
+    ['//wingsplus.vn/', false],
+    ['https://wingsplus.vn/\\path', false],
+    ['\nhttps://wingsplus.vn/', false],
+    ['https://wingsplus.vn/\n', false],
+    ['https://wings\tplus.vn/', false],
+    ['https://wingsplus.vn/\u007f', false],
+  ] as const)('keeps CMS/runtime URL validation consistent for %j', (url, valid) => {
+    const candidate = profile({
+      brandKey: 'wingsplus',
+      brandName: 'WingsPlus',
+      cta: { label: 'Xem trang WingsPlus', state: 'approved-deep-link', url },
+    })
+    const validation = validateEcosystemProfiles([
+      { brandKey: 'wingsgo', cta: { state: 'contact-fallback' } },
+      candidate,
+    ])
+    expect(validation === true).toBe(valid)
+    const result = resolveEcosystemCTA(candidate)
+    expect(result.isFallback).toBe(!valid)
+    expect(result.href).toBe(valid ? url.trim() : '/lien-he#contact-form')
+    if (valid) expect(result.label).toBe('Xem trang WingsPlus')
+  })
+
+  it('keeps contact mode and legacy external paths on the safe fallback', () => {
+    expect(resolveEcosystemCTA(profile({
+      cta: { label: 'Website', state: 'contact-fallback', url: 'https://wingsplus.vn/' },
+    })).isFallback).toBe(true)
+    expect(resolveEcosystemCTA(profile({
+      cta: { label: 'Legacy', state: 'approved-deep-link', url: 'https://wingsgroup.vn/wingsside/tour' },
+    })).isFallback).toBe(true)
   })
 
   it('publishes proof only with complete evidence and non-editorial proof media', () => {

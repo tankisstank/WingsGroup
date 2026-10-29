@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { validateEcosystemProfiles } from '@/blocks/WingsGroupEcosystem/config'
+import { WingsGroupEcosystem, validateEcosystemProfiles } from '@/blocks/WingsGroupEcosystem/config'
 import { validateProofRecords } from '@/blocks/WingsGroupProofArchive/config'
 import {
   createWingsGroupV3ProductionPublishContext,
@@ -304,7 +304,7 @@ describe('WingsGroup v3 fail-closed governance', () => {
     ).toBe(true)
   })
 
-  it('gates approved proof and ecosystem deep links on complete evidence', () => {
+  it('keeps proof evidence separate from ecosystem CTA configuration', () => {
     expect(
       validateProofRecords([
         { key: 'licence', permissionState: 'pending', publicationState: 'approved' },
@@ -319,7 +319,23 @@ describe('WingsGroup v3 fail-closed governance', () => {
           proofState: 'pending',
         },
       ]),
-    ).toMatch(/owner/)
+    ).toBe(true)
+  })
+
+  it('exposes only editorial CTA fields while retaining stored destination values', () => {
+    const profilesField = WingsGroupEcosystem.fields.find((field) => 'name' in field && field.name === 'profiles')
+    if (!profilesField || !('fields' in profilesField)) throw new Error('Missing profiles')
+    const ctaField = profilesField.fields.find((field) => 'name' in field && field.name === 'cta')
+    if (!ctaField || !('fields' in ctaField)) throw new Error('Missing CTA')
+    expect(ctaField.fields.map((field) => 'name' in field && field.name)).toEqual([
+      'label', 'state', 'contactPath', 'url',
+    ])
+    const state = ctaField.fields.find((field) => 'name' in field && field.name === 'state')
+    if (!state || !('options' in state)) throw new Error('Missing CTA destination')
+    expect(state.options).toEqual([
+      { label: 'Về form liên hệ', value: 'contact-fallback' },
+      { label: 'Đến trang web', value: 'approved-deep-link' },
+    ])
   })
 
   it('rejects nondeterministic duplicate site-settings instead of choosing limit:1', () => {

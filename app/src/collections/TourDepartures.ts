@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
+import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { supportedTourCurrencyOptions } from '@/tours/currency'
@@ -317,7 +317,7 @@ export const TourDepartures: CollectionConfig = {
   hooks: {
     afterChange: [revalidateTourDeparture],
     afterDelete: [revalidateTourDepartureDelete],
-    beforeChange: [enforceSiteAccess, preventEditorPublish],
+    beforeChange: [enforceSiteAccess],
     beforeValidate: [setDepartureInventoryIdentity],
   },
   versions: {

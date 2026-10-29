@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import type { Site } from '@/payload-types'
 
-import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
+import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
 import { sameSiteFilterOptions, siteField } from '@/fields/site'
 import { adminGroups, adminLabel } from '@/utilities/adminLabels'
@@ -208,7 +208,7 @@ export const TourCampaigns: CollectionConfig = {
   hooks: {
     afterChange: [revalidateTourCampaign],
     afterDelete: [revalidateTourCampaignDelete],
-    beforeChange: [enforceSiteAccess, preventEditorPublish],
+    beforeChange: [enforceSiteAccess],
   },
   versions: {
     drafts: {

@@ -1,4 +1,5 @@
 import type { CollectionBeforeChangeHook } from 'payload'
+import { APIError } from 'payload'
 import {
   findWingsGroupPublicJargon,
   getWingsGroupRouteDefinition,
@@ -121,6 +122,7 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
   }
 
   const isPublishing = (data?._status ?? originalDoc?._status) === 'published'
+  const canApproveContent = ['editor', 'site-manager', 'super-admin'].includes(req.user?.role ?? '')
   const isLocalDraftPreview = isWingsGroupLocalDraftPreview({
     context: req.context,
     status: data?._status ?? originalDoc?._status,
@@ -179,7 +181,7 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
 
   if (siteCode === WINGSGROUP_SITE_CODE) {
     if (!routeDefinition) {
-      throw new Error('WingsGroup v3 chỉ cho phép mười corporate routes đã duyệt.')
+      throw new Error('WingsGroup v3 chỉ cho phép các đường dẫn đã được khai báo và quản trị.')
     }
     let routeGovernance = asRecord(pendingRouteGovernance)
     if (
@@ -234,12 +236,13 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
     const approvedLocales = LOCALE_KEYS.filter((locale) => publication[locale] === 'approved')
     if (
       isPublishing &&
-      req.user?.role !== 'super-admin' &&
+      !canApproveContent &&
       ((localizedContentChanged && publication[localeKey] === 'approved') ||
         (sharedContentChanged && approvedLocales.length > 0))
     ) {
-      throw new Error(
-        'Nội dung WingsGroup đã duyệt phải chuyển về draft và được super-admin phê duyệt lại.',
+      throw new APIError(
+        'Chưa thể xuất bản thay đổi này. Hãy lưu bản nháp và nhờ người có quyền duyệt nội dung kiểm tra, phê duyệt lại.',
+        400,
       )
     }
 
@@ -250,7 +253,7 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
     } else if (localizedContentChanged) {
       nextContentApproval[localeKey] = null
     }
-    if (isPublishing && req.user?.role === 'super-admin') {
+    if (isPublishing && canApproveContent) {
       const localesToApprove = sharedContentChanged ? approvedLocales : [localeKey]
       for (const locale of localesToApprove) {
         if (publication[locale] === 'approved') {
@@ -292,7 +295,12 @@ export const validateWingsGroupV3Governance: CollectionBeforeChangeHook = async 
         siteCode,
       }) !== 'approved'
     ) {
-      throw new Error('WingsGroup route chưa vượt qua publication gate tiếng Việt hoặc policy.')
+      throw new APIError(
+        asRecord(routeGovernance.contentApproval).vi !== WINGSGROUP_CONTENT_VALIDATION_MARKER
+          ? 'Chưa thể xuất bản: nội dung tiếng Việt chưa qua publication gate. Hãy kiểm tra lại trạng thái duyệt tiếng Việt trước khi xuất bản.'
+          : 'Chưa thể xuất bản: cấu hình xuất bản tiếng Việt hoặc phê duyệt chính sách chưa hoàn tất. Hãy kiểm tra lại cài đặt xuất bản WingsGroup.',
+        400,
+      )
     }
   } else if (asRecord(pendingRouteGovernance).managedBy === 'wingsgroup-v3') {
     throw new Error('WingsGroup corporate governance không được gắn vào tenant khác.')

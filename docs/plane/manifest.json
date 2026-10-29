@@ -311,6 +311,113 @@
     }
   ],
   "storyMappings": {
+    "US-089": {
+      "projectKey": "core",
+      "module": "Trải nghiệm quản trị CMS",
+      "epicKey": "E09",
+      "site": "WingsGroup",
+      "phase": "Phase 1",
+      "workstream": "CMS",
+      "customerVisible": "Yes",
+      "startDate": "2026-10-27",
+      "targetDate": "2026-10-27",
+      "planeStateOverride": "Đã bàn giao",
+      "proofStatusOverride": "Full",
+      "childDateOverrides": {
+        "1": { "startDate": "2026-10-27", "targetDate": "2026-10-27" },
+        "2": { "startDate": "2026-10-27", "targetDate": "2026-10-27" },
+        "3": { "startDate": "2026-10-27", "targetDate": "2026-10-27" },
+        "4": { "startDate": "2026-10-27", "targetDate": "2026-10-27" },
+        "5": { "startDate": "2026-10-27", "targetDate": "2026-10-27" }
+      },
+      "childStateOverrides": {
+        "1": "Đã bàn giao",
+        "2": "Đã bàn giao",
+        "3": "Đã bàn giao",
+        "4": "Đã bàn giao",
+        "5": "Đã bàn giao"
+      },
+      "proofStatusNote": "2026-10-27 production befe6ef, clearer public400 publication errors with unchanged approval gates.18unit18integration/build/typecheck0; actual Edge cloneVI+EN errors, draftimage persistence and authorizedpublishPASS. Backuprestore6sites, fresh ARM64SharpPASS, exactimage labels/readinessPASS. Page375/media1419/6versions hashesunchanged. CodexSHIP, no unresolvedfindings. Production authenticatedUI sessionexpired; no productioncontentwrites. See US089 story/task evidence."
+    },
+    "US-088": {
+      "projectKey": "core",
+      "module": "CMS Admin UX",
+      "epicKey": "E09",
+      "site": "WingsGroup",
+      "phase": "Phase 1",
+      "workstream": "Content",
+      "customerVisible": "Yes",
+      "planeStateOverride": "Đã bàn giao",
+      "proofStatusOverride": "Full",
+      "childStateOverrides": {
+        "1": "Đã bàn giao",
+        "2": "Đã bàn giao",
+        "3": "Đã bàn giao",
+        "4": "Đã bàn giao",
+        "5": "Đã bàn giao",
+        "6": "Đã bàn giao"
+      },
+      "childDateOverrides": {
+        "1": {
+          "startDate": "2026-10-27",
+          "targetDate": "2026-10-27"
+        },
+        "2": {
+          "startDate": "2026-10-27",
+          "targetDate": "2026-10-27"
+        },
+        "3": {
+          "startDate": "2026-10-27",
+          "targetDate": "2026-10-27"
+        },
+        "4": {
+          "startDate": "2026-10-27",
+          "targetDate": "2026-10-27"
+        },
+        "5": {
+          "startDate": "2026-10-27",
+          "targetDate": "2026-10-27"
+        },
+        "6": {
+          "startDate": "2026-10-27",
+          "targetDate": "2026-10-27"
+        }
+      },
+      "proofStatusNote": "2026-10-27 delivered on correct WingsGroup site: page375 /gioi-thieu-wingsplus VI+EN, Hero/4groups/specialistCTA; homepage191 shortcopy+Xem giới thiệu links to Group page. Own wrongsite372 withdrawn. Release8a0e470 ARM64ready; build/typecheck0,70unit27component28integration, backuprestore6sites, realcontention/recoverypass, independentCodexSHIP. Actualdesktop/mobile390 and primaryCTAform checks pass; public/data productionchecks0,21unrelatedpagesunchanged, public/draftheropreserved. No reallead/email or physicaldevice test. Details US088validation and wingsplus-on-wingsgroup-20261027."
+    },
+    "US-087": {
+      "projectKey": "core",
+      "module": "CMS Admin UX",
+      "epicKey": "E09",
+      "site": "WingsGroup",
+      "phase": "Phase 1",
+      "workstream": "CMS",
+      "customerVisible": "Yes",
+      "planeStateOverride": "Chờ xác nhận",
+      "childDateOverrides": {
+        "1": {
+          "startDate": "2026-10-26",
+          "targetDate": "2026-10-26"
+        },
+        "2": {
+          "startDate": "2026-10-26",
+          "targetDate": "2026-10-26"
+        },
+        "3": {
+          "startDate": "2026-10-26",
+          "targetDate": "2026-10-26"
+        },
+        "4": {
+          "startDate": "2026-10-26",
+          "targetDate": "2026-10-26"
+        },
+        "5": {
+          "startDate": "2026-10-26",
+          "targetDate": "2026-10-26"
+        }
+      },
+      "proofStatusNote": "2026-10-27 bounded US087 delta deployed with US088 release8a0e470. Five CTA evidencefields absent in productionCMS; strictHTTPS/historicalnullablecolumnsretained. ActualPayloadsave withoutfakeevidence and realbrowserCTApass; backuprestorePostgreSQL/contention/recoverypass. Independent browsereditorSave/versionRestoreQA stillopen; storyin_progress/partialproof. Details US087validation and US088audit."
+    },
     "US-002": { "projectKey": "core", "module": "E01 - Lớp vận hành Harness", "epicKey": "E01", "site": "Core", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "No" },
     "US-003": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
     "US-004": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
@@ -389,6 +496,39 @@
     "US-082": { "projectKey": "core", "module": "Theme & Branding", "epicKey": "E09", "site": "WingsGroup", "phase": "Phase 1", "workstream": "Localization", "customerVisible": "Yes" },
     "US-083": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
     "US-084": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
+    "US-091": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes", "startDate": "2026-10-28", "targetDate": "2026-10-28", "planeStateOverride": "Đã bàn giao", "proofStatusOverride": "Full", "proofStatusNote": "Reproduced product 132 showing 18.500.000 VND while nextDeparture date remains 10 Dec 2026. Added unit tests for cheaper later departure, sold-out fallback, verification expiry fallback, and contact fallback. 23/23 tests passed in wingsGoCatalog.unit.spec.ts. No CMS or production data modified." },
+    "US-092": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes", "startDate": "2026-10-29", "planeStateOverride": "Đã lên kế hoạch", "proofStatusOverride": "Pending", "proofStatusNote": "Planning packet standardized; implementation not started. D1-D9 decided: reusable WingsGoCommerceHero without registry migration; one catalog snapshot per request; featured section hidden when filters are active; departure window (departureMonth AND season, spring 3-5, summer 6-8, autumn 9-11, winter 12-2) drives card date, price and budget filter; server-side Vietnam-calendar day badge with dynamic/no-store; Zalo OA and hotline from site settings; filtered URLs noindex. Gates: Phase 0 read-only date-shape query and Codex consultation before Phase 1." },
+    "US-086": {
+      "projectKey": "core",
+      "module": "SEO & Metadata",
+      "epicKey": "E03",
+      "site": "Core",
+      "phase": "Phase 1",
+      "workstream": "SEO",
+      "customerVisible": "Yes",
+      "proofStatusOverride": "Pending",
+      "planeStateOverride": "Đang thực hiện",
+      "childStateOverrides": {
+        "1": "Đã lên kế hoạch",
+        "2": "Đã lên kế hoạch",
+        "3": "Đã lên kế hoạch",
+        "4": "Đã lên kế hoạch",
+        "5": "Đã lên kế hoạch",
+        "6": "Đang thực hiện"
+      },
+      "childDateOverrides": {
+        "1": { "startDate": "2026-10-24", "targetDate": "2026-10-24" },
+        "2": { "startDate": "2026-10-25", "targetDate": "2026-10-25" },
+        "3": { "startDate": "2026-10-26", "targetDate": "2026-10-26" },
+        "4": { "startDate": "2026-10-27", "targetDate": "2026-10-27" },
+        "5": { "startDate": "2026-10-28", "targetDate": "2026-10-28" },
+        "6": {
+          "startDate": "2026-10-24",
+          "targetDate": "2026-11-06"
+        }
+      },
+      "proofStatusNote": "User-authorized Docker cleanup2026-10-26T12:14:30Z completed:31oldimages deleted,6app/ops images for be016fe/e8ed1a6/bf1cd8e and every image used by11containers preserved. Bothbuilderscache pruned;9Shared/nonreclaimable entries remain,0Breclaimable. Measured recovery19500290048B(18.16GiB),free20.60GiB/disk54%(from95%). ContainersID/start/restart0 unchanged,protectedimages/symlinks/BUILD/ready verified,12originalmediaSHA same;fresh Goimages200/errors0. ClaudeP2resumefixed/7checks/SHIPthenKEEP. No deployment/restart/CMS/DB/source deletion. Rollbackdepth3; oldinertops/composebeyondretentionmustnotrun. Report ops-docker-cleanup-20261026/REPORT.md. US/AC6in_progress/proof0,mobileLCP/TBTopen,planned start 2026-10-24 target 2026-11-06. Historical project status reconciled2026-10-26: Harness70US/65implemented/3in_progress(056,077,086)/2planned(058,079); do not equate implementation with acceptance. Currentbe016fe/previouse8ed1a6/thirdbf1cd8e pinned; symlinks valid/readinessready. VPS classification read-only: disk95%, free2622791680B(2.44GiB); no deletion/restart/deploy in this pass. Exact candidates/conditions in ops-status-cleanup-20261026/REPORT.md and classification.json. US/AC6in_progress/proof0, planned start 2026-10-24 target 2026-11-06. Schedule tour images fixed production2026-10-26T09:01:44Z be016fe (previous e8ed1a6), BUILD2cxCV9x7P_7KR0xCfFBxs. Existing UI had no tour images; reuse Media override-to-hero/AVIF/responsive/lazy in market/featured/filter rows; no CMS/schema writes. Component21/21/build/ARM64/backup real restore6sites6homepages/52applied migrations pass, CodexSHIP/ClaudeKEEP. Actual production183image nodes, desktop/mobile412 visible images loaded/positiveheight/no overflow, Japan22filteredrows links/CTA correct, media samples200/errors0; Japanmarket/campaign sampled. China prioritycard has no future departure and intentionally no product photo. Owned canary/extracted.next/node_modules removed, free2657681408B(2.48GiB)/95%, readinessready; pinned images and backups retained. Report us086-followup-20261025/schedule-images-20261026/REPORT.md. No full Lighthouse rerun be016fe; e8performance numbers historical; AC6mobile budgets OPEN. US/AC6in_progress/proof0; planned start 2026-10-24 target 2026-11-06. Historical VPS cleanup completed 2026-10-26: 24 exact audited temp/build/archive/rehearsal targets removed, recovered2050695168B(1.91GiB), free2.98GiB/disk94%; prior98% observation is historical. Claude twoP2 resolved before apply; same production and three pinned release image identities; no restart/DB/backup/media original/image/globalcache deletion. Original7962media inventory and12sample SHA unchanged; Go/Group real browser/readiness pass. Report us086-followup-20261025/vps-build-cleanup-20261026/REPORT.md. Planned start 2026-10-24 and target 2026-11-06 retained. Current production 2026-10-26T07:43:42Z e8ed1a6, previous bf1cd8e; reduced-motion CSS transition fix, Codex and Claude predeploy SHIP, ARM64 builds/backup real restore/52 migration statuses verified. Production /tour mobile reduced motion 5/5 CLS0 plus normal mode CLS0, rainbow rotation/menu verified. Final18 LH13.5/Chrome155 exit0,0warnings/HTTPerrors,18/18CLS pass. Desktop Go LCP1.81s/TBT0,Group1.72s/TBT0 bothPASS; mobile Group6.96s/814ms,GoHome9.01s/335ms,tour7.04s/134ms,detail6.54s/575ms remainOPEN. Go home transfer -39.46%mobile/-36.31%desktop vsba03. Six HTML/two sitemap e8smoke pass; exact ownedcanary/helpercredentials removed,readinessready,disk98%. Final lab reports ac6-next-20261026/performance-e8ed1a6/; detailed evidence us086-followup-20261025/ac6-next-20261026/REPORT.md. US/AC6 in_progress/proof0; mobile budgets remain open. Matched172 SEO on bf1: content40463→10(-84.1%), sitemap4042→0,H1errors3→0; matching VI/EN hashes resolve to same finalURL, not40 duplicate pages. No Git push or tour141 data write. Historical follow-up 2026-10-26: ba03d3f, previous5e8b89a; historical baseline8278868. 208 media/822 derivatives full verification, video mobile2.29MB/desktop4.31MB,34 image URLs200/Sharp decode.172 matched SEO audit on5e8b89a: content404 63→10 (-84.1%), sitemap404 2→0, badH1 3→0. Final18LH13.5 onba03d3f: Go home mobile image bytes -66.1% vs clean25Oct, LCP5.83→8.21s (40.8% slower), TBT830ms; other mobile LCP/TBT and intermittentCLS gates open. OnlyGroupdesktop passes applicablelabgates. Oct24Gohomebaselines hadwarnings; their LCPimprovementsunreliable. Claude final KEEP/HOLD archived query, predeploymentimagefixreview MISSED disclosed. US/AC6 in_progress,whole-USproof0,AC1–5 planned. Reports us086-followup-20261025/REPORT.md and production-window/performance-final/; historical us086-production-20261025/REPORT.md and seo-audit-20261024/performance-images/REPORT.md. Planned target 2026-11-06 retained; start 2026-10-24. Tour141 currentlypublished,wrappernull,page347samepath/siteunused; repairpendinguserdecision. Visibleoldphonecopy16requestedURLs,10content404/editorialissuesremain. QUYẾT ĐỊNH USER: mọi ảnh editor upload WingsGo public-on-upload; original/derivative không cần duyệt/publish/rights riêng hoặc trang tham chiếu, không thêm private/draft schema. Giữsiteownership/governanceGroup. AC6.1–10 P2reuseMedia/Payload/Sharp; source/strategy/us086-ac6-media-20261024/AC6.md,CMS-DESIGN.md,OPERATIONS.md. G-Async đoARMtrước,khôngépworker/schema. No fieldCWV/GSC/ranking/traffic/%SEOoverall."
+    },
     "US-085": { "projectKey": "core", "module": "Theme & Branding", "epicKey": "E09", "site": "WingsGroup", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes", "proofStatusOverride": "Full", "planeStateOverride": "Đã bàn giao", "proofStatusNote": "Footer follow-up deployed with explicit user authorization in release d6057d4 at 2026-10-23T21:29:13+07:00. One direct call beside the form; one hotline0948786775 and one preferred email in the WingsGroup V3 footer. Secondary numbers/Zalo remain in header. No CMS/schema writes; all6 settings and4 additional-hotline rows unchanged. Fresh59 component, isolated build/postbuild/release gates, encrypted backup plus real PostgreSQL restore,28 applied migrations, ARM64 native/readiness,12 candidate UI and24 public UI cases passed. Header A remains delivered from6a0dac0. Actual proof/limits: footer-contact-review-20261023/production-release/release-report.md and US085 validation/audit. No real calls, Zalo conversations, lead submission, physical-device testing or full repository suite. Delivery is not stakeholder acceptance. Original technical target2026-10-26 retained." }
   }
 }

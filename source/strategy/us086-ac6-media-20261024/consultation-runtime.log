@@ -1,0 +1,2732 @@
+2026-10-24T15:36:32.210513Z ERROR codex_core::session::session: failed to load skill C:\Users\VIETD\.claude\skills\seo\SKILL.md: missing YAML frontmatter delimited by ---
+2026-10-24T15:36:32.210667Z ERROR codex_core::session::session: failed to load skill C:\Users\VIETD\.claude\skills\seo\SKILL.md: missing YAML frontmatter delimited by ---
+OpenAI Codex v0.163.0
+--------
+workdir: E:\repo\WingsTravel
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a16e8e-7383-75a3-a0e4-650e6f41cc83
+--------
+user
+# AC6 / US-086 architecture consultation
+
+Read-only independent architecture/test review requested by repository Codex
+Consultation Gate. Do not edit files, deploy, access credentials, contact users,
+or spawn child agents. Parent will save your stdout as consultation evidence.
+Each parent write affects one file, <=15KB; no Delete+Add same file.
+
+Task: clarify existing US-086 AC6 and recommend sustainable CMS media flow.
+Planning/docs only, keep US planned and six Plane children. No app/schema
+implementation authorized by this request. Review concrete proposal below;
+return P1/P2/P3 findings, recommended option and explicit acceptance gaps.
+You may inspect only the named repository paths if needed (absolute root
+E:/repo/WingsTravel); do not scan outside workspace. Current versions:
+Payload3.84.1, Next16.2.6. No new dependency/service in the recommended baseline.
+
+Measured evidence in seo-audit-20261024/performance-images/REPORT.md:
+18 Lighthouse13.5/Chrome155 lab runs, six scenarios x3. Median LCP Group
+mobile4.79s desktop2.22s; Go home mobile17.24s desktop3.45s; listing4.61s,
+detail4.98s mobile. Seven runs load-warning (Go home mobile2 desktop3 listing2)
+with maxWaitForLoad45s; lab not field CWV. Group desktop CLS.173 mostlyecosystem.
+40GETimages200: Go11sampleURLs>1MiB, PNG~3MiB; HQt7 original3156x1769/1.87MB
+used for small cards. Group JPEGpreloads2x327744B duplicateAVIF;6w640responses
+decoded1440x810. Video autoplay11,546,189B, no poster; CDN206range works in2byte
+probe, MIMEoctet-stream. Origin route actual range behavior not tested.
+
+Existing implementation (read paths, no code changes):
+- app/src/collections/Media.ts: one tenant-scoped Media collection, localized
+  alt/caption, Payload imageSizes standard300/500square/600/900/1400/1920/OG,
+  plus six Group640/960/1440 WebP+AVIF sizes. All size configs global today;
+  PAYLOAD_IMPORT_ORIGINALS_ONLY and local preview can suppress derivatives.
+- app/src/fields/wingsGroupV3.ts: Group governance EXACTLYsix sizes, hashes,
+  rights/provenance, private production publish context; do not reuse this
+  Group managedBy/publication gate for WingsGo or loosen it.
+- app/src/components/Media/ImageMedia/index.tsx: picture responsive sources
+  only for published governed Group. Direct /media unoptimized for tenant
+  security. NextImage priority can preload original outside picture.
+- app/src/app/(payload)/api/public-media/[filename]/route.ts: site-scoped
+  lookup original+six derivative names, governance check; not generic all
+  sizes. Returns200stream and Accept-Ranges bytes but no request Range parse.
+- app/src/utilities/publicMediaDelivery.ts: MIME map currently images only.
+- app/src/payload.config.ts: existing Payload jobs queue tasks for leads;
+  no registered media task yet. ProductionPostgres, Redis cache not queue.
+- app/src/heros/config.ts: existing video.desktopVideo/mobileVideo/poster.
+  DeviceMockupSplitHero in presentations/index.tsx uses media mp4 bypassing
+  these poster settings; VideoBackgroundHero also needs review because it
+  mounts separate desktop/mobile video nodes (CSS hiding doesn't preventGET).
+
+Proposal options:
+P1 only manual file compression/render fixes: fastest but uploads regress.
+P2 RECOMMENDED extend existing Media/Sharp generation + shared rendering;
+   reuse existing derivatives and tenant delivery security, add bounded media
+   task through existing Payload jobs only where processing is too expensive.
+   No new collection, Redis queue, CDN transform service or platform switch.
+P3 request-time resizing Next/CDN: blocked until forwarding/access/cache key
+   verified for private/draft/tenant media; cannot just enable optimizer.
+P4 fullDAM/video platform/object-storage migration: future capacity-driven,
+   not dependency of AC6 baseline.
+
+P2 specifics for review:
+1) Fix Go thumbnails/cards to media relationship->shared asset resolver,
+   img picture/sizes appropriate to layout+actual DPR. Group priority only
+   true abovefold candidate; no original JPEGpreload when AVIFchosen. Reuse
+   existing640/960/1440 outputs; thumb160/320 WebP profile only where needed,
+   preserving Group validator EXACTsix, not imposing it on Go. No upscale;
+   smaller input emits actualwidth. Avoid generating every cropformatxsize.
+2) Server technical states proposed pending/processing/ready/failed + generation
+   identity sourcehash+profileVersion+crop; separate rights/publication states.
+   Fields optional additive after migration review; use existing metadata first
+   if sufficient; no mandatory schema now. Worker idempotent, concurrency1 on
+   ARM64 initially, limited resource budgets,3retries, partialfiles notserved.
+   Write temp/verify then switch only if source revision stillcurrent. Failed
+   replacement retains previousready version; technicalready cannotpublish.
+3) Preserve original immutable file and old URLs; new derivative versionednames
+   on replace/cropchange; no unsafe overwrite with updatedAtquery alone.
+   Page/asset revalidation site+locale+media dependencies. CDN cache host+path,
+   public only after access/publication confirmed; draft/auth no-store. Unpublish
+   purgebounded public caches before declaring revoked; do not promise immediate
+   revocation using immutable year cache without reliable purge.
+4) CMS editor sees progress/errors/retry/bytes/dimensions + slot preview and
+   warnings. No hand-entering URLs/quality/highpriority/srcset fields. New
+   content cannotpublish unready required hero/card; draft allowed. Legacy
+   published content served with existing valid image until batch converted;
+   no globalpublishblock introduced before backfill compatibility review.
+5) Video uses existing poster/desktop/mobile fields, active source only; poster
+   in initialHTML, no src/video bytes before visibility+pagecriticalcontentready
+   on normalnetwork, SaveData/reducedmotion/autoplayerror stays poster+play.
+   preload alone insufficient with autoplay. OptimizedMP4 H264baseline/AACif
+   needed, faststart, duration/resolution/bytes caps tested. Preserve design.
+   Correct video/mp4 and actual200/206/416 validation origin+CDN, no AcceptRanges
+   claim without range functionality. No unlimited FFmpeg sync on web request.
+6) Backfill dryrun site-scoped/allowlistedIDs, disk forecast source+variants+temp
+   +backup/logs, lowconcurrency resumable batches, physicalhash/size/decode then
+   pointer switch. Originals/relationships/alt/provenance stay; no automatic
+   deletion/dedup byhash across tenant. Hash duplicates only report. Rollback
+   previousgeneration,pointers,cache; schema backwardcompat; don't fullrestore
+   DB and lose leads. Cleanup separate referenced+retention approval only.
+7) Proposed gates: same6scenarios x3 clean reproducible runs, no timeout/runtime
+   warning accepted as passing; LCPmedian<=2.5s,CLS<=.1,TBT<=200ms mobile,
+   desktopTBT<=150ms; field unavailable=N/A not fake. If not met leaveAC6open,
+   identify concrete residual. Images budget thumb<=50KiB,card<=150KiB,
+   hero/poster<=250KiB (largest valid selectedDPR), qualityexceptiondocumented
+   slotnotglobaldisable. Initialpagebudget<=2MiB mobile excluding deferredvideo;
+   actualvideo bytes separate; no video precritical. May need tune budgets
+   before implementation against current layouts and quality, not relax after
+   measuring to pass. Origin+CDN samefiletest, cold/warm andtenantnegative tests.
+
+Review especially: race conditions/upload replacement, direct derivative
+read bypass, current six-size governance, denied-filecache/unpublish, source
+small vs thumbDPR handling, optimistic performance targets vs lab variation,
+schema rollout and the smallest sustainable solution. No need to rerun the
+18measurements or run app suites for docs. Return clear fixes to plan.
+
+
+warning: Codex is ignoring 9 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\VIETD\.codex\config.toml): `features.remote_connections` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.approvals_reviewer` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.model_reasoning_summary_format` is ignored.
+  ... and 6 more ignored settings.
+warning: Codex is ignoring 9 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\VIETD\.codex\config.toml): `features.remote_connections` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.approvals_reviewer` is ignored.
+  user (C:\Users\VIETD\.codex\config.toml): `model_providers.vippro.model_reasoning_summary_format` is ignored.
+  ... and 6 more ignored settings.
+hook: SessionStart
+hook: SessionStart
+hook: SessionStart Completed
+hook: SessionStart Completed
+hook: UserPromptSubmit
+hook: UserPromptSubmit Completed
+codex
+Tôi sẽ đối chiếu các đường dẫn được chỉ định và rà soát phương án P2, tập trung vào thay thế media, quyền truy cập và các khoảng trống nghiệm thu AC6. Tôi chỉ đọc, không sửa file hay chạy lại bộ đo.
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "Get-Content -LiteralPath 'app/src/collections/Media.ts'" in E:\repo\WingsTravel
+ succeeded in 334ms:
+import type {
+  CollectionAfterReadHook,
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  CollectionBeforeChangeHook,
+  CollectionConfig,
+  PayloadRequest,
+} from 'payload'
+
+import {
+  FixedToolbarFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
+import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
+import { enforceSiteAccess, siteScopedAccess, wingsGroupMediaReadAccess } from '@/access/siteScope'
+import { siteField } from '@/fields/site'
+import { adminGroups, adminLabel } from '@/utilities/adminLabels'
+import {
+  revalidateWingSideDiscovery,
+  revalidateWingSideDiscoveryForTourDependency,
+} from '@/collections/Tours/hooks/revalidateTourContent'
+import {
+  generateWingsGroupV3DerivativeImageName,
+  mediaGovernanceField,
+  validateWingsGroupV3PublicMedia,
+  validateGovernedMediaBeforeChange,
+  WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES,
+} from '@/fields/wingsGroupV3'
+import { isWingsGroupLocalDraftPreview } from '@/wingsgroup/corporateRoutes'
+import { resolveWingsGroupLocalPreviewMediaDirectory } from '@/utilities/localPreviewMedia'
+import {
+  deleteWingsGroupLocalPreviewMedia,
+  getWingsGroupLocalPreviewMedia,
+  isWingsGroupLocalPreviewStoreConfigured,
+  putWingsGroupLocalPreviewMedia,
+} from '@/utilities/localPreviewStore'
+
+const localPreviewStore = isWingsGroupLocalPreviewStoreConfigured()
+const mediaStaticDir = resolveWingsGroupLocalPreviewMediaDirectory(
+  process.env.E09_PREVIEW_MEDIA_DIRECTORY,
+)
+
+const storeLocalPreviewMedia: CollectionBeforeChangeHook = async ({ data, req }) => {
+  if (!localPreviewStore || !req.file?.data) return data
+  const filename = typeof data?.filename === 'string' ? data.filename : req.file.name
+  if (!filename) throw new Error('E09 preview media upload has no safe filename.')
+  await putWingsGroupLocalPreviewMedia({
+    bytes: req.file.data,
+    contentType: req.file.mimetype,
+    filename,
+  })
+  return data
+}
+
+const deleteLocalPreviewMedia: CollectionAfterDeleteHook = async ({ doc }) => {
+  if (localPreviewStore && typeof doc.filename === 'string') {
+    await deleteWingsGroupLocalPreviewMedia(doc.filename)
+  }
+  return doc
+}
+
+const serveLocalPreviewMedia = async (
+  _req: PayloadRequest,
+  { params }: { params: { filename: string } },
+): Promise<Response> => {
+  if (!localPreviewStore) return new Response(null, { status: 404 })
+  return getWingsGroupLocalPreviewMedia(params.filename)
+}
+
+const revalidateCuratedTourMedia: CollectionAfterChangeHook = async ({
+  doc,
+  req: { context, payload },
+}) => {
+  if (!context.disableRevalidate) {
+    await revalidateWingSideDiscoveryForTourDependency({
+      field: 'heroMedia',
+      payload,
+      value: doc.id,
+    })
+  }
+  return doc
+}
+
+const revalidateDeletedTourMedia: CollectionAfterDeleteHook = ({ doc, req: { context } }) => {
+  if (!context.disableRevalidate) revalidateWingSideDiscovery()
+  return doc
+}
+
+export const enforceAnonymousGovernedMediaRead: CollectionAfterReadHook = async ({ doc, req }) => {
+  const governance = doc?.governance
+  if (
+    req.user ||
+    governance?.managedBy !== 'wingsgroup-v3' ||
+    (process.env.NODE_ENV !== 'production' &&
+      isWingsGroupLocalDraftPreview({ context: req.context, status: 'draft' }))
+  ) {
+    return doc
+  }
+
+  const siteID =
+    typeof doc.site === 'object' && doc.site && 'id' in doc.site
+      ? doc.site.id
+      : typeof doc.site === 'number' || typeof doc.site === 'string'
+        ? doc.site
+        : undefined
+  if (siteID === undefined) throw new Error('WingsGroup public media requires site scope.')
+
+  const site = await req.payload.findByID({
+    collection: 'sites',
+    depth: 0,
+    id: siteID,
+    overrideAccess: true,
+    req,
+  })
+  const result = validateWingsGroupV3PublicMedia(
+    governance,
+    site?.code === 'wings-group' ? `https://${site.primaryDomain}` : undefined,
+  )
+  if (site?.code !== 'wings-group' || result !== true) {
+    throw new Error(result === true ? 'WingsGroup public media site scope is invalid.' : result)
+  }
+  return doc
+}
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  access: {
+    create: contentCreateAccess,
+    delete: contentDeleteAccess,
+    read: wingsGroupMediaReadAccess,
+    update: siteScopedAccess(),
+  },
+  admin: {
+    components: {
+      beforeList: ['@/components/ContentLocaleControl#ContentLocaleListControl'],
+      edit: {
+        beforeDocumentControls: [
+          '@/components/ContentLocaleControl#ContentLocaleCompactDocumentControl',
+        ],
+      },
+    },
+    defaultColumns: ['filename', 'alt', 'site', 'updatedAt'],
+    group: adminGroups.media,
+  },
+  fields: [
+    {
+      name: 'alt',
+      label: 'Mô tả ảnh',
+      type: 'text',
+      localized: true,
+      //required: true,
+    },
+    siteField(),
+    {
+      name: 'caption',
+      label: 'Chú thích',
+      type: 'richText',
+      localized: true,
+      editor: lexicalEditor({
+        features: ({ rootFeatures }) => {
+          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
+        },
+      }),
+    },
+    mediaGovernanceField,
+  ],
+  labels: {
+    plural: adminLabel('Thư viện media', 'Media library'),
+    singular: adminLabel('Media', 'Media'),
+  },
+  upload: {
+    ...(mediaStaticDir ? { staticDir: mediaStaticDir } : {}),
+    ...(localPreviewStore ? { adminThumbnail: undefined } : { adminThumbnail: 'thumbnail' }),
+    disableLocalStorage: localPreviewStore,
+    focalPoint: !localPreviewStore,
+    handlers: localPreviewStore ? [serveLocalPreviewMedia] : undefined,
+    imageSizes: localPreviewStore
+      ? []
+      : process.env.PAYLOAD_IMPORT_ORIGINALS_ONLY === 'true'
+        ? []
+        : [
+            {
+              name: 'thumbnail',
+              width: 300,
+            },
+            {
+              name: 'square',
+              width: 500,
+              height: 500,
+            },
+            {
+              name: 'small',
+              width: 600,
+            },
+            {
+              name: 'medium',
+              width: 900,
+            },
+            {
+              name: 'large',
+              width: 1400,
+            },
+            {
+              name: 'xlarge',
+              width: 1920,
+            },
+            {
+              name: 'og',
+              width: 1200,
+              height: 630,
+              crop: 'center',
+            },
+            ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ format, name, width }) => ({
+              formatOptions: { format },
+              generateImageName: generateWingsGroupV3DerivativeImageName,
+              name,
+              width,
+            })),
+          ],
+  },
+  hooks: {
+    afterRead: [enforceAnonymousGovernedMediaRead],
+    afterChange: [revalidateCuratedTourMedia],
+    afterDelete: [revalidateDeletedTourMedia, deleteLocalPreviewMedia],
+    beforeChange: [enforceSiteAccess, validateGovernedMediaBeforeChange, storeLocalPreviewMedia],
+  },
+}
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "Get-Content -LiteralPath 'app/src/components/Media/ImageMedia/index.tsx'" in E:\repo\WingsTravel
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "Get-Content -LiteralPath 'app/src/app/(payload)/api/public-media/[filename]/route.ts'" in E:\repo\WingsTravel
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "Get-Content -LiteralPath 'app/src/utilities/publicMediaDelivery.ts'" in E:\repo\WingsTravel
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "rg -n -C 5 'WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES|generateWingsGroupV3DerivativeImageName|length|derivative|publish' 'app/src/fields/wingsGroupV3.ts'" in E:\repo\WingsTravel
+ succeeded in 523ms:
+import { createReadStream } from 'node:fs'
+import { access, stat } from 'node:fs/promises'
+import path from 'node:path'
+import { Readable } from 'node:stream'
+
+import config from '@payload-config'
+import { getPayload, type Where } from 'payload'
+
+import { validateWingsGroupV3PublicMedia, WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES } from '@/fields/wingsGroupV3'
+import {
+  isSafePublicMediaFilename,
+  normalizePublicMediaHost,
+  publicMediaContentType,
+} from '@/utilities/publicMediaDelivery'
+import {
+  hasValidTrustedSiteContext,
+  requestHostCandidates,
+} from '@/utilities/siteDomains'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
+const json = (message: string, status: number): Response =>
+  Response.json(
+    { errors: [{ message }] },
+    { headers: { 'Cache-Control': 'no-store' }, status },
+  )
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ filename: string }> },
+): Promise<Response> {
+  const { filename } = await params
+  if (!isSafePublicMediaFilename(filename)) return json('Not found.', 404)
+
+  const payload = await getPayload({ config })
+  const siteResult = await payload.find({
+    collection: 'sites',
+    depth: 0,
+    limit: 100,
+    overrideAccess: true,
+    pagination: false,
+    where: { isActive: { equals: true } },
+  })
+  const isTrustedContext = await hasValidTrustedSiteContext(request.headers)
+  const siteCode = isTrustedContext ? request.headers.get('x-site-code') || null : null
+  const sites = siteResult.docs
+  let site = siteCode ? sites.find((s) => s.code === siteCode) : null
+
+  if (!site) {
+    const candidateHosts: string[] = []
+    if (isTrustedContext) {
+      candidateHosts.push(...requestHostCandidates(request.headers))
+    } else {
+      const untrustedHost = normalizePublicMediaHost(request.headers.get('host'))
+      if (untrustedHost) candidateHosts.push(untrustedHost)
+    }
+    if (candidateHosts.length === 0) {
+      const urlHost = normalizePublicMediaHost(new URL(request.url).host)
+      if (urlHost) candidateHosts.push(urlHost)
+    }
+
+    site = sites.find((candidate) => {
+      const domains = [
+        candidate.primaryDomain,
+        ...(candidate.additionalDomains || []).map((entry) => entry.domain),
+      ].map((d) => normalizePublicMediaHost(d))
+      return domains.some((domain) => candidateHosts.includes(domain))
+    })
+
+    // Local loopback host fallback (only exact 'localhost' or '127.0.0.1' without foreign domain suffixes)
+    const isExactLocalLoopback = candidateHosts.some(
+      (h) => h === 'localhost' || h === '127.0.0.1' || h.startsWith('localhost:') || h.startsWith('127.0.0.1:'),
+    )
+    if (!site && isExactLocalLoopback && process.env.NODE_ENV !== 'production') {
+      const filenameConditionsForSearch = [
+        { filename: { equals: filename } },
+        ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ name }) => ({
+          [`sizes.${name}.filename`]: { equals: filename },
+        })),
+      ]
+      const localMediaCheck = await payload.find({
+        collection: 'media',
+        depth: 0,
+        limit: 1,
+        overrideAccess: true,
+        pagination: false,
+        where: { or: filenameConditionsForSearch } satisfies Where,
+      })
+      if (localMediaCheck.docs[0]?.site) {
+        const foundSiteId = localMediaCheck.docs[0].site
+        site = sites.find((s) => s.id === foundSiteId) || null
+      }
+    }
+  }
+
+  if (!site) {
+    return json('Forbidden.', 403)
+  }
+
+  // Keep the query compatible with production Media schemas that do not carry
+  // the optional WingsGroup governance field. Derivative filenames are stored
+  // in the standard Payload sizes map and cover both governed and tenant media.
+  const filenameConditions = [
+    { filename: { equals: filename } },
+    ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ name }) => ({
+      [`sizes.${name}.filename`]: { equals: filename },
+    })),
+  ]
+  const mediaResult = await payload.find({
+    collection: 'media',
+    depth: 0,
+    limit: 1,
+    overrideAccess: true,
+    pagination: false,
+    where: {
+      and: [
+        { site: { equals: site.id } },
+        { or: filenameConditions },
+      ],
+    } satisfies Where,
+  })
+  const media = mediaResult.docs[0]
+  if (!media) return json('Not found.', 404)
+
+  const governance = (media as { governance?: Record<string, unknown> }).governance
+  if (governance && governance.managedBy === 'wingsgroup-v3') {
+    const governanceResult = validateWingsGroupV3PublicMedia(
+      governance,
+      `https://${site.primaryDomain}`,
+    )
+    if (governanceResult !== true) return json('Forbidden.', 403)
+  }
+
+  const mediaCollection = payload.config.collections.find(({ slug }) => slug === 'media')
+  const staticDir = mediaCollection?.upload
+    ? mediaCollection.upload.staticDir
+    : undefined
+  if (typeof staticDir !== 'string' || !staticDir) return json('Not found.', 404)
+
+  const root = path.resolve(staticDir)
+  const filePath = path.resolve(root, filename)
+  if (!filePath.startsWith(`${root}${path.sep}`)) return json('Not found.', 404)
+
+  try {
+    await access(filePath)
+    const fileStats = await stat(filePath)
+    if (!fileStats.isFile()) return json('Not found.', 404)
+
+    return new Response(Readable.toWeb(createReadStream(filePath)) as ReadableStream, {
+      headers: {
+        'Accept-Ranges': 'bytes',
+        'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
+        'Content-Length': String(fileStats.size),
+        'Content-Type': publicMediaContentType(filename),
+      },
+    })
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return json('Not found.', 404)
+    throw error
+  }
+}
+
+ succeeded in 541ms:
+const HOST_PORT = /:\d+$/u
+
+export const normalizePublicMediaHost = (value: string | null | undefined): string =>
+  (value || '').trim().toLowerCase().replace(HOST_PORT, '').replace(/\.$/u, '')
+
+export const isSafePublicMediaFilename = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  value.length <= 255 &&
+  value !== '.' &&
+  value !== '..' &&
+  !/[\\/\u0000-\u001F\u007F]/u.test(value)
+
+export const isWingsGroupPublicHost = (
+  requestHost: string | null | undefined,
+  primaryDomain: string | null | undefined,
+): boolean => {
+  const host = normalizePublicMediaHost(requestHost)
+  const configured = normalizePublicMediaHost(primaryDomain)
+  return Boolean(host && configured && (host === configured || host === `www.${configured}`))
+}
+
+export const publicMediaContentType = (filename: string): string => {
+  const extension = filename.slice(filename.lastIndexOf('.') + 1).toLowerCase()
+  return (
+    {
+      avif: 'image/avif',
+      gif: 'image/gif',
+      jpeg: 'image/jpeg',
+      jpg: 'image/jpeg',
+      png: 'image/png',
+      svg: 'image/svg+xml',
+      webp: 'image/webp',
+    }[extension] || 'application/octet-stream'
+  )
+}
+
+ succeeded in 601ms:
+'use client'
+
+import type { StaticImageData } from 'next/image'
+
+import { cn } from '@/utilities/ui'
+import NextImage from 'next/image'
+import React from 'react'
+
+import type { Props as MediaProps } from '../types'
+
+import { cssVariables } from '@/cssVariables'
+import { isWingsGroupPublishedMedia } from '@/components/WingsGroupV3/model'
+import { getMediaUrl } from '@/utilities/getMediaUrl'
+
+const { breakpoints } = cssVariables
+
+// A base64 encoded image to use as a placeholder while the image is loading
+const placeholderBlur =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAABchJREFUWEdtlwtTG0kMhHtGM7N+AAdcDsjj///EBLzenbtuadbLJaZUTlHB+tRqSesETB3IABqQG1KbUFqDlQorBSmboqeEBcC1d8zrCixXYGZcgMsFmH8B+AngHdurAmXKOE8nHOoBrU6opcGswPi5KSP9CcBaQ9kACJH/ALAA1xm4zMD8AczvQCcAQeJVAZsy7nYApTSUzwCHUKACeUJi9TsFci7AHmDtuHYqQIC9AgQYKnSwNAig4NyOOwXq/xU47gDYggarjIpsRSEA3Fqw7AGkwgW4fgALAdiC2btKgNZwbgdMbEFpqFR2UyCR8xwAhf8bUHIGk1ckMyB5C1YkeWAdAPQBAeiD6wVYPoD1HUgXwFagZAGc6oSpTmilopoD5GzISQD3odcNIFca0BUQQM5YA2DpHV0AYURBDIAL0C+ugC0C4GedSsVUmwC8/4w8TPiwU6AClJ5RWL1PgQNkrABWdKB3YF3cBwRY5lsI4ApkKpCQi+FIgFJU/TDgDuAxAAwonJuKpGD1rkCXCR1ALyrAUSSEQAhwBdYZ6DPAgSUA2c1wKIZmRcHxMzMYR9DH8NlbkAwwApSAcABwBwTAbb6owAr0AFiZPILVEyCtMmK2jCkTwFDNUNj7nJETQx744gCUmgkZVGJUHyakEZE4W91jtGFA9KsD8Z3JFYDlhGYZLWcllwJMnplcPy+csFAgAAaIDOgeuAGoB96GLZg4kmtfMjnr6ig5oSoySsoy3ya/FMivXZWxwr0KIf9nACbfqcBEgmBSAtAlIT83R+70IWpyACamIjf5E1Iqb9ECVmnoI/FvAIRk8s2J0Y5IquQDgB+5wpScw5AUTC75VTmTs+72NUzoCvQIaAXv5Q8PDAZKLD+MxLv3RFE7KlsQChgBIlKiCv5ByaZv3gJZNm8AnVMhAN+EjrtTYQMICJpu6/0aiQnhClANlz+Bw0cIWa8ev0sBrtrhAyaXEnrfGfATQJiRKih5vKeOHNXXPFrgyamAADh0Q4F2/sESojomDS9o9k0b0H83xjB8qL+JNoTjN+enjpaBpingRh4e8MSugudM030A8FeqMI6PFIgNyPehkpZWGFEAARIQdH5LcAAqIACHkAJqg4OoBccHAuz76wr4BbzFOEa8iBuAZB8AtJHLP2VgMgJw/EIBowo7HxCAH3V6dAXEE/vZ5aZIA8BP8RKhm7Cp8BnAMnAQADdgQDA520AVIpScP+enHz0Gwp25h4i2dPg5FkDXrbsdJikQwXuWgaM5gEMk1AgH4DKKFjDf3bMD+FjEeIxLlRKYnBk2BbquvSDCAQ4gwZiMAAmH4gBTyRtEsYxi7gP6QSrc//39BrDNqG8rtYTmC4BV1SfMhOhaumFCT87zy4pPhQBZEK1kQVRjJBBi7AOlePgyAPYjwlvtagx9e/dnQraAyS894TIkkAIEYMKEc8k4EqJ68lZ5jjNqcQC2QteQOf7659umwBgPybNtK4dg9WvnMyFwXYGP7uEO1lwJgAnPNeMYMVXbIIYKFioI4PGFt+BWPVfmWJdjW2lTUnLGCswECAgaUy86iwA1464ajo0QhgMBFGyBoZahANsMpMfXr1JA1SN29m5lqgXj+UPV85uRA7yv/KYUO4Tk7Hc1AZwbIRzg0AyNj2UlAMwfSLSMnl7fdAbcxHuA27YaAMvaQ4GOjwX4RTUGAG8Ge14N963g1AynqUiFqRX9noasxT4b8entNRQYyamk/3tYcHsO7R3XJRRYOn4tw4iUnwBM5gDnySGOreAwAGo8F9IDHEcq8Pz2Kg/oXCpuIL6tOPD8LsDn0ABYQoGFRowlsAEUPPDrGAGowAbgKsgDMmE8mDy/vXQ9IAwI7u4wta+gAdAdgB64Ah9SgD4IgGKhwACoAjgNgFDhtxY8f33ZTMjqdTAiHMBPrn8ZWkEfzFdX4Oc1AHg3+ADbvN8PU8WdFKg4Tt6CQy2+D4YHaMT/JP4XzbAq98cPDIUAAAAASUVORK5CYII='
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+
+const isPublicMediaRoute = (value: string): boolean => {
+  if (value.startsWith('/media/')) return true
+
+  try {
+    const url = new URL(value)
+    return (
+      (url.hostname === 'wingsgroup.vn' || url.hostname === 'www.wingsgroup.vn') &&
+      url.pathname.startsWith('/media/')
+    )
+  } catch {
+    return false
+  }
+}
+
+const getGeneratedDerivativeEntries = (resource: unknown) => {
+  const record = isRecord(resource) ? resource : {}
+
+  return Object.entries(isRecord(record.sizes) ? record.sizes : {}).flatMap(([name, value]) => {
+    const match = /^wingsgroup-v3-(640|960|1440)-(avif|webp)$/u.exec(name)
+    if (!match || !isRecord(value)) return []
+
+    const filename = typeof value.filename === 'string' ? value.filename : ''
+    const url =
+      typeof value.url === 'string'
+        ? value.url
+        : filename
+          ? `/api/media/file/${filename}`
+          : ''
+    if (!url) return []
+
+    return [{ format: match[2], url, width: Number(match[1]) }]
+  })
+}
+
+/**
+ * ImageMedia
+ *
+ * This component passes a **relative** `src` (e.g. `/media/...`) to Next.js Image.
+ * Public media stays unoptimized so the browser request passes through the trusted site
+ * context added by the proxy. Next's server-side optimizer cannot forward that context.
+ *
+ * Flow:
+ *   1. Resource URL from Payload: `/media/image-123.jpg`
+ *   2. getMediaUrl() keeps the public path: `/media/image-123.jpg`
+ *   3. The browser requests the public media route directly.
+ *
+ * If your storage/plugin returns **external CDN URLs** (e.g. `https://cdn.example.com/...`),
+ * choose ONE of the following:
+ *   A) Allow the remote host in next.config.js:
+ *      images: { remotePatterns: [{ protocol: 'https', hostname: 'cdn.example.com' }] }
+ *   B) Provide a **custom loader** for CDN-specific transforms:
+ *      const imageLoader: ImageLoader = ({ src, width, quality }) =>
+ *        `https://cdn.example.com${src}?w=${width}&q=${quality ?? 75}`
+ *      <Image loader={imageLoader} src="/media/hero.jpg" width={1200} height={600} alt="" />
+ *   C) Skip optimization:
+ *      <Image unoptimized src="https://cdn.example.com/hero.jpg" width={1200} height={600} alt="" />
+ *
+ * TL;DR: Template uses relative URLs + getMediaUrl() and serves the trusted `/media/` route
+ * directly. Only add `loader` if using external CDNs with custom transforms.
+ */
+
+export const ImageMedia: React.FC<MediaProps> = (props) => {
+  const {
+    alt: altFromProps,
+    fill,
+    pictureClassName,
+    imgClassName,
+    priority,
+    resource,
+    size: sizeFromProps,
+    src: srcFromProps,
+    loading: loadingFromProps,
+  } = props
+
+  let width: number | undefined
+  let height: number | undefined
+  const resourceAlt =
+    resource && typeof resource === 'object'
+      ? resource.alt ||
+        resource.filename
+          ?.replace(/\.[^.]+$/, '')
+          .replace(/[-_]+/g, ' ')
+          .trim()
+      : undefined
+  const alt = altFromProps ?? resourceAlt
+  let src: StaticImageData | string = srcFromProps || ''
+
+  if (!src && resource && typeof resource === 'object') {
+    const { height: fullHeight, url, width: fullWidth } = resource
+
+    width = fullWidth!
+    height = fullHeight!
+
+    const cacheTag = resource.updatedAt
+
+    src = getMediaUrl(url, cacheTag)
+  }
+
+  const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
+  const useDirectMediaRoute = typeof src === 'string' && isPublicMediaRoute(src)
+  const useAuthenticatedPreviewImage =
+    resource &&
+    typeof resource === 'object' &&
+    resource.governance?.managedBy === 'wingsgroup-v3' &&
+    resource.governance.publicationState !== 'published'
+
+  const responsiveSources =
+    resource && typeof resource === 'object' && isWingsGroupPublishedMedia(resource)
+      ? (['avif', 'webp'] as const).map((format) => {
+          const generatedEntries = getGeneratedDerivativeEntries(resource)
+          const entries = (generatedEntries.length > 0
+            ? generatedEntries
+            : resource.governance?.responsiveDerivatives || []
+          )
+            .filter((entry) => entry.format === format && entry.url && entry.width)
+            .sort((left, right) => left.width - right.width)
+          return {
+            format,
+            srcSet: entries
+              .map((entry) => `${getMediaUrl(entry.url, resource.updatedAt)} ${entry.width}w`)
+              .join(', '),
+          }
+        })
+      : []
+
+  // NOTE: this is used by the browser to determine which image to download at different screen sizes
+  const sizes =
+    sizeFromProps ||
+    `(max-width: ${breakpoints.md}px) 100vw, (max-width: ${breakpoints.xl}px) 50vw, 33vw`
+
+  return (
+    <picture className={cn(fill && 'relative block', pictureClassName)}>
+      {responsiveSources
+        .filter(({ srcSet }) => Boolean(srcSet))
+        .map(({ format, srcSet }) => (
+          <source key={format} sizes={sizes} srcSet={srcSet} type={`image/${format}`} />
+        ))}
+      <NextImage
+        alt={alt || ''}
+        className={cn(imgClassName)}
+        fill={fill}
+        fetchPriority={priority ? 'high' : undefined}
+        height={!fill ? height : undefined}
+        placeholder="blur"
+        blurDataURL={placeholderBlur}
+        priority={priority}
+        quality={80}
+        unoptimized={Boolean(useAuthenticatedPreviewImage || useDirectMediaRoute)}
+        loading={loading}
+        sizes={sizes}
+        src={src}
+        width={!fill ? width : undefined}
+      />
+    </picture>
+  )
+}
+
+ succeeded in 608ms:
+10-
+11-const HTTPS_URL = /^https:\/\//i
+12-const SHA256 = /^[a-f0-9]{64}$/
+13-const EXTERNAL_CONSULTATION_CHANNEL_KEYS = new Set(['zalo', 'whatsapp', 'messenger'])
+14-const SAFE_DERIVATIVE_FILENAME = /^[A-Za-z0-9][A-Za-z0-9._-]*\.(?:avif|webp)$/u
+15:const WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER = Symbol('wingsgroup-v3-production-publish')
+16-
+17-type WingsGroupV3ProductionPublishContext = {
+18-  [WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER]: string
+19-}
+20-
+21:export const WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES = [
+22-  { format: 'webp', name: 'wingsgroup-v3-640-webp', width: 640 },
+23-  { format: 'avif', name: 'wingsgroup-v3-640-avif', width: 640 },
+24-  { format: 'webp', name: 'wingsgroup-v3-960-webp', width: 960 },
+25-  { format: 'avif', name: 'wingsgroup-v3-960-avif', width: 960 },
+26-  { format: 'webp', name: 'wingsgroup-v3-1440-webp', width: 1440 },
+--
+29-
+30-export const getWingsGroupV3DerivativeSizeName = (
+31-  format: 'avif' | 'webp',
+32-  width: number,
+33-): string | undefined =>
+34:  WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.find(
+35-    (size) => size.format === format && size.width === width,
+36-  )?.name
+37-
+38-export const createWingsGroupV3ProductionPublishContext = (
+39-  operationID: string,
+--
+51-    typeof (value as Partial<WingsGroupV3ProductionPublishContext>)[
+52-      WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER
+53-    ] === 'string',
+54-  )
+55-
+56:export const generateWingsGroupV3DerivativeImageName = ({
+57-  extension,
+58-  originalName,
+59-  width,
+60-}: {
+61-  extension: string
+--
+73-  value && typeof value === 'object' && !Array.isArray(value) ? (value as UnknownRecord) : {}
+74-
+75-const asString = (value: unknown): string => (typeof value === 'string' ? value.trim() : '')
+76-
+77-const isTrimmedNonempty = (value: unknown): value is string =>
+78:  typeof value === 'string' && value.length > 0 && value === value.trim()
+79-
+80-const hasHTTPSURL = (value: unknown): boolean => HTTPS_URL.test(asString(value))
+81-
+82-const hasSha256 = (value: unknown): boolean => SHA256.test(asString(value))
+83-
+--
+123-  return true
+124-}
+125-
+126-export const validateMediaGovernance = (value: unknown): true | string => {
+127-  const governance = asRecord(value)
+128:  if (governance.managedBy !== 'wingsgroup-v3' || governance.publicationState !== 'published') {
+129-    return true
+130-  }
+131-
+132:  if (!asString(governance.sourceAttachmentId)) return 'Media publish cần attachment nguồn.'
+133:  if (!asString(governance.sourceIdentity)) return 'Media publish cần source identity.'
+134:  if (!hasSha256(governance.sourceArchiveSha256)) return 'Media publish cần SHA-256 archive.'
+135:  if (!hasSha256(governance.sourceFileSha256)) return 'Media publish cần SHA-256 file nguồn.'
+136:  if (!asString(governance.provenanceReference)) return 'Media publish cần provenance.'
+137:  if (governance.rightsState !== 'approved') return 'Media publish cần quyền sử dụng đã duyệt.'
+138:  if (!asString(governance.rightsEvidence)) return 'Media publish cần bằng chứng quyền sử dụng.'
+139:  if (governance.derivativeState !== 'verified') {
+140:    return 'Media publish cần responsive derivatives đã được xác minh.'
+141-  }
+142-
+143:  const derivatives = Array.isArray(governance.responsiveDerivatives)
+144-    ? governance.responsiveDerivatives.map(asRecord)
+145-    : []
+146-  const expectedKeys = new Set(
+147:    WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ format, width }) => `${format}:${width}`),
+148-  )
+149-  const actualKeys = new Set<string>()
+150:  if (derivatives.length !== WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.length) {
+151:    return 'Media publish cần đúng sáu responsive derivatives.'
+152-  }
+153:  for (const item of derivatives) {
+154-    const format = item.format
+155-    const width = item.width
+156-    const key = `${String(format)}:${String(width)}`
+157-    if (!expectedKeys.has(key) || actualKeys.has(key)) {
+158:      return 'Media publish cần đúng một derivative cho từng width/format.'
+159-    }
+160-    actualKeys.add(key)
+161-    if (
+162-      !Number.isInteger(width) ||
+163-      !hasHTTPSURL(item.url) ||
+164-      !hasSha256(item.sha256) ||
+165-      typeof item.height !== 'number' ||
+166-      !Number.isInteger(item.height) ||
+167-      item.height < 1
+168-    ) {
+169:      return 'Mỗi derivative cần width, height, URL HTTPS và SHA-256 hợp lệ.'
+170-    }
+171-    let url: URL
+172-    try {
+173-      url = new URL(String(item.url))
+174-    } catch {
+175:      return 'Mỗi derivative cần URL HTTPS hợp lệ.'
+176-    }
+177:    const filename = url.pathname.slice('/media/'.length)
+178-    if (
+179-      url.protocol !== 'https:' ||
+180-      url.search ||
+181-      url.hash ||
+182-      !url.pathname.startsWith('/media/') ||
+183-      !SAFE_DERIVATIVE_FILENAME.test(filename) ||
+184-      !filename.endsWith(`.${String(format)}`)
+185-    ) {
+186:      return 'Mỗi derivative cần filename flat an toàn dưới /media/.'
+187-    }
+188-  }
+189-
+190-  return true
+191-}
+--
+193-export const validateWingsGroupV3PublicMedia = (
+194-  value: unknown,
+195-  publicOrigin?: string,
+196-): true | string => {
+197-  const governance = asRecord(value)
+198:  if (governance.managedBy !== 'wingsgroup-v3' || governance.publicationState !== 'published') {
+199:    return 'WingsGroup public media must be published governed media.'
+200-  }
+201-  const result = validateMediaGovernance(governance)
+202-  if (result !== true) return result
+203-  if (publicOrigin) {
+204-    let origin: URL
+205-    try {
+206-      origin = new URL(publicOrigin)
+207-    } catch {
+208:      return 'Media publish cần public origin hợp lệ.'
+209-    }
+210:    const derivatives = Array.isArray(governance.responsiveDerivatives)
+211-      ? governance.responsiveDerivatives.map(asRecord)
+212-      : []
+213:    if (derivatives.some((item) => new URL(String(item.url)).origin !== origin.origin)) {
+214:      return 'Media publish cần derivative URL cùng origin với site.'
+215-    }
+216-  }
+217-  return true
+218-}
+219-
+--
+337-  if (operation === 'create') {
+338-    if (target.code === 'wings-group' && !isTrustedOperator) {
+339-      throw new Error('Chỉ super-admin được tạo WingsGroup SiteSettings.')
+340-    }
+341-    const existing = await findSettingsForSite(target.id, req)
+342:    if (existing.docs.length > 0) {
+343-      throw new Error('Mỗi site chỉ được có một SiteSettings record.')
+344-    }
+345-    return data
+346-  }
+347-
+--
+356-  }
+357-
+358-  if (target.code === 'wings-group') {
+359-    const existing = await findSettingsForSite(target.id, req)
+360-    if (
+361:      existing.docs.length !== 1 ||
+362-      (originalDoc?.id !== undefined && String(existing.docs[0]?.id) !== String(originalDoc.id))
+363-    ) {
+364-      throw new Error('WingsGroup SiteSettings duplicate hoặc không xác định; từ chối thay đổi.')
+365-    }
+366-  }
+--
+381-  })
+382-  const target = await resolveSiteCode(settings.site, req)
+383-  if (target?.code !== 'wings-group') return
+384-
+385-  const existing = await findSettingsForSite(target.id, req)
+386:  if (existing.docs.length !== 1 || String(existing.docs[0]?.id) !== String(settings.id)) {
+387-    throw new Error('WingsGroup SiteSettings duplicate hoặc không xác định; từ chối xóa.')
+388-  }
+389-  if (req.context?.seed !== true && req.user?.role !== 'super-admin') {
+390-    throw new Error('Chỉ super-admin được xóa WingsGroup SiteSettings.')
+391-  }
+--
+409-  }
+410-
+411-  const governance = data?.governance ?? originalDoc?.governance
+412-  const parsed = asRecord(governance)
+413-  const governedSnapshot = (record: UnknownRecord) => ({
+414:    derivativeState: record.derivativeState,
+415-    managedBy: record.managedBy,
+416-    provenanceReference: record.provenanceReference,
+417-    publicationState: record.publicationState,
+418-    responsiveDerivatives: record.responsiveDerivatives,
+419-    rightsEvidence: record.rightsEvidence,
+--
+424-    sourceFilename: record.sourceFilename,
+425-    sourceIdentity: record.sourceIdentity,
+426-    usageScope: record.usageScope,
+427-  })
+428-  const isPendingCreateGovernance = Object.entries(parsed).every(([key, value]) => {
+429:    if (['derivativeState', 'publicationState', 'rightsState'].includes(key)) {
+430-      return value === undefined || value === null || value === '' || value === 'pending'
+431-    }
+432-    if (key === 'responsiveDerivatives') {
+433:      return value === undefined || value === null || (Array.isArray(value) && value.length === 0)
+434-    }
+435-    return value === undefined || value === null || value === ''
+436-  })
+437-  if (
+438-    req.user?.role !== 'super-admin' &&
+--
+441-  ) {
+442-    throw new Error('Chỉ super-admin được thay đổi metadata và trạng thái media governance.')
+443-  }
+444-
+445-  const isPublished =
+446:    parsed.managedBy === 'wingsgroup-v3' && parsed.publicationState === 'published'
+447-  const wasPublished =
+448:    previous.managedBy === 'wingsgroup-v3' && previous.publicationState === 'published'
+449-  if (isPublished && !wasPublished && !hasWingsGroupV3ProductionPublishContext(req.context)) {
+450-    throw new Error(
+451:      'WingsGroup v3 publication is server-owned; use the operation-bound production-publish phase.',
+452-    )
+453-  }
+454-
+455-  const result = validateMediaGovernance(governance)
+456-  if (result !== true) throw new Error(result)
+457-
+458:  if (parsed.managedBy === 'wingsgroup-v3' && parsed.publicationState === 'published') {
+459-    const site = data?.site ?? originalDoc?.site
+460-    const siteID = relationID(site)
+461:    if (siteID === undefined) throw new Error('WingsGroup v3 media publish cần site scope.')
+462-    const siteDoc = await req.payload.findByID({
+463-      collection: 'sites',
+464-      id: siteID,
+465-      depth: 0,
+466-      overrideAccess: true,
+467-      req,
+468-    })
+469-    if (siteDoc.code !== 'wings-group') {
+470:      throw new Error('WingsGroup v3 media chỉ được publish trong site wings-group.')
+471-    }
+472-    const publicResult = validateWingsGroupV3PublicMedia(
+473-      governance,
+474-      `https://${siteDoc.primaryDomain}`,
+475-    )
+476-    if (publicResult !== true) throw new Error(publicResult)
+477-
+478-    const mediaID = relationID(originalDoc?.id)
+479-    if (mediaID === undefined) {
+480:      throw new Error('Lưu media ở trạng thái ready, nhập alt VI/EN, rồi mới publish.')
+481-    }
+482-    const requestLocale = req.locale === 'en' ? 'en' : req.locale === 'vi' ? 'vi' : undefined
+483-    if (!requestLocale)
+484:      throw new Error('WingsGroup v3 media publish cần locale vi hoặc en rõ ràng.')
+485-    const hasPendingAlt = Object.prototype.hasOwnProperty.call(data || {}, 'alt')
+486-    const effectiveAlt: Partial<Record<'en' | 'vi', unknown>> = {}
+487-    if (hasPendingAlt) effectiveAlt[requestLocale] = data?.alt
+488-
+489-    const localesToRead = (['vi', 'en'] as const).filter(
+--
+504-        effectiveAlt[locale] = record.alt
+505-        return record
+506-      }),
+507-    )
+508-    if (!asString(effectiveAlt.vi) || !asString(effectiveAlt.en)) {
+509:      throw new Error('WingsGroup v3 media publish cần alt riêng cho cả vi và en.')
+510-    }
+511-  }
+512-
+513-  return data
+514-}
+--
+708-    {
+709-      name: 'publicationState',
+710-      label: 'Trạng thái xuất bản',
+711-      type: 'select',
+712-      defaultValue: 'pending',
+713:      options: ['pending', 'ready', 'published', 'rejected'],
+714-    },
+715-    {
+716:      name: 'derivativeState',
+717:      label: 'Responsive derivatives',
+718-      type: 'select',
+719-      defaultValue: 'pending',
+720-      options: ['pending', 'generated', 'verified'],
+721-    },
+722-    {
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "Get-Content -LiteralPath 'app/src/heros/presentations/index.tsx'" in E:\repo\WingsTravel
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "rg -n -C 5 'desktopVideo|mobileVideo|poster|video' 'app/src/heros/config.ts'" in E:\repo\WingsTravel
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "rg -n -C 6 'jobs:|tasks:|queue|autoRun|concurrency' 'app/src/payload.config.ts'" in E:\repo\WingsTravel
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "Get-Content -LiteralPath 'seo-audit-20261024/performance-images/REPORT.md'" in E:\repo\WingsTravel
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "Get-Content -LiteralPath 'app/src/fields/wingsGroupV3.ts' | Select-Object -First 72" in E:\repo\WingsTravel
+ succeeded in 732ms:
+256-  plugins,
+257-  secret: process.env.PAYLOAD_SECRET,
+258-  sharp,
+259-  typescript: {
+260-    outputFile: path.resolve(dirname, 'payload-types.ts'),
+261-  },
+262:  jobs: {
+263-    access: {
+264-      run: ({ req }: { req: PayloadRequest }): boolean => {
+265-        if (req.user?.role === 'super-admin') return true
+266-
+267-        const secret = process.env.CRON_SECRET
+268-        if (!secret) return false
+--
+271-        // for the Vercel Cron secret to be present as an
+272-        // Authorization header:
+273-        const authHeader = req.headers.get('authorization')
+274-        return authHeader === `Bearer ${secret}`
+275-      },
+276-    },
+277:    tasks: [
+278-      sendLeadNotificationTask,
+279-      reconcileLeadNotificationTask,
+280-      purgeExpiredWingsGroupLeadsTask,
+281-    ],
+282-  },
+283-})
+
+ succeeded in 815ms:
+199-      label: 'Ảnh hero chính',
+200-      type: 'upload',
+201-      admin: {
+202-        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
+203-        description:
+204:          'Dùng cho centered, split, planner và layered hero. Với carousel, nhập ảnh trong Slides. Với video, nhập poster trong Video hero.',
+205-      },
+206-      relationTo: 'media',
+207-    },
+208-    {
+209-      name: 'supportingMedia',
+--
+243-          },
+244-        }),
+245-      ],
+246-    },
+247-    {
+248:      name: 'video',
+249-      label: 'Video hero',
+250-      type: 'group',
+251-      admin: {
+252-        condition: (_, { type } = {}) => type === 'highImpact',
+253-        description:
+254:          'Dùng cho Video background. Poster nên luôn có trước khi publish để làm fallback khi reduced-motion hoặc lỗi phát video.',
+255-      },
+256-      fields: [
+257:        { name: 'desktopVideo', label: 'Video desktop', type: 'upload', relationTo: 'media' },
+258:        { name: 'mobileVideo', label: 'Video mobile', type: 'upload', relationTo: 'media' },
+259:        { name: 'poster', label: 'Poster', type: 'upload', relationTo: 'media' },
+260-      ],
+261-    },
+262-  ],
+263-  label: false,
+264-})
+
+ succeeded in 887ms:
+import type { Media as MediaDocument } from '@/payload-types'
+
+import { CMSLink } from '@/components/Link'
+import { Media } from '@/components/Media'
+import RichText from '@/components/RichText'
+import React, { useEffect, useRef, useState } from 'react'
+import { ChevronLeftIcon, ChevronRightIcon, PauseIcon, PlayIcon, SparklesIcon } from 'lucide-react'
+
+import type { HeroPresentationKey, HeroPresentationProps, HeroSlide } from './types'
+import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
+import { getMediaUrl } from '@/utilities/getMediaUrl'
+
+export type { HeroPresentationProps } from './types'
+
+const HeroCopy: React.FC<
+  Pick<HeroPresentationProps, 'badge' | 'links' | 'richText'> & {
+    centered?: boolean
+  }
+> = ({ badge, centered = false, links, richText }) => (
+  <div className={`hero-presentation__copy${centered ? ' hero-presentation__copy--centered' : ''}`}>
+    {badge ? (
+      <div className="site-hero__badge">
+        <SparklesIcon aria-hidden="true" className="h-4 w-4" />
+        <span>{badge}</span>
+      </div>
+    ) : null}
+    {richText && <RichText className="site-hero__richtext" data={richText} enableGutter={false} />}
+    {Array.isArray(links) && links.length > 0 ? (
+      <ul className="site-hero__actions">
+        {links.map(({ link }, index) => (
+          <li key={index}>
+            <CMSLink {...link} />
+          </li>
+        ))}
+      </ul>
+    ) : null}
+  </div>
+)
+
+const HeroVisual: React.FC<{
+  className?: string
+  media?: HeroPresentationProps['media']
+  priority?: boolean
+}> = ({ className = '', media, priority = false }) => (
+  <div className={`hero-presentation__visual ${className}`}>
+    {media && typeof media === 'object' ? (
+      <Media fill imgClassName="object-cover" priority={priority} resource={media} />
+    ) : null}
+  </div>
+)
+
+const HeroPostcards: React.FC<Pick<HeroPresentationProps, 'postcards'>> = ({ postcards }) =>
+  postcards.length > 0 ? (
+    <div className="hero-presentation__postcards">
+      {postcards.map((label) => (
+        <span key={label}>{label}</span>
+      ))}
+    </div>
+  ) : null
+
+const CenteredVisualHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  businessPanel,
+  links,
+  media,
+  postcards,
+  richText,
+}) => (
+  <div className="container hero-presentation hero-presentation--centered">
+    <HeroCopy badge={badge} centered links={links} richText={richText} />
+    <div className="hero-presentation__frame">
+      <HeroVisual media={media} priority />
+      <HeroPostcards postcards={postcards} />
+    </div>
+    {businessPanel}
+  </div>
+)
+
+const SplitVisualHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  businessPanel,
+  links,
+  media,
+  postcards,
+  richText,
+}) => (
+  <div className="container hero-presentation hero-presentation--split">
+    <HeroCopy badge={badge} links={links} richText={richText} />
+    <div className="hero-presentation__frame hero-presentation__frame--split">
+      <HeroVisual media={media} priority />
+      <HeroPostcards postcards={postcards} />
+    </div>
+    {businessPanel ? (
+      <div className="hero-presentation__business-panel">{businessPanel}</div>
+    ) : null}
+  </div>
+)
+
+const LayeredVisualsHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  businessPanel,
+  links,
+  media,
+  postcards,
+  richText,
+  supportingMedia,
+}) => {
+  const visuals = [media, ...(supportingMedia || [])].filter(
+    (item): item is MediaDocument => typeof item === 'object' && item !== null,
+  )
+  const fallbackVisuals = visuals.length > 0 ? visuals : []
+  const layeredVisuals =
+    fallbackVisuals.length >= 3
+      ? fallbackVisuals.slice(0, 3)
+      : [...fallbackVisuals, ...fallbackVisuals, ...fallbackVisuals].slice(0, 3)
+
+  return (
+    <div className="container hero-presentation hero-presentation--layered">
+      <div className="hero-presentation__layered-stage" aria-hidden="true">
+        {layeredVisuals.map((visual, index) => (
+          <HeroVisual
+            className={`hero-presentation__layer hero-presentation__layer--${index + 1}`}
+            key={`${visual.id}-${index}`}
+            media={visual}
+            priority={index === 0}
+          />
+        ))}
+      </div>
+      <HeroCopy badge={badge} centered links={links} richText={richText} />
+      <HeroPostcards postcards={postcards} />
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
+    </div>
+  )
+}
+
+const GradientMeshHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  businessPanel,
+  links,
+  postcards,
+  richText,
+}) => (
+  <div className="hero-presentation hero-presentation--mesh">
+    <div
+      className="hero-presentation__mesh-orb hero-presentation__mesh-orb--one"
+      aria-hidden="true"
+    />
+    <div
+      className="hero-presentation__mesh-orb hero-presentation__mesh-orb--two"
+      aria-hidden="true"
+    />
+    <div
+      className="hero-presentation__mesh-orb hero-presentation__mesh-orb--three"
+      aria-hidden="true"
+    />
+    <div className="container hero-presentation__mesh-content">
+      <HeroCopy badge={badge} centered links={links} richText={richText} />
+      <HeroPostcards postcards={postcards} />
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
+    </div>
+  </div>
+)
+
+export const PlannerSplitHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  behavior: _behavior,
+  businessPanel,
+  links,
+  media,
+  postcards,
+  preset,
+  richText,
+}) => (
+  <div
+    className="container hero-presentation hero-presentation--planner-split"
+    data-content-align={preset?.visual?.contentAlign || 'left'}
+    data-media-fit={preset?.visual?.mediaFit || 'cover'}
+  >
+    <HeroCopy badge={badge} links={links} richText={richText} />
+    <div className="hero-presentation__planner-stage">
+      <div className="hero-presentation__planner-visual">
+        <HeroVisual media={media} priority />
+        <HeroPostcards postcards={postcards} />
+      </div>
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
+    </div>
+  </div>
+)
+
+const getSlideMedia = (slide: HeroSlide, mobile = false) => {
+  const resource = mobile ? slide.mobileMedia || slide.media : slide.media
+
+  return resource && typeof resource === 'object' ? resource : null
+}
+
+export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  behavior,
+  businessPanel,
+  links,
+  preset,
+  resolvedLocale,
+  richText,
+  slides,
+}) => {
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [clientReady, setClientReady] = useState(false)
+  const [paused, setPaused] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
+  const [documentVisible, setDocumentVisible] = useState(true)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const safeSlides = (slides || []).filter((slide) => getSlideMedia(slide))
+  const canAutoplay =
+    behavior.autoplay && !paused && isVisible && documentVisible && safeSlides.length > 1
+  const semanticHeading = safeSlides[0]?.title || null
+  // Restrict to explicit WingSide inbound cinematic preset only (no cross-site overlay trigger).
+  const isHiFiEditorialSplit =
+    preset?.key === 'wingsside-inbound-cinematic-search' ||
+    Boolean(preset?.key?.includes('wingsside') && preset?.key?.includes('cinematic'))
+
+  useEffect(() => setClientReady(true), [])
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    if (mediaQuery.matches) setPaused(true)
+
+    const onMotionChange = (event: MediaQueryListEvent) => {
+      if (event.matches) setPaused(true)
+    }
+    mediaQuery.addEventListener?.('change', onMotionChange)
+    return () => mediaQuery.removeEventListener?.('change', onMotionChange)
+  }, [])
+
+  useEffect(() => {
+    const onVisibilityChange = () => setDocumentVisible(document.visibilityState === 'visible')
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [])
+
+  useEffect(() => {
+    if (!rootRef.current || typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), {
+      threshold: 0.2,
+    })
+    observer.observe(rootRef.current)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!canAutoplay) return
+    const timer = window.setInterval(() => {
+      setActiveIndex((current) => {
+        if (!behavior.loop && current >= safeSlides.length - 1) return current
+        return (current + 1) % safeSlides.length
+      })
+    }, behavior.intervalMs)
+
+    return () => window.clearInterval(timer)
+  }, [behavior.intervalMs, behavior.loop, canAutoplay, safeSlides.length])
+
+  const goTo = (index: number) => {
+    if (safeSlides.length === 0) return
+    setPaused(true)
+    setActiveIndex((index + safeSlides.length) % safeSlides.length)
+  }
+
+  if (safeSlides.length === 0) {
+    return (
+      <div className="container hero-presentation hero-presentation--carousel hero-presentation--empty">
+        <HeroCopy badge={badge} links={links} richText={richText} />
+      </div>
+    )
+  }
+
+  const activeSlide = safeSlides[activeIndex]
+  const carouselControls = (
+    <div
+      className={
+        isHiFiEditorialSplit
+          ? 'hero-presentation__carousel-controls hero-presentation__carousel-controls--hifi'
+          : 'container hero-presentation__carousel-controls'
+      }
+    >
+      {behavior.showArrows ? (
+        <div>
+          <button aria-label="Previous slide" onClick={() => goTo(activeIndex - 1)} type="button">
+            <ChevronLeftIcon aria-hidden="true" />
+          </button>
+          <button aria-label="Next slide" onClick={() => goTo(activeIndex + 1)} type="button">
+            <ChevronRightIcon aria-hidden="true" />
+          </button>
+        </div>
+      ) : null}
+      {behavior.showDots ? (
+        <div aria-label="Choose slide" className="hero-presentation__carousel-dots" role="group">
+          {safeSlides.map((slide, index) => (
+            <button
+              aria-label={`Go to slide ${index + 1}`}
+              aria-pressed={index === activeIndex}
+              key={slide.id || index}
+              onClick={() => goTo(index)}
+              type="button"
+            />
+          ))}
+        </div>
+      ) : null}
+      {behavior.autoplay ? (
+        <button
+          aria-label={paused ? 'Play carousel' : 'Pause carousel'}
+          onClick={() => setPaused((current) => !current)}
+          type="button"
+        >
+          {paused ? <PlayIcon aria-hidden="true" /> : <PauseIcon aria-hidden="true" />}
+        </button>
+      ) : null}
+    </div>
+  )
+
+  return (
+    <div
+      aria-roledescription="carousel"
+      className={
+        isHiFiEditorialSplit
+          ? 'container hero-presentation hero-presentation--carousel hero-presentation--carousel-hifi-split'
+          : 'hero-presentation hero-presentation--carousel'
+      }
+      data-business-panel={businessPanel ? 'true' : 'false'}
+      data-active-index={activeIndex}
+      data-client-ready={clientReady ? 'true' : 'false'}
+      data-hifi-split={isHiFiEditorialSplit ? 'true' : 'false'}
+      data-transition={behavior.transition}
+      onMouseEnter={() => behavior.pauseOnHover && setPaused(true)}
+      onMouseLeave={() => behavior.pauseOnHover && setPaused(false)}
+      ref={rootRef}
+      role="region"
+      style={
+        {
+          '--hero-ken-burns-ms': `${behavior.intervalMs}ms`,
+          '--hero-transition-ms': `${behavior.transitionMs}ms`,
+        } as React.CSSProperties
+      }
+    >
+      {/* Non-hifi keeps a screen-reader-only h1; hi-fi split uses the visible title as the real h1. */}
+      {!isHiFiEditorialSplit && semanticHeading ? (
+        <h1 className="sr-only">{semanticHeading}</h1>
+      ) : null}
+
+      {isHiFiEditorialSplit ? (
+        <div className="hero-presentation__hifi-copy">
+          {activeSlide?.eyebrow ? <p className="site-mini-label">{activeSlide.eyebrow}</p> : null}
+          {activeSlide?.title ? (
+            <h1 className="hero-presentation__hifi-title">{activeSlide.title}</h1>
+          ) : semanticHeading ? (
+            <h1 className="sr-only">{semanticHeading}</h1>
+          ) : null}
+          {activeSlide?.description ? (
+            <p className="hero-presentation__hifi-lede">{activeSlide.description}</p>
+          ) : null}
+          {(() => {
+            const homeCopy = getWingsSideHiFiCopy(resolvedLocale).home
+            const slideLinks = Array.isArray(activeSlide?.links) ? activeSlide.links : []
+            const heroLinks = Array.isArray(links) ? links : []
+            const combined =
+              slideLinks.length > 0 ? slideLinks : heroLinks.length > 0 ? heroLinks : []
+            const exploreLabel = homeCopy.exploreDestinations
+            const planLabel = homeCopy.planTripCta
+            // Hi-fi dual CTA: primary scrolls to denser planner; secondary explores destinations.
+            const dual = [
+              {
+                link: {
+                  appearance: 'default' as const,
+                  label:
+                    (combined[0]?.link && 'label' in combined[0].link && combined[0].link.label) ||
+                    planLabel,
+                  type: 'custom' as const,
+                  url: '#home-planner',
+                },
+              },
+              {
+                link: {
+                  appearance: 'outline' as const,
+                  label:
+                    (combined[1]?.link && 'label' in combined[1].link && combined[1].link.label) ||
+                    exploreLabel,
+                  type: 'custom' as const,
+                  url: '/destinations',
+                },
+              },
+            ]
+            return (
+              <ul className="site-hero__actions">
+                {dual.map(({ link }, index) => (
+                  <li key={index}>
+                    <CMSLink {...link} />
+                  </li>
+                ))}
+              </ul>
+            )
+          })()}
+          {!activeSlide?.title &&
+          !(Array.isArray(activeSlide?.links) && activeSlide.links.length) &&
+          !(Array.isArray(links) && links.length) ? (
+            <HeroCopy badge={badge} links={links} richText={richText} />
+          ) : null}
+        </div>
+      ) : null}
+
+      <div className="hero-presentation__carousel-stage">
+        {safeSlides.map((slide, index) => {
+          const desktopMedia = getSlideMedia(slide)
+          const mobileMedia = getSlideMedia(slide, true)
+          const isActive = index === activeIndex
+
+          return (
+            <article
+              aria-hidden={!isActive}
+              aria-label={`Slide ${index + 1} of ${safeSlides.length}`}
+              className="hero-presentation__slide"
+              data-active={isActive}
+              key={slide.id || `${slide.title}-${index}`}
+            >
+              <div
+                className="hero-presentation__slide-media hero-presentation__slide-media--desktop"
+                data-ken-burns={isActive && !paused ? 'active' : 'idle'}
+              >
+                {desktopMedia ? (
+                  <Media
+                    fill
+                    imgClassName="object-cover"
+                    priority={index === 0}
+                    resource={desktopMedia}
+                  />
+                ) : null}
+              </div>
+              <div
+                className="hero-presentation__slide-media hero-presentation__slide-media--mobile"
+                data-ken-burns={isActive && !paused ? 'active' : 'idle'}
+              >
+                {mobileMedia ? (
+                  <Media
+                    fill
+                    imgClassName="object-cover"
+                    priority={index === 0}
+                    resource={mobileMedia}
+                  />
+                ) : null}
+              </div>
+              {!isHiFiEditorialSplit ? (
+                <>
+                  <div
+                    className="hero-presentation__carousel-overlay"
+                    data-strength={preset?.visual?.overlayStrength || 'soft'}
+                  />
+                  <div className="container hero-presentation__slide-content">
+                    {slide.eyebrow ? <p className="site-mini-label">{slide.eyebrow}</p> : null}
+                    {slide.title ? <h2>{slide.title}</h2> : null}
+                    {slide.description ? <p>{slide.description}</p> : null}
+                    {slide.links?.[0]?.link ? <CMSLink {...slide.links[0].link} /> : null}
+                    {!slide.title && index === 0 ? (
+                      <HeroCopy badge={badge} links={links} richText={richText} />
+                    ) : null}
+                  </div>
+                </>
+              ) : slide.title ? (
+                <div className="hero-presentation__media-cap" aria-hidden={!isActive}>
+                  <span>{slide.title}</span>
+                </div>
+              ) : null}
+            </article>
+          )
+        })}
+        {isHiFiEditorialSplit ? carouselControls : null}
+      </div>
+
+      {businessPanel ? (
+        <div
+          className={
+            isHiFiEditorialSplit
+              ? 'hero-presentation__carousel-business-panel hero-presentation__carousel-business-panel--hifi'
+              : 'container hero-presentation__carousel-business-panel'
+          }
+        >
+          {businessPanel}
+        </div>
+      ) : null}
+
+      {!isHiFiEditorialSplit ? carouselControls : null}
+    </div>
+  )
+}
+
+const asMedia = (value: HeroPresentationProps['media']) =>
+  value && typeof value === 'object' ? value : null
+
+export const VideoBackgroundHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  behavior: _behavior,
+  links,
+  preset,
+  richText,
+  video,
+}) => {
+  const desktopVideo = asMedia(video?.desktopVideo)
+  const mobileVideo = asMedia(video?.mobileVideo) || desktopVideo
+  const poster = asMedia(video?.poster)
+  const [failed, setFailed] = useState(false)
+  const [reduceMotion, setReduceMotion] = useState(false)
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setReduceMotion(mediaQuery.matches)
+    const onChange = (event: MediaQueryListEvent) => setReduceMotion(event.matches)
+    mediaQuery.addEventListener?.('change', onChange)
+    return () => mediaQuery.removeEventListener?.('change', onChange)
+  }, [])
+
+  const posterURL = poster?.url ? getMediaUrl(poster.url, poster.updatedAt) : undefined
+  const desktopURL = desktopVideo?.url
+    ? getMediaUrl(desktopVideo.url, desktopVideo.updatedAt)
+    : undefined
+  const mobileURL = mobileVideo?.url
+    ? getMediaUrl(mobileVideo.url, mobileVideo.updatedAt)
+    : desktopURL
+  const showVideo = Boolean(desktopURL && !failed && !reduceMotion)
+
+  return (
+    <div className="hero-presentation hero-presentation--video">
+      {poster ? (
+        <div className="hero-presentation__video-poster">
+          <Media fill imgClassName="object-cover" priority resource={poster} />
+        </div>
+      ) : null}
+      {showVideo ? (
+        <video
+          aria-hidden="true"
+          autoPlay
+          className="hero-presentation__video-media hero-presentation__video-media--desktop"
+          loop
+          muted
+          onError={() => setFailed(true)}
+          playsInline
+          poster={posterURL}
+        >
+          <source src={desktopURL} type={desktopVideo?.mimeType || undefined} />
+        </video>
+      ) : null}
+      {showVideo ? (
+        <video
+          aria-hidden="true"
+          autoPlay
+          className="hero-presentation__video-media hero-presentation__video-media--mobile"
+          loop
+          muted
+          onError={() => setFailed(true)}
+          playsInline
+          poster={posterURL}
+        >
+          <source src={mobileURL} type={mobileVideo?.mimeType || undefined} />
+        </video>
+      ) : null}
+      <div
+        className="hero-presentation__carousel-overlay"
+        data-strength={preset?.visual?.overlayStrength || 'strong'}
+      />
+      <div className="container hero-presentation__video-content">
+        <HeroCopy badge={badge} links={links} richText={richText} />
+      </div>
+    </div>
+  )
+}
+
+export const VerticalVideoSplitHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  businessPanel,
+  links,
+  media,
+  postcards,
+  richText,
+}) => {
+  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
+  const isVideo = Boolean(
+    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
+  )
+  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
+
+  return (
+    <div
+      className="container hero-presentation hero-presentation--split"
+      data-hero-option="vertical-video-split"
+    >
+      <HeroCopy badge={badge} links={links} richText={richText} />
+      <div className="hero-presentation__frame flex flex-col items-center justify-center overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
+        <div className="relative mx-auto aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-[32px] border border-slate-700/60 bg-slate-950 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.4),0_12px_28px_-6px_rgba(15,23,42,0.2)] md:max-w-[420px]">
+          {isVideo && videoSrc ? (
+            <video
+              autoPlay
+              className="h-full w-full object-cover"
+              controls={false}
+              loop
+              muted
+              playsInline
+            >
+              <source src={videoSrc} type="video/mp4" />
+            </video>
+          ) : (
+            <Media fill imgClassName="object-cover" priority resource={media} />
+          )}
+
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
+          />
+
+          {postcards.length > 0 ? (
+            <div className="absolute inset-x-0 bottom-3.5 z-10 flex flex-wrap justify-center gap-1.5 px-3">
+              {postcards.map((label) => (
+                <span
+                  className="inline-flex items-center rounded-full border border-white/25 bg-black/45 px-3 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-md"
+                  key={label}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
+    </div>
+  )
+}
+
+export const DeviceMockupSplitHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  businessPanel,
+  links,
+  media,
+  postcards,
+  richText,
+}) => {
+  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
+  const isVideo = Boolean(
+    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
+  )
+  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
+
+  return (
+    <div
+      className="container hero-presentation hero-presentation--split"
+      data-hero-option="device-mockup-split"
+    >
+      <HeroCopy badge={badge} links={links} richText={richText} />
+      <div className="hero-presentation__frame flex flex-col items-center justify-center overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
+        {/* Adaptive frame: Mobile is 4:5 vertical video card; Desktop (md:) is 9:18.5 smartphone mockup */}
+        <div className="relative mx-auto aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-[32px] border border-slate-700/60 bg-slate-950 p-0 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.4),0_12px_28px_-6px_rgba(15,23,42,0.2)] md:aspect-[9/18.5] md:w-[320px] md:max-w-none md:overflow-visible md:rounded-[52px] md:border-[6px] md:border-slate-700/80 md:bg-gradient-to-b md:from-slate-700 md:via-slate-800 md:to-slate-900 md:p-2.5 md:shadow-[0_30px_70px_-10px_rgba(15,23,42,0.45),0_12px_28px_-6px_rgba(15,23,42,0.25)] lg:w-[340px]">
+          {/* Dynamic Island: hidden on mobile, visible on desktop mockup */}
+          <div
+            aria-hidden="true"
+            className="absolute left-1/2 top-3.5 z-20 hidden h-4 w-24 -translate-x-1/2 items-center justify-center rounded-full bg-black/95 shadow-inner md:flex"
+          >
+            <div className="ml-auto mr-3 h-2 w-2 rounded-full border border-slate-700/60 bg-slate-900" />
+          </div>
+
+          {/* Screen content container */}
+          <div className="relative h-full w-full overflow-hidden rounded-[32px] bg-black md:rounded-[40px]">
+            {isVideo && videoSrc ? (
+              <video
+                autoPlay
+                className="h-full w-full object-cover"
+                controls={false}
+                loop
+                muted
+                playsInline
+              >
+                <source src={videoSrc} type="video/mp4" />
+              </video>
+            ) : (
+              <Media fill imgClassName="object-cover" priority resource={media} />
+            )}
+
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
+            />
+
+            {postcards.length > 0 ? (
+              <div className="absolute inset-x-0 bottom-3.5 z-10 flex flex-wrap justify-center gap-1.5 px-3">
+                {postcards.map((label) => (
+                  <span
+                    className="inline-flex items-center rounded-full border border-white/25 bg-black/45 px-3 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-md"
+                    key={label}
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
+    </div>
+  )
+}
+
+export const AmbientVideoSplitHero: React.FC<HeroPresentationProps> = ({
+  badge,
+  businessPanel,
+  links,
+  media,
+  postcards,
+  richText,
+}) => {
+  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
+  const isVideo = Boolean(
+    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
+  )
+  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
+
+  return (
+    <div
+      className="container hero-presentation hero-presentation--split"
+      data-hero-option="ambient-video-split"
+    >
+      <HeroCopy badge={badge} links={links} richText={richText} />
+      <div className="hero-presentation__frame overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[28px] border border-slate-700/60 bg-slate-950 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.45),0_12px_28px_-6px_rgba(15,23,42,0.25)]">
+          {isVideo && videoSrc ? (
+            <video
+              aria-hidden="true"
+              autoPlay
+              className="absolute inset-0 h-full w-full scale-125 object-cover opacity-50 blur-2xl filter"
+              controls={false}
+              loop
+              muted
+              playsInline
+            >
+              <source src={videoSrc} type="video/mp4" />
+            </video>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--site-brand)]/20 via-slate-900 to-black" />
+          )}
+
+          <div className="relative z-10 flex h-full w-full items-center justify-center p-2">
+            {isVideo && videoSrc ? (
+              <video
+                autoPlay
+                className="h-full max-h-full rounded-[18px] object-contain shadow-2xl"
+                controls={false}
+                loop
+                muted
+                playsInline
+              >
+                <source src={videoSrc} type="video/mp4" />
+              </video>
+            ) : (
+              <Media fill imgClassName="object-contain" priority resource={media} />
+            )}
+          </div>
+
+          {postcards.length > 0 ? (
+            <div className="absolute inset-x-0 bottom-2.5 z-20 flex flex-wrap justify-center gap-1.5 px-3">
+              {postcards.map((label) => (
+                <span
+                  className="inline-flex items-center rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md"
+                  key={label}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {businessPanel ? (
+        <div className="hero-presentation__business-panel">{businessPanel}</div>
+      ) : null}
+    </div>
+  )
+}
+
+export const heroPresentationComponents: Record<
+  HeroPresentationKey,
+  React.FC<HeroPresentationProps>
+> = {
+  'centered-visual': CenteredVisualHero,
+  'cinematic-carousel': CinematicCarouselHero,
+  'gradient-mesh': GradientMeshHero,
+  'layered-visuals': LayeredVisualsHero,
+  'planner-split': PlannerSplitHero,
+  'split-visual': SplitVisualHero,
+  'video-background': VideoBackgroundHero,
+  'vertical-video-split': VerticalVideoSplitHero,
+  'device-mockup-split': DeviceMockupSplitHero,
+  'ambient-video-split': AmbientVideoSplitHero,
+}
+
+ succeeded in 846ms:
+import type { CollectionBeforeChangeHook, CollectionBeforeDeleteHook, Field } from 'payload'
+import { WINGSGROUP_LEGAL_IDENTITY } from '@/wingsgroup/corporateRoutes'
+import {
+  WINGSGROUP_CONSENT_VERSION,
+  WINGSGROUP_DATA_CONTACT,
+  WINGSGROUP_LEAD_RETENTION_MONTHS,
+  WINGSGROUP_POLICY_ROUTES,
+  WINGSGROUP_PRIVACY_VERSION,
+} from '@/lead-capture/wingsGroupV3'
+
+const HTTPS_URL = /^https:\/\//i
+const SHA256 = /^[a-f0-9]{64}$/
+const EXTERNAL_CONSULTATION_CHANNEL_KEYS = new Set(['zalo', 'whatsapp', 'messenger'])
+const SAFE_DERIVATIVE_FILENAME = /^[A-Za-z0-9][A-Za-z0-9._-]*\.(?:avif|webp)$/u
+const WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER = Symbol('wingsgroup-v3-production-publish')
+
+type WingsGroupV3ProductionPublishContext = {
+  [WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER]: string
+}
+
+export const WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES = [
+  { format: 'webp', name: 'wingsgroup-v3-640-webp', width: 640 },
+  { format: 'avif', name: 'wingsgroup-v3-640-avif', width: 640 },
+  { format: 'webp', name: 'wingsgroup-v3-960-webp', width: 960 },
+  { format: 'avif', name: 'wingsgroup-v3-960-avif', width: 960 },
+  { format: 'webp', name: 'wingsgroup-v3-1440-webp', width: 1440 },
+  { format: 'avif', name: 'wingsgroup-v3-1440-avif', width: 1440 },
+] as const
+
+export const getWingsGroupV3DerivativeSizeName = (
+  format: 'avif' | 'webp',
+  width: number,
+): string | undefined =>
+  WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.find(
+    (size) => size.format === format && size.width === width,
+  )?.name
+
+export const createWingsGroupV3ProductionPublishContext = (
+  operationID: string,
+): Readonly<WingsGroupV3ProductionPublishContext> => {
+  if (!/^[a-z0-9][a-z0-9._-]{15,127}$/u.test(operationID)) {
+    throw new Error('WingsGroup production publication context requires an operation ID.')
+  }
+  return Object.freeze({ [WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER]: operationID })
+}
+
+const hasWingsGroupV3ProductionPublishContext = (value: unknown): boolean =>
+  Boolean(
+    value &&
+    typeof value === 'object' &&
+    typeof (value as Partial<WingsGroupV3ProductionPublishContext>)[
+      WINGSGROUP_V3_PUBLISH_CONTEXT_MARKER
+    ] === 'string',
+  )
+
+export const generateWingsGroupV3DerivativeImageName = ({
+  extension,
+  originalName,
+  width,
+}: {
+  extension: string
+  originalName: string
+  width: number
+}): string => {
+  const governedName = /^wg-v3-([a-f0-9]{12})-(.+)$/u.exec(originalName)
+  if (!governedName) return `${originalName}-${width}.${extension}`
+  return `${governedName[2]}-${governedName[1]}-${width}.${extension}`
+}
+
+type UnknownRecord = Record<string, unknown>
+
+const asRecord = (value: unknown): UnknownRecord =>
+
+ succeeded in 911ms:
+# Kiểm tra tốc độ tải và ảnh/video — WingsGroup, WingsGo
+
+Ngày đo: **24/10/2026**, giờ Việt Nam (UTC+7). Bổ sung cho **US-086 / AC6**,
+intake 158. Đây là baseline production trước tối ưu.
+
+## Kết quả tốc độ
+
+| Trang / thiết bị | Điểm Performance /100 | FCP | LCP | TBT | CLS | Đã truyền |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| WingsGroup home — mobile | 52 | 2,85s | **4,79s** | 742ms | 0,058 | 1,50 MiB |
+| WingsGroup home — desktop | 72 | 0,91s | 2,22s | 69ms | **0,173** | 2,57 MiB |
+| WingsGo home — mobile * | 57 | 2,25s | **17,24s** | 346ms | 0,000 | ≥5,07 MiB * |
+| WingsGo home — desktop * | 67 | 1,16s | **3,45s** | 0ms | 0,000 | ≥5,69 MiB * |
+| WingsGo /tour — mobile * | 71 | 2,53s | **4,61s** | 18ms | 0,000 | ≥3,32 MiB * |
+| WingsGo tour Seoul — mobile | 63 | 3,45s | **4,98s** | 81ms | 0,012 | 2,47 MiB |
+
+FCP: nội dung đầu tiên; LCP: nội dung lớn nhất hiển thị; TBT: thời gian tác vụ
+JavaScript chặn luồng chính trong lab; CLS: mức dịch chuyển bố cục. Dung lượng
+là tổng byte truyền quan sát trong lượt Lighthouse, không phải kích thước HTML.
+
+**Dấu *:** ít nhất một lượt có cảnh báo tải quá chậm/chưa hoàn tất trong giới
+hạn 45 giây của Lighthouse. LCP/điểm vẫn là kết quả lab mà công cụ xuất ra;
+payload ở các lượt này chỉ là phần đã tải, không phải tổng dung lượng tải xong.
+Không dùng kết quả có cảnh báo làm bằng chứng nghiệm thu đạt hiệu năng.
+
+| Tổ hợp | LCP thấp nhất–cao nhất | Lượt có observedLoad /3 | Cảnh báo chậm /3 |
+| --- | ---: | ---: | ---: |
+| Group home mobile | 4,54–8,71s | 3 | 0 |
+| Group home desktop | 1,46–2,80s | 3 | 0 |
+| Go home mobile | 16,04–18,94s | 1 | 2 |
+| Go home desktop | 3,19–4,14s | 0 | 3 |
+| Go /tour mobile | 4,41–5,74s | 1 | 2 |
+| Go detail mobile | 4,75–5,32s | 3 | 0 |
+
+Go home mobile chỉ một lượt ghi sự kiện load ở **42,545s**, tour listing một
+lượt ở **41,784s**; không có trung vị load hợp lệ từ ba lượt cho hai nhóm này.
+Go home desktop không ghi được sự kiện load trong cả ba lượt. Group mobile
+có load quan sát 3,789–14,533s, desktop 2,732–11,180s; Go detail
+18,889–31,491s. Đây là thời điểm sự kiện load trong trace, không phải thời điểm
+mọi ảnh lazy/video tải xong và không cùng đại lượng với LCP mô phỏng.
+
+### Cách đo và giới hạn
+
+- 18 lượt, sáu tổ hợp URL/thiết bị, mỗi tổ hợp ba lượt tuần tự; bảng dùng
+  **trung vị riêng của từng chỉ số**, không chọn một lượt đẹp nhất. JSON gốc
+  lưu `fetchTime`, cấu hình, cảnh báo, network và screenshot.
+- Lighthouse **13.5.0**, Headless Chrome **155**, Windows; local lab qua mạng
+  máy đang làm việc, không giả là vị trí đo toàn cầu hoặc điện thoại thật.
+- Mobile: 412×823 CSS px, DPR 1,75, simulated throttling RTT 150ms,
+  throughput 1638,4Kbps, CPU chậm 4 lần. Desktop: 1350×940, DPR 1,
+  RTT 40ms, throughput 10240Kbps, CPU 1 lần. Reset storage mỗi lượt.
+- FCP/LCP/TBT là kết quả mô phỏng; `observedLoad`, DCL và TTFB từ trace
+  chưa throttle. Không ghép chúng thành một thời gian tải “thật” duy nhất.
+- Chạy browser inventory riêng ở 412×823 và 1440×1000, DPR 1; không lấy
+  kích thước ảnh của inventory DPR 1 thay cho thiết bị Lighthouse DPR 1,75.
+- PSI API trước đó bị quota; lần này đo bằng Lighthouse cục bộ thành công.
+  **Chưa có CrUX/GSC/GA4**, chưa đo field p75 hay INP. TBT không thay INP;
+  điểm Performance không phải điểm SEO hoặc kết luận mất thứ hạng.
+- Lượt đầu có thể khác cache CDN so với lượt sau dù browser reset. Khoảng
+  dao động và cảnh báo được lưu đầy đủ, không cam kết một điểm cố định.
+
+## Ảnh: có đo byte và kích thước thật
+
+Tám inventory browser của bốn route × hai viewport, sau cuộn có giới hạn;
+GET **40 URL ảnh** đang được chọn qua `currentSrc` hoặc preload, cùng host.
+**40/40 trả HTTP 200.** Không chỉ kiểm tra thuộc tính alt.
+
+| Site | URL ảnh trong mẫu | >200 KiB | >1 MiB |
+| --- | ---: | ---: | ---: |
+| WingsGo | 27 | 19 | 11 |
+| WingsGroup | 13 | 4 | 0 |
+
+Đây là số URL trong mẫu, có URL version/query trùng nội dung. Tổng kích thước
+file của mẫu Go khoảng **32,15 MiB**, Group **1,93 MiB**: **không phải dung lượng
+tải ban đầu của một trang**. Byte file sau giải mã HTTP và byte truyền network
+có thể khác do nén header/body và cache.
+
+### P1 — WingsGo dùng ảnh gốc quá lớn cho card
+
+| File (rút gọn tên) | Dung lượng file | Kích thước thật |
+| --- | ---: | ---: |
+| NAGOYA – KYOTO – LÀNG CỔ … TOKYO.png | 3.197.788 B | 1024×1536 |
+| Cẩm nang du lịch Singapore – Malaysia.png | 3.139.347 B | 1448×1086 |
+| Hành trình khám phá Bắc Kinh rực rỡ.png | 3.119.029 B | 1122×1402 |
+| Hành Trình Rực Rỡ Singapore Malaysia.png | 3.085.270 B | 1448×1086 |
+| Hành trình Trung Hoa rực rỡ đào xuân.png | 3.065.201 B | 1448×1086 |
+| Tết Nhật Bản_ Hành Trình Hoa Anh Đào.png | 3.053.591 B | 1448×1086 |
+| HQt7-03.png | 1.872.544 B | 3156×1769 |
+| dia-diem-du-lich-le-30-4-o-busan-1-….png | 1.335.107 B | 1000×663 |
+
+Go dùng `img` không có srcset/picture responsive trong các inventory này.
+Ảnh `HQt7-03.png` xuất hiện ở thumb **62×62 CSS px** và card/detail **363×227**
+trong browser mobile DPR 1 nhưng vẫn lấy file gốc 3156×1769. Cùng URL trong
+một trang có thể được browser dùng chung; không cộng dung lượng mỗi thẻ img.
+
+Lượt `wingsgo-home-mobile-2.json` ghi ảnh truyền **3.010.926 B**; insight Improve
+image delivery ước tính tiết kiệm khoảng **2685 KiB** trong lượt này. Riêng
+HQt7-03 khoảng 1,78 triệu B ước tính có thể giảm. Đây là ước tính của công cụ,
+chưa phải số tiết kiệm đã thực hiện.
+
+**Việc cần làm:** tạo biến thể AVIF/WebP theo kích thước sử dụng, khai báo
+srcset/sizes; giữ file gốc cho nhu cầu xem chi tiết. Xem trực tiếp chữ và chi
+tiết poster sau nén/crop trước nghiệm thu. Không đặt lazy cho ảnh LCP; ảnh
+dưới fold dùng lazy có giữ tỷ lệ. Xác minh response byte, dimensions và ảnh
+được browser chọn trên mobile/desktop, không chỉ nhìn URL biến thể.
+
+### P1 — WingsGroup tải JPEG gốc đồng thời với AVIF
+
+Hai JPEG hero/ecosystem khác tên trả **cùng SHA-256**, mỗi file **327.744 B**,
+1086×1448. Cả hai được preload ưu tiên cao dưới dạng URL JPEG; `picture`
+lại chọn AVIF. Resource timing ghi JPEG có initiator `link`, AVIF có
+initiator `img`; network Lighthouse lạnh có cả hai loại được truyền.
+
+Các AVIF 640 khoảng **41.825 B**, AVIF 960 **73.205 B** trong mẫu. Bản AVIF
+giữa hai tên cũng trùng byte. Ảnh ecosystem dưới fold vẫn được priority cao.
+
+Điểm cần kiểm tra khi sửa:
+
+- `app/src/components/Media/ImageMedia/index.tsx`: picture sources kết hợp
+  NextImage priority/unoptimized và URL gốc có thể tạo preload không khớp.
+- `app/src/components/WingsGroupV3/EcosystemExplorer.tsx`: activeIndex đầu
+  được priority dù section nằm dưới fold.
+
+**Việc cần làm:** sửa preload khớp nguồn thực chọn và sizes, giữ ưu tiên cho
+ảnh trên fold; tránh tải hai bản JPEG/AVIF cho cùng vai trò. Kiểm tra network
+trước/sau và ảnh có hiển thị, không chỉ kiểm tra thuộc tính preload.
+
+### P1 — URL w=640 nhưng file vẫn rộng 1440px
+
+Sáu ảnh tiêu chuẩn WingsGroup dưới đây đi qua `_next/image?...&w=640&q=80`
+nhưng GET thực tế, giải mã bằng Pillow, đều là **WebP 1440×810**:
+
+| File gốc | Byte file trả về |
+| --- | ---: |
+| safety-and-trust | 133.760 |
+| professional-team | 201.468 |
+| care-for-every-journey | 216.314 |
+| airlines-and-partners | 162.932 |
+| hotel-standard | 174.638 |
+| fleet-and-tour-operations | 211.498 |
+
+Card hiển thị khoảng 363×204 mobile và 422×237 desktop trong inventory DPR 1.
+Đã có bằng chứng output resize không khớp yêu cầu; **chưa kết luận nguyên
+nhân là Nginx, Next hay cơ chế phục vụ media trên VPS**. Cần truy đúng pipeline,
+xác minh output thật và ảnh ở DPR cao sau sửa. Không đổi cache HTML/private
+toàn site để giải quyết ảnh.
+
+## Video hero cũng làm tăng tải WingsGo
+
+HTML production có `<video autoplay loop muted playsinline>` với nguồn
+`/media/video%20webs.mp4`, **không có poster hoặc preload khai báo**. Source
+`app/src/heros/presentations/index.tsx`, `DeviceMockupSplitHero`, khớp HTML này.
+
+Trong `wingsgo-home-mobile-2.json`, video đã truyền **2.142.475 B**, HTTP 206,
+request `finished=false`, MIME ghi `application/octet-stream`. Tổng tải quan
+sát lượt này **5.875.789 B**, gồm ảnh 3.010.926 B và video như trên. Không coi
+2,14 MB là dung lượng đầy đủ của file MP4.
+
+Screenshot mới của lượt này có nội dung, header và khung hero đen; chưa thấy
+khung hình video trong ảnh chụp lab. Đây không phải bằng chứng ảnh bị 404.
+Candidate LCP được công cụ ghi ở lượt này là logo, nên không quy toàn bộ
+LCP 16,04s cho video hoặc một ảnh cụ thể chỉ dựa vào dung lượng.
+
+Probe range mới lúc **22:02:06 UTC+7**, chỉ đọc **2 byte**, trả HTTP **206**,
+`Content-Range: bytes 0-1/11546189`: file video đầy đủ **11.546.189 B ≈11,01 MiB**.
+Server/CDN có xử lý range trong phép thử này; Content-Type thực vẫn là
+`application/octet-stream`, CF-Cache-Status HIT. Không tải toàn bộ MP4 để đo.
+Chi tiết: `video-range-probe.json`.
+
+**Việc cần làm:** poster tối ưu và cơ chế tải/phát video phù hợp mạng chậm,
+giữ thiết kế video; kiểm tra byte cạnh tranh với ảnh/JS, trạng thái media,
+Content-Type và range. Xác minh poster/khung hình thực trong browser mới.
+
+## P2 — CLS desktop WingsGroup và JavaScript
+
+Median response tài liệu do Lighthouse ghi khoảng **595/652ms** cho Group
+mobile/desktop và **1739/1740ms** cho Go home mobile/desktop, Go listing
+**1737ms**, detail **1176ms**. TTFB trace có thể tính cả các bước navigation
+nên khác các giá trị server-response audit. Cần tách origin, CDN và redirect
+thực bằng header/trace trước khi quy nguyên nhân cho database hoặc VPS.
+
+Group desktop có CLS trung vị khoảng **0,173**. Trace
+`wingsgroup-home-desktop-2.json` chỉ phần lớn dịch chuyển ở **section#about**
+(ecosystem), tổng hai đóng góp lớn khoảng 0,173. Cần giữ kích thước section
+ổn định qua hydrate/font/media và kiểm tra lại chính tác nhân trong trace.
+Không kết luận mọi img thiếu width/height HTML gây CLS: CSS có thể đã giữ tỷ lệ.
+
+Group mobile có TBT trung vị khoảng **742ms**, Go home khoảng **346ms**.
+Kiểm tra tác vụ dài, hydrate và JS không cần cho viewport đầu bằng trace;
+không xóa React/Next hay toàn bundle chỉ vì công cụ báo unused bytes.
+
+## Thứ tự tối ưu trong US-086
+
+1. **P1 ảnh/video:** biến thể ảnh Go; preload/picture và output resize Group;
+   poster và chiến lược tải video Go. AC6 có kiểm chứng byte/kích thước thật.
+2. **P2 ổn định và tương tác:** xử lý CLS ecosystem, trace JS/TBT, đối chiếu
+   thời gian phản hồi tài liệu trước khi cân nhắc thay đổi cache.
+3. **P3 nội dung ảnh:** alt hero Group/tour Go có dạng tên file; mô tả đúng
+   nội dung có ý nghĩa, giữ alt rỗng cho trang trí.
+4. **Đo sau sửa:** lặp ba lượt cho cùng sáu cấu hình; so sánh median/range,
+   completion, screenshot và request thực. Lượt cảnh báo không dùng làm proof
+   đạt. Không gộp kết quả local lab với field CWV p75.
+
+## Lệnh và bằng chứng
+
+```powershell
+./seo-audit-20261024/performance-images/collect-images.ps1
+python seo-audit-20261024/performance-images/probe-images.py
+./seo-audit-20261024/performance-images/run-lighthouse.ps1
+python seo-audit-20261024/performance-images/summarize-performance.py
+```
+
+- Summary: `performance-image-summary.json`; asserts đủ 18 lượt/sáu cấu hình,
+  không runtimeError, cùng cấu hình trong từng nhóm, đủ tám inventory.
+- Raw Lighthouse: `wingsgroup-home-{mobile,desktop}-{1,2,3}.json`,
+  `wingsgo-home-{mobile,desktop}-{1,2,3}.json`,
+  `wingsgo-{tour,detail}-mobile-{1,2,3}.json`.
+- Browser: tám `*-images.json`; `collect-images.js` cuộn và chờ decode có giới
+  hạn. Ảnh lazy còn pending sau cuộn không tự động là file hỏng; listing có
+  load thêm động nên không coi số ảnh trong hai viewport là tổng catalog.
+- GET: `image-probes.json`, `probe-progress.txt`: 40 URL, byte/header/hash,
+  dimensions và nơi sử dụng. Bốn AVIF không giải mã bằng Pillow bản cài hiện
+  tại; Chrome đã hiển thị và GET 200, không ghi chúng là ảnh hỏng.
+- Screenshot: `wingsgo-home-mobile-2-lighthouse.jpg` và ảnh lấy từ JSON median.
+- Nguồn phương pháp: Chrome Lighthouse performance scoring, Chrome Improve
+  image delivery, web.dev Optimize LCP; đối chiếu ngày 24/10/2026.
+
+## Đã làm / chưa làm
+
+Đã đo trên trang public, phân loại bottleneck, bổ sung cùng US-086; không
+đánh dấu proof triển khai. Chưa sửa app/CMS, chưa deploy/push, chưa thử thiết
+bị vật lý hoặc đo field CWV. Rủi ro tải chậm/ảnh lớn vẫn còn đến khi triển khai
+và đo lại; không suy ra mức tăng chuyển đổi hay thứ hạng từ audit này.
+
+web search: 
+web search: site.payloadcms.com/docs/jobs-queue preventing concurrent jobs running concurrency
+codex
+Đã xác nhận ba khoảng trống trong mã hiện tại: route public chỉ tra original và sáu biến thể Group; renderer lấy width từ tên profile thay vì metadata thực; response media có cache công khai kéo dài nhưng chưa xử lý Range. Tôi sẽ ghi rõ điều kiện chặn nghiệm thu cho từng điểm, đồng thời phân biệt lỗi đã thấy trong mã với rủi ro cần kiểm thử.
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "rg -n -A 140 'const VideoBackgroundHero|const DeviceMockupSplitHero' 'app/src/heros/presentations/index.tsx'" in E:\repo\WingsTravel
+ succeeded in 348ms:
+501:export const VideoBackgroundHero: React.FC<HeroPresentationProps> = ({
+502-  badge,
+503-  behavior: _behavior,
+504-  links,
+505-  preset,
+506-  richText,
+507-  video,
+508-}) => {
+509-  const desktopVideo = asMedia(video?.desktopVideo)
+510-  const mobileVideo = asMedia(video?.mobileVideo) || desktopVideo
+511-  const poster = asMedia(video?.poster)
+512-  const [failed, setFailed] = useState(false)
+513-  const [reduceMotion, setReduceMotion] = useState(false)
+514-
+515-  useEffect(() => {
+516-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+517-    setReduceMotion(mediaQuery.matches)
+518-    const onChange = (event: MediaQueryListEvent) => setReduceMotion(event.matches)
+519-    mediaQuery.addEventListener?.('change', onChange)
+520-    return () => mediaQuery.removeEventListener?.('change', onChange)
+521-  }, [])
+522-
+523-  const posterURL = poster?.url ? getMediaUrl(poster.url, poster.updatedAt) : undefined
+524-  const desktopURL = desktopVideo?.url
+525-    ? getMediaUrl(desktopVideo.url, desktopVideo.updatedAt)
+526-    : undefined
+527-  const mobileURL = mobileVideo?.url
+528-    ? getMediaUrl(mobileVideo.url, mobileVideo.updatedAt)
+529-    : desktopURL
+530-  const showVideo = Boolean(desktopURL && !failed && !reduceMotion)
+531-
+532-  return (
+533-    <div className="hero-presentation hero-presentation--video">
+534-      {poster ? (
+535-        <div className="hero-presentation__video-poster">
+536-          <Media fill imgClassName="object-cover" priority resource={poster} />
+537-        </div>
+538-      ) : null}
+539-      {showVideo ? (
+540-        <video
+541-          aria-hidden="true"
+542-          autoPlay
+543-          className="hero-presentation__video-media hero-presentation__video-media--desktop"
+544-          loop
+545-          muted
+546-          onError={() => setFailed(true)}
+547-          playsInline
+548-          poster={posterURL}
+549-        >
+550-          <source src={desktopURL} type={desktopVideo?.mimeType || undefined} />
+551-        </video>
+552-      ) : null}
+553-      {showVideo ? (
+554-        <video
+555-          aria-hidden="true"
+556-          autoPlay
+557-          className="hero-presentation__video-media hero-presentation__video-media--mobile"
+558-          loop
+559-          muted
+560-          onError={() => setFailed(true)}
+561-          playsInline
+562-          poster={posterURL}
+563-        >
+564-          <source src={mobileURL} type={mobileVideo?.mimeType || undefined} />
+565-        </video>
+566-      ) : null}
+567-      <div
+568-        className="hero-presentation__carousel-overlay"
+569-        data-strength={preset?.visual?.overlayStrength || 'strong'}
+570-      />
+571-      <div className="container hero-presentation__video-content">
+572-        <HeroCopy badge={badge} links={links} richText={richText} />
+573-      </div>
+574-    </div>
+575-  )
+576-}
+577-
+578-export const VerticalVideoSplitHero: React.FC<HeroPresentationProps> = ({
+579-  badge,
+580-  businessPanel,
+581-  links,
+582-  media,
+583-  postcards,
+584-  richText,
+585-}) => {
+586-  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
+587-  const isVideo = Boolean(
+588-    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
+589-  )
+590-  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
+591-
+592-  return (
+593-    <div
+594-      className="container hero-presentation hero-presentation--split"
+595-      data-hero-option="vertical-video-split"
+596-    >
+597-      <HeroCopy badge={badge} links={links} richText={richText} />
+598-      <div className="hero-presentation__frame flex flex-col items-center justify-center overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
+599-        <div className="relative mx-auto aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-[32px] border border-slate-700/60 bg-slate-950 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.4),0_12px_28px_-6px_rgba(15,23,42,0.2)] md:max-w-[420px]">
+600-          {isVideo && videoSrc ? (
+601-            <video
+602-              autoPlay
+603-              className="h-full w-full object-cover"
+604-              controls={false}
+605-              loop
+606-              muted
+607-              playsInline
+608-            >
+609-              <source src={videoSrc} type="video/mp4" />
+610-            </video>
+611-          ) : (
+612-            <Media fill imgClassName="object-cover" priority resource={media} />
+613-          )}
+614-
+615-          <div
+616-            aria-hidden="true"
+617-            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
+618-          />
+619-
+620-          {postcards.length > 0 ? (
+621-            <div className="absolute inset-x-0 bottom-3.5 z-10 flex flex-wrap justify-center gap-1.5 px-3">
+622-              {postcards.map((label) => (
+623-                <span
+624-                  className="inline-flex items-center rounded-full border border-white/25 bg-black/45 px-3 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-md"
+625-                  key={label}
+626-                >
+627-                  {label}
+628-                </span>
+629-              ))}
+630-            </div>
+631-          ) : null}
+632-        </div>
+633-      </div>
+634-      {businessPanel ? (
+635-        <div className="hero-presentation__business-panel">{businessPanel}</div>
+636-      ) : null}
+637-    </div>
+638-  )
+639-}
+640-
+641:export const DeviceMockupSplitHero: React.FC<HeroPresentationProps> = ({
+642-  badge,
+643-  businessPanel,
+644-  links,
+645-  media,
+646-  postcards,
+647-  richText,
+648-}) => {
+649-  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
+650-  const isVideo = Boolean(
+651-    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
+652-  )
+653-  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
+654-
+655-  return (
+656-    <div
+657-      className="container hero-presentation hero-presentation--split"
+658-      data-hero-option="device-mockup-split"
+659-    >
+660-      <HeroCopy badge={badge} links={links} richText={richText} />
+661-      <div className="hero-presentation__frame flex flex-col items-center justify-center overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
+662-        {/* Adaptive frame: Mobile is 4:5 vertical video card; Desktop (md:) is 9:18.5 smartphone mockup */}
+663-        <div className="relative mx-auto aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-[32px] border border-slate-700/60 bg-slate-950 p-0 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.4),0_12px_28px_-6px_rgba(15,23,42,0.2)] md:aspect-[9/18.5] md:w-[320px] md:max-w-none md:overflow-visible md:rounded-[52px] md:border-[6px] md:border-slate-700/80 md:bg-gradient-to-b md:from-slate-700 md:via-slate-800 md:to-slate-900 md:p-2.5 md:shadow-[0_30px_70px_-10px_rgba(15,23,42,0.45),0_12px_28px_-6px_rgba(15,23,42,0.25)] lg:w-[340px]">
+664-          {/* Dynamic Island: hidden on mobile, visible on desktop mockup */}
+665-          <div
+666-            aria-hidden="true"
+667-            className="absolute left-1/2 top-3.5 z-20 hidden h-4 w-24 -translate-x-1/2 items-center justify-center rounded-full bg-black/95 shadow-inner md:flex"
+668-          >
+669-            <div className="ml-auto mr-3 h-2 w-2 rounded-full border border-slate-700/60 bg-slate-900" />
+670-          </div>
+671-
+672-          {/* Screen content container */}
+673-          <div className="relative h-full w-full overflow-hidden rounded-[32px] bg-black md:rounded-[40px]">
+674-            {isVideo && videoSrc ? (
+675-              <video
+676-                autoPlay
+677-                className="h-full w-full object-cover"
+678-                controls={false}
+679-                loop
+680-                muted
+681-                playsInline
+682-              >
+683-                <source src={videoSrc} type="video/mp4" />
+684-              </video>
+685-            ) : (
+686-              <Media fill imgClassName="object-cover" priority resource={media} />
+687-            )}
+688-
+689-            <div
+690-              aria-hidden="true"
+691-              className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/30 to-transparent"
+692-            />
+693-
+694-            {postcards.length > 0 ? (
+695-              <div className="absolute inset-x-0 bottom-3.5 z-10 flex flex-wrap justify-center gap-1.5 px-3">
+696-                {postcards.map((label) => (
+697-                  <span
+698-                    className="inline-flex items-center rounded-full border border-white/25 bg-black/45 px-3 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-md"
+699-                    key={label}
+700-                  >
+701-                    {label}
+702-                  </span>
+703-                ))}
+704-              </div>
+705-            ) : null}
+706-          </div>
+707-        </div>
+708-      </div>
+709-      {businessPanel ? (
+710-        <div className="hero-presentation__business-panel">{businessPanel}</div>
+711-      ) : null}
+712-    </div>
+713-  )
+714-}
+715-
+716-export const AmbientVideoSplitHero: React.FC<HeroPresentationProps> = ({
+717-  badge,
+718-  businessPanel,
+719-  links,
+720-  media,
+721-  postcards,
+722-  richText,
+723-}) => {
+724-  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
+725-  const isVideo = Boolean(
+726-    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
+727-  )
+728-  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
+729-
+730-  return (
+731-    <div
+732-      className="container hero-presentation hero-presentation--split"
+733-      data-hero-option="ambient-video-split"
+734-    >
+735-      <HeroCopy badge={badge} links={links} richText={richText} />
+736-      <div className="hero-presentation__frame overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
+737-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[28px] border border-slate-700/60 bg-slate-950 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.45),0_12px_28px_-6px_rgba(15,23,42,0.25)]">
+738-          {isVideo && videoSrc ? (
+739-            <video
+740-              aria-hidden="true"
+741-              autoPlay
+742-              className="absolute inset-0 h-full w-full scale-125 object-cover opacity-50 blur-2xl filter"
+743-              controls={false}
+744-              loop
+745-              muted
+746-              playsInline
+747-            >
+748-              <source src={videoSrc} type="video/mp4" />
+749-            </video>
+750-          ) : (
+751-            <div className="absolute inset-0 bg-gradient-to-br from-[var(--site-brand)]/20 via-slate-900 to-black" />
+752-          )}
+753-
+754-          <div className="relative z-10 flex h-full w-full items-center justify-center p-2">
+755-            {isVideo && videoSrc ? (
+756-              <video
+757-                autoPlay
+758-                className="h-full max-h-full rounded-[18px] object-contain shadow-2xl"
+759-                controls={false}
+760-                loop
+761-                muted
+762-                playsInline
+763-              >
+764-                <source src={videoSrc} type="video/mp4" />
+765-              </video>
+766-            ) : (
+767-              <Media fill imgClassName="object-contain" priority resource={media} />
+768-            )}
+769-          </div>
+770-
+771-          {postcards.length > 0 ? (
+772-            <div className="absolute inset-x-0 bottom-2.5 z-20 flex flex-wrap justify-center gap-1.5 px-3">
+773-              {postcards.map((label) => (
+774-                <span
+775-                  className="inline-flex items-center rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md"
+776-                  key={label}
+777-                >
+778-                  {label}
+779-                </span>
+780-              ))}
+781-            </div>
+
+exec
+"C:\\Program Files\\PowerShell\\7\\pwsh.exe" -Command "rg -n 'getGeneratedDerivativeEntries|width: Number|responsiveSources|priority=|Cache-Control|Accept-Ranges|filenameConditions|governance &&|imageSizes:|afterChange:|generateWingsGroupV3DerivativeImageName|derivatives.length|expectedKeys|jobs:|tasks:|publicMediaContentType' 'app/src/components/Media/ImageMedia/index.tsx' 'app/src/app/(payload)/api/public-media/[filename]/route.ts' 'app/src/collections/Media.ts' 'app/src/fields/wingsGroupV3.ts' 'app/src/payload.config.ts' 'app/src/utilities/publicMediaDelivery.ts'" in E:\repo\WingsTravel
+ succeeded in 426ms:
+app/src/utilities/publicMediaDelivery.ts:23:export const publicMediaContentType = (filename: string): string => {
+app/src/payload.config.ts:262:  jobs: {
+app/src/payload.config.ts:277:    tasks: [
+app/src/collections/Media.ts:24:  generateWingsGroupV3DerivativeImageName,
+app/src/collections/Media.ts:178:    imageSizes: localPreviewStore
+app/src/collections/Media.ts:216:              generateImageName: generateWingsGroupV3DerivativeImageName,
+app/src/collections/Media.ts:224:    afterChange: [revalidateCuratedTourMedia],
+app/src/components/Media/ImageMedia/index.tsx:38:const getGeneratedDerivativeEntries = (resource: unknown) => {
+app/src/components/Media/ImageMedia/index.tsx:54:    return [{ format: match[2], url, width: Number(match[1]) }]
+app/src/components/Media/ImageMedia/index.tsx:130:  const responsiveSources =
+app/src/components/Media/ImageMedia/index.tsx:133:          const generatedEntries = getGeneratedDerivativeEntries(resource)
+app/src/components/Media/ImageMedia/index.tsx:156:      {responsiveSources
+app/src/components/Media/ImageMedia/index.tsx:169:        priority={priority}
+app/src/fields/wingsGroupV3.ts:56:export const generateWingsGroupV3DerivativeImageName = ({
+app/src/fields/wingsGroupV3.ts:146:  const expectedKeys = new Set(
+app/src/fields/wingsGroupV3.ts:150:  if (derivatives.length !== WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.length) {
+app/src/fields/wingsGroupV3.ts:157:    if (!expectedKeys.has(key) || actualKeys.has(key)) {
+app/src/app/(payload)/api/public-media/[filename]/route.ts:13:  publicMediaContentType,
+app/src/app/(payload)/api/public-media/[filename]/route.ts:26:    { headers: { 'Cache-Control': 'no-store' }, status },
+app/src/app/(payload)/api/public-media/[filename]/route.ts:76:      const filenameConditionsForSearch = [
+app/src/app/(payload)/api/public-media/[filename]/route.ts:88:        where: { or: filenameConditionsForSearch } satisfies Where,
+app/src/app/(payload)/api/public-media/[filename]/route.ts:104:  const filenameConditions = [
+app/src/app/(payload)/api/public-media/[filename]/route.ts:119:        { or: filenameConditions },
+app/src/app/(payload)/api/public-media/[filename]/route.ts:127:  if (governance && governance.managedBy === 'wingsgroup-v3') {
+app/src/app/(payload)/api/public-media/[filename]/route.ts:152:        'Accept-Ranges': 'bytes',
+app/src/app/(payload)/api/public-media/[filename]/route.ts:153:        'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
+app/src/app/(payload)/api/public-media/[filename]/route.ts:155:        'Content-Type': publicMediaContentType(filename),
+
+codex
+# US-086 / AC6 independent consultation — October 24, 2026
+
+**Recommendation: P2, conditional on the plan corrections below.** Reuse Media, existing derivatives, shared rendering and tenant delivery. Introduce a Payload media task only where measured processing cost requires it. No new dependency, collection, Redis queue, transform service or platform migration is needed in the baseline.
+
+**Keep US-086 Planned and retain its six Plane children.** This consultation supports planning; it does not establish implementation or AC6 acceptance.
+
+## P1 — Resolve before implementation or acceptance
+
+### 1. Replacement needs an atomic commit condition
+
+“Switch only if the source revision is current” must mean an **atomic conditional update**, not a read followed by an update.
+
+Required plan corrections:
+
+- Key work by site, media ID, source revision/hash, profile version and normalized crop.
+- Distinguish desired generation, active ready generation and individual processing attempts.
+- Write to private temporary files; validate; finalize unique filenames; then conditionally switch the active pointer.
+- Recheck source revision **and current publication/rights state** at commit. A worker must never restore publication after an editor revokes it.
+- A stale worker must not overwrite the new generation’s status or error.
+- Retry after a crash must reconcile finalized files and database state without exposing partial outputs.
+
+“Failed replacement retains previous ready version” should apply only while that previous version remains authorized. Rights revocation overrides availability.
+
+**Acceptance gap:** concurrent replacements finishing out of order; crop changes during processing; duplicate execution; unpublish during processing; crash before and after pointer switch.
+
+### 2. Public delivery authorization is not yet generic
+
+The inspected [public route](</E:/repo/WingsTravel/app/src/app/(payload)/api/public-media/[filename]/route.ts:104>) resolves originals and six Group derivative names, uses `overrideAccess: true`, and applies the explicit publication validator only when `managedBy === 'wingsgroup-v3'`.
+
+This does **not prove a WingsGo disclosure**, but it means tenant matching alone cannot establish the proposed private/draft/public policy.
+
+Required corrections:
+
+- Define WingsGo’s public-media eligibility separately from Group governance.
+- Resolve allowed derivatives through the owning media record and its authorized generation.
+- Require authorization for each file response, including original files.
+- Cover `/media/`, the named public API route, Payload file URLs and any storage/CDN exposure.
+- Do not add arbitrary filesystem lookup as a fallback when a derivative is missing.
+
+**Acceptance gap:** anonymous draft/private access, another tenant’s filenames, forged site headers, direct original/derivative requests, and authenticated preview responses crossing into public cache. Alternate-route behavior remains unverified.
+
+### 3. Revocation conflicts with preserving old URLs indefinitely
+
+The current route emits `max-age=300`, `s-maxage=3600` and `stale-while-revalidate=86400`; denial responses already use `no-store`. See [response headers](</E:/repo/WingsTravel/app/src/app/(payload)/api/public-media/[filename]/route.ts:152>).
+
+Correct the plan to distinguish:
+
+- **Retaining original bytes and historical filenames**, for rollback.
+- **Continuing public authorization**, which can end.
+
+Require a documented revocation bound covering browser caches, CDN caches, aliases, originals and every retained derivative generation. CDN purge cannot recall bytes already downloaded by a browser.
+
+Prevent in-flight old responses from repopulating caches after purge; define ordering, retries and failure reporting. Verify denied responses are not negatively cached by CDN rules.
+
+**Acceptance gap:** warm-cache unpublish, purge failure, concurrent requests during revocation, and old generation URLs after replacement or withdrawal.
+
+### 4. “No upscale” conflicts with Group’s fixed width contract
+
+The [Group validator](</E:/repo/WingsTravel/app/src/fields/wingsGroupV3.ts:146>) requires exactly six entries keyed by **actual numeric widths** 640/960/1440 and format. The [renderer](</E:/repo/WingsTravel/app/src/components/Media/ImageMedia/index.tsx:38>) currently derives width from the profile name rather than output metadata.
+
+Recommended baseline:
+
+- Preserve Group’s exact six-entry contract.
+- For new Group sources, require sufficient effective width after orientation/crop for genuine 1440px output.
+- Otherwise leave the replacement draft and retain an authorized previous generation.
+- For Go, use actual decoded widths and omit or deduplicate unavailable candidates.
+- Never advertise a 320px file as `640w`.
+
+A 160/320 thumb profile is reasonable only after checking actual slot size and supported DPR. It is not sufficient for a 363px card at DPR 1.75, which needs approximately 635 physical pixels.
+
+**Acceptance gap:** small sources, portrait crops, orientation, duplicate capped widths and truthful `srcset` descriptors. Supporting smaller Group sources would require a separately reviewed contract change.
+
+## P2 — Tighten the implementation and test plan
+
+### 5. Keep the sustainable baseline small
+
+The [Media configuration](</E:/repo/WingsTravel/app/src/collections/Media.ts:178>) already generates standard sizes and six Group sizes globally. First inventory and reuse valid outputs; add 160/320 WebP only for demonstrated thumbnail gaps. Scope any new profile rather than multiplying every upload’s outputs.
+
+Use existing metadata for synchronous readiness where sufficient. Persist additional generation state only when asynchronous replacement requires it; do not borrow Group’s publication or derivative state for Go.
+
+The [jobs configuration](</E:/repo/WingsTravel/app/src/payload.config.ts:262>) registers lead tasks. A media task still needs an explicit runner and queue selection; registering a task alone does not execute it. Payload documents queueing and execution separately. ([payloadcms.com](https://payloadcms.com/docs/jobs-queue/overview))
+
+Specify one media worker across the deployment initially, resource limits, stale-work recovery, retry backoff, and whether “three retries” means four total attempts. Keep media work from starving lead jobs. Verify concurrency controls against installed **3.84.1** before relying on current documentation.
+
+### 6. Match rendering and preload to the selected asset
+
+[ImageMedia](</E:/repo/WingsTravel/app/src/components/Media/ImageMedia/index.tsx:130>) combines Group picture sources with `NextImage priority` on the fallback original.
+
+Prefer one shared rendering policy that uses verified derivative metadata and preserves the existing tenant-safe delivery path. For the initial candidate, use eager loading and appropriate fetch priority; add preload only when it matches responsive selection. Next’s current Image documentation distinguishes preload from fetch priority and deprecates `priority` starting in Next 16. ([nextjs.org](https://nextjs.org/docs/app/api-reference/components/image))
+
+**Acceptance gap:** rendered `currentSrc`, decoded dimensions, selected DPR, no redundant original preload, below-fold requests, and actual resize output. Removing an attribute alone is insufficient evidence.
+
+### 7. Define video readiness without a circular wait
+
+[VideoBackgroundHero](</E:/repo/WingsTravel/app/src/heros/presentations/index.tsx:501>) initially permits video before its reduced-motion effect runs and mounts two video elements. [DeviceMockupSplitHero](</E:/repo/WingsTravel/app/src/heros/presentations/index.tsx:641>) supplies an immediate MP4 source without using the existing video poster fields.
+
+Required corrections:
+
+- Define “critical content ready” using observable content/poster readiness and a documented scheduling condition. Do not wait for a final LCP result or a load event that video can itself delay.
+- Initially render the poster without video URLs; select one active source after eligibility checks.
+- Treat unavailable network information conservatively without breaking playback.
+- Cover rejected `play()` promises, source errors, keyboard play/pause and visibility changes.
+- Explicitly scope the other video variants present in the same file.
+- Separate range behavior from playback: verify exact bytes for ordinary GET, bounded/open-ended/suffix ranges and unsatisfiable ranges at origin and CDN.
+
+The inspected route has no Range parsing, and [MIME mapping](</E:/repo/WingsTravel/app/src/utilities/publicMediaDelivery.ts:23>) lacks MP4. The reported CDN two-byte probe proves only that specific CDN response.
+
+Use prepared compliant MP4 files in the baseline. Automated transcoding requires a separate capability and capacity decision if no suitable encoder is already available.
+
+### 8. Freeze a reproducible performance contract
+
+The supplied [report](</E:/repo/WingsTravel/seo-audit-20261024/performance-images/REPORT.md>) supports prioritizing media work, but also identifies Group CLS, long tasks and document response time. Media optimization alone cannot promise the proposed page thresholds.
+
+Keep the proposed thresholds as provisional targets, then freeze before implementation:
+
+- Exact six scenarios, URLs, content revision, build and Lighthouse/browser configuration.
+- Separate browser-cold runs from CDN cold/warm diagnostics.
+- Three valid runs per scenario, metric medians **and ranges**, with every warning retained.
+- A predefined rerun rule; no silently discarding slow runs.
+- The aggregation rule for CLS/TBT as well as LCP.
+- A fixed initial-byte observation window or event, unique network requests, cache treatment and separate deferred-video bytes.
+- Per-slot quality review at supported DPR.
+
+If any required scenario misses the frozen gate, leave AC6 open and identify the residual cause. Field data remains N/A; these lab targets do not establish field CWV.
+
+### 9. Make rollout and rollback concrete
+
+Add acceptance cases for:
+
+- Original-only imports, preview mode and missing legacy derivatives.
+- Backward-compatible metadata deployment before enforcing readiness.
+- Unrelated edits to legacy published content without introducing a global block.
+- Readiness checks at the server publication boundary, including localized required slots.
+- Revalidation after generation switches across affected sites, locales and referencing documents.
+- Backfill interruption, resume, disk exhaustion and targeted rollback.
+
+Retaining files alone does not preserve usable old URLs: the delivery lookup must still resolve retained authorized generations. Schema reversibility and pointer rollback must be demonstrated without restoring the entire database.
+
+## P3 — Documentation and editor clarity
+
+- Separate generation errors, rights/publication errors and quality warnings.
+- State which slots are required and which legacy exceptions remain temporary.
+- Give each quality exception a media revision, slot, reason and review condition.
+- Report duplicate hashes only; keep tenant ownership and deletion decisions separate.
+- Track these details within AC6 and the existing six children; no additional child is necessary.
+
+## Proposed AC6 clarification
+
+> AC6 requires appropriately selected, verified media for the measured layouts; tenant-safe and publication-aware delivery; poster-first deferred video; compatible legacy conversion and rollback; and passing evidence against the frozen six-scenario lab protocol. Generation readiness does not authorize publication. Planning, queued work, HTTP 200 responses and warning-bearing measurements do not establish acceptance.
+
+**Review evidence:** read the eight named repository files using `Get-Content` and targeted `rg`; commands exited 0. No files or Plane records changed.
+
+Not checked: live access/cache behavior, raw measurement artifacts, application suites, or the original story/Plane records.  
+Remaining risk: P2 is suitable for planning, but race safety, revocation and performance remain unproven until implementation tests pass.
+tokens used
+60,533

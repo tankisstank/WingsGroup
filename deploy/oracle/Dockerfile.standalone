@@ -3,7 +3,6 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV PORT 3000
-ENV LD_LIBRARY_PATH /app/node_modules/.pnpm/@img+sharp-libvips-linuxmusl-arm64@1.1.0/node_modules/@img/sharp-libvips-linuxmusl-arm64/lib:$LD_LIBRARY_PATH
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -13,9 +12,9 @@ COPY .next ./.next
 COPY node_modules ./node_modules
 COPY package.json ./package.json
 COPY server.js ./server.js
-COPY relink.sh ./relink.sh
+COPY relink.sh verify-sharp-arm64.cjs ./
 
-RUN chmod +x ./relink.sh && ./relink.sh && rm ./relink.sh
+RUN chmod +x ./relink.sh && ./relink.sh && rm ./relink.sh && node verify-sharp-arm64.cjs && rm verify-sharp-arm64.cjs
 RUN chown -R nextjs:nodejs /app
 
 USER nextjs

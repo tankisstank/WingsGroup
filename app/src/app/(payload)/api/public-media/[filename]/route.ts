@@ -10,6 +10,7 @@ import { validateWingsGroupV3PublicMedia, WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES }
 import {
   isSafePublicMediaFilename,
   normalizePublicMediaHost,
+  parseSingleByteRange,
   publicMediaContentType,
 } from '@/utilities/publicMediaDelivery'
 import {
@@ -147,16 +148,82 @@ export async function GET(
     const fileStats = await stat(filePath)
     if (!fileStats.isFile()) return json('Not found.', 404)
 
+    const contentType = publicMediaContentType(filename)
+    // shortcut: video replacements lack strong validators; enable caching after immutable version storage is implemented.
+    const cacheControl = contentType.startsWith('video/')
+      ? 'no-store'
+      : 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400'
+    const method = request.method?.toUpperCase() || 'GET'
+    const rangeHeader = request.headers.get('range')
+    const ifRange = request.headers.get('if-range')
+
+    // RFC 9110:
+    // 1. Range is only evaluated for GET requests; non-GET requests ignore Range.
+    // 2. When If-Range is present, since entity tags are not currently exposed,
+    //    the Range header is ignored and the entire representation is served to prevent stale partial-file assembly.
+    const shouldEvaluateRange = method === 'GET' && Boolean(rangeHeader) && !ifRange
+
+    if (shouldEvaluateRange && rangeHeader) {
+      const parsedRange = parseSingleByteRange(rangeHeader, fileStats.size)
+
+      if (parsedRange.type === 'unsatisfiable') {
+        return new Response(null, {
+          status: 416,
+          headers: {
+            'Cache-Control': 'no-store',
+            'Content-Range': `bytes */${fileStats.size}`,
+          },
+        })
+      }
+
+      if (parsedRange.type === 'range') {
+        const { start, end } = parsedRange.range
+        const chunkLength = end - start + 1
+        const stream = createReadStream(filePath, { start, end })
+
+        return new Response(Readable.toWeb(stream) as ReadableStream, {
+          status: 206,
+          headers: {
+            'Accept-Ranges': 'bytes',
+            'Cache-Control': 'no-store',
+            'Content-Length': String(chunkLength),
+            'Content-Range': `bytes ${start}-${end}/${fileStats.size}`,
+            'Content-Type': contentType,
+          },
+        })
+      }
+    }
+
+    if (method === 'HEAD') {
+      return new Response(null, {
+        status: 200,
+        headers: {
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': cacheControl,
+          'Content-Length': String(fileStats.size),
+          'Content-Type': contentType,
+        },
+      })
+    }
+
     return new Response(Readable.toWeb(createReadStream(filePath)) as ReadableStream, {
+      status: 200,
       headers: {
         'Accept-Ranges': 'bytes',
-        'Cache-Control': 'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
+        'Cache-Control': cacheControl,
         'Content-Length': String(fileStats.size),
-        'Content-Type': publicMediaContentType(filename),
+        'Content-Type': contentType,
       },
     })
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return json('Not found.', 404)
     throw error
   }
+}
+
+export async function HEAD(
+  request: Request,
+  context: { params: Promise<{ filename: string }> },
+): Promise<Response> {
+  return GET(request, context)
 }

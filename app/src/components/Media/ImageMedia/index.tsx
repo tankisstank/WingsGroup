@@ -26,8 +26,16 @@ const isPublicMediaRoute = (value: string): boolean => {
 
   try {
     const url = new URL(value)
+    const host = url.hostname.toLowerCase()
     return (
-      (url.hostname === 'wingsgroup.vn' || url.hostname === 'www.wingsgroup.vn') &&
+      (host === 'wingsgroup.vn' ||
+        host === 'www.wingsgroup.vn' ||
+        host === 'wingsgo.vn' ||
+        host === 'www.wingsgo.vn' ||
+        host === 'wingsside.vn' ||
+        host === 'www.wingsside.vn' ||
+        host === 'localhost' ||
+        host === '127.0.0.1') &&
       url.pathname.startsWith('/media/')
     )
   } catch {
@@ -35,52 +43,39 @@ const isPublicMediaRoute = (value: string): boolean => {
   }
 }
 
-const getGeneratedDerivativeEntries = (resource: unknown) => {
+interface DerivativeEntry {
+  format: 'avif' | 'webp'
+  url: string
+  width: number
+}
+
+const getGeneratedDerivativeEntries = (resource: unknown): DerivativeEntry[] => {
   const record = isRecord(resource) ? resource : {}
 
   return Object.entries(isRecord(record.sizes) ? record.sizes : {}).flatMap(([name, value]) => {
     const match = /^wingsgroup-v3-(640|960|1440)-(avif|webp)$/u.exec(name)
     if (!match || !isRecord(value)) return []
 
-    const filename = typeof value.filename === 'string' ? value.filename : ''
+    const filename = typeof value.filename === 'string' && value.filename.trim() ? value.filename.trim() : ''
     const url =
-      typeof value.url === 'string'
-        ? value.url
+      typeof value.url === 'string' && value.url.trim()
+        ? value.url.trim()
         : filename
           ? `/api/media/file/${filename}`
           : ''
     if (!url) return []
 
-    return [{ format: match[2], url, width: Number(match[1]) }]
+    // AC6 WP1: Use verified metadata width; drop missing/invalid width, never advertise 1440w purely from size name
+    const rawWidth = value.width
+    const width =
+      typeof rawWidth === 'number' && Number.isFinite(rawWidth) && rawWidth > 0
+        ? Math.round(rawWidth)
+        : null
+    if (!width) return []
+
+    return [{ format: match[2] as 'avif' | 'webp', url, width }]
   })
 }
-
-/**
- * ImageMedia
- *
- * This component passes a **relative** `src` (e.g. `/media/...`) to Next.js Image.
- * Public media stays unoptimized so the browser request passes through the trusted site
- * context added by the proxy. Next's server-side optimizer cannot forward that context.
- *
- * Flow:
- *   1. Resource URL from Payload: `/media/image-123.jpg`
- *   2. getMediaUrl() keeps the public path: `/media/image-123.jpg`
- *   3. The browser requests the public media route directly.
- *
- * If your storage/plugin returns **external CDN URLs** (e.g. `https://cdn.example.com/...`),
- * choose ONE of the following:
- *   A) Allow the remote host in next.config.js:
- *      images: { remotePatterns: [{ protocol: 'https', hostname: 'cdn.example.com' }] }
- *   B) Provide a **custom loader** for CDN-specific transforms:
- *      const imageLoader: ImageLoader = ({ src, width, quality }) =>
- *        `https://cdn.example.com${src}?w=${width}&q=${quality ?? 75}`
- *      <Image loader={imageLoader} src="/media/hero.jpg" width={1200} height={600} alt="" />
- *   C) Skip optimization:
- *      <Image unoptimized src="https://cdn.example.com/hero.jpg" width={1200} height={600} alt="" />
- *
- * TL;DR: Template uses relative URLs + getMediaUrl() and serves the trusted `/media/` route
- * directly. Only add `loader` if using external CDNs with custom transforms.
- */
 
 export const ImageMedia: React.FC<MediaProps> = (props) => {
   const {
@@ -93,6 +88,8 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
     size: sizeFromProps,
     src: srcFromProps,
     loading: loadingFromProps,
+    onLoad,
+    onError,
   } = props
 
   let width: number | undefined
@@ -119,32 +116,79 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
     src = getMediaUrl(url, cacheTag)
   }
 
-  const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
   const useDirectMediaRoute = typeof src === 'string' && isPublicMediaRoute(src)
+  const isGoverned =
+    Boolean(resource &&
+    typeof resource === 'object' &&
+    resource.governance?.managedBy === 'wingsgroup-v3')
+
   const useAuthenticatedPreviewImage =
+    isGoverned &&
     resource &&
     typeof resource === 'object' &&
-    resource.governance?.managedBy === 'wingsgroup-v3' &&
-    resource.governance.publicationState !== 'published'
+    resource.governance?.publicationState !== 'published'
+
+  // Governance gate:
+  // For WingsGroup governed media: only published media may emit responsive derivatives (pending stays protected).
+  // For tenant media (e.g. WingsGo / WingsSide without Group governance): public-on-upload allows using derivatives.
+  const canUseResponsiveDerivatives = Boolean(
+    resource &&
+      typeof resource === 'object' &&
+      (!isGoverned || isWingsGroupPublishedMedia(resource)),
+  )
 
   const responsiveSources =
-    resource && typeof resource === 'object' && isWingsGroupPublishedMedia(resource)
+    canUseResponsiveDerivatives && resource && typeof resource === 'object'
       ? (['avif', 'webp'] as const).map((format) => {
           const generatedEntries = getGeneratedDerivativeEntries(resource)
-          const entries = (generatedEntries.length > 0
-            ? generatedEntries
-            : resource.governance?.responsiveDerivatives || []
+          const fallbackGovernanceEntries: DerivativeEntry[] = (
+            isWingsGroupPublishedMedia(resource) ? resource.governance?.responsiveDerivatives || [] : []
           )
-            .filter((entry) => entry.format === format && entry.url && entry.width)
+            .filter(
+              (entry) =>
+                (entry.format === 'avif' || entry.format === 'webp') &&
+                Boolean(entry.url) &&
+                typeof entry.width === 'number' &&
+                entry.width > 0,
+            )
+            .map((entry) => ({
+              format: entry.format as 'avif' | 'webp',
+              url: entry.url,
+              width: entry.width,
+            }))
+
+          const rawEntries = generatedEntries.length > 0 ? generatedEntries : fallbackGovernanceEntries
+          const sortedEntries = rawEntries
+            .filter((entry) => entry.format === format && Boolean(entry.url) && entry.width > 0)
             .sort((left, right) => left.width - right.width)
+
+          // Deduplicate widths per format (never emit duplicate width candidates)
+          const uniqueByWidth: DerivativeEntry[] = []
+          const seenWidths = new Set<number>()
+          for (const entry of sortedEntries) {
+            if (!seenWidths.has(entry.width)) {
+              seenWidths.add(entry.width)
+              uniqueByWidth.push(entry)
+            }
+          }
+
           return {
             format,
-            srcSet: entries
+            srcSet: uniqueByWidth
               .map((entry) => `${getMediaUrl(entry.url, resource.updatedAt)} ${entry.width}w`)
               .join(', '),
           }
         })
       : []
+
+  const hasResponsiveSources = responsiveSources.some(({ srcSet }) => Boolean(srcSet))
+
+  // When responsive picture sources exist, do NOT let NextImage priority inject a preload
+  // tag for the fallback original JPEG/PNG (prevents double fetch).
+  // Hero still receives eager loading & high fetch priority.
+  const nextImagePriority = hasResponsiveSources ? false : Boolean(priority)
+  const loading = priority ? 'eager' : loadingFromProps || 'lazy'
+  const fetchPriority = priority ? 'high' : undefined
 
   // NOTE: this is used by the browser to determine which image to download at different screen sizes
   const sizes =
@@ -162,14 +206,16 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
         alt={alt || ''}
         className={cn(imgClassName)}
         fill={fill}
-        fetchPriority={priority ? 'high' : undefined}
+        fetchPriority={fetchPriority}
         height={!fill ? height : undefined}
         placeholder="blur"
         blurDataURL={placeholderBlur}
-        priority={priority}
+        priority={nextImagePriority ? true : undefined}
         quality={80}
         unoptimized={Boolean(useAuthenticatedPreviewImage || useDirectMediaRoute)}
         loading={loading}
+        onLoad={onLoad}
+        onError={onError}
         sizes={sizes}
         src={src}
         width={!fill ? width : undefined}

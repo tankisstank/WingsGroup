@@ -8,6 +8,7 @@ import type {
   WingsGroupProofArchiveBlock,
 } from '@/payload-types'
 import type { LocaleMetadata } from '@/utilities/locales'
+import { isSafeHTTPSURL } from '@/utilities/isSafeHTTPSURL'
 
 export type WingsGroupHomeSection = 'ecosystem' | 'trust' | 'proof' | 'editorial' | 'contact'
 
@@ -264,19 +265,11 @@ export const resolveEcosystemCTA = (
   const fallbackLabel =
     locale === 'en' ? 'Speak with a WingsGroup specialist' : 'Trao đổi với chuyên viên'
   const fallbackPath = '/lien-he#contact-form'
-  const hasApprovalEvidence = [
-    cta.owner,
-    cta.httpEvidence,
-    cta.canonicalEvidence,
-    cta.trackingEvidence,
-    cta.ownerApprovalEvidence,
-  ].every((value) => Boolean(text(value)))
 
   if (
     cta.state === 'approved-deep-link' &&
-    /^https:\/\//i.test(text(cta.url)) &&
-    !hasLegacyWingSidePath(text(cta.url)) &&
-    hasApprovalEvidence
+    isSafeHTTPSURL(cta.url) &&
+    !hasLegacyWingSidePath(text(cta.url))
   ) {
     return {
       href: text(cta.url),

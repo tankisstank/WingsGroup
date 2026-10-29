@@ -8,7 +8,7 @@ import { ChevronLeftIcon, ChevronRightIcon, PauseIcon, PlayIcon, SparklesIcon } 
 
 import type { HeroPresentationKey, HeroPresentationProps, HeroSlide } from './types'
 import { getWingsSideHiFiCopy } from '@/components/WingsSideHiFi/copy'
-import { getMediaUrl } from '@/utilities/getMediaUrl'
+import { ResponsiveHeroVideo } from './ResponsiveHeroVideo'
 
 export type { HeroPresentationProps } from './types'
 
@@ -495,81 +495,37 @@ export const CinematicCarouselHero: React.FC<HeroPresentationProps> = ({
   )
 }
 
-const asMedia = (value: HeroPresentationProps['media']) =>
-  value && typeof value === 'object' ? value : null
 
 export const VideoBackgroundHero: React.FC<HeroPresentationProps> = ({
   badge,
   behavior: _behavior,
   links,
+  media,
   preset,
+  resolvedLocale,
   richText,
   video,
 }) => {
-  const desktopVideo = asMedia(video?.desktopVideo)
-  const mobileVideo = asMedia(video?.mobileVideo) || desktopVideo
-  const poster = asMedia(video?.poster)
-  const [failed, setFailed] = useState(false)
-  const [reduceMotion, setReduceMotion] = useState(false)
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setReduceMotion(mediaQuery.matches)
-    const onChange = (event: MediaQueryListEvent) => setReduceMotion(event.matches)
-    mediaQuery.addEventListener?.('change', onChange)
-    return () => mediaQuery.removeEventListener?.('change', onChange)
-  }, [])
-
-  const posterURL = poster?.url ? getMediaUrl(poster.url, poster.updatedAt) : undefined
-  const desktopURL = desktopVideo?.url
-    ? getMediaUrl(desktopVideo.url, desktopVideo.updatedAt)
-    : undefined
-  const mobileURL = mobileVideo?.url
-    ? getMediaUrl(mobileVideo.url, mobileVideo.updatedAt)
-    : desktopURL
-  const showVideo = Boolean(desktopURL && !failed && !reduceMotion)
-
   return (
     <div className="hero-presentation hero-presentation--video">
-      {poster ? (
-        <div className="hero-presentation__video-poster">
-          <Media fill imgClassName="object-cover" priority resource={poster} />
-        </div>
-      ) : null}
-      {showVideo ? (
-        <video
-          aria-hidden="true"
-          autoPlay
-          className="hero-presentation__video-media hero-presentation__video-media--desktop"
-          loop
-          muted
-          onError={() => setFailed(true)}
-          playsInline
-          poster={posterURL}
-        >
-          <source src={desktopURL} type={desktopVideo?.mimeType || undefined} />
-        </video>
-      ) : null}
-      {showVideo ? (
-        <video
-          aria-hidden="true"
-          autoPlay
-          className="hero-presentation__video-media hero-presentation__video-media--mobile"
-          loop
-          muted
-          onError={() => setFailed(true)}
-          playsInline
-          poster={posterURL}
-        >
-          <source src={mobileURL} type={mobileVideo?.mimeType || undefined} />
-        </video>
-      ) : null}
+      <div className="absolute inset-0 z-0">
+        <ResponsiveHeroVideo
+          containerClassName="h-full w-full"
+          media={media}
+          resolvedLocale={resolvedLocale}
+          size="100vw"
+          video={video}
+          videoClassName="h-full w-full object-cover"
+        />
+      </div>
       <div
         className="hero-presentation__carousel-overlay"
         data-strength={preset?.visual?.overlayStrength || 'strong'}
       />
-      <div className="container hero-presentation__video-content">
-        <HeroCopy badge={badge} links={links} richText={richText} />
+      <div className="container hero-presentation__video-content pointer-events-none">
+        <div className="pointer-events-auto">
+          <HeroCopy badge={badge} links={links} richText={richText} />
+        </div>
       </div>
     </div>
   )
@@ -581,14 +537,10 @@ export const VerticalVideoSplitHero: React.FC<HeroPresentationProps> = ({
   links,
   media,
   postcards,
+  resolvedLocale,
   richText,
+  video,
 }) => {
-  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
-  const isVideo = Boolean(
-    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
-  )
-  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
-
   return (
     <div
       className="container hero-presentation hero-presentation--split"
@@ -597,20 +549,14 @@ export const VerticalVideoSplitHero: React.FC<HeroPresentationProps> = ({
       <HeroCopy badge={badge} links={links} richText={richText} />
       <div className="hero-presentation__frame flex flex-col items-center justify-center overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
         <div className="relative mx-auto aspect-[4/5] w-full max-w-[380px] overflow-hidden rounded-[32px] border border-slate-700/60 bg-slate-950 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.4),0_12px_28px_-6px_rgba(15,23,42,0.2)] md:max-w-[420px]">
-          {isVideo && videoSrc ? (
-            <video
-              autoPlay
-              className="h-full w-full object-cover"
-              controls={false}
-              loop
-              muted
-              playsInline
-            >
-              <source src={videoSrc} type="video/mp4" />
-            </video>
-          ) : (
-            <Media fill imgClassName="object-cover" priority resource={media} />
-          )}
+          <ResponsiveHeroVideo
+            containerClassName="h-full w-full"
+            media={media}
+            resolvedLocale={resolvedLocale}
+            size="(max-width: 768px) 100vw, 420px"
+            video={video}
+            videoClassName="h-full w-full object-cover"
+          />
 
           <div
             aria-hidden="true"
@@ -644,14 +590,10 @@ export const DeviceMockupSplitHero: React.FC<HeroPresentationProps> = ({
   links,
   media,
   postcards,
+  resolvedLocale,
   richText,
+  video,
 }) => {
-  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
-  const isVideo = Boolean(
-    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
-  )
-  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
-
   return (
     <div
       className="container hero-presentation hero-presentation--split"
@@ -671,20 +613,14 @@ export const DeviceMockupSplitHero: React.FC<HeroPresentationProps> = ({
 
           {/* Screen content container */}
           <div className="relative h-full w-full overflow-hidden rounded-[32px] bg-black md:rounded-[40px]">
-            {isVideo && videoSrc ? (
-              <video
-                autoPlay
-                className="h-full w-full object-cover"
-                controls={false}
-                loop
-                muted
-                playsInline
-              >
-                <source src={videoSrc} type="video/mp4" />
-              </video>
-            ) : (
-              <Media fill imgClassName="object-cover" priority resource={media} />
-            )}
+            <ResponsiveHeroVideo
+              containerClassName="h-full w-full"
+              media={media}
+              resolvedLocale={resolvedLocale}
+              size="(max-width: 768px) 100vw, 420px"
+              video={video}
+              videoClassName="h-full w-full object-cover"
+            />
 
             <div
               aria-hidden="true"
@@ -719,14 +655,10 @@ export const AmbientVideoSplitHero: React.FC<HeroPresentationProps> = ({
   links,
   media,
   postcards,
+  resolvedLocale,
   richText,
+  video,
 }) => {
-  const mediaDoc = typeof media === 'object' && media !== null ? (media as MediaDocument) : null
-  const isVideo = Boolean(
-    mediaDoc?.mimeType?.includes('video') || mediaDoc?.filename?.endsWith('.mp4'),
-  )
-  const videoSrc = mediaDoc ? getMediaUrl(mediaDoc.url || `/media/${mediaDoc.filename}`) : null
-
   return (
     <div
       className="container hero-presentation hero-presentation--split"
@@ -735,37 +667,18 @@ export const AmbientVideoSplitHero: React.FC<HeroPresentationProps> = ({
       <HeroCopy badge={badge} links={links} richText={richText} />
       <div className="hero-presentation__frame overflow-visible !border-0 !bg-transparent !p-0 !shadow-none">
         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[28px] border border-slate-700/60 bg-slate-950 shadow-[0_30px_70px_-10px_rgba(15,23,42,0.45),0_12px_28px_-6px_rgba(15,23,42,0.25)]">
-          {isVideo && videoSrc ? (
-            <video
-              aria-hidden="true"
-              autoPlay
-              className="absolute inset-0 h-full w-full scale-125 object-cover opacity-50 blur-2xl filter"
-              controls={false}
-              loop
-              muted
-              playsInline
-            >
-              <source src={videoSrc} type="video/mp4" />
-            </video>
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[var(--site-brand)]/20 via-slate-900 to-black" />
-          )}
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--site-brand)]/20 via-slate-900 to-black opacity-80" />
 
           <div className="relative z-10 flex h-full w-full items-center justify-center p-2">
-            {isVideo && videoSrc ? (
-              <video
-                autoPlay
-                className="h-full max-h-full rounded-[18px] object-contain shadow-2xl"
-                controls={false}
-                loop
-                muted
-                playsInline
-              >
-                <source src={videoSrc} type="video/mp4" />
-              </video>
-            ) : (
-              <Media fill imgClassName="object-contain" priority resource={media} />
-            )}
+            <ResponsiveHeroVideo
+              containerClassName="h-full max-h-full rounded-[18px]"
+              media={media}
+              objectFit="contain"
+              resolvedLocale={resolvedLocale}
+              size="(max-width: 768px) 100vw, 50vw"
+              video={video}
+              videoClassName="h-full max-h-full rounded-[18px] object-contain shadow-2xl"
+            />
           </div>
 
           {postcards.length > 0 ? (

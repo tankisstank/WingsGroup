@@ -64,7 +64,7 @@ export const contentDeleteAccess: Access = ({ req }) => {
 }
 
 export const contentPublishAccess: Access = ({ req }) => {
-  return hasRole(req.user as AppUser | undefined, managerRoles)
+  return hasRole(req.user as AppUser | undefined, contentRoles)
 }
 
 export const preventEditorPublish: CollectionBeforeChangeHook = ({ data, req }) => {

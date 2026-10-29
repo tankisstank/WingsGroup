@@ -8,9 +8,9 @@ import { cn } from '@/utilities/ui'
 import { BadgeCheckIcon, CalendarDaysIcon, CompassIcon, MapPinnedIcon } from 'lucide-react'
 
 const gridColumns = {
-  '2': 'lg:grid-cols-2',
-  '3': 'lg:grid-cols-3',
-  '4': 'lg:grid-cols-4',
+  '2': 'lg:grid-cols-2!',
+  '3': 'lg:grid-cols-3!',
+  '4': 'lg:grid-cols-4!',
 } as const
 
 const featureIcons = [CompassIcon, CalendarDaysIcon, MapPinnedIcon, BadgeCheckIcon] as const

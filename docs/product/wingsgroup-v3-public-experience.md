@@ -114,9 +114,15 @@ resolve through trusted WingsGroup site context.
 - Disabled channels are hidden while the generic intake form remains usable.
 - Configured channels open only a site-setting URL with approved owner, SLA,
   and analytics metadata.
-- Brand deep links remain routed to contact intake until the destination
-  returns HTTP 200, has the correct tenant canonical, passes tracking QA, and
-  receives owner approval.
+- US-087 simplifies brand CTA editing: editors choose the contact form or a
+  website destination and enter its label and HTTPS URL. Owner, HTTP evidence,
+  canonical evidence, tracking evidence, and owner-approval evidence are no
+  longer CMS fields or runtime prerequisites. Website URLs must parse as
+  absolute HTTPS with a hostname and no credentials, control characters, or
+  backslashes. Invalid stored URLs use the safe contact fallback. The existing
+  destination enum and nullable historical columns remain compatible; schema
+  push must be disabled. This is a local implementation contract, not evidence
+  of a production release. Media/proof and consultation-channel rules remain.
 
 ## Media Contract
 
@@ -144,8 +150,9 @@ Production must retain the following controls:
 - A configured external consultation URL is exposed without an approved
   endpoint, owner, SLA, and tracking proof.
 - A proof record lacks source or publication permission and is published.
-- A brand deep link is enabled before it returns 200, has the right canonical,
-  passes tracking QA and has destination-owner approval.
+- A brand CTA emits an unsafe URL instead of rejecting it or using contact
+  fallback. Destination availability, canonical and analytics checks belong
+  to release QA, not evidence fields entered by editors.
 - Sitemap, robots, canonical, or locale output leaks another tenant.
 - A required Vietnamese or English route, locale switch, chrome, metadata, or
   editorial review is incomplete.

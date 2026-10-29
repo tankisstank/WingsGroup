@@ -1,0 +1,107 @@
+{
+  "checkedAt": "2026-10-24T15:46:54.149Z",
+  "project": {
+    "id": "5af23c1f-7c6b-4b22-91c2-bcba6ea262e0",
+    "name": "Nền tảng lõi WingsGroup",
+    "identifier": "WGCORE"
+  },
+  "epic": {
+    "id": "dee9ffd7-6872-4a97-b7e9-5d170b8e3c45",
+    "name": "E03 - SEO, metadata và theme nền tảng",
+    "type": "223b8bfe-2183-48bd-9515-cbc9d44211e8"
+  },
+  "ownerFound": true,
+  "ownerId": "2792b34c-d5f0-481a-b561-48808098906b",
+  "childCount": 6,
+  "missingDates": 0,
+  "genericChildNames": 0,
+  "performanceChildUpdated": true,
+  "performanceEvidenceSynced": true,
+  "cmsMediaContractSynced": true,
+  "rows": [
+    {
+      "id": "7d3d02d5-3c4c-40df-842b-8e046bebb379",
+      "externalId": "story:US-086",
+      "name": "US-086 Tối ưu SEO và hành trình tìm kiếm WingsGroup, WingsGo",
+      "parent": "dee9ffd7-6872-4a97-b7e9-5d170b8e3c45",
+      "state": "Đã lên kế hoạch",
+      "startDate": "2026-10-24",
+      "targetDate": "2026-11-06",
+      "assignees": [
+        "2792b34c-d5f0-481a-b561-48808098906b"
+      ]
+    },
+    {
+      "id": "0e841173-732a-4770-9661-a5d0ed900aec",
+      "externalId": "child:US-086-ac-6",
+      "name": "US-086 - Tối ưu tốc độ tải, ảnh và kiểm chứng sau phát hành.",
+      "parent": "7d3d02d5-3c4c-40df-842b-8e046bebb379",
+      "state": "Đã lên kế hoạch",
+      "startDate": "2026-11-06",
+      "targetDate": "2026-11-06",
+      "assignees": [
+        "2792b34c-d5f0-481a-b561-48808098906b"
+      ]
+    },
+    {
+      "id": "06160358-8e43-4731-8e32-bcc36dd0dbe0",
+      "externalId": "child:US-086-ac-5",
+      "name": "US-086 - Đồng bộ sitemap, hreflang và schema theo nội dung thật.",
+      "parent": "7d3d02d5-3c4c-40df-842b-8e046bebb379",
+      "state": "Đã lên kế hoạch",
+      "startDate": "2026-11-03",
+      "targetDate": "2026-11-03",
+      "assignees": [
+        "2792b34c-d5f0-481a-b561-48808098906b"
+      ]
+    },
+    {
+      "id": "f67c7398-39ce-4659-a066-4e234823cacd",
+      "externalId": "child:US-086-ac-4",
+      "name": "US-086 - Chuẩn hóa metadata và liên kết bài viết WingsGroup.",
+      "parent": "7d3d02d5-3c4c-40df-842b-8e046bebb379",
+      "state": "Đã lên kế hoạch",
+      "startDate": "2026-11-01",
+      "targetDate": "2026-11-01",
+      "assignees": [
+        "2792b34c-d5f0-481a-b561-48808098906b"
+      ]
+    },
+    {
+      "id": "71cb3cf4-b21e-42f3-bb68-af8817067890",
+      "externalId": "child:US-086-ac-3",
+      "name": "US-086 - Đồng bộ hotline, mùa vụ và cam kết dịch vụ có căn cứ.",
+      "parent": "7d3d02d5-3c4c-40df-842b-8e046bebb379",
+      "state": "Đã lên kế hoạch",
+      "startDate": "2026-10-29",
+      "targetDate": "2026-10-29",
+      "assignees": [
+        "2792b34c-d5f0-481a-b561-48808098906b"
+      ]
+    },
+    {
+      "id": "fb737a3e-d733-4867-be11-398e2d6bb49b",
+      "externalId": "child:US-086-ac-2",
+      "name": "US-086 - Đồng bộ nội dung và trạng thái xuất bản tiếng Anh.",
+      "parent": "7d3d02d5-3c4c-40df-842b-8e046bebb379",
+      "state": "Đã lên kế hoạch",
+      "startDate": "2026-10-27",
+      "targetDate": "2026-10-27",
+      "assignees": [
+        "2792b34c-d5f0-481a-b561-48808098906b"
+      ]
+    },
+    {
+      "id": "65fb76a3-84e2-4b31-bb90-0f0456fc56b7",
+      "externalId": "child:US-086-ac-1",
+      "name": "US-086 - Sửa liên kết tour và điều hướng VI/EN không còn 404.",
+      "parent": "7d3d02d5-3c4c-40df-842b-8e046bebb379",
+      "state": "Đã lên kế hoạch",
+      "startDate": "2026-10-24",
+      "targetDate": "2026-10-24",
+      "assignees": [
+        "2792b34c-d5f0-481a-b561-48808098906b"
+      ]
+    }
+  ]
+}

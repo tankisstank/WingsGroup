@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import type { Site } from '@/payload-types'
 
-import { contentCreateAccess, contentDeleteAccess, preventEditorPublish } from '@/access/roles'
+import { contentCreateAccess, contentDeleteAccess } from '@/access/roles'
 import { enforceSiteAccess, siteScopedAccess, siteScopedOrPublished } from '@/access/siteScope'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
@@ -82,7 +82,7 @@ export const Pages: CollectionConfig<'pages'> = {
       },
     },
     description:
-      'Quản lý trang theo site. Editor chỉ lưu nháp; site-manager hoặc super-admin duyệt publish.',
+      'Quản lý trang theo site. Editor, site-manager và super-admin có thể sửa, duyệt và publish nội dung khi các publication gate đã sẵn sàng.',
     defaultColumns: ['title', 'site', 'slug', 'updatedAt', 'id'],
     group: adminGroups.content,
     livePreview: {
@@ -306,7 +306,6 @@ export const Pages: CollectionConfig<'pages'> = {
       validateWingsGroupV3Governance,
       validateWingsSideHomeCuration,
       validateWingsGoTourCatalog,
-      preventEditorPublish,
       populatePublishedAt,
     ],
     afterDelete: [revalidateDelete],

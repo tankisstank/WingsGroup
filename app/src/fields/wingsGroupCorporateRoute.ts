@@ -7,7 +7,7 @@ export const wingsGroupCorporateRouteField: Field = disableListColumnRecursively
   type: 'group',
   admin: {
     description:
-      'Fail-closed publication contract for the ten E09 WingsGroup routes. Approval fields are operator controlled.',
+      'Publication contract for governed WingsGroup routes. Approval fields are operator controlled.',
     position: 'sidebar',
     disableListColumn: true,
     disableListFilter: true,
