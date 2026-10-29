@@ -87,6 +87,11 @@ Story chỉ đóng khi mỗi phase có bằng chứng từ code, test và trình
     - `pendingParamsRef` chỉ bị xóa khi filter đổi; sau một thao tác chip không đổi URL, thao tác chip kế tiếp ghi đè params mà hero hoặc nút Back vừa đặt. Sửa bằng cách xóa ref khi transition kết thúc; test mới thất bại trên code cũ (`8dfc391`).
     - Chip khoảng giá/số ngày dùng nhãn "Giá từ"/"Số ngày tối thiểu" cả khi là cận trên ("Giá từ: ≤ 1.000"). Đổi sang "Ngân sách"/"Số ngày" (EN "Budget"/"Duration"), có test.
   - Để Phase 6 kiểm tra trên trình duyệt: hiệu ứng hover `-translate-y-1` của card (có từ baseline) khi bật reduced motion; layout 390px.
+- Phase 4 (`667a529` D10, `e999928`, commit sửa copy ô thị trường kế tiếp): đạt.
+  - Orchestrator tự chạy lại: unit WingsGo/SEO 147/147, component 51/51, tsc chỉ còn 2 lỗi có từ trước, `git diff --check` đạt.
+  - `upcoming` loại toàn bộ ID featured (slot #1–#6), rỗng khi có filter (D10). Ô thị trường render trong client catalog, trước "Tour nổi bật"; bấm ô đặt `?market=`, giữ filter khác, xóa `cursor`/`offset`, `window.scrollTo` tới "Tất cả tour".
+  - Dev server local (`wingsgo.local`): `/tour` hiện dải "Sắp cất cánh" 6 tour có badge "Khởi hành sau N ngày", rồi ô thị trường (Hàn Quốc 9, Nhật Bản 6, Trung Quốc 2), rồi "Tour nổi bật". `/en/tour` không có dải và ô vì DB local thiếu bản dịch EN (đã ghi ở Phase 2).
+  - Orchestrator sửa copy mô tả ô thị trường: "với mức giá tốt nhất" / "verified best available pricing" là khẳng định không kiểm chứng được; đổi thành mô tả đúng dữ liệu (số tour và giá thấp nhất đang mở bán).
 - Trước staging/production: **Chưa chạy.**
 
 ## Kiểm tra chi tiết theo tiêu chí chấp nhận
