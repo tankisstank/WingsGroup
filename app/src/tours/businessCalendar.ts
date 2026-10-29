@@ -88,3 +88,37 @@ export const daysUntilBusinessDay = (
 
   return Math.round((targetUtc - nowUtc) / 86_400_000)
 }
+
+export type BusinessMonthOption = { label: string; value: string }
+
+export const getNextBusinessMonths = (
+  count = 12,
+  now = new Date(),
+  locale = 'vi',
+): Array<BusinessMonthOption> => {
+  const currentDayStr = toBusinessCalendarDay(now) || '2026-10-01'
+  const [yearStr, monthStr] = currentDayStr.split('-')
+  let currentYear = Number(yearStr)
+  let currentMonth = Number(monthStr)
+
+  const options: Array<BusinessMonthOption> = []
+  for (let i = 0; i < count; i++) {
+    const y = currentYear
+    const m = currentMonth
+    const value = `${y}-${String(m).padStart(2, '0')}`
+    const label =
+      locale === 'en'
+        ? new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(
+            new Date(Date.UTC(y, m - 1, 1)),
+          )
+        : `Tháng ${m}/${y}`
+    options.push({ label, value })
+
+    currentMonth++
+    if (currentMonth > 12) {
+      currentMonth = 1
+      currentYear++
+    }
+  }
+  return options
+}

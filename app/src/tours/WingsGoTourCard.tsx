@@ -4,6 +4,7 @@ import React from 'react'
 import { SiteLink } from '@/components/SiteLink'
 import { getDurationLabel, formatTourDate } from './utils'
 import { isDisplayablePromoLabel, PromotionBadge, PromotionPrice } from './PromotionPrice'
+import { getWingsGoCatalogCopy } from './wingsGoCatalogCopy'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import { cn } from '@/utilities/ui'
 
@@ -25,13 +26,17 @@ const marketLabels: Record<string, { en: string; vi: string }> = {
 export const WingsGoTourCard = ({
   badge,
   card,
+  layout = 'grid',
   locale = 'vi',
 }: {
   badge?: string
   card: WingsGoCatalogCard
+  layout?: 'grid' | 'wide'
   locale?: SupportedLocaleCode
 }) => {
   const isEn = locale === 'en'
+  const isWide = layout === 'wide'
+  const copy = getWingsGoCatalogCopy(locale)
   const displayBadge = isDisplayablePromoLabel(badge)
     ? badge
     : isDisplayablePromoLabel(card.nextDeparture?.promoLabel)
@@ -44,6 +49,10 @@ export const WingsGoTourCard = ({
   const cornerStickers = editorialBadges.filter(
     (b) => b.kind === 'specialized' || b.kind === 'vip',
   )
+  const daysUntilText =
+    typeof card.nextDeparture?.daysUntilDeparture === 'number'
+      ? copy.daysUntilDepartureBadge(card.nextDeparture.daysUntilDeparture)
+      : null
 
   return (
     <article
@@ -53,11 +62,16 @@ export const WingsGoTourCard = ({
       )}
       data-has-hot={hasHot ? 'true' : undefined}
     >
-      <SiteLink className="block no-underline" href={card.href}>
+      <SiteLink className={isWide ? 'flex flex-col md:flex-row h-full no-underline' : 'block no-underline'} href={card.href}>
         {hasHot && hotBadge?.label ? (
           <span className="sr-only">{hotBadge.label}</span>
         ) : null}
-        <div className="relative aspect-[16/10] overflow-hidden rounded-t-[23px] bg-muted">
+        <div
+          className={cn(
+            'relative aspect-[16/10] overflow-hidden rounded-t-[23px] bg-muted',
+            isWide && 'md:w-2/5 md:shrink-0 md:aspect-auto md:rounded-tr-none md:rounded-l-[23px]',
+          )}
+        >
           {cornerStickers.length > 0 || displayBadge ? (
             <div className="absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2 pointer-events-none">
               {cornerStickers.length > 0 ? (
@@ -100,14 +114,17 @@ export const WingsGoTourCard = ({
           ) : (
             <div
               aria-label={`${isEn ? 'Image coming soon for' : 'Ảnh đang cập nhật cho'} ${card.title}`}
-              className="flex h-full items-center justify-center bg-[linear-gradient(135deg,color-mix(in_oklch,var(--site-brand)_18%,transparent),color-mix(in_oklch,var(--site-accent)_16%,transparent))] px-6 text-center text-sm font-semibold text-foreground/70"
+              className={cn(
+                'flex h-full items-center justify-center bg-[linear-gradient(135deg,color-mix(in_oklch,var(--site-brand)_18%,transparent),color-mix(in_oklch,var(--site-accent)_16%,transparent))] px-6 text-center text-sm font-semibold text-foreground/70',
+                isWide && 'min-h-[200px] md:min-h-full',
+              )}
               role="img"
             >
               {isEn ? 'Tour image coming soon' : 'Ảnh tour đang cập nhật'}
             </div>
           )}
         </div>
-        <div className="space-y-4 p-5">
+        <div className={cn('space-y-4 p-5', isWide && 'md:p-6 flex-1 flex flex-col justify-between')}>
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             <span>{marketLabels[card.market]?.[isEn ? 'en' : 'vi'] || card.market}</span>
             <span aria-hidden="true">•</span>
@@ -153,6 +170,7 @@ export const WingsGoTourCard = ({
               {formatTourDate(card.nextDeparture.date, locale)}
               {card.nextDeparture.departureCity ? ` • ${card.nextDeparture.departureCity}` : ''}
               {card.nextDeparture.airline ? ` • ${card.nextDeparture.airline}` : ''}
+              {daysUntilText ? ` • ${daysUntilText}` : ''}
             </p>
           </div>
         </div>

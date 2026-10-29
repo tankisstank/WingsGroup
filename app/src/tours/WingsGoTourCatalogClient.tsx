@@ -11,14 +11,24 @@ import React, {
 } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 
-import type {
-  WingsGoCatalogCard,
-  WingsGoCatalogData,
-  WingsGoCatalogFilters,
+import {
+  getNextBusinessMonths,
+} from './businessCalendar'
+import {
+  hasActiveCatalogFilters,
+  WINGSGO_CATALOG_BATCH_SIZE,
+  WINGSGO_CATALOG_MARKETS,
+  type WingsGoCatalogCard,
+  type WingsGoCatalogData,
+  type WingsGoCatalogFilters,
 } from './wingsGoCatalog'
-import { WINGSGO_CATALOG_BATCH_SIZE } from './wingsGoCatalog'
-import { getWingsGoCatalogCopy, resolveWingsGoCopyLocale } from './wingsGoCatalogCopy'
+import {
+  getWingsGoCatalogCopy,
+  resolveWingsGoCopyLocale,
+  WINGSGO_MARKET_LABELS,
+} from './wingsGoCatalogCopy'
 import { WingsGoTourCard } from './WingsGoTourCard'
+import { cn } from '@/utilities/ui'
 
 type Props = {
   initial: WingsGoCatalogData
@@ -31,6 +41,10 @@ const filterKey = (filters: WingsGoCatalogFilters) => JSON.stringify(filters)
 const queryValue = (filters: WingsGoCatalogFilters, key: keyof WingsGoCatalogFilters) => {
   const value = filters[key]
   return value === undefined ? '' : String(value)
+}
+
+const formatNumberVnd = (val: number, locale = 'vi') => {
+  return new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'vi-VN').format(val)
 }
 
 const SkeletonCard = () => (
@@ -50,14 +64,27 @@ const SkeletonCard = () => (
 
 const CatalogGrid = ({
   cards,
+  layout = 'grid',
   locale,
 }: {
   cards: WingsGoCatalogCard[]
+  layout?: 'grid' | 'wide'
   locale?: ComponentProps<typeof WingsGoTourCard>['locale']
 }) => (
-  <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+  <div
+    className={
+      layout === 'wide'
+        ? 'grid gap-6 md:grid-cols-1'
+        : 'grid gap-5 md:grid-cols-2 xl:grid-cols-3'
+    }
+  >
     {cards.map((card) => (
-      <WingsGoTourCard card={card} key={String(card.id)} locale={locale} />
+      <WingsGoTourCard
+        card={card}
+        key={String(card.id)}
+        layout={layout}
+        locale={locale}
+      />
     ))}
   </div>
 )
@@ -65,8 +92,8 @@ const CatalogGrid = ({
 export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi' }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
-  const copy = getWingsGoCatalogCopy(locale)
   const copyLocale = resolveWingsGoCopyLocale(locale)
+  const copy = getWingsGoCatalogCopy(copyLocale)
   const [isPending, startTransition] = useTransition()
   const [cards, setCards] = useState(initial.all)
   const [offset, setOffset] = useState(initial.nextOffset)
@@ -79,10 +106,25 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
   const requestGenerationRef = useRef(0)
   const currentFilterKey = useMemo(() => filterKey(initialFilters), [initialFilters])
   const previousFilterKey = useRef(currentFilterKey)
+  const pendingParamsRef = useRef<URLSearchParams | null>(null)
+
+  // Local state for numeric text inputs to commit on blur/Enter
+  const [localDurationMin, setLocalDurationMin] = useState(queryValue(initialFilters, 'durationMin'))
+  const [localDurationMax, setLocalDurationMax] = useState(queryValue(initialFilters, 'durationMax'))
+  const [localPriceMin, setLocalPriceMin] = useState(queryValue(initialFilters, 'priceMin'))
+  const [localPriceMax, setLocalPriceMax] = useState(queryValue(initialFilters, 'priceMax'))
+
+  useEffect(() => {
+    setLocalDurationMin(queryValue(initialFilters, 'durationMin'))
+    setLocalDurationMax(queryValue(initialFilters, 'durationMax'))
+    setLocalPriceMin(queryValue(initialFilters, 'priceMin'))
+    setLocalPriceMax(queryValue(initialFilters, 'priceMax'))
+  }, [initialFilters])
 
   useEffect(() => {
     if (previousFilterKey.current === currentFilterKey) return
     previousFilterKey.current = currentFilterKey
+    pendingParamsRef.current = null
     requestGenerationRef.current += 1
     requestControllerRef.current?.abort()
     requestControllerRef.current = null
@@ -96,15 +138,68 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
 
   useEffect(() => () => requestControllerRef.current?.abort(), [])
 
-  const updateFilter = (key: keyof WingsGoCatalogFilters, value: string) => {
-    const params = new URLSearchParams(window.location.search)
-    if (value) params.set(key, value)
-    else params.delete(key)
-    params.delete('offset')
-    const query = params.toString()
-    startTransition(() =>
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false }),
-    )
+  const updateFilters = useCallback(
+    (updates: Partial<Record<keyof WingsGoCatalogFilters, string | undefined>>) => {
+      const currentSearch = pendingParamsRef.current
+        ? new URLSearchParams(pendingParamsRef.current)
+        : new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+
+      for (const [key, value] of Object.entries(updates)) {
+        if (value !== undefined && value !== '') {
+          currentSearch.set(key, value)
+        } else {
+          currentSearch.delete(key)
+        }
+      }
+      currentSearch.delete('offset')
+      currentSearch.delete('cursor')
+
+      pendingParamsRef.current = new URLSearchParams(currentSearch)
+      const query = currentSearch.toString()
+      const targetUrl = query ? `${pathname}?${query}` : pathname
+
+      startTransition(() => {
+        router.replace(targetUrl, { scroll: false })
+      })
+    },
+    [pathname, router],
+  )
+
+  const updateFilter = useCallback(
+    (key: keyof WingsGoCatalogFilters, value: string) => {
+      updateFilters({ [key]: value })
+    },
+    [updateFilters],
+  )
+
+  const clearAllFilters = useCallback(() => {
+    updateFilters({
+      departureMonth: '',
+      durationMax: '',
+      durationMin: '',
+      market: '',
+      priceMax: '',
+      priceMin: '',
+      season: '',
+    })
+  }, [updateFilters])
+
+  const clearPriceFilter = useCallback(() => {
+    updateFilters({
+      priceMax: '',
+      priceMin: '',
+    })
+  }, [updateFilters])
+
+  const handleInputKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    key: keyof WingsGoCatalogFilters,
+    value: string,
+  ) => {
+    if (event.key === 'Enter') {
+      event.currentTarget.blur()
+      updateFilter(key, value)
+    }
   }
 
   const loadMore = useCallback(async () => {
@@ -188,6 +283,136 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
     void loadMore()
   }
 
+  const eligibleMarkets = useMemo(() => {
+    const current = initialFilters.market
+    return WINGSGO_CATALOG_MARKETS.filter((m) => {
+      if (current && m === current) return true
+      const summary = initial.markets?.find((s) => s.market === m)
+      return summary ? summary.count > 0 : false
+    })
+  }, [initial.markets, initialFilters.market])
+
+  const monthOptions = useMemo(
+    () => getNextBusinessMonths(12, new Date(), copyLocale),
+    [copyLocale],
+  )
+
+  const seasons = useMemo(
+    () => [
+      { key: 'spring', label: copy.seasonSpring },
+      { key: 'summer', label: copy.seasonSummer },
+      { key: 'autumn', label: copy.seasonAutumn },
+      { key: 'winter', label: copy.seasonWinter },
+    ],
+    [copy.seasonAutumn, copy.seasonSpring, copy.seasonSummer, copy.seasonWinter],
+  )
+
+  const sortOptions = useMemo(
+    () => [
+      { key: 'next-departure', label: copy.sortNextDeparture },
+      { key: 'price', label: copy.sortPrice },
+      { key: 'title', label: copy.sortTitle },
+    ],
+    [copy.sortNextDeparture, copy.sortPrice, copy.sortTitle],
+  )
+
+  const currentSort = initialFilters.sort || 'next-departure'
+  const filtersActive = hasActiveCatalogFilters(initialFilters)
+  const hasPriceFilter =
+    initialFilters.priceMin !== undefined || initialFilters.priceMax !== undefined
+
+  // Active filters for the removable chips row
+  const activeChips = useMemo(() => {
+    const chips: Array<{
+      id: string
+      label: string
+      onRemove: () => void
+      removeAriaLabel: string
+    }> = []
+
+    if (initialFilters.market) {
+      const marketLabel =
+        WINGSGO_MARKET_LABELS[initialFilters.market]?.[copyLocale] || initialFilters.market
+      chips.push({
+        id: 'market',
+        label: `${copy.filterMarket}: ${marketLabel}`,
+        onRemove: () => updateFilter('market', ''),
+        removeAriaLabel: copy.removeFilterLabel(marketLabel),
+      })
+    }
+
+    if (initialFilters.departureMonth) {
+      const monthLabel =
+        monthOptions.find((o) => o.value === initialFilters.departureMonth)?.label ||
+        initialFilters.departureMonth
+      chips.push({
+        id: 'departureMonth',
+        label: `${copy.quickSearchMonthLabel}: ${monthLabel}`,
+        onRemove: () => updateFilter('departureMonth', ''),
+        removeAriaLabel: copy.removeFilterLabel(monthLabel),
+      })
+    }
+
+    if (initialFilters.season) {
+      const seasonLabel =
+        seasons.find((s) => s.key === initialFilters.season)?.label || initialFilters.season
+      chips.push({
+        id: 'season',
+        label: `${copy.quickSearchSeasonLabel}: ${seasonLabel}`,
+        onRemove: () => updateFilter('season', ''),
+        removeAriaLabel: copy.removeFilterLabel(seasonLabel),
+      })
+    }
+
+    if (initialFilters.durationMin !== undefined || initialFilters.durationMax !== undefined) {
+      const dMin = initialFilters.durationMin
+      const dMax = initialFilters.durationMax
+      let dLabel = ''
+      if (dMin !== undefined && dMax !== undefined) {
+        dLabel = `${dMin} - ${dMax} ${copyLocale === 'en' ? 'days' : 'ngày'}`
+      } else if (dMin !== undefined) {
+        dLabel = `≥ ${dMin} ${copyLocale === 'en' ? 'days' : 'ngày'}`
+      } else {
+        dLabel = `≤ ${dMax} ${copyLocale === 'en' ? 'days' : 'ngày'}`
+      }
+      chips.push({
+        id: 'duration',
+        label: `${copy.filterDurationMin}: ${dLabel}`,
+        onRemove: () => updateFilters({ durationMax: '', durationMin: '' }),
+        removeAriaLabel: copy.removeFilterLabel(dLabel),
+      })
+    }
+
+    if (initialFilters.priceMin !== undefined || initialFilters.priceMax !== undefined) {
+      const pMin = initialFilters.priceMin
+      const pMax = initialFilters.priceMax
+      let pLabel = ''
+      if (pMin !== undefined && pMax !== undefined) {
+        pLabel = `${formatNumberVnd(pMin, copyLocale)} - ${formatNumberVnd(pMax, copyLocale)} VND`
+      } else if (pMin !== undefined) {
+        pLabel = `≥ ${formatNumberVnd(pMin, copyLocale)} VND`
+      } else {
+        pLabel = `≤ ${formatNumberVnd(pMax ?? 0, copyLocale)} VND`
+      }
+      chips.push({
+        id: 'price',
+        label: `${copy.filterPriceMin}: ${pLabel}`,
+        onRemove: () => updateFilters({ priceMax: '', priceMin: '' }),
+        removeAriaLabel: copy.removeFilterLabel(pLabel),
+      })
+    }
+
+    return chips
+  }, [
+    copy,
+    copyLocale,
+    initialFilters,
+    monthOptions,
+    seasons,
+    updateFilter,
+    updateFilters,
+  ])
+
   const heroCount = initial.hero ? initial.hero.length : 0
   const remainingFeatured = initial.featured.slice(heroCount)
   const hideFeatured =
@@ -213,7 +438,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
             </p>
           </div>
           {remainingFeatured.length > 0 ? (
-            <CatalogGrid cards={remainingFeatured} locale={copyLocale} />
+            <CatalogGrid cards={remainingFeatured} layout="wide" locale={copyLocale} />
           ) : (
             <p className="rounded-[20px] border border-border/60 bg-muted/20 p-5 text-sm text-muted-foreground">
               {copy.featuredEmpty}
@@ -223,105 +448,305 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
       ) : null}
 
       <section aria-labelledby="wingsgo-all-tours">
-        <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
-              {copy.catalogKicker}
-            </p>
-            <h2
-              className="mt-2 text-2xl font-semibold text-foreground md:text-3xl"
-              id="wingsgo-all-tours"
-            >
-              {copy.catalogTitle}
-            </h2>
+        <div className="mb-6 space-y-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
+                {copy.catalogKicker}
+              </p>
+              <h2
+                className="mt-2 text-2xl font-semibold text-foreground md:text-3xl"
+                id="wingsgo-all-tours"
+              >
+                {copy.catalogTitle}
+              </h2>
+            </div>
           </div>
+
           <div
             aria-label={copy.filtersAriaLabel}
-            className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
+            className="space-y-5 rounded-[22px] border border-border/70 bg-card p-5 shadow-xs md:p-6"
             role="group"
           >
-            <label className="text-xs font-semibold text-muted-foreground">
-              {copy.filterMarket}
-              <select
-                className="mt-1 block min-h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
-                onChange={(event) => updateFilter('market', event.target.value)}
-                value={queryValue(initialFilters, 'market')}
+            {/* Market chips */}
+            <div className="space-y-2">
+              <span className="block text-xs font-semibold text-muted-foreground">
+                {copy.filterMarket}
+              </span>
+              <div
+                aria-label={copy.filterMarket}
+                className="flex flex-wrap gap-2"
+                role="group"
               >
-                <option value="">{copy.allMarkets}</option>
-                <option value="korea">{copy.marketKorea}</option>
-                <option value="japan">{copy.marketJapan}</option>
-                <option value="china">{copy.marketChina}</option>
-              </select>
-            </label>
-            <label className="text-xs font-semibold text-muted-foreground">
-              {copy.filterSort}
-              <select
-                className="mt-1 block min-h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
-                onChange={(event) => updateFilter('sort', event.target.value)}
-                value={queryValue(initialFilters, 'sort')}
+                <button
+                  aria-pressed={!initialFilters.market}
+                  className={cn(
+                    'inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]',
+                    !initialFilters.market
+                      ? 'bg-[var(--site-brand)] text-white shadow-xs'
+                      : 'border border-border bg-background text-foreground hover:border-[var(--site-brand)] hover:text-[var(--site-brand)]',
+                  )}
+                  onClick={() => updateFilter('market', '')}
+                  type="button"
+                >
+                  {copy.allMarkets}
+                </button>
+                {eligibleMarkets.map((m) => {
+                  const isSelected = initialFilters.market === m
+                  const label = WINGSGO_MARKET_LABELS[m]?.[copyLocale] || m
+                  return (
+                    <button
+                      aria-pressed={isSelected}
+                      className={cn(
+                        'inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]',
+                        isSelected
+                          ? 'bg-[var(--site-brand)] text-white shadow-xs'
+                          : 'border border-border bg-background text-foreground hover:border-[var(--site-brand)] hover:text-[var(--site-brand)]',
+                      )}
+                      key={m}
+                      onClick={() => updateFilter('market', isSelected ? '' : m)}
+                      type="button"
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Season chips */}
+            <div className="space-y-2">
+              <span className="block text-xs font-semibold text-muted-foreground">
+                {copy.quickSearchSeasonLabel}
+              </span>
+              <div
+                aria-label={copy.quickSearchSeasonLabel}
+                className="flex flex-wrap gap-2"
+                role="group"
               >
-                <option value="next-departure">{copy.sortNextDeparture}</option>
-                <option value="price">{copy.sortPrice}</option>
-                <option value="title">{copy.sortTitle}</option>
-              </select>
-            </label>
-            <label className="text-xs font-semibold text-muted-foreground">
-              {copy.filterDurationMin}
-              <input
-                className="mt-1 block min-h-10 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground"
-                inputMode="numeric"
-                min="1"
-                onChange={(event) => updateFilter('durationMin', event.target.value)}
-                placeholder={copy.durationMinPlaceholder}
-                type="number"
-                value={queryValue(initialFilters, 'durationMin')}
-              />
-            </label>
-            <label className="text-xs font-semibold text-muted-foreground">
-              {copy.filterDurationMax}
-              <input
-                className="mt-1 block min-h-10 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground"
-                inputMode="numeric"
-                min="1"
-                onChange={(event) => updateFilter('durationMax', event.target.value)}
-                placeholder={copy.durationMaxPlaceholder}
-                type="number"
-                value={queryValue(initialFilters, 'durationMax')}
-              />
-            </label>
-            <label className="text-xs font-semibold text-muted-foreground">
-              {copy.filterPriceMin}
-              <input
-                className="mt-1 block min-h-10 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground"
-                inputMode="numeric"
-                min="0"
-                onChange={(event) => updateFilter('priceMin', event.target.value)}
-                placeholder={copy.priceMinPlaceholder}
-                type="number"
-                value={queryValue(initialFilters, 'priceMin')}
-              />
-            </label>
-            <label className="text-xs font-semibold text-muted-foreground">
-              {copy.filterPriceMax}
-              <input
-                className="mt-1 block min-h-10 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground"
-                inputMode="numeric"
-                min="0"
-                onChange={(event) => updateFilter('priceMax', event.target.value)}
-                placeholder={copy.priceMaxPlaceholder}
-                type="number"
-                value={queryValue(initialFilters, 'priceMax')}
-              />
-            </label>
+                <button
+                  aria-pressed={!initialFilters.season}
+                  className={cn(
+                    'inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]',
+                    !initialFilters.season
+                      ? 'bg-[var(--site-brand)] text-white shadow-xs'
+                      : 'border border-border bg-background text-foreground hover:border-[var(--site-brand)] hover:text-[var(--site-brand)]',
+                  )}
+                  onClick={() => updateFilter('season', '')}
+                  type="button"
+                >
+                  {copy.allSeasons}
+                </button>
+                {seasons.map(({ key, label }) => {
+                  const isSelected = initialFilters.season === key
+                  return (
+                    <button
+                      aria-pressed={isSelected}
+                      className={cn(
+                        'inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]',
+                        isSelected
+                          ? 'bg-[var(--site-brand)] text-white shadow-xs'
+                          : 'border border-border bg-background text-foreground hover:border-[var(--site-brand)] hover:text-[var(--site-brand)]',
+                      )}
+                      key={key}
+                      onClick={() => updateFilter('season', isSelected ? '' : key)}
+                      type="button"
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Departure month & Sort & Numeric ranges */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="text-xs font-semibold text-muted-foreground">
+                {copy.quickSearchMonthLabel}
+                <select
+                  className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]"
+                  onChange={(event) => updateFilter('departureMonth', event.target.value)}
+                  value={queryValue(initialFilters, 'departureMonth')}
+                >
+                  <option value="">{copy.quickSearchMonthAll}</option>
+                  {monthOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="space-y-1 sm:col-span-2 lg:col-span-2">
+                <span className="block text-xs font-semibold text-muted-foreground">
+                  {copy.filterSort}
+                </span>
+                <div
+                  aria-label={copy.filterSort}
+                  className="flex flex-wrap gap-2"
+                  role="group"
+                >
+                  {sortOptions.map(({ key, label }) => {
+                    const isSelected = currentSort === key
+                    return (
+                      <button
+                        aria-pressed={isSelected}
+                        className={cn(
+                          'inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]',
+                          isSelected
+                            ? 'bg-[var(--site-brand)] text-white shadow-xs'
+                            : 'border border-border bg-background text-foreground hover:border-[var(--site-brand)] hover:text-[var(--site-brand)]',
+                        )}
+                        key={key}
+                        onClick={() => updateFilter('sort', key)}
+                        type="button"
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <label className="text-xs font-semibold text-muted-foreground">
+                {copy.filterDurationMin}
+                <input
+                  className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]"
+                  inputMode="numeric"
+                  min="1"
+                  onBlur={() => updateFilter('durationMin', localDurationMin)}
+                  onChange={(event) => setLocalDurationMin(event.target.value)}
+                  onKeyDown={(event) =>
+                    handleInputKeyDown(event, 'durationMin', localDurationMin)
+                  }
+                  placeholder={copy.durationMinPlaceholder}
+                  type="number"
+                  value={localDurationMin}
+                />
+              </label>
+
+              <label className="text-xs font-semibold text-muted-foreground">
+                {copy.filterDurationMax}
+                <input
+                  className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]"
+                  inputMode="numeric"
+                  min="1"
+                  onBlur={() => updateFilter('durationMax', localDurationMax)}
+                  onChange={(event) => setLocalDurationMax(event.target.value)}
+                  onKeyDown={(event) =>
+                    handleInputKeyDown(event, 'durationMax', localDurationMax)
+                  }
+                  placeholder={copy.durationMaxPlaceholder}
+                  type="number"
+                  value={localDurationMax}
+                />
+              </label>
+
+              <label className="text-xs font-semibold text-muted-foreground">
+                {copy.filterPriceMin}
+                <input
+                  className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]"
+                  inputMode="numeric"
+                  min="0"
+                  onBlur={() => updateFilter('priceMin', localPriceMin)}
+                  onChange={(event) => setLocalPriceMin(event.target.value)}
+                  onKeyDown={(event) => handleInputKeyDown(event, 'priceMin', localPriceMin)}
+                  placeholder={copy.priceMinPlaceholder}
+                  type="number"
+                  value={localPriceMin}
+                />
+              </label>
+
+              <label className="text-xs font-semibold text-muted-foreground">
+                {copy.filterPriceMax}
+                <input
+                  className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]"
+                  inputMode="numeric"
+                  min="0"
+                  onBlur={() => updateFilter('priceMax', localPriceMax)}
+                  onChange={(event) => setLocalPriceMax(event.target.value)}
+                  onKeyDown={(event) => handleInputKeyDown(event, 'priceMax', localPriceMax)}
+                  placeholder={copy.priceMaxPlaceholder}
+                  type="number"
+                  value={localPriceMax}
+                />
+              </label>
+            </div>
+
+            {/* Active filter row */}
+            {activeChips.length > 0 ? (
+              <div
+                aria-label={copy.activeFiltersAriaLabel}
+                className="flex flex-wrap items-center gap-2 border-t border-border/50 pt-4"
+                role="region"
+              >
+                <span className="text-xs font-semibold text-muted-foreground">
+                  {copy.activeFiltersAriaLabel}:
+                </span>
+                {activeChips.map((chip) => (
+                  <button
+                    aria-label={chip.removeAriaLabel}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border/80 bg-muted/40 px-3.5 py-1 text-xs font-semibold text-foreground transition-colors hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]"
+                    key={chip.id}
+                    onClick={chip.onRemove}
+                    type="button"
+                  >
+                    <span>{chip.label}</span>
+                    <span aria-hidden="true" className="font-bold">
+                      ×
+                    </span>
+                  </button>
+                ))}
+                <button
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-dashed border-border px-3.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]"
+                  onClick={clearAllFilters}
+                  type="button"
+                >
+                  {copy.clearAllFilters}
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
+
         {cards.length > 0 ? (
           <CatalogGrid cards={cards} locale={copyLocale} />
         ) : (
-          <p className="rounded-[20px] border border-border/60 bg-muted/20 p-5 text-sm text-muted-foreground">
-            {copy.emptyFiltered}
-          </p>
+          <div
+            className="space-y-4 rounded-[20px] border border-border/60 bg-muted/20 p-6 text-center"
+            role="status"
+          >
+            <p className="text-base font-medium text-foreground">
+              {filtersActive ? copy.emptyFiltered : copy.featuredEmpty}
+            </p>
+            {hasPriceFilter ? (
+              <p className="mx-auto max-w-xl text-sm leading-relaxed text-muted-foreground">
+                {copy.emptyBudgetExplanation}
+              </p>
+            ) : null}
+            {filtersActive ? (
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-5 text-sm font-semibold text-white shadow-xs transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]"
+                  onClick={clearAllFilters}
+                  type="button"
+                >
+                  {copy.clearFilters}
+                </button>
+                {hasPriceFilter ? (
+                  <button
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-semibold text-foreground transition-colors hover:border-[var(--site-brand)] hover:text-[var(--site-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]"
+                    onClick={clearPriceFilter}
+                    type="button"
+                  >
+                    {copy.removeBudgetFilter}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         )}
+
         <div aria-live="polite" className="mt-6 space-y-4">
           {loading ? (
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -337,7 +762,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
             >
               <span>{error}</span>
               <button
-                className="min-h-10 rounded-full border border-border bg-background px-4 font-semibold"
+                className="min-h-11 rounded-full border border-border bg-background px-4 font-semibold"
                 onClick={retry}
                 type="button"
               >

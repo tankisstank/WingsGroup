@@ -146,7 +146,15 @@ describe('WingsGoTourCatalogClient', () => {
   })
 
   it('renders all catalog sections, filters, and cards in English when locale is en', async () => {
-    render(<WingsGoTourCatalogClient initial={data([1, 2], true)} initialFilters={{}} locale="en" />)
+    const initialWithMarkets: WingsGoCatalogData = {
+      ...data([1, 2], true),
+      markets: [
+        { count: 1, image: null, lowestPrice: null, market: 'korea' },
+        { count: 1, image: null, lowestPrice: null, market: 'japan' },
+        { count: 1, image: null, lowestPrice: null, market: 'china' },
+      ],
+    }
+    render(<WingsGoTourCatalogClient initial={initialWithMarkets} initialFilters={{}} locale="en" />)
 
     // Featured section
     expect(screen.getByText('Quick picks')).toBeTruthy()
@@ -165,13 +173,16 @@ describe('WingsGoTourCatalogClient', () => {
     expect(screen.getByText('Price from (VND)')).toBeTruthy()
     expect(screen.getByText('Price to (VND)')).toBeTruthy()
 
-    // Select options
-    expect(screen.getByRole('option', { name: 'South Korea' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Japan' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'China' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Earliest departure' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Price: low to high' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Tour name' })).toBeTruthy()
+    // Chips and select options
+    expect(screen.getByRole('button', { name: 'All' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'South Korea' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Japan' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'China' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'All seasons' })).toBeTruthy()
+    expect(screen.getByRole('option', { name: 'All months' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Earliest departure' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Price: low to high' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Tour name' })).toBeTruthy()
 
     // Buttons and card labels
     expect(screen.getByRole('button', { name: 'Load 6 more tours' })).toBeTruthy()
@@ -348,6 +359,130 @@ describe('WingsGoTourCatalogClient', () => {
     for (const id of allIDs) {
       expect(heroIDs.has(id)).toBe(false)
       expect(remainingFeaturedIDs.has(id)).toBe(false)
+    }
+  })
+
+  it('handles rapid chip removal without race condition and removes both filters', async () => {
+    // Simulate window.location.search having both filters
+    delete (window as unknown as { location?: unknown }).location
+    ;(window as unknown as { location: { search: string } }).location = {
+      search: '?market=korea&season=autumn',
+    }
+
+    render(
+      <WingsGoTourCatalogClient
+        initial={{
+          ...data([1], false),
+          filtersActive: true,
+        }}
+        initialFilters={{ market: 'korea', season: 'autumn' }}
+        locale="vi"
+      />,
+    )
+
+    // Two active filter chips are rendered
+    const removeMarketBtn = screen.getByRole('button', { name: 'Xóa bộ lọc: Hàn Quốc' })
+    const removeSeasonBtn = screen.getByRole('button', { name: 'Xóa bộ lọc: Mùa thu (T9 - T11)' })
+    expect(removeMarketBtn).toBeTruthy()
+    expect(removeSeasonBtn).toBeTruthy()
+
+    // Rapid sequential clicks
+    fireEvent.click(removeMarketBtn)
+    fireEvent.click(removeSeasonBtn)
+
+    // The final replace call must have NEITHER market NOR season
+    expect(replace).toHaveBeenCalled()
+    const lastCall = replace.mock.calls[replace.mock.calls.length - 1]
+    expect(lastCall[0]).not.toContain('market=')
+    expect(lastCall[0]).not.toContain('season=')
+  })
+
+  it('renders empty state with recovery buttons and budget explanation only when price filter is active', () => {
+    // 1. Without price filter (e.g. market only)
+    const { rerender } = render(
+      <WingsGoTourCatalogClient
+        initial={{
+          all: [],
+          featured: [],
+          filtersActive: true,
+          hasMore: false,
+          hero: [],
+          markets: [],
+          nextCursor: null,
+          nextOffset: 0,
+          upcoming: [],
+        }}
+        initialFilters={{ market: 'china' }}
+        locale="vi"
+      />,
+    )
+
+    expect(screen.getByText('Không có tour phù hợp bộ lọc.')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Xóa bộ lọc' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Bỏ lọc ngân sách' })).toBeNull()
+    expect(
+      screen.queryByText('Các tour có giá "Liên hệ" không tham gia vào bộ lọc ngân sách.'),
+    ).toBeNull()
+
+    // 2. With price filter active
+    rerender(
+      <WingsGoTourCatalogClient
+        initial={{
+          all: [],
+          featured: [],
+          filtersActive: true,
+          hasMore: false,
+          hero: [],
+          markets: [],
+          nextCursor: null,
+          nextOffset: 0,
+          upcoming: [],
+        }}
+        initialFilters={{ priceMin: 20000000 }}
+        locale="vi"
+      />,
+    )
+
+    expect(screen.getByText('Không có tour phù hợp bộ lọc.')).toBeTruthy()
+    expect(
+      screen.getByText('Các tour có giá "Liên hệ" không tham gia vào bộ lọc ngân sách.'),
+    ).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Xóa bộ lọc' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Bỏ lọc ngân sách' })).toBeTruthy()
+
+    // Clicking "Bỏ lọc ngân sách" calls replace
+    fireEvent.click(screen.getByRole('button', { name: 'Bỏ lọc ngân sách' }))
+    expect(replace).toHaveBeenCalled()
+  })
+
+  it('guarantees no Vietnamese characters in English locale for chips, labels, and empty state', () => {
+    const VIETNAMESE_CHAR_REGEX =
+      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i
+
+    const initialWithMarkets: WingsGoCatalogData = {
+      ...data([], false),
+      filtersActive: true,
+      markets: [
+        { count: 1, image: null, lowestPrice: null, market: 'korea' },
+        { count: 1, image: null, lowestPrice: null, market: 'japan' },
+      ],
+    }
+
+    const { container } = render(
+      <WingsGoTourCatalogClient
+        initial={initialWithMarkets}
+        initialFilters={{ market: 'korea', priceMin: 10000000 }}
+        locale="en"
+      />,
+    )
+
+    // Check all buttons, spans, paragraphs, options
+    const textElements = container.querySelectorAll(
+      'button, label, select, option, p, h1, h2, h3, span',
+    )
+    for (const el of textElements) {
+      const text = el.textContent || ''
+      expect(text).not.toMatch(VIETNAMESE_CHAR_REGEX)
     }
   })
 })

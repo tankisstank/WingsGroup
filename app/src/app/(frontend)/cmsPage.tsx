@@ -489,10 +489,37 @@ export async function renderCmsPageByPath({
   )
 }
 
+export const WINGSGO_CATALOG_FILTER_PARAMS = [
+  'market',
+  'departureMonth',
+  'season',
+  'durationMin',
+  'durationMax',
+  'priceMin',
+  'priceMax',
+  'sort',
+  'cursor',
+  'offset',
+] as const
+
+export const hasWingsGoCatalogFilterParams = (
+  searchParams?: Record<string, string | string[] | undefined> | null,
+): boolean => {
+  if (!searchParams) return false
+  return WINGSGO_CATALOG_FILTER_PARAMS.some((key) => {
+    const value = searchParams[key]
+    if (value === undefined || value === null || value === '') return false
+    if (Array.isArray(value) && value.length === 0) return false
+    return true
+  })
+}
+
 export async function generateCmsPageMetadataByPath({
   requestedPath,
+  searchParams,
 }: {
   requestedPath: string
+  searchParams?: Record<string, string | string[] | undefined>
 }): Promise<Metadata> {
   const locale = await getCurrentLocale()
   const page = await queryPageByPath({
@@ -565,6 +592,23 @@ export async function generateCmsPageMetadataByPath({
       ...metadata,
       robots: {
         follow: false,
+        index: false,
+      },
+    }
+  }
+
+  if (
+    site.code === 'wings-go' &&
+    requestedPath === '/tour' &&
+    hasWingsGoCatalogFilterParams(searchParams)
+  ) {
+    return {
+      ...metadata,
+      robots: {
+        ...(typeof metadata.robots === 'object' && metadata.robots !== null
+          ? metadata.robots
+          : {}),
+        follow: true,
         index: false,
       },
     }

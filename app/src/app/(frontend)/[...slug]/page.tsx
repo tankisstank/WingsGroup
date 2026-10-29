@@ -25,11 +25,17 @@ export default async function Page({
   return renderCmsPageByPath({ requestedPath, searchParams: searchParamsPromise })
 }
 
-export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
+export async function generateMetadata({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}: Args): Promise<Metadata> {
   const { slug = [] } = await paramsPromise
   const requestedPath = getRequestedPathFromSlug(slug)
 
-  return generateCmsPageMetadataByPath({ requestedPath })
+  return generateCmsPageMetadataByPath({
+    requestedPath,
+    searchParams: searchParamsPromise ? await searchParamsPromise : undefined,
+  })
 }
 
 const getRequestedPathFromSlug = (slug: string[]) => {

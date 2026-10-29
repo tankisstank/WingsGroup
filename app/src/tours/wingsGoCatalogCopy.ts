@@ -64,6 +64,13 @@ export interface WingsGoCatalogCopy {
 
   // Results & status
   emptyFiltered: string
+  emptyBudgetExplanation: string
+  clearFilters: string
+  clearAllFilters: string
+  removeBudgetFilter: string
+  activeFiltersAriaLabel: string
+  allSeasons: string
+  removeFilterLabel: (filterName: string) => string
   loadMoreError: string
   retry: string
   loading: string
@@ -132,6 +139,14 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     priceMaxPlaceholder: 'Ví dụ 30000000',
 
     emptyFiltered: 'Không có tour phù hợp bộ lọc.',
+    emptyBudgetExplanation:
+      'Các tour có giá "Liên hệ" không tham gia vào bộ lọc ngân sách.',
+    clearFilters: 'Xóa bộ lọc',
+    clearAllFilters: 'Xóa tất cả bộ lọc',
+    removeBudgetFilter: 'Bỏ lọc ngân sách',
+    activeFiltersAriaLabel: 'Các bộ lọc đang áp dụng',
+    allSeasons: 'Tất cả các mùa',
+    removeFilterLabel: (filterName: string) => `Xóa bộ lọc: ${filterName}`,
     loadMoreError: 'Không tải thêm được catalog tour.',
     retry: 'Thử lại',
     loading: 'Đang tải…',
@@ -198,6 +213,14 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     priceMaxPlaceholder: 'e.g. 30000000',
 
     emptyFiltered: 'No tours match your filters.',
+    emptyBudgetExplanation:
+      'Tours with contact pricing are excluded from budget filtering.',
+    clearFilters: 'Clear filters',
+    clearAllFilters: 'Clear all filters',
+    removeBudgetFilter: 'Remove budget filter',
+    activeFiltersAriaLabel: 'Active filters',
+    allSeasons: 'All seasons',
+    removeFilterLabel: (filterName: string) => `Remove filter: ${filterName}`,
     loadMoreError: 'Unable to load more tours.',
     retry: 'Retry',
     loading: 'Loading…',
