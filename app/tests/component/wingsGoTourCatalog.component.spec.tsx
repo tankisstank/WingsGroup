@@ -386,6 +386,13 @@ describe('WingsGoTourCatalogClient', () => {
     expect(removeMarketBtn).toBeTruthy()
     expect(removeSeasonBtn).toBeTruthy()
 
+    // Like Next, a settled replace() updates the URL.
+    replace.mockImplementation((url: string) => {
+      ;(window as unknown as { location: { search: string } }).location.search = url.includes('?')
+        ? url.slice(url.indexOf('?'))
+        : ''
+    })
+
     // Rapid sequential clicks
     fireEvent.click(removeMarketBtn)
     fireEvent.click(removeSeasonBtn)
@@ -395,6 +402,34 @@ describe('WingsGoTourCatalogClient', () => {
     const lastCall = replace.mock.calls[replace.mock.calls.length - 1]
     expect(lastCall[0]).not.toContain('market=')
     expect(lastCall[0]).not.toContain('season=')
+  })
+
+  it('builds the next chip change from the URL once the previous transition has settled', () => {
+    delete (window as unknown as { location?: unknown }).location
+    ;(window as unknown as { location: { search: string } }).location = {
+      search: '?market=korea',
+    }
+    replace.mockImplementation(() => {})
+
+    render(
+      <WingsGoTourCatalogClient
+        initial={{ ...data([1], false), filtersActive: true }}
+        initialFilters={{ market: 'korea' }}
+        locale="vi"
+      />,
+    )
+
+    // A chip action that does not change the URL leaves no stale pending params behind.
+    fireEvent.click(screen.getByRole('button', { name: 'Xóa bộ lọc: Hàn Quốc' }))
+
+    // The hero quick search then navigates elsewhere.
+    ;(window as unknown as { location: { search: string } }).location.search = '?departureMonth=2026-12'
+
+    fireEvent.click(screen.getAllByRole('button', { name: /Mùa xuân/ })[0])
+    const lastCall = replace.mock.calls[replace.mock.calls.length - 1]
+    expect(lastCall[0]).toContain('season=spring')
+    expect(lastCall[0]).toContain('departureMonth=2026-12')
+    expect(lastCall[0]).not.toContain('market=')
   })
 
   it('renders empty state with recovery buttons and budget explanation only when price filter is active', () => {

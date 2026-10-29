@@ -138,6 +138,12 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
 
   useEffect(() => () => requestControllerRef.current?.abort(), [])
 
+  // Pending params only chain rapid clicks inside one transition; once it settles the
+  // URL is the source of truth again (hero quick search, back/forward).
+  useEffect(() => {
+    if (!isPending) pendingParamsRef.current = null
+  }, [isPending])
+
   const updateFilters = useCallback(
     (updates: Partial<Record<keyof WingsGoCatalogFilters, string | undefined>>) => {
       const currentSearch = pendingParamsRef.current
