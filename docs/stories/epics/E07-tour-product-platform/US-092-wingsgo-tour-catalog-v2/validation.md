@@ -29,7 +29,12 @@ Story chỉ đóng khi mỗi phase có bằng chứng từ code, test và trình
 
 ### Cổng tham vấn Codex (AGENTS.md)
 
-- Trước Phase 1: **Chưa chạy.** Cần chạy và lưu biên bản vào `docs/consultations/`.
+- Trước Phase 1: **Chưa có kết quả, đã ghi nhận sai lệch.** Ngày 2026-10-29, `codext exec -m gpt-6.1-sol -s read-only` lỗi "Selected model is at capacity" ở mọi lần chạy (từ khoảng 07:45Z đến 08:28Z, 7 lần). Người dùng chỉ định chỉ dùng `gpt-6.1-sol`, sau đó yêu cầu "tiếp tục", nên Phase 1 được làm trên branch local `feat/us-092-tour-catalog-v2` (không push, không deploy) song song với việc tiếp tục thử lại Codex. Bù đắp: cổng Codex phải chạy trên diff Phase 0 và Phase 1 trước khi bắt đầu Phase 2 và trước khi merge. Biên bản lưu ở `docs/consultations/2026-10-29-us092-phase1-codex-gate.md`.
+
+### Review của orchestrator
+
+- Phase 0 (`59fcbbb`, `abaa7ab`): đạt. Đã yêu cầu sửa lỗi locale thiếu bị rơi về EN; bản sửa có test.
+- Phase 1 (`853e0bc`): đạt. Orchestrator tự chạy lại test WingsGo: 104/104 unit, 29/29 component. Lỗi `wingsGroupV3Shell.unit.spec.ts` cũng xảy ra trên baseline `8980e23`, nên là lỗi có từ trước. Phát hiện một lỗ hổng trong design (Hero vẫn hiện slot #1–#3 khi đang lọc, gây trùng card với "Tất cả tour"); đã xử lý bằng cách cập nhật D6 và giao cho Phase 2.
 - Trước staging/production: **Chưa chạy.**
 
 ## Kiểm tra chi tiết theo tiêu chí chấp nhận

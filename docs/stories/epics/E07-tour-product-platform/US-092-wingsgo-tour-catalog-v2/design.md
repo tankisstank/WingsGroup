@@ -33,7 +33,7 @@ Hero, "Tour nổi bật", "Tất cả tour", ô thị trường và "Sắp cất
 | Trạng thái | Hero | Tour nổi bật | Tất cả tour |
 |---|---|---|---|
 | Không có filter | Slot #1–#3 | Slot #4–#6 | Inventory còn lại, loại mọi tour đã nằm ở Hero hoặc Tour nổi bật (giữ hành vi hiện tại) |
-| Có ít nhất một filter (`market`, `durationMin/Max`, `priceMin/Max`, `departureMonth`, `season`) | Slot #1–#3, không lọc | Ẩn | Mọi tour khớp filter, không loại tour featured |
+| Có ít nhất một filter (`market`, `durationMin/Max`, `priceMin/Max`, `departureMonth`, `season`) | Chỉ giữ tiêu đề và ô tìm nhanh; ẩn các thẻ tour slot #1–#3 | Ẩn | Mọi tour khớp filter, không loại tour featured |
 
 Khi có filter thì không có card nào bị trùng giữa các section đang hiển thị. Riêng filter `market` sẽ thay đổi hành vi hiện tại: trước đây "Tất cả tour" loại các tour featured, nay không loại nữa. Thay đổi này được ghi nhận có chủ ý.
 
@@ -88,7 +88,7 @@ Locale được truyền từ page và API xuống query, DTO và client. Mọi 
 - **D3 — Đã chốt:** `daysUntilDeparture` được tính trên server theo `Asia/Ho_Chi_Minh` và đưa vào DTO; trang giữ dynamic/no-store; client không tính lại.
 - **D4 — Đã chốt:** Chỉ dùng Zalo OA và hotline từ cấu hình site hiện có; không thêm WhatsApp/Messenger cho tới khi có link chính thức.
 - **D5 — Đã chốt:** Thêm `departureMonth` và `season` bốn mùa ở server, kết hợp AND theo cửa sổ khởi hành. Card và bộ lọc ngân sách dùng departure và giá trong cửa sổ đó.
-- **D6 — Đã chốt:** Giữ hai section. Khi có filter thì ẩn "Tour nổi bật", và "Tất cả tour" chứa mọi tour khớp.
+- **D6 — Đã chốt:** Giữ hai section. Khi có filter thì ẩn "Tour nổi bật" và các thẻ tour của Hero (Hero chỉ giữ tiêu đề và ô tìm nhanh), còn "Tất cả tour" chứa mọi tour khớp. Bổ sung ngày 2026-10-29 khi review Phase 1: nếu Hero vẫn hiện slot #1–#3 thì sẽ trùng card với "Tất cả tour", vi phạm AC2.
 - **D7 — Đã chốt:** Bỏ quick-view, link thẳng tới trang detail (có tiền tố `/en` khi ở locale EN).
 - **D8 — Đã chốt:** Giữ font WingsGo hiện tại.
 - **D9 — Đã chốt:** URL có filter dùng `noindex, follow` và canonical về `/tour` theo locale.
