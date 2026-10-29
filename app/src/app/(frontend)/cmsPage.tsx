@@ -435,7 +435,7 @@ export async function renderCmsPageByPath({
                 )}
               </h1>
             </section>
-          ) : (
+          ) : useWingsGoTourCatalog ? null : (
             <RenderHero
               {...page.hero}
               heroFeaturedTours={wingsGoFeaturedTours}

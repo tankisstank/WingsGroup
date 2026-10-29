@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+
 'use client'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import React, { useEffect } from 'react'
@@ -13,9 +13,9 @@ import { resolveHeroPresentationConfig } from '@/heros/presentations/resolver'
 import type { SiteHeroDefaultsLike } from '@/heros/presentations/types'
 import type { SupportedLocaleCode } from '@/utilities/locales'
 import type { WingsGoCatalogCard } from '@/tours/wingsGoCatalog'
-import { SiteLink } from '@/components/SiteLink'
-import { formatTourDate } from '@/tours/utils'
-import { PromotionBadge, PromotionPrice } from '@/tours/PromotionPrice'
+import { WingsGoHeroTourRow } from '@/heros/WingsGoCommerceHero'
+
+
 import {
   BadgeCheckIcon,
   CalendarDaysIcon,
@@ -389,42 +389,6 @@ export const HighImpactHero: React.FC<
 
   const catalogTours = props.heroFeaturedTours || []
 
-  const displayTours =
-    catalogTours.length > 0
-      ? catalogTours.slice(0, 3).map((tour) => {
-          const departureDate = formatTourDate(
-            tour.nextDeparture?.date,
-            props.resolvedLocale || 'vi',
-          )
-          const airline = tour.nextDeparture?.airline
-          const dateMeta = departureDate
-            ? `${departureDate}${airline ? ` · ${airline}` : ''}`
-            : airline || (isEn ? 'Latest departure' : 'Lịch mở bán mới nhất')
-          const priceText =
-            tour.price?.kind === 'verified' ? (
-              <PromotionPrice
-                currency={tour.price.currency}
-                originalPrice={tour.price.originalPrice}
-                price={tour.price.value}
-              />
-            ) : isEn ? (
-              'Contact us'
-            ) : (
-              'Liên hệ'
-            )
-          const promoBadge = tour.nextDeparture?.promoLabel?.trim() || ''
-          return {
-            badge: promoBadge,
-            dateMeta,
-            href: tour.href || `/tour/${tour.slug}`,
-            id: String(tour.id),
-            image: tour.image,
-            market: tour.market,
-            price: priceText,
-            title: tour.title,
-          }
-        })
-      : []
 
   const businessPanel = isRetailDepartures ? (
     <aside
@@ -441,44 +405,13 @@ export const HighImpactHero: React.FC<
         </div>
       </div>
       <div className="site-departure-stack">
-        {displayTours.length > 0 ? (
-          displayTours.map((item) => (
-            <SiteLink
-              className="site-departure-row group flex items-center gap-4 py-4 transition-colors hover:bg-muted/40 no-underline rounded-2xl px-3 -mx-3"
-              href={item.href}
+        {catalogTours.length > 0 ? (
+          catalogTours.slice(0, 3).map((item) => (
+            <WingsGoHeroTourRow
               key={item.id}
-            >
-              <div className="relative h-16 w-16 md:h-18 md:w-18 shrink-0 overflow-hidden rounded-2xl border border-border/70 bg-muted shadow-xs">
-                {item.image ? (
-                  <img
-                    alt={item.image.alt || item.title}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    loading="lazy"
-                    src={item.image.url}
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-muted/60 text-muted-foreground">
-                    <PlaneIcon className="h-6 w-6 opacity-40" />
-                  </div>
-                )}
-                <div className="absolute inset-x-1 top-1 flex justify-start">
-                  <PromotionBadge label={item.badge} />
-                </div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="line-clamp-1 text-base md:text-lg font-bold text-foreground group-hover:text-[var(--site-brand)] transition-colors">
-                    {item.title}
-                  </h3>
-                </div>
-                <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm text-muted-foreground line-clamp-1">{item.dateMeta}</p>
-                  <strong className="max-w-full text-base md:text-lg font-bold text-[var(--site-accent)]">
-                    {item.price}
-                  </strong>
-                </div>
-              </div>
-            </SiteLink>
+              locale={props.resolvedLocale}
+              tour={item}
+            />
           ))
         ) : (
           <div className="p-4 text-sm text-muted-foreground text-center">

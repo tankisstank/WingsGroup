@@ -2517,6 +2517,7 @@ describe('WingsGo dynamic catalog constraints', () => {
           featured: [],
           filtersActive: false,
           hasMore: false,
+          hero: [],
           markets: [],
           nextCursor: null,
           nextOffset: 0,

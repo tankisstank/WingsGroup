@@ -70,7 +70,7 @@ const fixture: WingsGoCatalogCard[] = [
       departureCity: 'TP.HCM',
       promoLabel: null,
     },
-    price: { currency: 'VND', kind: 'contact' },
+    price: { kind: 'contact', label: 'Liên hệ' },
     slug: 'chau-au-5-nuoc',
     summary: 'Tour Châu Âu 5 Nước',
     title: 'Tour Châu Âu 5 Nước',

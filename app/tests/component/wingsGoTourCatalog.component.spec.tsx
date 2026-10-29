@@ -37,6 +37,7 @@ const data = (
   featured: [],
   filtersActive: false,
   hasMore,
+  hero: [],
   markets: [],
   nextCursor,
   nextOffset: ids.length,
@@ -187,6 +188,7 @@ describe('WingsGoTourCatalogClient', () => {
           featured: [],
           filtersActive: false,
           hasMore: false,
+          hero: [],
           markets: [],
           nextCursor: null,
           nextOffset: 0,
@@ -211,6 +213,7 @@ describe('WingsGoTourCatalogClient', () => {
           featured: [featuredCard],
           filtersActive: true,
           hasMore: false,
+          hero: [],
           markets: [],
           nextCursor: null,
           nextOffset: 1,
@@ -239,6 +242,7 @@ describe('WingsGoTourCatalogClient', () => {
       featured: [makeCard(10), makeCard(20)],
       filtersActive: false,
       hasMore: true,
+      hero: [],
       markets: [],
       nextCursor: 'cursor_token_123',
       nextOffset: 6,
@@ -252,5 +256,98 @@ describe('WingsGoTourCatalogClient', () => {
     const calledUrl = fetchMock.mock.calls[0][0] as string
     expect(calledUrl).toContain('cursor=cursor_token_123')
     expect(calledUrl).not.toContain('exclude=')
+  })
+
+  it('renders slots #4-#6 only in "Tour nổi bật" when hero has slots #1-#3', () => {
+    const heroCards = [makeCard(1), makeCard(2), makeCard(3)]
+    const featuredCards = [
+      makeCard(1),
+      makeCard(2),
+      makeCard(3),
+      makeCard(4),
+      makeCard(5),
+      makeCard(6),
+    ]
+    const allCards = [makeCard(7), makeCard(8)]
+
+    const { container } = render(
+      <WingsGoTourCatalogClient
+        initial={{
+          all: allCards,
+          featured: featuredCards,
+          filtersActive: false,
+          hasMore: false,
+          hero: heroCards,
+          markets: [],
+          nextCursor: null,
+          nextOffset: 2,
+          upcoming: [],
+        }}
+        initialFilters={{}}
+        locale="vi"
+      />,
+    )
+
+    const featuredSection = container.querySelector('section[aria-labelledby="wingsgo-featured-tours"]')
+    expect(featuredSection).not.toBeNull()
+
+    // Featured section shows only slots #4, #5, #6
+    expect(featuredSection?.textContent).toContain('Tour 4')
+    expect(featuredSection?.textContent).toContain('Tour 5')
+    expect(featuredSection?.textContent).toContain('Tour 6')
+    expect(featuredSection?.textContent).not.toContain('Tour 1')
+    expect(featuredSection?.textContent).not.toContain('Tour 2')
+    expect(featuredSection?.textContent).not.toContain('Tour 3')
+  })
+
+  it('hides the featured section with no empty message when remaining featured slice is empty', () => {
+    const heroCards = [makeCard(1), makeCard(2), makeCard(3)]
+    const featuredCards = [makeCard(1), makeCard(2), makeCard(3)]
+
+    const { container } = render(
+      <WingsGoTourCatalogClient
+        initial={{
+          all: [makeCard(4)],
+          featured: featuredCards,
+          filtersActive: false,
+          hasMore: false,
+          hero: heroCards,
+          markets: [],
+          nextCursor: null,
+          nextOffset: 1,
+          upcoming: [],
+        }}
+        initialFilters={{}}
+        locale="vi"
+      />,
+    )
+
+    expect(container.querySelector('section[aria-labelledby="wingsgo-featured-tours"]')).toBeNull()
+    expect(screen.queryByText('Hiện chưa có tour đủ điều kiện hiển thị.')).toBeNull()
+  })
+
+  it('ensures no card appears in both hero, featured, or all', () => {
+    const heroCards = [makeCard(1), makeCard(2), makeCard(3)]
+    const featuredCards = [
+      makeCard(1),
+      makeCard(2),
+      makeCard(3),
+      makeCard(4),
+      makeCard(5),
+      makeCard(6),
+    ]
+    const allCards = [makeCard(7), makeCard(8), makeCard(9)]
+
+    const heroIDs = new Set(heroCards.map((c) => c.id))
+    const remainingFeaturedIDs = new Set(featuredCards.slice(heroCards.length).map((c) => c.id))
+    const allIDs = new Set(allCards.map((c) => c.id))
+
+    for (const id of remainingFeaturedIDs) {
+      expect(heroIDs.has(id)).toBe(false)
+    }
+    for (const id of allIDs) {
+      expect(heroIDs.has(id)).toBe(false)
+      expect(remainingFeaturedIDs.has(id)).toBe(false)
+    }
   })
 })

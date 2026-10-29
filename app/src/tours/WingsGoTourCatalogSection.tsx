@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import type { Site } from '@/payload-types'
 import type { CopyLocaleCode } from '@/utilities/locales'
 
+import { WingsGoCommerceHero } from '@/heros/WingsGoCommerceHero'
 import { WingsGoTourCatalogClient } from './WingsGoTourCatalogClient'
 import {
   parseWingsGoCatalogFilters,
@@ -38,10 +39,18 @@ export const WingsGoTourCatalogSection = async ({
   })
 
   return (
-    <WingsGoTourCatalogClient
-      initial={initial}
-      initialFilters={filters}
-      locale={copyLocale}
-    />
+    <>
+      <WingsGoCommerceHero
+        cards={initial.hero}
+        filtersActive={initial.filtersActive}
+        initialFilters={filters}
+        locale={copyLocale}
+      />
+      <WingsGoTourCatalogClient
+        initial={initial}
+        initialFilters={filters}
+        locale={copyLocale}
+      />
+    </>
   )
 }

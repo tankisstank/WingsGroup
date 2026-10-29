@@ -62,6 +62,7 @@ describe('WingsGo tour catalog endpoint', () => {
       featured: [],
       filtersActive: false,
       hasMore: false,
+      hero: [],
       markets: [],
       nextCursor: null,
       nextOffset: 0,
@@ -82,6 +83,7 @@ describe('WingsGo tour catalog endpoint', () => {
       featured: [],
       filtersActive: false,
       hasMore: false,
+      hero: [],
       markets: [],
       nextCursor: null,
       nextOffset: 0,
@@ -99,6 +101,7 @@ describe('WingsGo tour catalog endpoint', () => {
       all: [{ id: 1, title: 'Tour 1' }],
       featured: [],
       hasMore: false,
+      hero: [],
       nextOffset: 1,
     }
     queryWingsGoTourCatalog.mockResolvedValue(successData)
@@ -133,6 +136,7 @@ describe('WingsGo tour catalog endpoint', () => {
       all: [],
       featured: [],
       hasMore: false,
+      hero: [],
       nextOffset: 0,
     })
 
@@ -168,6 +172,7 @@ describe('WingsGo tour catalog endpoint', () => {
       featured: [{ id: 1, title: 'Tour 1' }],
       filtersActive: true,
       hasMore: false,
+      hero: [],
       markets: [{ count: 1, image: null, lowestPrice: null, market: 'korea' }],
       nextOffset: 1,
       upcoming: [{ id: 2, title: 'Tour 2' }],
@@ -208,6 +213,7 @@ describe('WingsGo tour catalog endpoint', () => {
       featured: [],
       filtersActive: false,
       hasMore: false,
+      hero: [],
       markets: [],
       nextCursor: null,
       nextOffset: 1,
@@ -247,6 +253,7 @@ describe('WingsGo tour catalog endpoint', () => {
       featured: [],
       filtersActive: false,
       hasMore: false,
+      hero: [],
       markets: [],
       nextCursor: null,
       nextOffset: 0,
@@ -271,6 +278,7 @@ describe('WingsGo tour catalog endpoint', () => {
       featured: [],
       filtersActive: false,
       hasMore: false,
+      hero: [],
       markets: [],
       nextCursor: null,
       nextOffset: 0,

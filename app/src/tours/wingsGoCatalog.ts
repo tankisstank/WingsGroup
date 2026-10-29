@@ -95,6 +95,7 @@ export type WingsGoCatalogData = {
   featured: WingsGoCatalogCard[]
   filtersActive: boolean
   hasMore: boolean
+  hero: WingsGoCatalogCard[]
   markets: WingsGoCatalogMarketSummary[]
   nextCursor: string | null
   nextOffset: number
@@ -384,7 +385,7 @@ const buildCard = ({
     },
     editorialBadges,
     hasHotEditorialBadge: Boolean(hasHotEditorialBadge),
-    href: getTourProductPath(product.slug),
+    href: getTourProductPath(product.slug, locale === 'vi' ? undefined : locale, 'vi'),
     id: product.id,
     image: firstMedia(product),
     market: product.market || 'other',
@@ -769,6 +770,7 @@ export const queryWingsGoTourCatalog = async ({
     featured: [],
     filtersActive: false,
     hasMore: false,
+    hero: [],
     markets: [],
     nextCursor: null,
     nextOffset: 0,
@@ -1003,6 +1005,7 @@ export const queryWingsGoTourCatalog = async ({
     featured,
     filtersActive,
     hasMore: all.hasMore,
+    hero: filtersActive ? [] : featured.slice(0, 3),
     markets,
     nextCursor,
     nextOffset: effectiveOffset + all.cards.length,

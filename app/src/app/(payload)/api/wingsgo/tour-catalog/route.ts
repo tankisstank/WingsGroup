@@ -17,6 +17,7 @@ const emptyCatalog = {
   featured: [],
   filtersActive: false,
   hasMore: false,
+  hero: [],
   markets: [],
   nextCursor: null,
   nextOffset: 0,

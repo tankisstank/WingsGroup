@@ -1,6 +1,7 @@
 import { getCopyLocale, type CopyLocaleCode } from '@/utilities/locales'
 import { resolveSiteInquiryContactPath } from '@/utilities/siteContactPaths'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import { businessCalendarMonth } from './businessCalendar'
 import { normalizeGovernedTourPrice } from './currency'
 import { appendTourEnquiryContextParams, type TourEnquiryContext } from './enquiryContext'
 import type { DepartureCardViewModel } from './types'
@@ -639,10 +640,7 @@ export const groupDeparturesByMonth = <T extends { departureDate?: null | string
   const groups = new Map<string, T[]>()
 
   for (const departure of departures || []) {
-    const date = toDateOnly(departure.departureDate)
-    const key = date
-      ? `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`
-      : 'undated'
+    const key = businessCalendarMonth(departure.departureDate) || 'undated'
 
     groups.set(key, [...(groups.get(key) || []), departure])
   }

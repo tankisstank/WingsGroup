@@ -188,9 +188,15 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
     void loadMore()
   }
 
+  const heroCount = initial.hero ? initial.hero.length : 0
+  const remainingFeatured = initial.featured.slice(heroCount)
+  const hideFeatured =
+    initial.filtersActive ||
+    (remainingFeatured.length === 0 && heroCount > 0)
+
   return (
     <div className="container space-y-10 py-10 md:py-14">
-      {!initial.filtersActive ? (
+      {!hideFeatured ? (
         <section aria-labelledby="wingsgo-featured-tours">
           <div className="mb-5">
             <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
@@ -206,8 +212,8 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
               {copy.featuredDescription}
             </p>
           </div>
-          {initial.featured.length > 0 ? (
-            <CatalogGrid cards={initial.featured} locale={copyLocale} />
+          {remainingFeatured.length > 0 ? (
+            <CatalogGrid cards={remainingFeatured} locale={copyLocale} />
           ) : (
             <p className="rounded-[20px] border border-border/60 bg-muted/20 p-5 text-sm text-muted-foreground">
               {copy.featuredEmpty}

@@ -3,6 +3,32 @@ import { getCopyLocale, type CopyLocaleCode } from '@/utilities/locales'
 export interface WingsGoCatalogCopy {
   contactPriceLabel: string
 
+  // Hero section
+  heroKicker: string
+  heroTitle: string
+  heroSubtitle: string
+  heroTrendingTitle: string
+  heroViewTour: string
+  heroNextDeparture: string
+  heroPriceFrom: string
+  daysUntilDepartureBadge: (days: number) => string
+
+  // Quick search
+  quickSearchTitle: string
+  quickSearchMarketLabel: string
+  quickSearchMarketAll: string
+  quickSearchMonthLabel: string
+  quickSearchMonthAll: string
+  quickSearchSeasonLabel: string
+  quickSearchSeasonAll: string
+  quickSearchSubmit: string
+
+  // Season names
+  seasonSpring: string
+  seasonSummer: string
+  seasonAutumn: string
+  seasonWinter: string
+
   // Featured section
   featuredKicker: string
   featuredTitle: string
@@ -49,6 +75,31 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
   vi: {
     contactPriceLabel: 'Liên hệ để nhận giá mới nhất',
 
+    heroKicker: 'WingsGo Tours',
+    heroTitle: 'Khám phá thế giới cùng WingsGo',
+    heroSubtitle:
+      'Tour chọn lọc chất lượng cao, lịch khởi hành rõ ràng, trải nghiệm trọn vẹn và giá minh bạch.',
+    heroTrendingTitle: 'Tour đang được quan tâm',
+    heroViewTour: 'Xem tour',
+    heroNextDeparture: 'Khởi hành gần nhất',
+    heroPriceFrom: 'Giá từ',
+    daysUntilDepartureBadge: (days: number) =>
+      days === 0 ? 'Khởi hành hôm nay' : `Khởi hành sau ${days} ngày`,
+
+    quickSearchTitle: 'Tìm kiếm tour nhanh',
+    quickSearchMarketLabel: 'Điểm đến',
+    quickSearchMarketAll: 'Tất cả điểm đến',
+    quickSearchMonthLabel: 'Tháng khởi hành',
+    quickSearchMonthAll: 'Tất cả các tháng',
+    quickSearchSeasonLabel: 'Mùa',
+    quickSearchSeasonAll: 'Tất cả các mùa',
+    quickSearchSubmit: 'Tìm tour',
+
+    seasonSpring: 'Mùa xuân (T3 - T5)',
+    seasonSummer: 'Mùa hạ (T6 - T8)',
+    seasonAutumn: 'Mùa thu (T9 - T11)',
+    seasonWinter: 'Mùa đông (T12 - T2)',
+
     featuredKicker: 'Gợi ý chọn nhanh',
     featuredTitle: 'Tour nổi bật',
     featuredDescription:
@@ -89,6 +140,31 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
   },
   en: {
     contactPriceLabel: 'Contact us for latest pricing',
+
+    heroKicker: 'WingsGo Tours',
+    heroTitle: 'Explore the World with WingsGo',
+    heroSubtitle:
+      'Curated premium tours, reliable departure dates, seamless journeys, and transparent pricing.',
+    heroTrendingTitle: 'Trending tours',
+    heroViewTour: 'View tour',
+    heroNextDeparture: 'Next departure',
+    heroPriceFrom: 'From',
+    daysUntilDepartureBadge: (days: number) =>
+      days === 0 ? 'Departs today' : days === 1 ? 'Departs in 1 day' : `Departs in ${days} days`,
+
+    quickSearchTitle: 'Quick tour search',
+    quickSearchMarketLabel: 'Destination',
+    quickSearchMarketAll: 'All destinations',
+    quickSearchMonthLabel: 'Departure month',
+    quickSearchMonthAll: 'All months',
+    quickSearchSeasonLabel: 'Season',
+    quickSearchSeasonAll: 'All seasons',
+    quickSearchSubmit: 'Search tours',
+
+    seasonSpring: 'Spring (Mar - May)',
+    seasonSummer: 'Summer (Jun - Aug)',
+    seasonAutumn: 'Autumn (Sep - Nov)',
+    seasonWinter: 'Winter (Dec - Feb)',
 
     featuredKicker: 'Quick picks',
     featuredTitle: 'Featured tours',
