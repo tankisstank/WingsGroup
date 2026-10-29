@@ -808,22 +808,33 @@ export const queryWingsGoTourCatalog = async ({
   const wrapperIDs = wrappers.map((wrapper) => wrapper.id)
   if (wrapperIDs.length === 0) return emptyCatalog
 
-  const productsResult = await queryDocs(
-    payload,
-    'tour-products',
-    {
-      and: [
-        { _status: { equals: 'published' } },
-        { site: { equals: site.id } },
-        { wrapperPage: { in: wrapperIDs } },
-      ],
-    },
-    locale,
-  )
+  const productsWhere = {
+    and: [
+      { _status: { equals: 'published' } },
+      { site: { equals: site.id } },
+      { wrapperPage: { in: wrapperIDs } },
+    ],
+  }
+  const productsResult = await queryDocs(payload, 'tour-products', productsWhere, locale)
   checkInventoryCap('tour-products', productsResult.docs.length)
-  const products = (productsResult.docs as unknown as InventoryProduct[]).filter((item) =>
+  let products = (productsResult.docs as unknown as InventoryProduct[]).filter((item) =>
     sameID(item.site, site.id),
   )
+  // Untranslated tours would vanish from EN: show their Vietnamese copy instead, but keep
+  // badges from the strict EN read so no Vietnamese badge label leaks (US-084).
+  if (locale === 'en' && products.some((product) => !product.title)) {
+    const viResult = await queryDocs(payload, 'tour-products', productsWhere, 'vi')
+    const viByID = new Map(
+      (viResult.docs as unknown as InventoryProduct[])
+        .filter((item) => sameID(item.site, site.id))
+        .map((item) => [String(item.id), item]),
+    )
+    products = products.map((product) => {
+      if (product.title) return product
+      const viProduct = viByID.get(String(product.id))
+      return viProduct ? { ...viProduct, editorialBadges: product.editorialBadges } : product
+    })
+  }
   const productIDs = products.map((product) => product.id)
   if (productIDs.length === 0) return emptyCatalog
 

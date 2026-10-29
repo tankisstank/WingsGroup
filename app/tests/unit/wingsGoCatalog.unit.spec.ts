@@ -618,6 +618,83 @@ describe('WingsGo dynamic catalog constraints', () => {
       })
     })
 
+    it('shows the Vietnamese copy of an untranslated tour on EN without leaking Vietnamese badge labels', async () => {
+      const wrap = wrapper({ id: 1512, pathname: '/tour/vi-only-tour' })
+      const deps = [departure({ id: 5121, tourProduct: 512, departureDate: '2026-11-01T00:00:00.000Z' })]
+      const enDoc = product({
+        editorialBadges: [{ kind: 'specialized', label: null }],
+        id: 512,
+        slug: 'vi-only-tour',
+        title: null,
+        wrapperPage: 1512,
+      })
+      const viDoc = product({
+        editorialBadges: [{ kind: 'specialized', label: 'Chuyên tour tiếng Việt' }],
+        id: 512,
+        slug: 'vi-only-tour',
+        title: 'Tour chỉ có tiếng Việt',
+        wrapperPage: 1512,
+      })
+      const productLocales: string[] = []
+
+      const payload = {
+        find: vi.fn(async ({ collection, locale }: { collection: string; locale?: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') {
+            productLocales.push(String(locale))
+            return { docs: [locale === 'vi' ? viDoc : enDoc] }
+          }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      const result = await queryWingsGoTourCatalog({
+        limit: 6,
+        locale: 'en',
+        now: new Date('2026-01-01T00:00:00.000Z'),
+        page: {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [] },
+        },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+
+      expect(productLocales).toEqual(['en', 'vi'])
+      const card = [...result.featured, ...result.all].find((c) => c.id === 512)
+      expect(card?.title).toBe('Tour chỉ có tiếng Việt')
+      expect(JSON.stringify(card?.editorialBadges)).not.toContain('tiếng Việt')
+    })
+
+    it('does not run the Vietnamese fallback read when every EN tour is translated', async () => {
+      const wrap = wrapper({ id: 1513, pathname: '/tour/en-tour' })
+      const deps = [departure({ id: 5131, tourProduct: 513, departureDate: '2026-11-01T00:00:00.000Z' })]
+      const productLocales: string[] = []
+      const payload = {
+        find: vi.fn(async ({ collection, locale }: { collection: string; locale?: string }) => {
+          if (collection === 'pages') return { docs: [wrap] }
+          if (collection === 'tour-products') {
+            productLocales.push(String(locale))
+            return { docs: [product({ id: 513, slug: 'en-tour', title: 'English Tour', wrapperPage: 1513 })] }
+          }
+          if (collection === 'tour-curations') return { docs: [] }
+          return { docs: deps }
+        }),
+      }
+
+      await queryWingsGoTourCatalog({
+        locale: 'en',
+        now: new Date('2026-01-01T00:00:00.000Z'),
+        page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true, featuredTours: [] } },
+        payload: payload as never,
+        site: { code: 'wings-go', id: 7 },
+      })
+      expect(productLocales).toEqual(['en'])
+    })
+
     it('degrades to contact price when commerceVerified is false or unverified', async () => {
       const tour = product({ id: 52, slug: 'unverified-tour', title: 'Tour Chưa Xác Thực', wrapperPage: 152 })
       const wrap = wrapper({ id: 152, pathname: '/tour/unverified-tour' })

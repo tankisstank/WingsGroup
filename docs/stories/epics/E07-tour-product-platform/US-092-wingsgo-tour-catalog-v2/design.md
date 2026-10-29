@@ -93,6 +93,7 @@ Locale được truyền từ page và API xuống query, DTO và client. Mọi 
 - **D8 — Đã chốt:** Giữ font WingsGo hiện tại.
 - **D9 — Đã chốt:** URL có filter dùng `noindex, follow` và canonical về `/tour` theo locale.
 - **D10 — Đã chốt (2026-10-29, orchestrator, trước Phase 4):** "Sắp cất cánh" là lối tắt điều hướng, không phải danh sách kết quả. Dải lấy tối đa 6 tour sắp khởi hành sớm nhất từ snapshot không lọc, **loại các tour đang ở Hero và "Tour nổi bật"** (slot #1–#6), và **ẩn khi có filter**. Tour trong dải vẫn có thể xuất hiện ở "Tất cả tour"; đây là trùng lặp có chủ ý. Quy tắc "không trùng card" của AC2 áp dụng cho ba section kết quả: Hero, "Tour nổi bật" và "Tất cả tour". Ô thị trường là số liệu tổng hợp, không phải card tour.
+- **D11 — Đã chốt (2026-10-30, người dùng, trước deploy production):** Truy vấn chỉ đọc trên production cho thấy 0/49 tour WingsGo có title EN; với quy tắc EN strict ban đầu, `/en/tour` đang hiện 13 card sẽ thành trống. Người dùng chọn fallback: ở EN, tour chưa có title EN hiển thị nội dung tour tiếng Việt, còn giao diện (nhãn, nút, chip, copy) vẫn tiếng Anh. Badge US-084 vẫn lấy từ lần đọc EN strict nên không lọt nhãn tiếng Việt. Homepage EN, vốn đang trống vì cùng nguyên nhân, cũng có lại tour. AC1 hiểu là "không có nhãn giao diện tiếng Việt"; nội dung tour chưa dịch là dữ liệu.
 
 ## Phương án đã cân nhắc
 
