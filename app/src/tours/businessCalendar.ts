@@ -19,6 +19,13 @@ const parseValidDate = (value: unknown): Date | null => {
   return null
 }
 
+export type BusinessSeason = 'spring' | 'summer' | 'autumn' | 'winter'
+
+export const BUSINESS_SEASONS = ['spring', 'summer', 'autumn', 'winter'] as const
+
+export const isBusinessSeason = (value: unknown): value is BusinessSeason =>
+  typeof value === 'string' && (BUSINESS_SEASONS as readonly string[]).includes(value)
+
 export const toBusinessCalendarDay = (value: unknown): string | null => {
   const date = parseValidDate(value)
   if (!date) return null
@@ -38,6 +45,31 @@ export const businessCalendarMonth = (value: unknown): string | null => {
   }
   const day = toBusinessCalendarDay(value)
   return day ? day.slice(0, 7) : null
+}
+
+export const seasonOfBusinessMonth = (value: unknown): BusinessSeason | null => {
+  let monthNum: number | null = null
+
+  if (typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 12) {
+    monthNum = value
+  } else if (typeof value === 'string') {
+    const monthStr = businessCalendarMonth(value)
+    if (monthStr) {
+      monthNum = Number(monthStr.slice(5, 7))
+    }
+  } else if (value instanceof Date) {
+    const monthStr = businessCalendarMonth(value)
+    if (monthStr) {
+      monthNum = Number(monthStr.slice(5, 7))
+    }
+  }
+
+  if (monthNum === null) return null
+  if (monthNum >= 3 && monthNum <= 5) return 'spring'
+  if (monthNum >= 6 && monthNum <= 8) return 'summer'
+  if (monthNum >= 9 && monthNum <= 11) return 'autumn'
+  if (monthNum === 12 || monthNum === 1 || monthNum === 2) return 'winter'
+  return null
 }
 
 export const daysUntilBusinessDay = (

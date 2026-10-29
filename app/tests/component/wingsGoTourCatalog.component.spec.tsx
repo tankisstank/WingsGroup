@@ -31,7 +31,10 @@ const makeCard = (id: number): WingsGoCatalogCard => ({
 const data = (ids: number[], hasMore = true): WingsGoCatalogData => ({
   all: ids.map(makeCard),
   featured: [],
+  filtersActive: false,
   hasMore,
+  markets: [],
+  upcoming: [],
   nextOffset: ids.length,
 })
 
@@ -174,7 +177,7 @@ describe('WingsGoTourCatalogClient', () => {
   it('renders English empty-state message when filters match zero tours', async () => {
     render(
       <WingsGoTourCatalogClient
-        initial={{ all: [], featured: [], hasMore: false, nextOffset: 0 }}
+        initial={{ all: [], featured: [], filtersActive: false, hasMore: false, markets: [], nextOffset: 0, upcoming: [] }}
         initialFilters={{ market: 'china' }}
         locale="en"
       />,
@@ -182,5 +185,31 @@ describe('WingsGoTourCatalogClient', () => {
 
     expect(screen.getByText('No tours match your filters.')).toBeTruthy()
     expect(screen.getByText('No eligible tours to display right now.')).toBeTruthy()
+  })
+
+  it('hides the featured tours section when filtersActive is true', () => {
+    const featuredCard = makeCard(99)
+    const allCard = makeCard(1)
+    render(
+      <WingsGoTourCatalogClient
+        initial={{
+          all: [allCard],
+          featured: [featuredCard],
+          filtersActive: true,
+          hasMore: false,
+          markets: [],
+          nextOffset: 1,
+          upcoming: [],
+        }}
+        initialFilters={{ market: 'korea' }}
+        locale="vi"
+      />,
+    )
+
+    expect(screen.queryByRole('heading', { level: 2, name: 'Tour nổi bật' })).toBeNull()
+    expect(screen.queryByText('Lựa chọn nhanh')).toBeNull()
+    expect(screen.getByRole('heading', { level: 2, name: 'Tất cả tour' })).toBeTruthy()
+    expect(screen.getByText('Tour 1')).toBeTruthy()
+    expect(screen.queryByText('Tour 99')).toBeNull()
   })
 })

@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import {
   getWingsGoFeaturedTours,
+  hasActiveCatalogFilters,
+  parseWingsGoCatalogFilters,
   isEligibleWingsGoCatalogProduct,
   queryWingsGoTourCatalog,
   selectWingsGoCatalogCards,
@@ -18,6 +20,7 @@ const product = (overrides: Record<string, unknown> = {}) => ({
   slug: 'seoul-5n4d',
   site: 7,
   title: 'Seoul 5N4D',
+  wrapperPage: 9 as any,
   ...overrides,
 })
 
@@ -1148,6 +1151,879 @@ describe('WingsGo dynamic catalog constraints', () => {
         kind: 'verified',
         originalPrice: null,
         value: 20000000,
+      })
+    })
+  })
+
+  describe('US-092 Phase 1: snapshot, filter contract, and departure window', () => {
+    describe('parseWingsGoCatalogFilters and hasActiveCatalogFilters', () => {
+      const fixedNow = new Date('2026-05-15T10:00:00.000Z') // VN month: 2026-05
+
+      it('accepts departureMonth only if within [current month, current month + 24]', () => {
+        // current month
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('departureMonth=2026-05'), fixedNow),
+        ).toEqual({ departureMonth: '2026-05' })
+
+        // 24 months ahead (2028-05)
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('departureMonth=2028-05'), fixedNow),
+        ).toEqual({ departureMonth: '2028-05' })
+
+        // 1 month ahead
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('departureMonth=2026-06'), fixedNow),
+        ).toEqual({ departureMonth: '2026-06' })
+
+        // Past month: dropped
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('departureMonth=2026-04'), fixedNow),
+        ).toEqual({})
+
+        // 25 months ahead: dropped
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('departureMonth=2028-06'), fixedNow),
+        ).toEqual({})
+
+        // Malformed strings: dropped
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('departureMonth=2026-5'), fixedNow),
+        ).toEqual({})
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('departureMonth=2026-13'), fixedNow),
+        ).toEqual({})
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('departureMonth=invalid'), fixedNow),
+        ).toEqual({})
+      })
+
+      it('accepts only the 4 canonical business seasons', () => {
+        expect(parseWingsGoCatalogFilters(new URLSearchParams('season=spring'), fixedNow)).toEqual({
+          season: 'spring',
+        })
+        expect(parseWingsGoCatalogFilters(new URLSearchParams('season=summer'), fixedNow)).toEqual({
+          season: 'summer',
+        })
+        expect(parseWingsGoCatalogFilters(new URLSearchParams('season=autumn'), fixedNow)).toEqual({
+          season: 'autumn',
+        })
+        expect(parseWingsGoCatalogFilters(new URLSearchParams('season=winter'), fixedNow)).toEqual({
+          season: 'winter',
+        })
+
+        // Unknown or invalid casing
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('season=monsoon'), fixedNow),
+        ).toEqual({})
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('season=SPRING'), fixedNow),
+        ).toEqual({})
+        expect(
+          parseWingsGoCatalogFilters(new URLSearchParams('season=winter '), fixedNow),
+        ).toEqual({})
+      })
+
+      it('whitelists market against TourProducts market values', () => {
+        const allowedMarkets = [
+          'korea',
+          'japan',
+          'china',
+          'vietnam',
+          'thailand',
+          'cambodia',
+          'laos',
+          'myanmar',
+          'indochina',
+          'other',
+        ]
+        for (const m of allowedMarkets) {
+          expect(parseWingsGoCatalogFilters(new URLSearchParams(`market=${m}`), fixedNow)).toEqual({
+            market: m,
+          })
+        }
+
+        // Unknown market dropped
+        expect(parseWingsGoCatalogFilters(new URLSearchParams('market=mars'), fixedNow)).toEqual({})
+        expect(parseWingsGoCatalogFilters(new URLSearchParams('market=europe'), fixedNow)).toEqual({})
+      })
+
+      it('recognizes active filters correctly while sort alone is not active', () => {
+        expect(hasActiveCatalogFilters({})).toBe(false)
+        expect(hasActiveCatalogFilters({ sort: 'price' })).toBe(false)
+        expect(hasActiveCatalogFilters({ sort: 'next-departure' })).toBe(false)
+
+        expect(hasActiveCatalogFilters({ market: 'korea' })).toBe(true)
+        expect(hasActiveCatalogFilters({ departureMonth: '2026-06' })).toBe(true)
+        expect(hasActiveCatalogFilters({ season: 'summer' })).toBe(true)
+        expect(hasActiveCatalogFilters({ durationMin: 4 })).toBe(true)
+        expect(hasActiveCatalogFilters({ durationMax: 8 })).toBe(true)
+        expect(hasActiveCatalogFilters({ priceMin: 5000000 })).toBe(true)
+        expect(hasActiveCatalogFilters({ priceMax: 20000000 })).toBe(true)
+        expect(hasActiveCatalogFilters({ sort: 'price', market: 'japan' })).toBe(true)
+      })
+    })
+
+    describe('departure window filtering and card building', () => {
+      const fixedNow = new Date('2026-05-01T00:00:00.000Z')
+
+      it('filters cards by month only and selects nearest departure and lowest price inside window', async () => {
+        const tour = product({ id: 201, slug: 'tour-month', title: 'Tour Month', wrapperPage: 2010 })
+        const wrap = wrapper({ id: 2010, pathname: '/tour/tour-month' })
+        const deps = [
+          departure({
+            id: 2011,
+            tourProduct: 201,
+            departureDate: '2026-06-10T00:00:00.000Z',
+            priceFrom: 18000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 2012,
+            tourProduct: 201,
+            departureDate: '2026-07-05T00:00:00.000Z',
+            priceFrom: 12000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 2013,
+            tourProduct: 201,
+            departureDate: '2026-07-20T00:00:00.000Z',
+            priceFrom: 15000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: [wrap] }
+            if (collection === 'tour-products') return { docs: [tour] }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        const result = await queryWingsGoTourCatalog({
+          filters: { departureMonth: '2026-07' },
+          limit: 6,
+          now: fixedNow,
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        expect(result.filtersActive).toBe(true)
+        const match = result.all.find((c) => c.id === 201)
+        expect(match).toBeDefined()
+        // Nearest in July is July 5
+        expect(match?.nextDeparture.date).toBe('2026-07-05T00:00:00.000Z')
+        // Lowest price in July is 12,000,000 (from July 5)
+        expect(match?.price).toEqual({
+          currency: 'VND',
+          kind: 'verified',
+          originalPrice: null,
+          value: 12000000,
+        })
+      })
+
+      it('filters cards by season only and supports winter across year boundary (Dec, Jan, Feb)', async () => {
+        const tour = product({ id: 202, slug: 'tour-winter', title: 'Tour Winter', wrapperPage: 2020 })
+        const wrap = wrapper({ id: 2020, pathname: '/tour/tour-winter' })
+        const deps = [
+          departure({
+            id: 2021,
+            tourProduct: 202,
+            departureDate: '2026-10-15T00:00:00.000Z', // Autumn
+            priceFrom: 8000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 2022,
+            tourProduct: 202,
+            departureDate: '2026-12-25T00:00:00.000Z', // Winter (Dec)
+            priceFrom: 16000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 2023,
+            tourProduct: 202,
+            departureDate: '2027-01-15T00:00:00.000Z', // Winter (Jan)
+            priceFrom: 14000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 2024,
+            tourProduct: 202,
+            departureDate: '2027-02-10T00:00:00.000Z', // Winter (Feb)
+            priceFrom: 13000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: [wrap] }
+            if (collection === 'tour-products') return { docs: [tour] }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        const result = await queryWingsGoTourCatalog({
+          filters: { season: 'winter' },
+          limit: 6,
+          now: fixedNow,
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        const match = result.all.find((c) => c.id === 202)
+        expect(match).toBeDefined()
+        // Nearest in winter is 2026-12-25
+        expect(match?.nextDeparture.date).toBe('2026-12-25T00:00:00.000Z')
+        // Lowest valid price in winter is 13,000,000 (from 2027-02-10)
+        expect(match?.price).toEqual({
+          currency: 'VND',
+          kind: 'verified',
+          originalPrice: null,
+          value: 13000000,
+        })
+      })
+
+      it('filters cards by month AND season intersection, dropping products with empty intersection', async () => {
+        const tourMatch = product({ id: 203, slug: 'tour-match', title: 'Tour Match', wrapperPage: 2030 })
+        const wrapMatch = wrapper({ id: 2030, pathname: '/tour/tour-match' })
+        const depsMatch = [
+          departure({
+            id: 2031,
+            tourProduct: 203,
+            departureDate: '2026-07-10T00:00:00.000Z', // July is summer
+            priceFrom: 10000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const tourMismatch = product({ id: 204, slug: 'tour-mismatch', title: 'Tour Mismatch', wrapperPage: 2040 })
+        const wrapMismatch = wrapper({ id: 2040, pathname: '/tour/tour-mismatch' })
+        const depsMismatch = [
+          departure({
+            id: 2041,
+            tourProduct: 204,
+            departureDate: '2026-07-15T00:00:00.000Z', // July is summer, NOT winter
+            priceFrom: 9000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: [wrapMatch, wrapMismatch] }
+            if (collection === 'tour-products') return { docs: [tourMatch, tourMismatch] }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: [...depsMatch, ...depsMismatch] }
+          }),
+        }
+
+        // July (summer) + summer -> match
+        const resultMatch = await queryWingsGoTourCatalog({
+          filters: { departureMonth: '2026-07', season: 'summer' },
+          limit: 6,
+          now: fixedNow,
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+        expect(resultMatch.all.map((c) => c.id)).toContain(203)
+
+        // July (summer) + winter -> contradictory intersection, 0 matching departures
+        const resultContradictory = await queryWingsGoTourCatalog({
+          filters: { departureMonth: '2026-07', season: 'winter' },
+          limit: 6,
+          now: fixedNow,
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+        expect(resultContradictory.all).toHaveLength(0)
+      })
+
+      it('drops a product from catalog cards when it has no departures matching the window', async () => {
+        const tour = product({ id: 205, slug: 'tour-no-deps', title: 'Tour No Deps', wrapperPage: 2050 })
+        const wrap = wrapper({ id: 2050, pathname: '/tour/tour-no-deps' })
+        const deps = [
+          departure({
+            id: 2051,
+            tourProduct: 205,
+            departureDate: '2026-06-01T00:00:00.000Z', // June (summer)
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: [wrap] }
+            if (collection === 'tour-products') return { docs: [tour] }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        const result = await queryWingsGoTourCatalog({
+          filters: { departureMonth: '2026-11' }, // November
+          limit: 6,
+          now: fixedNow,
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        expect(result.all).toHaveLength(0)
+      })
+
+      it('matches budget filters (priceMin/Max) against the windowed price', async () => {
+        const tour = product({ id: 206, slug: 'tour-budget', title: 'Tour Budget', wrapperPage: 2060 })
+        const wrap = wrapper({ id: 2060, pathname: '/tour/tour-budget' })
+        const deps = [
+          departure({
+            id: 2061,
+            tourProduct: 206,
+            departureDate: '2026-05-10T00:00:00.000Z', // May departure: cheap 10M
+            priceFrom: 10000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 2062,
+            tourProduct: 206,
+            departureDate: '2026-07-10T00:00:00.000Z', // July departure: expensive 25M
+            priceFrom: 25000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: [wrap] }
+            if (collection === 'tour-products') return { docs: [tour] }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        // Filtering for July (window price is 25M), budget max is 20M -> excluded
+        const resultExcluded = await queryWingsGoTourCatalog({
+          filters: { departureMonth: '2026-07', priceMax: 20000000 },
+          limit: 6,
+          now: fixedNow,
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+        expect(resultExcluded.all).toHaveLength(0)
+
+        // Filtering for July with budget max 30M -> included
+        const resultIncluded = await queryWingsGoTourCatalog({
+          filters: { departureMonth: '2026-07', priceMax: 30000000 },
+          limit: 6,
+          now: fixedNow,
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+        expect(resultIncluded.all.map((c) => c.id)).toEqual([206])
+      })
+
+      it('falls back to contact pricing when windowed departures are sold-out or expired', async () => {
+        const tour = product({ id: 207, slug: 'tour-sold-out-in-window', title: 'Tour Sold Out Window', wrapperPage: 2070 })
+        const wrap = wrapper({ id: 2070, pathname: '/tour/tour-sold-out-in-window' })
+        const deps = [
+          departure({
+            id: 2071,
+            tourProduct: 207,
+            departureDate: '2026-05-10T00:00:00.000Z', // May: valid 15M
+            priceFrom: 15000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 2072,
+            tourProduct: 207,
+            departureDate: '2026-06-15T00:00:00.000Z', // June: sold-out
+            priceFrom: 10000000,
+            commerceVerified: true,
+            availabilityStatus: 'sold-out',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: [wrap] }
+            if (collection === 'tour-products') return { docs: [tour] }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        const result = await queryWingsGoTourCatalog({
+          filters: { departureMonth: '2026-06' },
+          limit: 6,
+          now: fixedNow,
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        const card = result.all.find((c) => c.id === 207)
+        expect(card).toBeDefined()
+        expect(card?.nextDeparture.date).toBe('2026-06-15T00:00:00.000Z')
+        expect(card?.price).toEqual({
+          kind: 'contact',
+          label: 'Liên hệ để nhận giá mới nhất',
+        })
+      })
+    })
+
+    describe('one snapshot per request invariants', () => {
+      it('calculates daysUntilDeparture using the same request now across the boundary', async () => {
+        const tour = product({ id: 301, slug: 'tour-boundary', title: 'Tour Boundary', wrapperPage: 3010 })
+        const wrap = wrapper({ id: 3010, pathname: '/tour/tour-boundary' })
+        const deps = [
+          departure({
+            id: 3011,
+            tourProduct: 301,
+            departureDate: '2026-06-15T00:00:00.000Z',
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: [wrap] }
+            if (collection === 'tour-products') return { docs: [tour] }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        // Just before VN midnight: 2026-06-10T16:59:59Z is 23:59:59 in VN (2026-06-10) -> 5 days to June 15
+        const resultBefore = await queryWingsGoTourCatalog({
+          limit: 6,
+          now: new Date('2026-06-10T16:59:59.000Z'),
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+        const cardBefore = [...resultBefore.featured, ...resultBefore.all][0]
+        expect(cardBefore?.nextDeparture.daysUntilDeparture).toBe(5)
+
+        // At VN midnight: 2026-06-10T17:00:00Z is 00:00:00 in VN (2026-06-11) -> 4 days to June 15
+        const resultAfter = await queryWingsGoTourCatalog({
+          limit: 6,
+          now: new Date('2026-06-10T17:00:00.000Z'),
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+        const cardAfter = [...resultAfter.featured, ...resultAfter.all][0]
+        expect(cardAfter?.nextDeparture.daysUntilDeparture).toBe(4)
+      })
+
+      it('keeps featured unaffected by active filters, while all includes featured when filters are active', async () => {
+        const tourKorea = product({
+          id: 310,
+          market: 'korea',
+          slug: 'tour-korea',
+          title: 'Tour Korea',
+          wrapperPage: 3100,
+        })
+        const tourJapan = product({
+          id: 320,
+          market: 'japan',
+          slug: 'tour-japan',
+          title: 'Tour Japan',
+          wrapperPage: 3200,
+        })
+        const wrappers = [
+          wrapper({ id: 3100, pathname: '/tour/tour-korea' }),
+          wrapper({ id: 3200, pathname: '/tour/tour-japan' }),
+        ]
+        const deps = [
+          departure({
+            id: 3101,
+            tourProduct: 310,
+            departureDate: '2026-08-01T00:00:00.000Z',
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 3201,
+            tourProduct: 320,
+            departureDate: '2026-08-05T00:00:00.000Z',
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: wrappers }
+            if (collection === 'tour-products') return { docs: [tourKorea, tourJapan] }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        // Curation designates Tour Korea (310) as featured
+        const page = {
+          id: 99,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true, featuredTours: [310] },
+        }
+
+        // Case A: No filters active -> featured has [310, 320] (310 curated, 320 fallback), all excludes featured
+        const resNoFilters = await queryWingsGoTourCatalog({
+          filters: {},
+          limit: 6,
+          now: new Date('2026-05-01T00:00:00.000Z'),
+          offset: 0,
+          page,
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+        expect(resNoFilters.filtersActive).toBe(false)
+        expect(resNoFilters.featured.map((c) => c.id)).toEqual([310, 320])
+        expect(resNoFilters.all).toEqual([])
+
+        // Case B: Filter market=korea -> featured is STILL computed from unfiltered (remains [310, 320]),
+        // and all includes 310 (does NOT exclude featured)
+        const resFiltered = await queryWingsGoTourCatalog({
+          filters: { market: 'korea' },
+          limit: 6,
+          now: new Date('2026-05-01T00:00:00.000Z'),
+          offset: 0,
+          page,
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+        expect(resFiltered.filtersActive).toBe(true)
+        expect(resFiltered.featured.map((c) => c.id)).toEqual([310, 320])
+        expect(resFiltered.all.map((c) => c.id)).toEqual([310])
+      })
+
+      it('produces markets summaries with count, lowestPrice, and deterministic image selection', async () => {
+        const tourKorea1 = product({
+          heroMedia: { alt: 'seoul image', site: 7, url: '/media/seoul.jpg' },
+          id: 331,
+          market: 'korea',
+          slug: 'seoul',
+          wrapperPage: 3310,
+        })
+        const tourKorea2 = product({
+          heroMedia: { alt: 'busan image', site: 7, url: '/media/busan.jpg' },
+          id: 332,
+          market: 'korea',
+          slug: 'busan',
+          wrapperPage: 3320,
+        })
+        const tourJapan = product({
+          heroMedia: null, // no image
+          id: 333,
+          market: 'japan',
+          slug: 'tokyo',
+          wrapperPage: 3330,
+        })
+
+        const wrappers = [
+          wrapper({ id: 3310, pathname: '/tour/seoul' }),
+          wrapper({ id: 3320, pathname: '/tour/busan' }),
+          wrapper({ id: 3330, pathname: '/tour/tokyo' }),
+        ]
+        const deps = [
+          departure({
+            id: 3311,
+            tourProduct: 331,
+            departureDate: '2026-08-01T00:00:00.000Z',
+            priceFrom: 15000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 3321,
+            tourProduct: 332,
+            departureDate: '2026-08-05T00:00:00.000Z',
+            priceFrom: 12000000, // lowest for korea
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 3331,
+            tourProduct: 333,
+            departureDate: '2026-08-10T00:00:00.000Z',
+            priceFrom: 20000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: wrappers }
+            if (collection === 'tour-products') return { docs: [tourKorea1, tourKorea2, tourJapan] }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        const now = new Date('2026-05-01T00:00:00.000Z')
+        const result = await queryWingsGoTourCatalog({
+          limit: 6,
+          now,
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        // Sorted by count desc, then market asc: korea (count: 2), then japan (count: 1)
+        expect(result.markets.map((m) => m.market)).toEqual(['korea', 'japan'])
+        expect(result.markets[0]?.count).toBe(2)
+        expect(result.markets[0]?.lowestPrice?.value).toBe(12000000)
+        expect(result.markets[0]?.image).not.toBeNull()
+
+        expect(result.markets[1]?.count).toBe(1)
+        expect(result.markets[1]?.lowestPrice?.value).toBe(20000000)
+        expect(result.markets[1]?.image).toBeNull() // japan has no image
+
+        // Deterministic image test: repeated calls with same now yield exact same image pick
+        const result2 = await queryWingsGoTourCatalog({
+          limit: 6,
+          now,
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+        expect(result2.markets[0]?.image).toEqual(result.markets[0]?.image)
+      })
+
+      it('derives upcoming as the first 6 unfiltered cards sorted by next-departure', async () => {
+        const products = Array.from({ length: 8 }, (_, i) =>
+          product({ id: 401 + i, slug: `tour-${i}`, title: `Tour ${i}`, wrapperPage: 4010 + i }),
+        )
+        const wrappers = products.map((p) => wrapper({ id: p.wrapperPage, pathname: `/tour/${p.slug}` }))
+        // Departures in reverse order: Tour 7 has earliest date, Tour 0 has latest date
+        const deps = products.map((p, i) =>
+          departure({
+            id: 501 + i,
+            tourProduct: p.id,
+            departureDate: `2026-${String(10 - i).padStart(2, '0')}-01T00:00:00.000Z`,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        )
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: wrappers }
+            if (collection === 'tour-products') return { docs: products }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        const result = await queryWingsGoTourCatalog({
+          limit: 6,
+          now: new Date('2026-01-01T00:00:00.000Z'),
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        expect(result.upcoming).toHaveLength(6)
+        // Earliest departure is 2026-03-01 (Tour 7 / id 408)
+        expect(result.upcoming[0]?.id).toBe(408)
+        expect(result.upcoming[1]?.id).toBe(407)
+        expect(result.upcoming[2]?.id).toBe(406)
+        expect(result.upcoming[3]?.id).toBe(405)
+        expect(result.upcoming[4]?.id).toBe(404)
+        expect(result.upcoming[5]?.id).toBe(403)
+      })
+
+      it('logs a console.warn without PII when any collection query hits WINGSGO_CATALOG_MAX_INVENTORY', async () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+        const maxDocs = Array.from({ length: WINGSGO_CATALOG_MAX_INVENTORY }, (_, i) =>
+          product({ id: 500 + i, wrapperPage: 5000 + i }),
+        )
+        const wrappers = maxDocs.map((p) => wrapper({ id: p.wrapperPage, pathname: `/tour/${p.slug}` }))
+        const deps = maxDocs.map((p) => departure({ id: 6000 + p.id, tourProduct: p.id }))
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: wrappers }
+            if (collection === 'tour-products') return { docs: maxDocs } // Exactly 200!
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        await queryWingsGoTourCatalog({
+          limit: 6,
+          now: new Date('2026-01-01T00:00:00.000Z'),
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        expect(warnSpy).toHaveBeenCalled()
+        const warnCall = warnSpy.mock.calls.find((call) =>
+          String(call[0]).includes('tour-products'),
+        )
+        expect(warnCall).toBeDefined()
+        expect(String(warnCall?.[0])).toContain('reached maximum cap (200)')
+        expect(String(warnCall?.[0])).toContain('site 7')
+        warnSpy.mockRestore()
+      })
+
+      it('ignores departures and products belonging to a different site', async () => {
+        const tourSameSite = product({ id: 601, site: 7, slug: 'tour-same', wrapperPage: 6010 })
+        const tourOtherSite = product({ id: 602, site: 8, slug: 'tour-other', wrapperPage: 6020 })
+        const wrapSame = wrapper({ id: 6010, site: 7, pathname: '/tour/tour-same' })
+        const wrapOther = wrapper({ id: 6020, site: 8, pathname: '/tour/tour-other' })
+
+        const deps = [
+          departure({
+            id: 6011,
+            site: 7,
+            tourProduct: 601,
+            departureDate: '2026-08-01T00:00:00.000Z',
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+          departure({
+            id: 6021,
+            site: 8,
+            tourProduct: 602,
+            departureDate: '2026-08-01T00:00:00.000Z',
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        ]
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: [wrapSame, wrapOther] }
+            if (collection === 'tour-products') return { docs: [tourSameSite, tourOtherSite] }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: deps }
+          }),
+        }
+
+        const result = await queryWingsGoTourCatalog({
+          limit: 6,
+          now: new Date('2026-01-01T00:00:00.000Z'),
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+
+        const allReturnedCards = [...result.featured, ...result.all]
+        expect(allReturnedCards.map((c) => c.id)).toEqual([601])
+        expect(allReturnedCards.some((c) => c.id === 602)).toBe(false)
+      })
+    })
+
+    describe('homepage regression test (getWingsGoFeaturedTours)', () => {
+      it('returns expected featured cards for homepage HighImpact consumption', async () => {
+        const products = [
+          product({ id: 701, slug: 'featured-1', title: 'Featured 1', wrapperPage: 7010 }),
+          product({ id: 702, slug: 'featured-2', title: 'Featured 2', wrapperPage: 7020 }),
+        ]
+        const wrappers = products.map((p) => wrapper({ id: p.wrapperPage, pathname: `/tour/${p.slug}` }))
+        const deps = products.map((p, i) =>
+          departure({
+            id: 7001 + i,
+            tourProduct: p.id,
+            departureDate: '2026-12-01T00:00:00.000Z',
+            priceFrom: 15000000 + i * 1000000,
+            commerceVerified: true,
+            availabilityStatus: 'open',
+          }),
+        )
+
+        const payload = {
+          find: vi.fn(
+            async ({
+              collection,
+              where,
+            }: {
+              collection: string
+              where?: { and?: Array<{ pathname?: { equals?: string } }> }
+            }) => {
+              if (collection === 'pages') {
+                const hasCatalogPath = where?.and?.some(
+                  (cond) => cond.pathname?.equals === '/tour',
+                )
+                if (hasCatalogPath) {
+                  return {
+                    docs: [
+                      {
+                        id: 99,
+                        pathname: '/tour',
+                        site: 7,
+                        _status: 'published',
+                        wingsGoTourCatalog: { enabled: true, featuredTours: [701, 702] },
+                      },
+                    ],
+                  }
+                }
+                return { docs: wrappers }
+              }
+              if (collection === 'tour-products') return { docs: products }
+              if (collection === 'tour-curations') return { docs: [] }
+              return { docs: deps }
+            },
+          ),
+        }
+
+        const featured = await getWingsGoFeaturedTours({
+          limit: 6,
+          locale: 'vi',
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+
+        expect(featured).toHaveLength(2)
+        expect(featured[0]?.id).toBe(701)
+        expect(featured[0]?.title).toBe('Featured 1')
+        expect(featured[0]?.price.kind).toBe('verified')
+        expect(featured[1]?.id).toBe(702)
+        expect(featured[1]?.title).toBe('Featured 2')
       })
     })
   })

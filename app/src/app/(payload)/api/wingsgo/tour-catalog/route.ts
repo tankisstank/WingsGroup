@@ -15,8 +15,11 @@ import { getCurrentLocale, getCurrentSite } from '@/utilities/siteContext'
 const emptyCatalog = {
   all: [],
   featured: [],
+  filtersActive: false,
   hasMore: false,
+  markets: [],
   nextOffset: 0,
+  upcoming: [],
 } as const
 
 const jsonNoStore = (body: unknown, init?: ResponseInit) =>
@@ -83,10 +86,14 @@ export async function GET(request: Request) {
 
     if (!page?.wingsGoTourCatalog?.enabled) return jsonNoStore(emptyCatalog)
 
+    const now = new Date()
+    const filters = parseWingsGoCatalogFilters(url.searchParams, now)
+
     const data = await queryWingsGoTourCatalog({
-      filters: parseWingsGoCatalogFilters(url.searchParams),
+      filters,
       limit: requestedLimit,
       locale: resolvedLocale,
+      now,
       offset,
       page,
       payload,

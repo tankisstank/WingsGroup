@@ -52,7 +52,15 @@ describe('WingsGo tour catalog endpoint', () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get('cache-control')).toBe('no-store')
-    expect(await response.json()).toEqual({ all: [], featured: [], hasMore: false, nextOffset: 0 })
+    expect(await response.json()).toEqual({
+      all: [],
+      featured: [],
+      filtersActive: false,
+      hasMore: false,
+      markets: [],
+      nextOffset: 0,
+      upcoming: [],
+    })
   })
 
   it('marks the non-WingsGo empty response as non-cacheable too', async () => {
@@ -63,7 +71,15 @@ describe('WingsGo tour catalog endpoint', () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get('cache-control')).toBe('no-store')
-    expect(await response.json()).toEqual({ all: [], featured: [], hasMore: false, nextOffset: 0 })
+    expect(await response.json()).toEqual({
+      all: [],
+      featured: [],
+      filtersActive: false,
+      hasMore: false,
+      markets: [],
+      nextOffset: 0,
+      upcoming: [],
+    })
   })
 
   it('returns 200 success with Cache-Control: no-store and forwards locale to the query', async () => {
@@ -130,6 +146,46 @@ describe('WingsGo tour catalog endpoint', () => {
       expect.objectContaining({
         locale: 'en',
         limit: 6,
+      }),
+    )
+  })
+
+  it('forwards departureMonth and season query params and returns Phase 1 DTO fields with Cache-Control: no-store', async () => {
+    getCurrentLocale.mockResolvedValue('vi')
+    const mockFind = vi.fn().mockResolvedValue({
+      docs: [{ id: 10, pathname: '/tour', wingsGoTourCatalog: { enabled: true } }],
+    })
+    getPayload.mockResolvedValue({ find: mockFind })
+    const successData = {
+      all: [{ id: 2, title: 'Tour 2' }],
+      featured: [{ id: 1, title: 'Tour 1' }],
+      filtersActive: true,
+      hasMore: false,
+      markets: [{ count: 1, image: null, lowestPrice: null, market: 'korea' }],
+      nextOffset: 1,
+      upcoming: [{ id: 2, title: 'Tour 2' }],
+    }
+    queryWingsGoTourCatalog.mockResolvedValue(successData)
+
+    // Use current year-month relative to now (e.g. 2026-11)
+    const response = await GET(
+      new Request(
+        'http://localhost/api/wingsgo/tour-catalog?limit=6&market=korea&departureMonth=2026-11&season=autumn',
+      ),
+    )
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(await response.json()).toEqual(successData)
+
+    expect(queryWingsGoTourCatalog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: expect.objectContaining({
+          market: 'korea',
+          season: 'autumn',
+        }),
+        limit: 6,
+        now: expect.any(Date),
       }),
     )
   })

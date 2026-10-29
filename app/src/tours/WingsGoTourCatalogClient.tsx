@@ -123,6 +123,8 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
       'durationMax',
       'priceMin',
       'priceMax',
+      'departureMonth',
+      'season',
       'sort',
     ] as const) {
       const value = initialFilters[key]
@@ -174,29 +176,31 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
 
   return (
     <div className="container space-y-10 py-10 md:py-14">
-      <section aria-labelledby="wingsgo-featured-tours">
-        <div className="mb-5">
-          <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
-            {copy.featuredKicker}
-          </p>
-          <h2
-            className="mt-2 text-2xl font-semibold text-foreground md:text-3xl"
-            id="wingsgo-featured-tours"
-          >
-            {copy.featuredTitle}
-          </h2>
-          <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">
-            {copy.featuredDescription}
-          </p>
-        </div>
-        {initial.featured.length > 0 ? (
-          <CatalogGrid cards={initial.featured} locale={copyLocale} />
-        ) : (
-          <p className="rounded-[20px] border border-border/60 bg-muted/20 p-5 text-sm text-muted-foreground">
-            {copy.featuredEmpty}
-          </p>
-        )}
-      </section>
+      {!initial.filtersActive ? (
+        <section aria-labelledby="wingsgo-featured-tours">
+          <div className="mb-5">
+            <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
+              {copy.featuredKicker}
+            </p>
+            <h2
+              className="mt-2 text-2xl font-semibold text-foreground md:text-3xl"
+              id="wingsgo-featured-tours"
+            >
+              {copy.featuredTitle}
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">
+              {copy.featuredDescription}
+            </p>
+          </div>
+          {initial.featured.length > 0 ? (
+            <CatalogGrid cards={initial.featured} locale={copyLocale} />
+          ) : (
+            <p className="rounded-[20px] border border-border/60 bg-muted/20 p-5 text-sm text-muted-foreground">
+              {copy.featuredEmpty}
+            </p>
+          )}
+        </section>
+      ) : null}
 
       <section aria-labelledby="wingsgo-all-tours">
         <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

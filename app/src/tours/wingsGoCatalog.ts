@@ -1,6 +1,14 @@
 import { type EditorialBadgeDTO, normalizeEditorialBadges } from './editorialBadges'
 import type { Payload } from 'payload'
 
+import {
+  type BusinessSeason,
+  businessCalendarMonth,
+  daysUntilBusinessDay,
+  isBusinessSeason,
+  seasonOfBusinessMonth,
+  toBusinessCalendarDay,
+} from './businessCalendar'
 import { isDepartureVerificationCurrent } from './departureCommerce'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { getTourProductPath } from '@/utilities/siteURLs'
@@ -11,14 +19,31 @@ export const WINGSGO_CATALOG_MAX_FEATURED = 6
 /** Maximum source inventory read for the bounded WingsGo catalog contract. */
 export const WINGSGO_CATALOG_MAX_INVENTORY = 200
 
+export const WINGSGO_CATALOG_MARKETS = [
+  'korea',
+  'japan',
+  'china',
+  'vietnam',
+  'thailand',
+  'cambodia',
+  'laos',
+  'myanmar',
+  'indochina',
+  'other',
+] as const
+
+export type WingsGoCatalogMarket = (typeof WINGSGO_CATALOG_MARKETS)[number]
+
 export type WingsGoCatalogSort = 'next-departure' | 'price' | 'title'
 
 export type WingsGoCatalogFilters = {
-  market?: string
+  departureMonth?: string
   durationMax?: number
   durationMin?: number
+  market?: string
   priceMax?: number
   priceMin?: number
+  season?: BusinessSeason
   sort?: WingsGoCatalogSort
 }
 
@@ -43,6 +68,7 @@ export type WingsGoCatalogCard = {
   nextDeparture: {
     airline: string | null
     date: string
+    daysUntilDeparture?: number | null
     departureCity: string | null
     promoLabel?: string | null
   }
@@ -55,11 +81,23 @@ export type WingsGoCatalogCard = {
   href: string
 }
 
+export type WingsGoCatalogMarketSummary = {
+  count: number
+  image: { alt: string; url: string } | null
+  lowestPrice:
+    | { currency: string; kind: 'verified'; originalPrice?: number | null; value: number }
+    | null
+  market: string
+}
+
 export type WingsGoCatalogData = {
   all: WingsGoCatalogCard[]
   featured: WingsGoCatalogCard[]
+  filtersActive: boolean
   hasMore: boolean
+  markets: WingsGoCatalogMarketSummary[]
   nextOffset: number
+  upcoming: WingsGoCatalogCard[]
 }
 
 type Relation = number | string | { id?: number | string | null } | null | undefined
@@ -109,6 +147,28 @@ type InventoryDeparture = {
 }
 
 type SearchParamSource = URLSearchParams | Record<string, string | string[] | undefined>
+
+export const hasActiveCatalogFilters = (filters?: WingsGoCatalogFilters | null): boolean => {
+  if (!filters) return false
+  return Boolean(
+    filters.market ||
+      filters.durationMin !== undefined ||
+      filters.durationMax !== undefined ||
+      filters.priceMin !== undefined ||
+      filters.priceMax !== undefined ||
+      filters.departureMonth ||
+      filters.season,
+  )
+}
+
+export const fnv1a32 = (input: string): number => {
+  let hash = 0x811c9dc5
+  for (let i = 0; i < input.length; i++) {
+    hash ^= input.charCodeAt(i)
+    hash = Math.imul(hash, 0x01000193)
+  }
+  return hash >>> 0
+}
 
 const relationID = (value: Relation): number | string | null => {
   if (typeof value === 'number' || typeof value === 'string') return value
@@ -200,12 +260,14 @@ const buildCard = ({
   locale,
   now,
   product,
+  window,
   wrapper,
 }: {
   departures: InventoryDeparture[]
   locale?: string
   now: Date
   product: InventoryProduct
+  window?: { departureMonth?: string; season?: BusinessSeason }
   wrapper: InventoryWrapper | null
 }): WingsGoCatalogCard | null => {
   if (
@@ -222,23 +284,42 @@ const buildCard = ({
     return null
   }
 
-  const futureDepartures = sortDepartures(departures).filter((departure) => {
+  const matchingDepartures = sortDepartures(departures).filter((departure) => {
     const date = validDate(departure.departureDate)
-    return (
-      departure._status === 'published' &&
-      sameID(departure.tourProduct, product.id) &&
-      sameID(departure.site, product.site) &&
-      date !== null &&
-      new Date(date).getTime() > now.getTime()
-    )
+    if (
+      departure._status !== 'published' ||
+      !sameID(departure.tourProduct, product.id) ||
+      !sameID(departure.site, product.site) ||
+      date === null ||
+      new Date(date).getTime() <= now.getTime()
+    ) {
+      return false
+    }
+
+    if (window?.departureMonth) {
+      const departureMonth = businessCalendarMonth(departure.departureDate)
+      if (departureMonth !== window.departureMonth) return false
+    }
+
+    if (window?.season) {
+      const departureSeason = seasonOfBusinessMonth(departure.departureDate)
+      if (departureSeason !== window.season) return false
+    }
+
+    return true
   })
-  const nearestDeparture = futureDepartures[0]
+
+  if (matchingDepartures.length === 0) {
+    return null
+  }
+
+  const nearestDeparture = matchingDepartures[0]
   if (!nearestDeparture?.departureDate) return null
 
-  // US-091: Card price displays the lowest price among future published same-site
-  // departures with current commerce verification and not sold-out.
-  // The nearest valid future departure remains independent as nextDeparture.
-  const verifiedPriceDepartures = futureDepartures.filter((departure) => {
+  // US-091 / US-092: Card price displays the lowest price among future published same-site
+  // departures inside the matching window with current commerce verification and not sold-out.
+  // The nearest matching future departure remains independent as nextDeparture.
+  const verifiedPriceDepartures = matchingDepartures.filter((departure) => {
     if (departure.availabilityStatus === 'sold-out') return false
     if (typeof departure.priceFrom !== 'number' || departure.priceFrom <= 0) return false
 
@@ -298,6 +379,7 @@ const buildCard = ({
     nextDeparture: {
       airline: nearestDeparture.airline || null,
       date: nearestDeparture.departureDate,
+      daysUntilDeparture: daysUntilBusinessDay(nearestDeparture.departureDate, now),
       departureCity: nearestDeparture.departureCity || null,
       promoLabel:
         price.kind === 'verified' && lowestPriceDeparture?.promoLabel
@@ -396,21 +478,80 @@ const parsePositiveNumber = (value?: string) => {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined
 }
 
-export const parseWingsGoCatalogFilters = (source: SearchParamSource): WingsGoCatalogFilters => {
+export const parseWingsGoCatalogFilters = (
+  source: SearchParamSource,
+  now: Date = new Date(),
+): WingsGoCatalogFilters => {
   const sort = readSearchParam(source, 'sort')
   const durationMin = parsePositiveNumber(readSearchParam(source, 'durationMin'))
   const durationMax = parsePositiveNumber(readSearchParam(source, 'durationMax'))
   const priceMin = parsePositiveNumber(readSearchParam(source, 'priceMin'))
   const priceMax = parsePositiveNumber(readSearchParam(source, 'priceMax'))
 
+  const rawMarket = readSearchParam(source, 'market')
+  const market =
+    rawMarket && (WINGSGO_CATALOG_MARKETS as readonly string[]).includes(rawMarket)
+      ? rawMarket
+      : undefined
+
+  const rawDepartureMonth = readSearchParam(source, 'departureMonth')
+  let departureMonth: string | undefined
+  if (rawDepartureMonth && /^\d{4}-(?:0[1-9]|1[0-2])$/.test(rawDepartureMonth)) {
+    const currentMonth = businessCalendarMonth(now)
+    if (currentMonth) {
+      const [currY, currM] = currentMonth.split('-').map(Number)
+      const [targetY, targetM] = rawDepartureMonth.split('-').map(Number)
+      const diff = (targetY - currY) * 12 + (targetM - currM)
+      if (diff >= 0 && diff <= 24) {
+        departureMonth = rawDepartureMonth
+      }
+    }
+  }
+
+  const rawSeason = readSearchParam(source, 'season')
+  const season = isBusinessSeason(rawSeason) ? rawSeason : undefined
+
   return {
-    ...(readSearchParam(source, 'market') ? { market: readSearchParam(source, 'market') } : {}),
+    ...(market ? { market } : {}),
     ...(durationMin === undefined ? {} : { durationMin }),
     ...(durationMax === undefined ? {} : { durationMax }),
     ...(priceMin === undefined ? {} : { priceMin }),
     ...(priceMax === undefined ? {} : { priceMax }),
+    ...(departureMonth ? { departureMonth } : {}),
+    ...(season ? { season } : {}),
     ...(sort === 'next-departure' || sort === 'price' || sort === 'title' ? { sort } : {}),
   }
+}
+
+const selectDeterministicMarketImage = ({
+  cardsInMarket,
+  featuredSlot1ID,
+  market,
+  now,
+  siteID,
+}: {
+  cardsInMarket: WingsGoCatalogCard[]
+  featuredSlot1ID?: number | string | null
+  market: string
+  now: Date
+  siteID: number | string
+}): { alt: string; url: string } | null => {
+  const cardsWithImage = cardsInMarket.filter(
+    (card): card is WingsGoCatalogCard & { image: { alt: string; url: string } } =>
+      Boolean(card.image),
+  )
+  if (cardsWithImage.length === 0) return null
+  if (cardsWithImage.length === 1) return cardsWithImage[0].image
+
+  const nonFeatured = featuredSlot1ID
+    ? cardsWithImage.filter((card) => String(card.id) !== String(featuredSlot1ID))
+    : cardsWithImage
+  const candidates = nonFeatured.length > 0 ? nonFeatured : cardsWithImage
+
+  const calendarDay = toBusinessCalendarDay(now) || ''
+  const seed = `${siteID}|${market}|${calendarDay}`
+  const index = fnv1a32(seed) % candidates.length
+  return candidates[index].image
 }
 
 const queryDocs = async (
@@ -449,11 +590,29 @@ export const queryWingsGoTourCatalog = async ({
   payload: Payload
   site: { code: string; id: number | string }
 }): Promise<WingsGoCatalogData> => {
+  const emptyCatalog: WingsGoCatalogData = {
+    all: [],
+    featured: [],
+    filtersActive: false,
+    hasMore: false,
+    markets: [],
+    nextOffset: 0,
+    upcoming: [],
+  }
+
   if (
     site.code !== 'wings-go' ||
     (!page.wingsGoTourCatalog?.enabled && page.pathname !== '/tour')
   ) {
-    return { all: [], featured: [], hasMore: false, nextOffset: 0 }
+    return emptyCatalog
+  }
+
+  const checkInventoryCap = (collection: string, count: number) => {
+    if (count >= WINGSGO_CATALOG_MAX_INVENTORY) {
+      console.warn(
+        `[wingsgo-catalog] Inventory query for collection "${collection}" reached maximum cap (${WINGSGO_CATALOG_MAX_INVENTORY}) for site ${site.id}.`,
+      )
+    }
   }
 
   const wrapperResult = await queryDocs(
@@ -468,9 +627,12 @@ export const queryWingsGoTourCatalog = async ({
     },
     locale,
   )
-  const wrappers = wrapperResult.docs as unknown as InventoryWrapper[]
+  checkInventoryCap('pages', wrapperResult.docs.length)
+  const wrappers = (wrapperResult.docs as unknown as InventoryWrapper[]).filter((item) =>
+    sameID(item.site, site.id),
+  )
   const wrapperIDs = wrappers.map((wrapper) => wrapper.id)
-  if (wrapperIDs.length === 0) return { all: [], featured: [], hasMore: false, nextOffset: 0 }
+  if (wrapperIDs.length === 0) return emptyCatalog
 
   const productsResult = await queryDocs(
     payload,
@@ -484,9 +646,12 @@ export const queryWingsGoTourCatalog = async ({
     },
     locale,
   )
-  const products = productsResult.docs as unknown as InventoryProduct[]
+  checkInventoryCap('tour-products', productsResult.docs.length)
+  const products = (productsResult.docs as unknown as InventoryProduct[]).filter((item) =>
+    sameID(item.site, site.id),
+  )
   const productIDs = products.map((product) => product.id)
-  if (productIDs.length === 0) return { all: [], featured: [], hasMore: false, nextOffset: 0 }
+  if (productIDs.length === 0) return emptyCatalog
 
   const departuresResult = await queryDocs(
     payload,
@@ -501,7 +666,10 @@ export const queryWingsGoTourCatalog = async ({
     },
     locale,
   )
-  const departures = departuresResult.docs as unknown as InventoryDeparture[]
+  checkInventoryCap('tour-departures', departuresResult.docs.length)
+  const departures = (departuresResult.docs as unknown as InventoryDeparture[]).filter((item) =>
+    sameID(item.site, site.id),
+  )
   const wrappersByID = new Map(wrappers.map((wrapper) => [String(wrapper.id), wrapper]))
   const departuresByProduct = new Map<string, InventoryDeparture[]>()
   for (const departure of departures) {
@@ -512,17 +680,36 @@ export const queryWingsGoTourCatalog = async ({
     departuresByProduct.set(String(productID), current)
   }
 
-  const cards = products
+  const unfilteredCards = products
     .map((product) =>
       buildCard({
         departures: departuresByProduct.get(String(product.id)) || [],
+        locale,
         now,
         product,
         wrapper: wrappersByID.get(String(relationID(product.wrapperPage))) || null,
-        locale,
       }),
     )
     .filter((card): card is WingsGoCatalogCard => Boolean(card))
+
+  const hasWindow = Boolean(filters.departureMonth || filters.season)
+  const windowCards = hasWindow
+    ? products
+        .map((product) =>
+          buildCard({
+            departures: departuresByProduct.get(String(product.id)) || [],
+            locale,
+            now,
+            product,
+            window: {
+              departureMonth: filters.departureMonth,
+              season: filters.season,
+            },
+            wrapper: wrappersByID.get(String(relationID(product.wrapperPage))) || null,
+          }),
+        )
+        .filter((card): card is WingsGoCatalogCard => Boolean(card))
+    : unfilteredCards
 
   const configuredIDs = await resolveCuratedTourIDs({
     page,
@@ -534,26 +721,84 @@ export const queryWingsGoTourCatalog = async ({
   for (const id of configuredIDs) {
     const key = String(id)
     if (configuredSeenIDs.has(key)) continue
-    const card = cards.find((candidate) => String(candidate.id) === key)
+    const card = unfilteredCards.find((candidate) => String(candidate.id) === key)
     if (card) {
       configuredSeenIDs.add(key)
       configuredFeatured.push(card)
     }
   }
   const fallback = selectWingsGoCatalogCards({
-    cards,
+    cards: unfilteredCards,
     excludeIDs: configuredFeatured.map((card) => card.id),
     filters: {},
   }).cards
   const featured = [...configuredFeatured, ...fallback].slice(0, WINGSGO_CATALOG_MAX_FEATURED)
   const featuredIDs = featured.map((card) => card.id)
-  const all = selectWingsGoCatalogCards({ cards, excludeIDs: featuredIDs, filters, limit, offset })
+
+  const filtersActive = hasActiveCatalogFilters(filters)
+  const all = selectWingsGoCatalogCards({
+    cards: windowCards,
+    excludeIDs: filtersActive ? [] : featuredIDs,
+    filters,
+    limit,
+    offset,
+  })
+
+  // Market summaries from unfilteredCards
+  const marketMap = new Map<string, WingsGoCatalogCard[]>()
+  for (const card of unfilteredCards) {
+    const m = card.market || 'other'
+    const list = marketMap.get(m) || []
+    list.push(card)
+    marketMap.set(m, list)
+  }
+
+  const featuredSlot1ID = featured[0]?.id || null
+
+  const markets: WingsGoCatalogMarketSummary[] = Array.from(marketMap.entries())
+    .filter(([, cardsInMarket]) => cardsInMarket.length > 0)
+    .map(([marketName, cardsInMarket]) => {
+      const verifiedCards = cardsInMarket.filter(
+        (card): card is WingsGoCatalogCard & { price: { kind: 'verified'; value: number } } =>
+          card.price.kind === 'verified',
+      )
+      let lowestPriceCard: (typeof verifiedCards)[0] | null = null
+      for (const card of verifiedCards) {
+        if (!lowestPriceCard || card.price.value < lowestPriceCard.price.value) {
+          lowestPriceCard = card
+        }
+      }
+
+      return {
+        count: cardsInMarket.length,
+        image: selectDeterministicMarketImage({
+          cardsInMarket,
+          featuredSlot1ID,
+          market: marketName,
+          now,
+          siteID: site.id,
+        }),
+        lowestPrice: lowestPriceCard ? lowestPriceCard.price : null,
+        market: marketName,
+      }
+    })
+    .sort((left, right) => {
+      if (left.count !== right.count) return right.count - left.count
+      return left.market.localeCompare(right.market, 'en')
+    })
+
+  const upcoming = [...unfilteredCards]
+    .sort((left, right) => compareCards(left, right, 'next-departure'))
+    .slice(0, 6)
 
   return {
     all: all.cards,
     featured,
+    filtersActive,
     hasMore: all.hasMore,
+    markets,
     nextOffset: offset + all.cards.length,
+    upcoming,
   }
 }
 
@@ -576,7 +821,8 @@ export const resolveCuratedTourIDs = async ({
       Array.isArray((pageCurationRef as { featuredTours?: unknown }).featuredTours)
     ) {
       const pageCurationSite = relationID((pageCurationRef as { site?: Relation }).site)
-      if (!pageCurationSite || String(pageCurationSite) === String(siteID)) {
+      // Tier 1 hardening: strictly require site to be present AND match siteID
+      if (pageCurationSite !== null && String(pageCurationSite) === String(siteID)) {
         const ids = relationIDs((pageCurationRef as { featuredTours?: unknown }).featuredTours)
         if (ids.length > 0) return ids
       }
@@ -592,7 +838,8 @@ export const resolveCuratedTourIDs = async ({
         })
         if (curationDoc) {
           const curationSite = relationID((curationDoc as { site?: Relation }).site)
-          if (!curationSite || String(curationSite) === String(siteID)) {
+          // Tier 1 hardening: strictly require site to be present AND match siteID
+          if (curationSite !== null && String(curationSite) === String(siteID)) {
             const ids = relationIDs((curationDoc as { featuredTours?: unknown }).featuredTours)
             if (ids.length > 0) return ids
           }

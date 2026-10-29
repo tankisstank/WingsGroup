@@ -24,12 +24,14 @@ export const WingsGoTourCatalogSection = async ({
   site: Site
 }) => {
   const payload = await getPayload({ config: configPromise })
-  const filters = parseWingsGoCatalogFilters(searchParams)
+  const now = new Date()
+  const filters = parseWingsGoCatalogFilters(searchParams, now)
   const copyLocale = resolveWingsGoCopyLocale(locale)
   const initial = await queryWingsGoTourCatalog({
     filters,
     limit: 6,
     locale: copyLocale,
+    now,
     page,
     payload,
     site: { code: String(site.code), id: site.id },

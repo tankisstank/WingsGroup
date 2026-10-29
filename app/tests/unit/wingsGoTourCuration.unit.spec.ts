@@ -179,7 +179,7 @@ describe('WingsGo Visual Tour Curation & Simulator Logic (US-078)', () => {
     it('Tier 1: Page-bound curation takes highest precedence', async () => {
       const { resolveCuratedTourIDs } = await import('@/tours/wingsGoCatalog')
       const mockPayload = {
-        findByID: async () => ({ id: 99, featuredTours: [101, 102, 103] }),
+        findByID: async () => ({ id: 99, featuredTours: [101, 102, 103], site: 1 }),
         find: async () => ({ docs: [{ id: 1, featuredTours: [201, 202] }] }),
       } as any
 
@@ -199,6 +199,90 @@ describe('WingsGo Visual Tour Curation & Simulator Logic (US-078)', () => {
       })
 
       expect(result).toEqual([101, 102, 103])
+    })
+
+    it('Tier 1: Populated curation object without site falls through to tier 2', async () => {
+      const { resolveCuratedTourIDs } = await import('@/tours/wingsGoCatalog')
+      const mockPayload = {
+        findByID: async () => null,
+        find: async () => ({ docs: [{ id: 1, featuredTours: [201, 202] }] }),
+      } as any
+
+      const result = await resolveCuratedTourIDs({
+        page: {
+          id: 10,
+          pathname: '/tour',
+          site: 1,
+          wingsGoTourCatalog: {
+            enabled: true,
+            curation: {
+              id: 99,
+              featuredTours: [101, 102],
+              // site is missing!
+            } as any,
+            featuredTours: [301, 302],
+          },
+        },
+        payload: mockPayload,
+        siteID: 1,
+      })
+
+      // Must fall through to tier 2 (docs[0].featuredTours)
+      expect(result).toEqual([201, 202])
+    })
+
+    it('Tier 1: Populated curation object with different site falls through to tier 2', async () => {
+      const { resolveCuratedTourIDs } = await import('@/tours/wingsGoCatalog')
+      const mockPayload = {
+        findByID: async () => null,
+        find: async () => ({ docs: [{ id: 1, featuredTours: [201, 202] }] }),
+      } as any
+
+      const result = await resolveCuratedTourIDs({
+        page: {
+          id: 10,
+          pathname: '/tour',
+          site: 1,
+          wingsGoTourCatalog: {
+            enabled: true,
+            curation: {
+              id: 99,
+              featuredTours: [101, 102],
+              site: 2, // Different site!
+            } as any,
+            featuredTours: [301, 302],
+          },
+        },
+        payload: mockPayload,
+        siteID: 1,
+      })
+
+      expect(result).toEqual([201, 202])
+    })
+
+    it('Tier 1: Curation doc findByID without site falls through to tier 2', async () => {
+      const { resolveCuratedTourIDs } = await import('@/tours/wingsGoCatalog')
+      const mockPayload = {
+        findByID: async () => ({ id: 99, featuredTours: [101, 102] }), // no site
+        find: async () => ({ docs: [{ id: 1, featuredTours: [201, 202] }] }),
+      } as any
+
+      const result = await resolveCuratedTourIDs({
+        page: {
+          id: 10,
+          pathname: '/tour',
+          site: 1,
+          wingsGoTourCatalog: {
+            enabled: true,
+            curation: 99,
+            featuredTours: [301, 302],
+          },
+        },
+        payload: mockPayload,
+        siteID: 1,
+      })
+
+      expect(result).toEqual([201, 202])
     })
 
     it('Tier 2: Site default curation is used when page curation is omitted', async () => {
