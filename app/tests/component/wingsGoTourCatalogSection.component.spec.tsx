@@ -81,16 +81,20 @@ describe('WingsGoTourCatalogSection SSR', () => {
 
     expect(React.isValidElement(element)).toBe(true)
     const children = React.Children.toArray((element as React.ReactElement<{ children: React.ReactNode }>).props.children)
-    expect(children).toHaveLength(2)
+    expect(children).toHaveLength(3)
 
-    const [heroElement, clientElement] = children as [
+    const [heroElement, upcomingElement, clientElement] = children as [
       React.ReactElement<{ cards: unknown[]; filtersActive: boolean }>,
+      React.ReactElement<{ cards?: unknown[]; locale?: string }>,
       React.ReactElement<{ initial: { all: unknown[]; hero: unknown[]; nextCursor: string | null; filtersActive: boolean } }>,
     ]
 
     // Hero receives slots #1-#3
     expect(heroElement.props.cards).toHaveLength(3)
     expect(heroElement.props.filtersActive).toBe(false)
+
+    // Upcoming strip receives upcoming cards (Phase 4)
+    expect(upcomingElement.props.cards).toBeDefined()
 
     // Client initial receives nextCursor because 8 remaining > 6 batch limit
     expect(clientElement.props.initial.nextCursor).toBeTruthy()
@@ -111,14 +115,19 @@ describe('WingsGoTourCatalogSection SSR', () => {
     })
 
     const children = React.Children.toArray((element as React.ReactElement<{ children: React.ReactNode }>).props.children)
-    const [heroElement, clientElement] = children as [
+    expect(children).toHaveLength(3)
+
+    const [heroElement, upcomingElement, clientElement] = children as [
       React.ReactElement<{ cards: unknown[]; filtersActive: boolean }>,
-      React.ReactElement<{ initial: { hero: unknown[]; filtersActive: boolean } }>,
+      React.ReactElement<{ cards?: unknown[]; locale?: string }>,
+      React.ReactElement<{ initial: { hero: unknown[]; upcoming: unknown[]; filtersActive: boolean } }>,
     ]
 
     expect(heroElement.props.cards).toHaveLength(0)
     expect(heroElement.props.filtersActive).toBe(true)
+    expect(upcomingElement.props.cards).toEqual([])
     expect(clientElement.props.initial.hero).toEqual([])
+    expect(clientElement.props.initial.upcoming).toEqual([])
     expect(clientElement.props.initial.filtersActive).toBe(true)
   })
 })

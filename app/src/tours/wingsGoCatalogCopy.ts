@@ -29,6 +29,19 @@ export interface WingsGoCatalogCopy {
   seasonAutumn: string
   seasonWinter: string
 
+  // Upcoming strip section
+  upcomingKicker: string
+  upcomingTitle: string
+  upcomingDescription: string
+
+  // Market tiles section
+  marketTilesKicker: string
+  marketTilesTitle: string
+  marketTilesDescription: string
+  marketToursCount: (count: number) => string
+  marketAllLabel: string
+  marketLowestPriceFrom: string
+
   // Featured section
   featuredKicker: string
   featuredTitle: string
@@ -109,6 +122,19 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     seasonAutumn: 'Mùa thu (T9 - T11)',
     seasonWinter: 'Mùa đông (T12 - T2)',
 
+    upcomingKicker: 'Lịch khởi hành cận ngày',
+    upcomingTitle: 'Sắp cất cánh',
+    upcomingDescription:
+      'Những chuyến đi có ngày khởi hành gần nhất, giá minh bạch và sẵn sàng cất cánh.',
+
+    marketTilesKicker: 'Điểm đến phổ biến',
+    marketTilesTitle: 'Khám phá theo thị trường',
+    marketTilesDescription:
+      'Lựa chọn các tuyến tour trọng điểm theo từng điểm đến với mức giá tốt nhất.',
+    marketToursCount: (count: number) => `${count} tour`,
+    marketAllLabel: 'Tất cả thị trường',
+    marketLowestPriceFrom: 'Giá từ',
+
     featuredKicker: 'Gợi ý chọn nhanh',
     featuredTitle: 'Tour nổi bật',
     featuredDescription:
@@ -184,6 +210,19 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     seasonSummer: 'Summer (Jun - Aug)',
     seasonAutumn: 'Autumn (Sep - Nov)',
     seasonWinter: 'Winter (Dec - Feb)',
+
+    upcomingKicker: 'Imminent departures',
+    upcomingTitle: 'Departing soon',
+    upcomingDescription:
+      'Tours with nearest departure dates, transparent pricing, and ready to take off.',
+
+    marketTilesKicker: 'Popular destinations',
+    marketTilesTitle: 'Explore by market',
+    marketTilesDescription:
+      'Browse our key tour destinations with verified best available pricing.',
+    marketToursCount: (count: number) => (count === 1 ? '1 tour' : `${count} tours`),
+    marketAllLabel: 'All markets',
+    marketLowestPriceFrom: 'From',
 
     featuredKicker: 'Quick picks',
     featuredTitle: 'Featured tours',

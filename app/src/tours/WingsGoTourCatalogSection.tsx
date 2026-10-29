@@ -5,6 +5,7 @@ import type { Site } from '@/payload-types'
 import type { CopyLocaleCode } from '@/utilities/locales'
 
 import { WingsGoCommerceHero } from '@/heros/WingsGoCommerceHero'
+import { WingsGoUpcomingStrip } from './WingsGoUpcomingStrip'
 import { WingsGoTourCatalogClient } from './WingsGoTourCatalogClient'
 import {
   parseWingsGoCatalogFilters,
@@ -44,6 +45,10 @@ export const WingsGoTourCatalogSection = async ({
         cards={initial.hero}
         filtersActive={initial.filtersActive}
         initialFilters={filters}
+        locale={copyLocale}
+      />
+      <WingsGoUpcomingStrip
+        cards={initial.upcoming}
         locale={copyLocale}
       />
       <WingsGoTourCatalogClient

@@ -91,6 +91,27 @@ describe('WingsGo tour catalog endpoint', () => {
     })
   })
 
+  it('marks the WingsGroup empty response as non-cacheable with empty hero, upcoming, markets', async () => {
+    getCurrentSite.mockResolvedValue({ code: 'wings-group', id: 9 })
+    getPayload.mockResolvedValue({ find: vi.fn() })
+
+    const response = await GET(new Request('http://localhost/api/wingsgo/tour-catalog'))
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(await response.json()).toEqual({
+      all: [],
+      featured: [],
+      filtersActive: false,
+      hasMore: false,
+      hero: [],
+      markets: [],
+      nextCursor: null,
+      nextOffset: 0,
+      upcoming: [],
+    })
+  })
+
   it('returns 200 success with Cache-Control: no-store and forwards locale to the query', async () => {
     getCurrentLocale.mockResolvedValue('vi')
     const mockFind = vi.fn().mockResolvedValue({

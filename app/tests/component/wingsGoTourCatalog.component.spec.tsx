@@ -187,7 +187,7 @@ describe('WingsGoTourCatalogClient', () => {
     // Buttons and card labels
     expect(screen.getByRole('button', { name: 'Load 6 more tours' })).toBeTruthy()
     expect(screen.getAllByText('View tour →')).toHaveLength(2)
-    expect(screen.getAllByText('From')).toHaveLength(2)
+    expect(screen.getAllByText('From')).toHaveLength(5) // 2 tour cards + 3 market tiles
     expect(screen.getAllByText('Next departure')).toHaveLength(2)
   })
 

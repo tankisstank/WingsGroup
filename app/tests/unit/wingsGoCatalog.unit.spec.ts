@@ -1832,19 +1832,20 @@ describe('WingsGo dynamic catalog constraints', () => {
         expect(result2.markets[0]?.image).toEqual(result.markets[0]?.image)
       })
 
-      it('derives upcoming as the first 6 unfiltered cards sorted by next-departure', async () => {
-        const products = Array.from({ length: 8 }, (_, i) =>
+      it('derives upcoming as up to 6 unfiltered cards excluding featured, sorted by next-departure (D10)', async () => {
+        // 14 products: 6 become featured (401..406), 8 remain (407..414)
+        const products = Array.from({ length: 14 }, (_, i) =>
           product({ id: 401 + i, slug: `tour-${i}`, title: `Tour ${i}`, wrapperPage: 4010 + i }),
         )
         const wrappers = products.map((p) => wrapper({ id: p.wrapperPage, pathname: `/tour/${p.slug}` }))
-        // Departures in reverse order: Tour 7 has earliest date, Tour 0 has latest date
+        // Departures: Tour 13 has earliest date, Tour 0 has latest date
         const deps = products.map((p, i) =>
           departure({
+            availabilityStatus: 'open',
+            commerceVerified: true,
+            departureDate: new Date(Date.UTC(2026, 14 - i, 1)).toISOString(),
             id: 501 + i,
             tourProduct: p.id,
-            departureDate: `2026-${String(10 - i).padStart(2, '0')}-01T00:00:00.000Z`,
-            commerceVerified: true,
-            availabilityStatus: 'open',
           }),
         )
 
@@ -1866,14 +1867,30 @@ describe('WingsGo dynamic catalog constraints', () => {
           site: { code: 'wings-go', id: 7 },
         })
 
+        // Featured has the 6 earliest departures: 414, 413, 412, 411, 410, 409
+        expect(result.featured).toHaveLength(6)
+        expect(result.featured.map((c) => c.id)).toEqual([414, 413, 412, 411, 410, 409])
+        const featuredIds = new Set(result.featured.map((c) => c.id))
+
+        // Upcoming has cap 6, and none of them are in featured (D10)
         expect(result.upcoming).toHaveLength(6)
-        // Earliest departure is 2026-03-01 (Tour 7 / id 408)
-        expect(result.upcoming[0]?.id).toBe(408)
-        expect(result.upcoming[1]?.id).toBe(407)
-        expect(result.upcoming[2]?.id).toBe(406)
-        expect(result.upcoming[3]?.id).toBe(405)
-        expect(result.upcoming[4]?.id).toBe(404)
-        expect(result.upcoming[5]?.id).toBe(403)
+        for (const card of result.upcoming) {
+          expect(featuredIds.has(card.id)).toBe(false)
+        }
+        // Upcoming gets the next 6 earliest non-featured departures: 408, 407, 406, 405, 404, 403
+        expect(result.upcoming.map((c) => c.id)).toEqual([408, 407, 406, 405, 404, 403])
+
+        // When filters are active, upcoming is empty (D10)
+        const filteredResult = await queryWingsGoTourCatalog({
+          filters: { market: 'korea' },
+          limit: 6,
+          now: new Date('2026-01-01T00:00:00.000Z'),
+          offset: 0,
+          page: { id: 99, pathname: '/tour', site: 7, wingsGoTourCatalog: { enabled: true } },
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 },
+        })
+        expect(filteredResult.upcoming).toEqual([])
       })
 
       it('logs a console.warn without PII when any collection query hits WINGSGO_CATALOG_MAX_INVENTORY', async () => {
@@ -2585,6 +2602,409 @@ describe('WingsGo dynamic catalog constraints', () => {
 
         expect(featured).toHaveLength(1)
         expect(featured[0]?.id).toBe(901)
+      })
+    })
+
+    describe('Phase 4: Integration-style tests (curation tiers, no duplicates, tenant isolation)', () => {
+      const createTenTours = () => {
+        const products = Array.from({ length: 14 }, (_, i) =>
+          product({
+            id: 301 + i,
+            market: i % 2 === 0 ? 'korea' : 'japan',
+            site: 7,
+            slug: `tour-${301 + i}`,
+            title: `Tour ${301 + i}`,
+            wrapperPage: 3010 + i,
+          }),
+        )
+        const wrappers = products.map((p) =>
+          wrapper({ id: p.wrapperPage, pathname: `/tour/${p.slug}`, site: 7 }),
+        )
+        const deps = products.map((p, i) =>
+          departure({
+            availabilityStatus: 'open',
+            commerceVerified: true,
+            currency: 'VND',
+            departureDate: `2026-11-${String(i + 1).padStart(2, '0')}T00:00:00.000Z`,
+            id: 3001 + i,
+            priceFrom: 10000000 + i * 500000,
+            site: 7,
+            tourProduct: p.id,
+          }),
+        )
+        return { deps, products, wrappers }
+      }
+
+      it('Tier 1: Page curation feeds Hero /tour with curated cards', async () => {
+        const { deps, products, wrappers } = createTenTours()
+        const page = {
+          id: 10,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: {
+            curation: 501,
+            enabled: true,
+          },
+        }
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: wrappers }
+            if (collection === 'tour-products') return { docs: products }
+            if (collection === 'tour-departures') return { docs: deps }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: [] }
+          }),
+          findByID: vi.fn(async ({ collection, id }: { collection: string; id: number | string }) => {
+            if (collection === 'tour-curations' && Number(id) === 501) {
+              return {
+                id: 501,
+                featuredTours: [305, 303, 301, 307, 309, 311],
+                site: 7,
+              }
+            }
+            return null
+          }),
+        }
+
+        const catalog = await queryWingsGoTourCatalog({
+          filters: {},
+          limit: 6,
+          locale: 'vi',
+          now: new Date('2026-10-01T00:00:00.000Z'),
+          page: page as never,
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+
+        expect(catalog.hero.map((c) => c.id)).toEqual([305, 303, 301])
+        expect(catalog.featured.map((c) => c.id)).toEqual([305, 303, 301, 307, 309, 311])
+      })
+
+      it('Tier 2: Site default curation feeds Hero /tour when page curation is absent', async () => {
+        const { deps, products, wrappers } = createTenTours()
+        const page = {
+          id: 10,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: {
+            enabled: true,
+          },
+        }
+
+        const payload = {
+          find: vi.fn(
+            async ({
+              collection,
+              where,
+            }: {
+              collection: string
+              where?: { and?: Array<Record<string, unknown>> }
+            }) => {
+              if (collection === 'pages') return { docs: wrappers }
+              if (collection === 'tour-products') return { docs: products }
+              if (collection === 'tour-departures') return { docs: deps }
+              if (collection === 'tour-curations') {
+                const isDefault = where?.and?.some(
+                  (cond) =>
+                    typeof cond.isDefault === 'object' &&
+                    cond.isDefault !== null &&
+                    'equals' in cond.isDefault &&
+                    (cond.isDefault as { equals?: unknown }).equals === true,
+                )
+              if (isDefault) {
+                return {
+                  docs: [
+                    {
+                      id: 601,
+                      featuredTours: [304, 302, 306, 308, 310, 312],
+                      isDefault: true,
+                      site: 7,
+                    },
+                  ],
+                }
+              }
+              return { docs: [] }
+            }
+            return { docs: [] }
+          }),
+          findByID: vi.fn().mockResolvedValue(null),
+        }
+
+        const catalog = await queryWingsGoTourCatalog({
+          filters: {},
+          limit: 6,
+          locale: 'vi',
+          now: new Date('2026-10-01T00:00:00.000Z'),
+          page: page as never,
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+
+        expect(catalog.hero.map((c) => c.id)).toEqual([304, 302, 306])
+        expect(catalog.featured.map((c) => c.id)).toEqual([304, 302, 306, 308, 310, 312])
+      })
+
+      it('Tier 3: Legacy featuredTours array on page feeds Hero /tour when curations are absent', async () => {
+        const { deps, products, wrappers } = createTenTours()
+        const page = {
+          id: 10,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: {
+            enabled: true,
+            featuredTours: [308, 309, 310, 311, 312, 313],
+          },
+        }
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: wrappers }
+            if (collection === 'tour-products') return { docs: products }
+            if (collection === 'tour-departures') return { docs: deps }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: [] }
+          }),
+          findByID: vi.fn().mockResolvedValue(null),
+        }
+
+        const catalog = await queryWingsGoTourCatalog({
+          filters: {},
+          limit: 6,
+          locale: 'vi',
+          now: new Date('2026-10-01T00:00:00.000Z'),
+          page: page as never,
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+
+        expect(catalog.hero.map((c) => c.id)).toEqual([308, 309, 310])
+        expect(catalog.featured.map((c) => c.id)).toEqual([308, 309, 310, 311, 312, 313])
+      })
+
+      it('Tier 4: Algorithmic fallback feeds Hero /tour when no curation or legacy featuredTours exist', async () => {
+        const { deps, products, wrappers } = createTenTours()
+        const page = {
+          id: 10,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: {
+            enabled: true,
+          },
+        }
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: wrappers }
+            if (collection === 'tour-products') return { docs: products }
+            if (collection === 'tour-departures') return { docs: deps }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: [] }
+          }),
+          findByID: vi.fn().mockResolvedValue(null),
+        }
+
+        const catalog = await queryWingsGoTourCatalog({
+          filters: {},
+          limit: 6,
+          locale: 'vi',
+          now: new Date('2026-10-01T00:00:00.000Z'),
+          page: page as never,
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+
+        // Algorithmic selects top 6 by earliest departure: 301, 302, 303, 304, 305, 306
+        expect(catalog.hero.map((c) => c.id)).toEqual([301, 302, 303])
+        expect(catalog.featured.map((c) => c.id)).toEqual([301, 302, 303, 304, 305, 306])
+      })
+
+      it('guarantees one snapshot with no duplicates across hero, featured remaining, all (p1 + p2), and upcoming excludes featured', async () => {
+        const { deps, products, wrappers } = createTenTours()
+        const page = {
+          id: 10,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: {
+            enabled: true,
+            featuredTours: [301, 302, 303, 304, 305, 306],
+          },
+        }
+
+        const payload = {
+          find: vi.fn(async ({ collection }: { collection: string }) => {
+            if (collection === 'pages') return { docs: wrappers }
+            if (collection === 'tour-products') return { docs: products }
+            if (collection === 'tour-departures') return { docs: deps }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: [] }
+          }),
+          findByID: vi.fn().mockResolvedValue(null),
+        }
+
+        // Page 1
+        const catalogP1 = await queryWingsGoTourCatalog({
+          filters: {},
+          limit: 6,
+          locale: 'vi',
+          now: new Date('2026-10-01T00:00:00.000Z'),
+          page: page as never,
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+
+        // Page 2 via cursor
+        const catalogP2 = await queryWingsGoTourCatalog({
+          cursor: catalogP1.nextCursor ?? undefined,
+          filters: {},
+          limit: 6,
+          locale: 'vi',
+          now: new Date('2026-10-01T00:00:00.000Z'),
+          page: page as never,
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+
+        const heroIds = catalogP1.hero.map((c) => c.id)
+        const featuredRemainingIds = catalogP1.featured.slice(catalogP1.hero.length).map((c) => c.id)
+        const allP1Ids = catalogP1.all.map((c) => c.id)
+        const allP2Ids = catalogP2.all.map((c) => c.id)
+
+        expect(heroIds).toEqual([301, 302, 303])
+        expect(featuredRemainingIds).toEqual([304, 305, 306])
+        expect(allP1Ids).toEqual([307, 308, 309, 310, 311, 312])
+        expect(allP2Ids).toEqual([313, 314])
+
+        // Verify mutual disjointness across hero, featured remaining, all P1, all P2
+        const allSeen = [...heroIds, ...featuredRemainingIds, ...allP1Ids, ...allP2Ids]
+        const uniqueSeen = new Set(allSeen)
+        expect(uniqueSeen.size).toBe(allSeen.length)
+
+        // D10: upcoming excludes all featured cards (hero #1-#3 + featured #4-#6)
+        expect(catalogP1.upcoming).toHaveLength(6)
+        const featuredIds = new Set(catalogP1.featured.map((c) => String(c.id)))
+        for (const upcomingCard of catalogP1.upcoming) {
+          expect(featuredIds.has(String(upcomingCard.id))).toBe(false)
+        }
+        // Upcoming should take the earliest available non-featured tours: 307..312
+        expect(catalogP1.upcoming.map((c) => c.id)).toEqual([307, 308, 309, 310, 311, 312])
+
+        // D10: upcoming is empty when filtersActive is true
+        const filteredCatalog = await queryWingsGoTourCatalog({
+          filters: { market: 'korea' },
+          limit: 6,
+          locale: 'vi',
+          now: new Date('2026-10-01T00:00:00.000Z'),
+          page: page as never,
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+        expect(filteredCatalog.filtersActive).toBe(true)
+        expect(filteredCatalog.upcoming).toEqual([])
+      })
+
+      it('enforces strict tenant isolation for products, departures, markets, and upcoming', async () => {
+        // Multi-tenant fixtures
+        const site7Products = [
+          product({ id: 101, market: 'korea', site: 7, slug: 'tour-101', wrapperPage: 1010 }),
+          product({ id: 102, market: 'japan', site: 7, slug: 'tour-102', wrapperPage: 1020 }),
+        ]
+        const site8Products = [
+          product({ id: 201, market: 'taiwan', site: 8, slug: 'side-201', wrapperPage: 2010 }),
+        ]
+        const site9Products = [
+          product({ id: 301, market: 'china', site: 9, slug: 'group-301', wrapperPage: 3010 }),
+        ]
+
+        const allProducts = [...site7Products, ...site8Products, ...site9Products]
+        const allWrappers = allProducts.map((p) =>
+          wrapper({ id: p.wrapperPage, pathname: `/tour/${p.slug}`, site: p.site }),
+        )
+        const allDepartures = allProducts.map((p, i) =>
+          departure({
+            availabilityStatus: 'open',
+            commerceVerified: true,
+            currency: 'VND',
+            departureDate: `2026-11-${String(i + 1).padStart(2, '0')}T00:00:00.000Z`,
+            id: 5001 + i,
+            priceFrom: 10000000,
+            site: p.site,
+            tourProduct: p.id,
+          }),
+        )
+
+        const payload = {
+          find: vi.fn(
+            async ({
+              collection,
+              where,
+            }: {
+              collection: string
+              where?: { and?: Array<Record<string, unknown>> }
+            }) => {
+              // Find site filter in where clause
+              const siteFilter = where?.and?.find(
+                (cond) =>
+                  typeof cond.site === 'object' &&
+                  cond.site !== null &&
+                  'equals' in cond.site &&
+                  (cond.site as { equals?: unknown }).equals !== undefined,
+              )
+              const requestedSite = (siteFilter?.site as { equals?: unknown } | undefined)?.equals
+
+            if (collection === 'pages') {
+              return { docs: allWrappers.filter((w) => w.site === requestedSite) }
+            }
+            if (collection === 'tour-products') {
+              return { docs: allProducts.filter((p) => p.site === requestedSite) }
+            }
+            if (collection === 'tour-departures') {
+              return { docs: allDepartures.filter((d) => d.site === requestedSite) }
+            }
+            if (collection === 'tour-curations') return { docs: [] }
+            return { docs: [] }
+          }),
+          findByID: vi.fn().mockResolvedValue(null),
+        }
+
+        const page = {
+          id: 10,
+          pathname: '/tour',
+          site: 7,
+          wingsGoTourCatalog: { enabled: true },
+        }
+
+        const catalog = await queryWingsGoTourCatalog({
+          filters: {},
+          limit: 6,
+          locale: 'vi',
+          now: new Date('2026-10-01T00:00:00.000Z'),
+          page: page as never,
+          payload: payload as never,
+          site: { code: 'wings-go', id: 7 } as never,
+        })
+
+        // All returned IDs must be from site 7 (101, 102), never site 8 (201) or site 9 (301)
+        const site7Ids = new Set([101, 102])
+        for (const card of catalog.all) {
+          expect(site7Ids.has(Number(card.id))).toBe(true)
+        }
+        for (const card of catalog.hero) {
+          expect(site7Ids.has(Number(card.id))).toBe(true)
+        }
+        for (const card of catalog.featured) {
+          expect(site7Ids.has(Number(card.id))).toBe(true)
+        }
+        for (const card of catalog.upcoming) {
+          expect(site7Ids.has(Number(card.id))).toBe(true)
+        }
+
+        // Markets only contain site 7 markets
+        const marketCodes = catalog.markets.map((m) => m.market)
+        expect(marketCodes).toContain('korea')
+        expect(marketCodes).toContain('japan')
+        expect(marketCodes).not.toContain('taiwan')
+        expect(marketCodes).not.toContain('china')
       })
     })
   })

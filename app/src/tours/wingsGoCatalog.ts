@@ -996,9 +996,17 @@ export const queryWingsGoTourCatalog = async ({
       return left.market.localeCompare(right.market, 'en')
     })
 
-  const upcoming = [...unfilteredCards]
-    .sort((left, right) => compareCards(left, right, 'next-departure'))
-    .slice(0, 6)
+  const featuredIdSet = new Set(featured.map((card) => String(card.id)))
+  const upcoming = filtersActive
+    ? []
+    : [...unfilteredCards]
+        .filter(
+          (card) =>
+            !featuredIdSet.has(String(card.id)) &&
+            Boolean(card.nextDeparture && card.nextDeparture.date),
+        )
+        .sort((left, right) => compareCards(left, right, 'next-departure'))
+        .slice(0, 6)
 
   return {
     all: all.cards,

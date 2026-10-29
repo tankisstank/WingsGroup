@@ -28,6 +28,7 @@ import {
   WINGSGO_MARKET_LABELS,
 } from './wingsGoCatalogCopy'
 import { WingsGoTourCard } from './WingsGoTourCard'
+import { WingsGoMarketTiles } from './WingsGoMarketTiles'
 import { cn } from '@/utilities/ui'
 
 type Props = {
@@ -427,6 +428,12 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
 
   return (
     <div className="container space-y-10 py-10 md:py-14">
+      <WingsGoMarketTiles
+        locale={copyLocale}
+        markets={initial.markets}
+        selectedMarket={initialFilters.market}
+      />
+
       {!hideFeatured ? (
         <section aria-labelledby="wingsgo-featured-tours">
           <div className="mb-5">
