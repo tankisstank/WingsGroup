@@ -26,7 +26,8 @@ const eslintConfig = [
     },
   },
   {
-    ignores: ['.next/**', 'src/payload-types.ts', 'src/payload-generated-schema.ts'],
+    // artifacts/ holds one-off evidence scripts, not shipped source.
+    ignores: ['.next/**', 'artifacts/**', 'src/payload-types.ts', 'src/payload-generated-schema.ts'],
   },
 ]
 
