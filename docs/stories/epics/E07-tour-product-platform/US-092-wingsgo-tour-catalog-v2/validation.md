@@ -101,7 +101,7 @@ Nguồn của 6 tiêu chí chấp nhận là mục `Acceptance Criteria` trong `
 - AC6 → mục 12, 13
 
 1. `/en/tour` và API tải thêm ở ngữ cảnh EN không có nhãn tiếng Việt nào, kể cả nhãn giá liên hệ và các chuỗi của client.
-2. Hero, Tour nổi bật, Tất cả tour, ô thị trường và Sắp cất cánh lấy từ một snapshot với cùng `now`. Không có card trùng giữa các section đang hiển thị, cả khi có và không có filter, kể cả sau khi tải thêm.
+2. Hero, Tour nổi bật, Tất cả tour, ô thị trường và Sắp cất cánh lấy từ một snapshot với cùng `now`. Không có card trùng giữa Hero, Tour nổi bật và Tất cả tour, cả khi có và không có filter, kể cả sau khi tải thêm. "Sắp cất cánh" không chứa tour ở Hero/Tour nổi bật và ẩn khi có filter (D10).
 3. Khi không có filter: Hero hiện slot #1–#3, Tour nổi bật hiện slot #4–#6, Tất cả tour loại các tour đó. Khi có filter: Tour nổi bật ẩn, và Tất cả tour chứa mọi tour khớp.
 4. Resolver giữ đúng thứ tự Page → mặc định của site → legacy → fallback, chỉ trong phạm vi site. Curation có ít hơn 3 tour vẫn render đúng.
 5. `departureMonth` và bốn mùa dùng helper lịch VN, kết hợp AND, mùa đông đúng khi qua năm mới, giá trị không hợp lệ bị bỏ qua.
