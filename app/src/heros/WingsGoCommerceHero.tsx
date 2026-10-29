@@ -17,12 +17,10 @@ import type {
 import {
   getWingsGoCatalogCopy,
   resolveWingsGoCopyLocale,
+  WINGSGO_MARKET_LABELS,
 } from '@/tours/wingsGoCatalogCopy'
 import { cn } from '@/utilities/ui'
-import {
-  WingsGoQuickSearchForm,
-  WINGSGO_MARKET_LABELS,
-} from './WingsGoQuickSearchForm'
+import { WingsGoQuickSearchForm } from './WingsGoQuickSearchForm'
 
 export type WingsGoHeroTourRowProps = {
   locale?: string | null

@@ -215,3 +215,17 @@ export const getWingsGoCatalogCopy = (locale?: null | string): WingsGoCatalogCop
   const copyLocale = resolveWingsGoCopyLocale(locale)
   return WINGSGO_CATALOG_COPY[copyLocale]
 }
+
+// Lives outside the client form so server components get the real object.
+export const WINGSGO_MARKET_LABELS: Record<string, { en: string; vi: string }> = {
+  cambodia: { en: 'Cambodia', vi: 'Campuchia' },
+  china: { en: 'China', vi: 'Trung Quốc' },
+  indochina: { en: 'Indochina', vi: 'Đông Dương' },
+  japan: { en: 'Japan', vi: 'Nhật Bản' },
+  korea: { en: 'South Korea', vi: 'Hàn Quốc' },
+  laos: { en: 'Laos', vi: 'Lào' },
+  myanmar: { en: 'Myanmar', vi: 'Myanmar' },
+  other: { en: 'Other destinations', vi: 'Tuyến khác' },
+  thailand: { en: 'Thailand', vi: 'Thái Lan' },
+  vietnam: { en: 'Vietnam', vi: 'Việt Nam' },
+}

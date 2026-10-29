@@ -7,20 +7,7 @@ import {
   WINGSGO_CATALOG_MARKETS,
   type WingsGoCatalogFilters,
 } from '@/tours/wingsGoCatalog'
-import { getWingsGoCatalogCopy } from '@/tours/wingsGoCatalogCopy'
-
-export const WINGSGO_MARKET_LABELS: Record<string, { en: string; vi: string }> = {
-  cambodia: { en: 'Cambodia', vi: 'Campuchia' },
-  china: { en: 'China', vi: 'Trung Quốc' },
-  indochina: { en: 'Indochina', vi: 'Đông Dương' },
-  japan: { en: 'Japan', vi: 'Nhật Bản' },
-  korea: { en: 'South Korea', vi: 'Hàn Quốc' },
-  laos: { en: 'Laos', vi: 'Lào' },
-  myanmar: { en: 'Myanmar', vi: 'Myanmar' },
-  other: { en: 'Other destinations', vi: 'Tuyến khác' },
-  thailand: { en: 'Thailand', vi: 'Thái Lan' },
-  vietnam: { en: 'Vietnam', vi: 'Việt Nam' },
-}
+import { getWingsGoCatalogCopy, WINGSGO_MARKET_LABELS } from '@/tours/wingsGoCatalogCopy'
 
 export type MonthOption = {
   label: string
