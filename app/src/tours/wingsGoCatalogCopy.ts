@@ -58,6 +58,8 @@ export interface WingsGoCatalogCopy {
   durationMaxPlaceholder: string
 
   filterPriceMin: string
+  filterPriceRange: string
+  filterDurationRange: string
   priceMinPlaceholder: string
   filterPriceMax: string
   priceMaxPlaceholder: string
@@ -134,6 +136,8 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     durationMaxPlaceholder: 'Ví dụ 6',
 
     filterPriceMin: 'Giá từ (VND)',
+    filterPriceRange: 'Ngân sách',
+    filterDurationRange: 'Số ngày',
     priceMinPlaceholder: 'Ví dụ 10000000',
     filterPriceMax: 'Giá đến (VND)',
     priceMaxPlaceholder: 'Ví dụ 30000000',
@@ -208,6 +212,8 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     durationMaxPlaceholder: 'e.g. 6',
 
     filterPriceMin: 'Price from (VND)',
+    filterPriceRange: 'Budget',
+    filterDurationRange: 'Duration',
     priceMinPlaceholder: 'e.g. 10000000',
     filterPriceMax: 'Price to (VND)',
     priceMaxPlaceholder: 'e.g. 30000000',

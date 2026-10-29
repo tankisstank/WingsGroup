@@ -432,6 +432,18 @@ describe('WingsGoTourCatalogClient', () => {
     expect(lastCall[0]).not.toContain('market=')
   })
 
+  it('labels range chips neutrally so an upper bound is not called a minimum', () => {
+    render(
+      <WingsGoTourCatalogClient
+        initial={{ ...data([1], false), filtersActive: true }}
+        initialFilters={{ durationMax: 6, priceMax: 1000 }}
+        locale="vi"
+      />,
+    )
+    expect(screen.getByText(/Ngân sách: ≤ 1\.000 VND/)).toBeTruthy()
+    expect(screen.getByText(/Số ngày: ≤ 6 ngày/)).toBeTruthy()
+  })
+
   it('renders empty state with recovery buttons and budget explanation only when price filter is active', () => {
     // 1. Without price filter (e.g. market only)
     const { rerender } = render(

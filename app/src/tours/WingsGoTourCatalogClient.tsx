@@ -383,7 +383,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
       }
       chips.push({
         id: 'duration',
-        label: `${copy.filterDurationMin}: ${dLabel}`,
+        label: `${copy.filterDurationRange}: ${dLabel}`,
         onRemove: () => updateFilters({ durationMax: '', durationMin: '' }),
         removeAriaLabel: copy.removeFilterLabel(dLabel),
       })
@@ -402,7 +402,7 @@ export const WingsGoTourCatalogClient = ({ initial, initialFilters, locale = 'vi
       }
       chips.push({
         id: 'price',
-        label: `${copy.filterPriceMin}: ${pLabel}`,
+        label: `${copy.filterPriceRange}: ${pLabel}`,
         onRemove: () => updateFilters({ priceMax: '', priceMin: '' }),
         removeAriaLabel: copy.removeFilterLabel(pLabel),
       })
