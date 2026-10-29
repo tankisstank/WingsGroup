@@ -38,7 +38,7 @@ Story chỉ đóng khi mỗi phase có bằng chứng từ code, test và trình
 | P2.1 Ảnh market phụ thuộc thứ tự trả về của Payload | Sắp xếp ứng viên theo `id` rồi `url` trước khi lấy modulo | Đang sửa |
 | P2.2 Ba lần đọc tuần tự không nằm trong một transaction | Ghi nhận là giới hạn đã chấp nhận: cursor ở P1.1 chặn lỗi bỏ sót card; nếu một lần ghi xen giữa ba lần đọc, DTO có thể ghép các trạng thái khác nhau trong một request, và lần render sau sẽ tự đúng lại | Chấp nhận, đã ghi rõ |
 | P2.3 Quy tắc `enabled` khác nhau giữa SSR, API và query | `queryWingsGoTourCatalog` chỉ chạy khi `enabled === true`; homepage giữ việc ghi đè tường minh trong `getWingsGoFeaturedTours` | Đang sửa |
-| P2.4 Chưa có bằng chứng dạng ngày trên production | Cần người dùng đồng ý chạy truy vấn chỉ đọc; trang detail giữ nguyên cho tới khi có kết quả | Chờ người dùng |
+| P2.4 Chưa có bằng chứng dạng ngày trên production | Người dùng đã đồng ý; truy vấn chỉ đọc ngày 2026-10-29: 323 departure, 100% `00:00:00Z`, 0 lệch ngày (chi tiết ở `phase0-date-audit.md` mục 6). Trang detail chuyển sang helper lịch VN cùng Phase 2, kèm snapshot WingSide | Đã có bằng chứng |
 | P3.1 Các field DTO mới là bắt buộc | Giữ bắt buộc, vì đây là hợp đồng v2; JSON consumer cũ không bị ảnh hưởng | Chấp nhận |
 | P3.2 Homepage gọi resolver curation hai lần | Trả trực tiếp `catalog.featured`, bỏ lần resolve thứ hai | Đang sửa |
 | P3.3 Chạm trần inventory chỉ ghi log warning | Giữ warning; metric/alert để Phase 6 hoặc vận hành | Hoãn |
@@ -108,7 +108,7 @@ pnpm run build
 
 | Mục | Kết quả |
 |---|---|
-| Truy vấn Phase 0: số departure có ngày VN khác ngày UTC, theo site | Chưa có |
+| Truy vấn Phase 0: số departure có ngày VN khác ngày UTC, theo site | Local: 164/164 `00:00Z`, 0 lệch. Production 2026-10-29: 323/323 `00:00Z`, 0 lệch |
 | Biên bản tham vấn Codex trước Phase 1 | Chưa có |
 | Exit code của các lệnh kiểm tra | Chưa có |
 | Ảnh chụp và log trình duyệt | Chưa có |

@@ -119,3 +119,22 @@ ORDER BY s.id;
 In accordance with Phase 0 brief constraints:
 - `groupDeparturesByMonth` in `app/src/tours/utils.ts` and detail-page code were **not changed** in Phase 0.
 - Orchestrator review and production execution will determine the Phase 1 path.
+
+---
+
+## 6. Production Audit Results (2026-10-29)
+
+- **Approval:** người dùng đồng ý chạy truy vấn chỉ đọc trên production (2026-10-29).
+- **Target:** Oracle VPS `instance-20260604-2317`, container `wingstravel-postgres-1` (`postgres:16-alpine`), qua SSH theo `docs/accounts.md`.
+- **Safety:** `SET default_transaction_read_only = on`, `BEGIN READ ONLY` … `ROLLBACK`; chỉ chạy Query A và Query B ở mục 4. Không ghi dữ liệu, không restart, không deploy.
+- **Kiểm tra bổ sung:** cột `tour_departures.departure_date` là `timestamp with time zone`; session `TimeZone = UTC`; khoảng dữ liệu 2026-01-24 → 2027-11-06; 214 departure từ hiện tại trở đi.
+
+| Site | Departures | VN ≠ UTC | 00:00Z | 12:00Z | 17:00Z | Khác |
+|---|---|---|---|---|---|---|
+| `wings-group` | 5 | 0 | 5 | 0 | 0 | 0 |
+| `wings-go` | 296 | 0 | 296 | 0 | 0 | 0 |
+| `wing-side` | 22 | 0 | 22 | 0 | 0 | 0 |
+| `wings-pass`, `wings-plus`, `wings-care` | 0 | 0 | 0 | 0 | 0 | 0 |
+| **Tổng** | **323** | **0** | **323 (100%)** | 0 | 0 | 0 |
+
+**Kết luận:** production có 0 departure lệch ngày giữa lịch VN và UTC. Theo quy tắc trang detail trong `design.md` (0 khác biệt ⇒ chuyển helper), `groupDeparturesByMonth` được phép chuyển sang helper lịch nghiệp vụ VN, kèm snapshot WingSide để chứng minh output không đổi. Việc này được lên lịch cùng Phase 2, không làm trong Phase 1b.
