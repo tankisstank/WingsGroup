@@ -61,7 +61,27 @@ Riêng Q3, Codex khuyến nghị không thêm nhãn hot vào row. Stakeholder ch
 | D6 bảo mật | Chỉ chấp nhận hai alias tính từ chính đợt; fail closed; giữ chính sách draft hiện tại; ma trận test lead đầy đủ |
 | Phase | Tách Phase 1 thành 1A và 1B, mỗi phần có Codex review |
 
-### Review Phase 1A / 1B / 3 / Release
+### Phase 1A — Review của orchestrator (2026-10-30)
+
+- **Commit gốc `d53074f` (agy) không được chấp nhận.** Orchestrator ghi 6 lỗi trong `phase1a-fix-brief.md`:
+  - F1 (P1): integration test mock Payload;
+  - F2: test thống kê không gọi code sản phẩm, chỉ tự kiểm chính nó;
+  - F3: kiểm tra site, `_status` và media để lọt (fail-open);
+  - F4: query fallback VI của D11 không scope theo site;
+  - F5: `locale` chưa truyền tới `normalizeTourProductCard`;
+  - F6: dọn dẹp.
+- **Commit sửa `5a15e76`.** Orchestrator tự chạy lại và xác nhận:
+  - `node scripts/run-integration-tests.mjs tests/int/wingsGoScheduleIntegration.int.spec.ts` → **5/5 pass** trên SQLite tạm, Payload thật. Mock chỉ thay `getCurrentSite`/`appendSiteWhere` để đặt site của request.
+  - `vitest --config vitest.unit.config.mts` cho 6 file liên quan (snapshot, snapshot mocked, lowestPrice, priorityMarketDeparture, wingsGoDisplay, tourPublicProjection) → **48/48 pass**.
+  - `tsc --noEmit` → 2 lỗi, giữ nguyên baseline.
+  - Đã kiểm code: product và media fail closed theo site và `_status` (`wingsGoSchedule.ts:206`, `:578`, `:581`); query VI scope theo site (`:548`); `locale` được truyền qua mọi caller trong `queries.ts`.
+  - Theo `phase1a-report.md` (agy tự báo, orchestrator chưa chạy lại): suite unit đầy đủ còn 1 lỗi baseline, component 422/422, lint exit 0.
+
+### Phase 1A — Codex review
+
+Đang chờ. Codex hết quota 5 giờ lúc khoảng 17:35, reset lúc 18:58. Yêu cầu đã nằm trong hàng đợi của tab `us093-codex`. Phase 1B chạy song song (quyết định của orchestrator); finding của Codex về DTO sẽ được sửa bổ sung trước Phase 2.
+
+### Review Phase 1B / 3 / Release
 
 Chưa chạy.
 
