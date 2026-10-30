@@ -79,9 +79,31 @@ Riêng Q3, Codex khuyến nghị không thêm nhãn hot vào row. Stakeholder ch
 
 ### Phase 1A — Codex review
 
-Đang chờ. Codex hết quota 5 giờ lúc khoảng 17:35, reset lúc 18:58. Yêu cầu đã nằm trong hàng đợi của tab `us093-codex`. Phase 1B chạy song song (quyết định của orchestrator); finding của Codex về DTO sẽ được sửa bổ sung trước Phase 2.
+- **Biên bản:** `docs/consultations/2026-10-30-us093-phase1a-codex-review.md`. Chạy sau khi quota reset, trên HEAD có cả `158e663`.
+- **VERDICT: GO có điều kiện.** Không có P1. Có 4 P2 và 1 P3:
+  - P2.1: nhãn `other`;
+  - P2.2: `verifiedDay` bỏ sót đợt verified đang `quote`;
+  - P2.3: integration chưa chứng minh dedupe/trang 2;
+  - P2.4: thiếu test `now` invalid và contract CTA;
+  - P3.1: chuẩn hoá media URL.
+- Codex chạy lead integration bằng `vitest` trực tiếp nên thiếu `PAYLOAD_SECRET`. Orchestrator chạy lại qua `run-integration-tests.mjs` và pass (xem Phase 1B).
+- Tất cả finding được giao trong `phase1-fix-brief.md` (C1–C5).
 
-### Review Phase 1B / 3 / Release
+### Phase 1B — Review của orchestrator (2026-10-30)
+
+- **Commit `158e663` (agy).** Orchestrator tự chạy lại:
+  - unit (helpers, snapshot, snapshot mocked, display, priorityMarketDeparture, lowestPrice) → **52/52 pass**;
+  - `run-integration-tests.mjs`: `wingsGoLeadCompatibility` 6/6, `leadSubmissionRoute` 21/21, `leadCapture` 3/3, `wingsGoScheduleIntegration` 5/5;
+  - `tsc --noEmit` → 2 lỗi baseline.
+- **Chưa chấp nhận.** Các finding đã giao trong `phase1-fix-brief.md`:
+  - B1 (P1): `route.ts` export `resolveDepartureLeadContext`; Next.js chỉ cho route export handler/config, nên `next build` sẽ hỏng. Chuyển sang module riêng.
+  - B2 (P2): test lead gọi resolver rồi tự `payload.create`, chưa đi qua POST thật.
+  - B3 (P3): mã hãng bay khớp không phân biệt hoa thường.
+  - B4 (P3): allowlist viết tắt upper-case cả từ viết thường.
+  - B5 (P3): so id bằng chuỗi.
+- Đã kiểm: `/lien-he` và `lead-capture/validation.ts` chỉ yêu cầu `YYYY-MM-DD` hợp lệ, nên đổi sang ngày VN không phá prefill.
+
+### Review Phase 3 / Release
 
 Chưa chạy.
 
