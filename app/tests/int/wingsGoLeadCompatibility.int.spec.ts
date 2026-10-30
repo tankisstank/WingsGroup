@@ -1,8 +1,32 @@
 import configPromise from '@payload-config'
+import { randomUUID } from 'node:crypto'
 import { getPayload, type Payload } from 'payload'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { resolveDepartureLeadContext } from '@/app/(payload)/api/lead-submissions/route'
+let activeTestSite: any = null
+
+vi.mock('@/utilities/siteContext', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>()
+  return {
+    ...actual,
+    getCurrentLocale: async () => 'vi',
+    getCurrentSite: async () => activeTestSite,
+  }
+})
+
+vi.mock('@/lead-capture/redis', () => ({
+  createLeadRedisStore: () => ({
+    checkIPRateLimit: async () => ({ allowed: true, requiresChallenge: false }),
+    checkValidatedRateLimits: async () => ({ allowed: true, formCount: 1, ipCount: 1 }),
+    completeIdempotency: async () => {},
+    releaseIdempotency: async () => {},
+    reserveIdempotency: async () => true,
+  }),
+  getClientIP: () => '198.51.100.10',
+}))
+
+import { resolveDepartureLeadContext } from '@/lead-capture/departureLeadContext'
+import { POST } from '@/app/(payload)/api/lead-submissions/route'
 import { getTourInquiryPath } from '@/tours/utils'
 
 describe('US-093 Phase 1B - WingsGo Lead Compatibility & Vietnam Date Persistence', () => {
@@ -191,9 +215,12 @@ describe('US-093 Phase 1B - WingsGo Lead Compatibility & Vietnam Date Persistenc
       } as any,
       overrideAccess: true,
     })
+
+    activeTestSite = wingsGoSite
   }, 60_000)
 
   afterAll(async () => {
+    activeTestSite = null
     await payload?.destroy()
   })
 
@@ -477,5 +504,104 @@ describe('US-093 Phase 1B - WingsGo Lead Compatibility & Vietnam Date Persistenc
     expect(url).toContain('intent=hold-seat')
     expect(url).toContain(`departureId=${dep17Z.id}`)
     expect(url).toContain(`tour=${publishedTour.slug}`)
+  })
+
+  describe('B2 - POST route endpoint integration with real SQLite database', () => {
+    const createLeadRequest = (bodyOverrides = {}) =>
+      new Request(`https://wingsgo-${suffix}.invalid/api/lead-submissions`, {
+        body: JSON.stringify({
+          formId: formRecord.id,
+          idempotencyKey: randomUUID(),
+          submissionData: [{ field: 'name', value: 'Nguyễn Văn A' }],
+          ...bodyOverrides,
+        }),
+        headers: new Headers({
+          'content-type': 'application/json',
+          'x-site-context-source': 'proxy',
+          'x-client-ip': '198.51.100.10',
+          'x-site-host': `wingsgo-${suffix}.invalid`,
+        }),
+        method: 'POST',
+      })
+
+    it('accepts 17:00Z departure with VN date and persists VN date in database', async () => {
+      const req = createLeadRequest({
+        context: {
+          departureId: String(dep17Z.id),
+          departureDate: '2027-05-20', // Vietnam calendar day
+          tourId: String(publishedTour.id),
+          tourSlug: publishedTour.slug,
+          intent: 'hold-seat',
+          source: 'schedule',
+        },
+      })
+
+      const res = await POST(req)
+      expect(res.status).toBe(202)
+
+      const saved = await payload.find({
+        collection: 'form-submissions',
+        where: {
+          and: [
+            { form: { equals: formRecord.id } },
+            { 'enquiryContext.departureId': { equals: String(dep17Z.id) } },
+          ],
+        },
+        sort: '-createdAt',
+        limit: 1,
+        overrideAccess: true,
+      })
+      expect(saved.docs).toHaveLength(1)
+      expect(saved.docs[0].enquiryContext?.departureDate).toBe('2027-05-20')
+    })
+
+    it('accepts 17:00Z departure with legacy UTC date and still persists VN date', async () => {
+      const req = createLeadRequest({
+        context: {
+          departureId: String(dep17Z.id),
+          departureDate: '2027-05-19', // Legacy UTC calendar day
+          tourId: String(publishedTour.id),
+          tourSlug: publishedTour.slug,
+          intent: 'hold-seat',
+          source: 'schedule',
+        },
+      })
+
+      const res = await POST(req)
+      expect(res.status).toBe(202)
+
+      const saved = await payload.find({
+        collection: 'form-submissions',
+        where: {
+          and: [
+            { form: { equals: formRecord.id } },
+            { 'enquiryContext.departureId': { equals: String(dep17Z.id) } },
+          ],
+        },
+        sort: '-createdAt',
+        limit: 1,
+        overrideAccess: true,
+      })
+      expect(saved.docs).toHaveLength(1)
+      expect(saved.docs[0].enquiryContext?.departureDate).toBe('2027-05-20')
+    })
+
+    it('rejects submission when departure date matches neither VN date nor legacy UTC date', async () => {
+      const req = createLeadRequest({
+        context: {
+          departureId: String(dep17Z.id),
+          departureDate: '2027-05-25', // Invalid date
+          tourId: String(publishedTour.id),
+          tourSlug: publishedTour.slug,
+          intent: 'hold-seat',
+          source: 'schedule',
+        },
+      })
+
+      const res = await POST(req)
+      expect(res.status).toBe(400)
+      const data = await res.json()
+      expect(data.error).toBe('Invalid submission.')
+    })
   })
 })

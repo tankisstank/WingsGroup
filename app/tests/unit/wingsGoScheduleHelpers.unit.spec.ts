@@ -11,6 +11,7 @@ import {
 import {
   normalizeScheduleAirline,
   getTourRouteTitle,
+  toTitleCaseWord,
 } from '@/tours/wingsGoDisplay'
 import {
   foldVietnameseText,
@@ -19,6 +20,7 @@ import {
   countScheduleFacets,
   sortScheduleRows,
   groupScheduleRowsByTour,
+  compareScheduleIds,
   deriveScheduleAvailability,
   type WingsGoScheduleRow,
   type WingsGoScheduleTour,
@@ -155,6 +157,21 @@ describe('US-093 Phase 1B - normalizeScheduleAirline', () => {
     expect(normalizeScheduleAirline('Vietnam Airlines and Vietjet')).toEqual({
       key: 'raw:vietnam airlines and vietjet',
       label: 'Vietnam Airlines and Vietjet',
+    })
+
+    // B3: lowercase code words like "we", "ca" without matching airline name do NOT match IATA codes
+    expect(normalizeScheduleAirline('we travel')).toEqual({
+      key: 'raw:we travel',
+      label: 'we travel',
+    })
+    expect(normalizeScheduleAirline('ca transport')).toEqual({
+      key: 'raw:ca transport',
+      label: 'ca transport',
+    })
+    // Uppercase code matches
+    expect(normalizeScheduleAirline('WE travel')).toEqual({
+      key: 'WE',
+      label: 'Parata Air',
     })
 
     // Empty, spaces, quotes, null, undefined
@@ -651,6 +668,15 @@ describe('US-093 Phase 1B - sortScheduleRows', () => {
       'r-noprice',   // no price
     ])
   })
+
+  it('B5: sorts numeric IDs numerically (9 before 10 on the same date)', () => {
+    const rows: WingsGoScheduleRow[] = [
+      { id: '10', departureDay: '2027-05-10', price: null } as any,
+      { id: '9', departureDay: '2027-05-10', price: null } as any,
+    ]
+    const sorted = sortScheduleRows(rows, 'date')
+    expect(sorted.map((r) => r.id)).toEqual(['9', '10'])
+  })
 })
 
 describe('US-093 Phase 1B - groupScheduleRowsByTour', () => {
@@ -711,6 +737,28 @@ describe('US-093 Phase 1B - groupScheduleRowsByTour', () => {
     expect(g2).toBeDefined()
     expect(g2?.priceFrom?.currency).toBe('USD')
     expect(g2?.priceFrom?.value).toBe(950)
+  })
+
+  it('B5: tie-breaks by numeric id in groupScheduleRowsByTour when prices and dates match', () => {
+    const tourRows: WingsGoScheduleRow[] = [
+      {
+        id: '10',
+        tourId: 'tour-1',
+        departureDay: '2027-05-10',
+        canHoldSeat: true,
+        price: { value: 12000000, currency: 'VND', original: null },
+      } as any,
+      {
+        id: '9',
+        tourId: 'tour-1',
+        departureDay: '2027-05-10',
+        canHoldSeat: true,
+        price: { value: 12000000, currency: 'VND', original: null },
+      } as any,
+    ]
+    const groups = groupScheduleRowsByTour(tourRows, tours)
+    expect(groups[0].rows.map((r) => r.id)).toEqual(['9', '10'])
+    expect(groups[0].chosenRow?.id).toBe('9')
   })
 })
 
@@ -789,6 +837,21 @@ describe('US-093 Phase 1B - getTourRouteTitle', () => {
     expect(getTourRouteTitle('Bắc Kinh – Vạn Lý Trường Thành – Cố Cung · No Shop')).toBe(
       'Bắc Kinh · Vạn Lý Trường Thành · Cố Cung · No Shop',
     )
+  })
+
+  it('B4: only keeps uppercase acronyms when already uppercase in source', () => {
+    // "Ca" was mixed-case -> stays "Ca" (not forced to "CA")
+    expect(toTitleCaseWord('Ca')).toBe('Ca')
+    // "Vu" was mixed-case -> stays "Vu" (not forced to "VU")
+    expect(toTitleCaseWord('Vu')).toBe('Vu')
+    // "VNA" was already uppercase and in allowlist -> stays "VNA"
+    expect(toTitleCaseWord('VNA')).toBe('VNA')
+    // "CA" was already uppercase and in allowlist -> stays "CA"
+    expect(toTitleCaseWord('CA')).toBe('CA')
+    // "VU" was already uppercase and in allowlist -> stays "VU"
+    expect(toTitleCaseWord('VU')).toBe('VU')
+    // Non-allowlist all-caps words get title-cased
+    expect(toTitleCaseWord('NỘI')).toBe('Nội')
   })
 })
 

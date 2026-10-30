@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 
 import { appendSiteWhere, getCurrentSite } from '@/utilities/siteContext'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
+import { normalizePublicMediaURL } from '@/utilities/getMediaUrl'
 
 import {
   toBusinessCalendarDay,
@@ -392,6 +393,18 @@ export const countScheduleFacets = (
 }
 
 /**
+ * Compare two schedule IDs: numeric if both are integers, otherwise string localeCompare.
+ */
+export const compareScheduleIds = (a: string, b: string): number => {
+  const numA = Number(a)
+  const numB = Number(b)
+  if (Number.isInteger(numA) && Number.isInteger(numB)) {
+    return numA - numB
+  }
+  return a.localeCompare(b)
+}
+
+/**
  * Sort schedule rows:
  * - date: departureDay asc, then id asc.
  * - price: VND asc, then USD asc, then no price; within group: price.value asc, then departureDay asc, then id asc.
@@ -405,7 +418,7 @@ export const sortScheduleRows = (
     return list.sort((a, b) => {
       const dayCmp = a.departureDay.localeCompare(b.departureDay)
       if (dayCmp !== 0) return dayCmp
-      return a.id.localeCompare(b.id)
+      return compareScheduleIds(a.id, b.id)
     })
   }
 
@@ -428,7 +441,7 @@ export const sortScheduleRows = (
 
     const dayCmp = a.departureDay.localeCompare(b.departureDay)
     if (dayCmp !== 0) return dayCmp
-    return a.id.localeCompare(b.id)
+    return compareScheduleIds(a.id, b.id)
   })
 }
 
@@ -460,7 +473,7 @@ export const groupScheduleRowsByTour = (
     tourRows.sort((a, b) => {
       const d = a.departureDay.localeCompare(b.departureDay)
       if (d !== 0) return d
-      return a.id.localeCompare(b.id)
+      return compareScheduleIds(a.id, b.id)
     })
 
     const holdSeatRows = tourRows.filter((r) => r.canHoldSeat && r.price)
@@ -472,7 +485,9 @@ export const groupScheduleRowsByTour = (
       vndRows.sort((a, b) => {
         const pDiff = a.price!.value - b.price!.value
         if (pDiff !== 0) return pDiff
-        return a.departureDay.localeCompare(b.departureDay)
+        const d = a.departureDay.localeCompare(b.departureDay)
+        if (d !== 0) return d
+        return compareScheduleIds(a.id, b.id)
       })
       chosenRow = vndRows[0]
     } else {
@@ -481,14 +496,18 @@ export const groupScheduleRowsByTour = (
         usdRows.sort((a, b) => {
           const pDiff = a.price!.value - b.price!.value
           if (pDiff !== 0) return pDiff
-          return a.departureDay.localeCompare(b.departureDay)
+          const d = a.departureDay.localeCompare(b.departureDay)
+          if (d !== 0) return d
+          return compareScheduleIds(a.id, b.id)
         })
         chosenRow = usdRows[0]
       } else if (holdSeatRows.length > 0) {
         holdSeatRows.sort((a, b) => {
           const pDiff = a.price!.value - b.price!.value
           if (pDiff !== 0) return pDiff
-          return a.departureDay.localeCompare(b.departureDay)
+          const d = a.departureDay.localeCompare(b.departureDay)
+          if (d !== 0) return d
+          return compareScheduleIds(a.id, b.id)
         })
         chosenRow = holdSeatRows[0]
       }
@@ -508,6 +527,8 @@ export const groupScheduleRowsByTour = (
 /**
  * Validate and extract media for a tour, checking site ownership.
  * F3: Media without site is rejected (null). Only accepted if site matches siteId.
+ * C5: Trims, normalizes via normalizePublicMediaURL, rejects whitespace or malformed URLs,
+ *     only accepts paths starting with '/' or valid 'https://' URLs.
  */
 export const extractTourMedia = (
   media: Record<string, any> | null | undefined,
@@ -518,9 +539,29 @@ export const extractTourMedia = (
     media.site && typeof media.site === 'object' ? media.site.id : media.site
   // F3 fail closed: media without site or site mismatch -> return null
   if (mediaSiteId == null || String(mediaSiteId) !== String(siteId)) return null
-  // Must have a valid URL
+
+  // Must have a valid URL string
   if (!media.url || typeof media.url !== 'string') return null
-  return { url: media.url, alt: media.alt || '' }
+  const rawUrl = media.url.trim()
+  if (!rawUrl) return null
+
+  let normalizedUrl = ''
+  if (rawUrl.startsWith('/')) {
+    normalizedUrl = normalizePublicMediaURL(rawUrl)
+  } else if (rawUrl.startsWith('https://')) {
+    try {
+      new URL(rawUrl)
+      normalizedUrl = normalizePublicMediaURL(rawUrl)
+    } catch {
+      return null
+    }
+  } else {
+    return null
+  }
+
+  if (!normalizedUrl) return null
+  const alt = typeof media.alt === 'string' ? media.alt.trim() : ''
+  return { url: normalizedUrl, alt }
 }
 
 /**
@@ -731,6 +772,29 @@ export const computeScheduleStats = (
 // Main snapshot function
 // ---------------------------------------------------------------------------
 
+export const createEmptyScheduleSnapshot = (
+  locale: SupportedLocaleCode = 'vi',
+): WingsGoScheduleSnapshot => ({
+  locale: locale === 'en' ? 'en' : 'vi',
+  todayDay: '',
+  tours: {},
+  rows: [],
+  months: [],
+  markets: [],
+  airlines: [],
+  marketCards: [],
+  stats: {
+    openCount: 0,
+    tourCount: 0,
+    pricedCount: 0,
+    nearestDay: null,
+    yearRange: null,
+    sharedDepartureCity: null,
+    verifiedDay: null,
+  },
+  initialFilters: { sort: 'date', view: 'date' },
+})
+
 export const getWingsGoScheduleSnapshot = async ({
   locale = 'vi',
   draft = false,
@@ -743,34 +807,18 @@ export const getWingsGoScheduleSnapshot = async ({
   searchParams?: Record<string, string | string[] | undefined>
 }): Promise<WingsGoScheduleSnapshot | null> => {
   const site = await getCurrentSite()
-  if (!site?.id) return null
+  if (!site?.id) {
+    console.warn('[wingsGoSchedule] No site found for schedule snapshot')
+    return createEmptyScheduleSnapshot(locale)
+  }
 
   const siteId = site.id
   const copy = getWingsGoScheduleCopy(locale)
   const today = toBusinessCalendarDay(now)
   if (!today) {
     // Fail closed: cannot determine business day
-    console.error('[wingsGoSchedule] toBusinessCalendarDay returned null for', now.toISOString())
-    return {
-      locale: locale === 'en' ? 'en' : 'vi',
-      todayDay: '',
-      tours: {},
-      rows: [],
-      months: [],
-      markets: [],
-      airlines: [],
-      marketCards: [],
-      stats: {
-        openCount: 0,
-        tourCount: 0,
-        pricedCount: 0,
-        nearestDay: null,
-        yearRange: null,
-        sharedDepartureCity: null,
-        verifiedDay: null,
-      },
-      initialFilters: { sort: 'date', view: 'date' },
-    }
+    console.error('[wingsGoSchedule] toBusinessCalendarDay returned null for', String(now))
+    return createEmptyScheduleSnapshot(locale)
   }
 
   // Query departures: published, from start of today VN, paginated
@@ -959,8 +1007,8 @@ export const getWingsGoScheduleSnapshot = async ({
 
     if (!row) continue
 
-    // Track verifiedAt for stats
-    if (row.canHoldSeat || row.availability !== 'quote') {
+    // Track verifiedAt for stats (C2: all currently verified departures regardless of price/sold-out)
+    if (isDepartureVerificationCurrent(doc, now.getTime())) {
       if (doc.verifiedAt) {
         const vAt = Date.parse(doc.verifiedAt)
         if (Number.isFinite(vAt) && (maxVerifiedAt === null || vAt > maxVerifiedAt)) {
@@ -988,19 +1036,22 @@ export const getWingsGoScheduleSnapshot = async ({
   rows.sort((a, b) => {
     const dayCmp = a.departureDay.localeCompare(b.departureDay)
     if (dayCmp !== 0) return dayCmp
-    return a.id.localeCompare(b.id)
+    return compareScheduleIds(a.id, b.id)
   })
 
   // F2: Build schedule months with gaps
   const months = buildScheduleMonths(rows)
 
-  // Markets list with labels
+  // Markets list with labels (C1: 'other' uses copy.marketOther)
   const resolvedLocale = locale === 'en' ? 'en' : 'vi'
   const markets = Array.from(marketSet)
     .sort()
     .map((value) => ({
       value,
-      label: WINGSGO_MARKET_LABELS[value]?.[resolvedLocale] || copy.marketOther,
+      label:
+        value === 'other'
+          ? copy.marketOther
+          : (WINGSGO_MARKET_LABELS[value]?.[resolvedLocale] || copy.marketOther),
     }))
 
   // Airlines list

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   find: vi.fn(),
+  getCurrentSite: vi.fn(async () => ({ code: 'wings-go', id: 7 })),
   siteID: 7,
 }))
 
@@ -11,7 +12,7 @@ vi.mock('@/utilities/siteContext', () => ({
   appendSiteWhere: vi.fn(async (where?: Record<string, unknown>) => ({
     and: [{ site: { equals: mocks.siteID } }, where],
   })),
-  getCurrentSite: vi.fn(async () => ({ code: 'wings-go', id: mocks.siteID })),
+  getCurrentSite: () => mocks.getCurrentSite(),
 }))
 
 import { getResolvedScheduleData } from '@/tours/queries'
@@ -334,5 +335,116 @@ describe('US-093 Phase 1A - Schedule Snapshot & Integration Contracts', () => {
     // Lowest price skips 0 and returns 19000000
     expect(futureResult.heroStats.lowestPrice).toBe(19000000)
     expect(futureResult.heroStats.openCount).toBe(2)
+  })
+
+  it('fails closed and does not query data when now is invalid or site is missing', async () => {
+    // 1. Invalid now
+    const invalidNowSnapshot = await getWingsGoScheduleSnapshot({
+      now: new Date('invalid date'),
+    })
+    expect(invalidNowSnapshot).not.toBeNull()
+    expect(invalidNowSnapshot?.rows).toEqual([])
+    expect(mocks.find).not.toHaveBeenCalled()
+
+    // 2. Missing site
+    mocks.getCurrentSite.mockResolvedValueOnce(null as any)
+    const noSiteSnapshot = await getWingsGoScheduleSnapshot({
+      now: new Date('2027-01-01T00:00:00.000Z'),
+    })
+    expect(noSiteSnapshot).not.toBeNull()
+    expect(noSiteSnapshot?.rows).toEqual([])
+    expect(mocks.find).not.toHaveBeenCalled()
+  })
+
+  it('uses copy.marketOther for other market in VI ("Thị trường khác") and EN ("Other destinations")', async () => {
+    const otherDepartures = [
+      {
+        id: 'dep-other',
+        departureDate: '2027-05-10T00:00:00.000Z',
+        commerceVerified: true,
+        availabilityStatus: 'open',
+        priceFrom: 15000000,
+        currency: 'VND',
+        tourProduct: {
+          id: 'tour-other',
+          _status: 'published',
+          site: 7,
+          slug: 'tour-other',
+          title: 'Tour Other',
+          market: 'other',
+        },
+      },
+    ]
+
+    mocks.find.mockResolvedValue({ docs: otherDepartures, hasNextPage: false })
+
+    const snapshotVi = await getWingsGoScheduleSnapshot({
+      locale: 'vi',
+      now: new Date('2027-01-01T00:00:00.000Z'),
+    })
+    const marketVi = snapshotVi?.markets.find((m) => m.value === 'other')
+    expect(marketVi?.label).toBe('Thị trường khác')
+
+    const snapshotEn = await getWingsGoScheduleSnapshot({
+      locale: 'en',
+      now: new Date('2027-01-01T00:00:00.000Z'),
+    })
+    const marketEn = snapshotEn?.markets.find((m) => m.value === 'other')
+    expect(marketEn?.label).toBe('Other destinations')
+  })
+
+  it('updates verifiedDay for verified departures that are sold-out or quote due to missing price', async () => {
+    const testNow = new Date('2027-01-20T00:00:00.000Z')
+    const expiresAt = '2027-01-30T00:00:00.000Z'
+    const docs = [
+      // 1. Verified but sold out
+      {
+        id: 'dep-soldout',
+        departureDate: '2027-05-10T00:00:00.000Z',
+        commerceVerified: true,
+        verifiedAt: '2027-01-15T08:30:00.000Z',
+        expiresAt,
+        availabilityStatus: 'sold-out',
+        priceFrom: 15000000,
+        currency: 'VND',
+        tourProduct: {
+          id: 'tour-1',
+          _status: 'published',
+          site: 7,
+          slug: 'tour-1',
+          title: 'Tour 1',
+          market: 'japan',
+        },
+      },
+      // 2. Verified but missing price -> quote
+      {
+        id: 'dep-noprice',
+        departureDate: '2027-05-12T00:00:00.000Z',
+        commerceVerified: true,
+        verifiedAt: '2027-01-16T10:00:00.000Z',
+        expiresAt,
+        availabilityStatus: 'open',
+        priceFrom: null,
+        currency: 'VND',
+        tourProduct: {
+          id: 'tour-2',
+          _status: 'published',
+          site: 7,
+          slug: 'tour-2',
+          title: 'Tour 2',
+          market: 'japan',
+        },
+      },
+    ]
+
+    mocks.find.mockResolvedValue({ docs, hasNextPage: false })
+
+    const snapshot = await getWingsGoScheduleSnapshot({
+      locale: 'vi',
+      now: testNow,
+    })
+
+    // verifiedDay computed from latest verifiedAt ('2027-01-16T10:00:00.000Z' -> '2027-01-16')
+    expect(snapshot?.stats.verifiedDay).toBe('2027-01-16')
   })
 })

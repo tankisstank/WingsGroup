@@ -128,6 +128,7 @@ describe('US-093 Phase 1A - Real Payload Integration Test', () => {
 
     // Create 260 departures with unique dates (from 2027-01-01 onwards) so inventoryIdentity is unique
     const totalCount = 260
+    const createdDepartureIds = new Set<string>()
     for (let chunk = 0; chunk < totalCount; chunk += 50) {
       const end = Math.min(chunk + 50, totalCount)
       const promises: Promise<any>[] = []
@@ -150,17 +151,45 @@ describe('US-093 Phase 1A - Real Payload Integration Test', () => {
           }),
         )
       }
-      await Promise.all(promises)
+      const createdChunk = await Promise.all(promises)
+      for (const doc of createdChunk) {
+        createdDepartureIds.add(String(doc.id))
+      }
     }
 
-    // Call snapshot with real Payload query
-    const snapshot = await getWingsGoScheduleSnapshot({
-      locale: 'vi',
-      now: new Date('2026-12-01T00:00:00.000Z'),
+    // Spy on payload.find to prove page 2 was queried
+    const queriedPages: number[] = []
+    const originalFind = payload.find.bind(payload)
+    const findSpy = vi.spyOn(payload, 'find').mockImplementation(async (args: any) => {
+      if (args?.collection === 'tour-departures' && typeof args?.page === 'number') {
+        queriedPages.push(args.page)
+      }
+      return originalFind(args)
     })
 
+    // Call snapshot with real Payload query
+    let snapshot: any
+    try {
+      snapshot = await getWingsGoScheduleSnapshot({
+        locale: 'vi',
+        now: new Date('2026-12-01T00:00:00.000Z'),
+      })
+    } finally {
+      findSpy.mockRestore()
+    }
+
     expect(snapshot).not.toBeNull()
-    expect(snapshot!.rows.length).toBeGreaterThanOrEqual(260)
+    // C3: Exactly 260 fixture rows
+    expect(snapshot!.rows).toHaveLength(260)
+
+    // C3: Unique set of IDs matching created fixture IDs
+    const rowIds = new Set(snapshot!.rows.map((r: any) => r.id))
+    expect(rowIds.size).toBe(260)
+    expect(rowIds).toEqual(createdDepartureIds)
+
+    // C3: Prove that page 2 was queried
+    expect(queriedPages).toContain(1)
+    expect(queriedPages).toContain(2)
 
     // Verify sort order: departureDay ascending, then id ascending
     for (let i = 1; i < snapshot!.rows.length; i++) {
@@ -169,7 +198,13 @@ describe('US-093 Phase 1A - Real Payload Integration Test', () => {
       const cmp = prev.departureDay.localeCompare(curr.departureDay)
       expect(cmp <= 0).toBe(true)
       if (cmp === 0) {
-        expect(prev.id.localeCompare(curr.id) <= 0).toBe(true)
+        const numPrev = Number(prev.id)
+        const numCurr = Number(curr.id)
+        if (Number.isInteger(numPrev) && Number.isInteger(numCurr)) {
+          expect(numPrev).toBeLessThanOrEqual(numCurr)
+        } else {
+          expect(prev.id.localeCompare(curr.id)).toBeLessThanOrEqual(0)
+        }
       }
     }
   }, 120_000)

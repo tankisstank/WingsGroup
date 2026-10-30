@@ -335,6 +335,73 @@ describe('US-093 Phase 1A - F2 Pure Functions & Stats Verification', () => {
     expect(row?.canHoldSeat).toBe(true)
     expect(row?.ctaHref).toContain('departureId=501')
   })
+
+  it('buildScheduleRow with 17:00Z departure produces VN calendar departureDay, correct intent, and respects ctaLabelOverride', () => {
+    // 2027-05-19T17:00:00Z -> 2027-05-20 in ICT
+    const baseDoc = {
+      id: 502,
+      departureDate: '2027-05-19T17:00:00.000Z',
+      commerceVerified: true,
+      availabilityStatus: 'open',
+      priceFrom: 18900000,
+      currency: 'VND',
+      airline: 'Vietnam Airlines',
+      departureCity: 'Ha Noi',
+    }
+    const tour = {
+      id: 'tour-101',
+      slug: 'japan-journey',
+      title: 'Hành trình Nhật Bản',
+      market: 'japan',
+    }
+    const now = new Date('2027-05-10T00:00:00.000Z')
+
+    // 1. canHoldSeat = true -> intent=hold-seat
+    const rowHold = buildScheduleRow({
+      doc: baseDoc,
+      tour,
+      now,
+      copy,
+    })
+    expect(rowHold?.departureDay).toBe('2027-05-20')
+    expect(rowHold?.canHoldSeat).toBe(true)
+    expect(rowHold?.ctaHref).toContain('departureDate=2027-05-20')
+    expect(rowHold?.ctaHref).toContain('intent=hold-seat')
+    expect(rowHold?.ctaLabel).toBe(copy.ctaHoldSeat)
+
+    // 2. quote due to missing price -> intent=inquiry
+    const rowQuote = buildScheduleRow({
+      doc: { ...baseDoc, priceFrom: null },
+      tour,
+      now,
+      copy,
+    })
+    expect(rowQuote?.canHoldSeat).toBe(false)
+    expect(rowQuote?.ctaHref).toContain('departureDate=2027-05-20')
+    expect(rowQuote?.ctaHref).toContain('intent=inquiry')
+    expect(rowQuote?.ctaLabel).toBe(copy.ctaRequestQuote)
+
+    // 3. sold-out -> intent=inquiry
+    const rowSoldOut = buildScheduleRow({
+      doc: { ...baseDoc, availabilityStatus: 'sold-out' },
+      tour,
+      now,
+      copy,
+    })
+    expect(rowSoldOut?.canHoldSeat).toBe(false)
+    expect(rowSoldOut?.ctaHref).toContain('intent=inquiry')
+
+    // 4. ctaLabelOverride changes label, does NOT change intent
+    const rowOverride = buildScheduleRow({
+      doc: { ...baseDoc, ctaLabelOverride: 'Đặt chỗ ngay' },
+      tour,
+      now,
+      copy,
+    })
+    expect(rowOverride?.canHoldSeat).toBe(true)
+    expect(rowOverride?.ctaLabel).toBe('Đặt chỗ ngay')
+    expect(rowOverride?.ctaHref).toContain('intent=hold-seat')
+  })
 })
 
 describe('US-093 Phase 1A - F3 Media Fail-Closed Scope', () => {
@@ -350,6 +417,28 @@ describe('US-093 Phase 1A - F3 Media Fail-Closed Scope', () => {
     expect(extractTourMedia({ site: 7, url: '/photo.jpg', alt: 'Test' }, 7)).toEqual({
       url: '/photo.jpg',
       alt: 'Test',
+    })
+  })
+
+  it('extractTourMedia trims URL, normalizes Payload media paths, and rejects malformed/whitespace URLs', () => {
+    // Whitespace only
+    expect(extractTourMedia({ site: 7, url: '   ' }, 7)).toBeNull()
+    // Malformed URL
+    expect(extractTourMedia({ site: 7, url: 'https:// invalid url' }, 7)).toBeNull()
+    // Path /media/...
+    expect(extractTourMedia({ site: 7, url: '  /media/banner.jpg  ', alt: '  Banner  ' }, 7)).toEqual({
+      url: '/media/banner.jpg',
+      alt: 'Banner',
+    })
+    // Path /api/media/file/... normalized to /media/...
+    expect(extractTourMedia({ site: 7, url: '/api/media/file/banner.jpg' }, 7)).toEqual({
+      url: '/media/banner.jpg',
+      alt: '',
+    })
+    // Valid HTTPS URL
+    expect(extractTourMedia({ site: 7, url: 'https://cdn.example.com/banner.jpg' }, 7)).toEqual({
+      url: 'https://cdn.example.com/banner.jpg',
+      alt: '',
     })
   })
 })

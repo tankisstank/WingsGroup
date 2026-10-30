@@ -163,3 +163,121 @@ Test Files  63 passed (63)
   - Render chế độ xem theo ngày (`view=date`) và theo tour (`view=tour`).
   - Gắn URL synchronization (push/replace query params) khi người dùng tương tác với bộ lọc/sắp xếp.
   - Modal form giữ chỗ / hỏi giá trên client liên kết mượt mà với route `lead-submissions` vừa cập nhật.
+
+---
+
+## 6. Vòng sửa C1–C5, B1–B5 (Codex 1A & Orchestrator 1B Review)
+
+### 6.1. Chi tiết các nội dung đã xử lý
+
+1. **C1 (P2) — Nhãn `other`:**
+   - Trong `wingsGoSchedule.ts`, cập nhật mapping markets để dùng `value === 'other' ? copy.marketOther : (WINGSGO_MARKET_LABELS[value]?.[resolvedLocale] || copy.marketOther)`.
+   - Kết quả: `other` ra "Thị trường khác" (VI) và "Other destinations" (EN). Giữ nguyên `WINGSGO_MARKET_LABELS` dùng chung cho `/tour`.
+   - Bổ sung assertion cho cả VI và EN trong `wingsGoScheduleSnapshotMocked.unit.spec.ts`.
+2. **C2 (P2) — `verifiedDay`:**
+   - Trong vòng lặp tạo schedule rows của `getWingsGoScheduleSnapshot`, tính `isDepartureVerificationCurrent(doc, now.getTime())` độc lập, cập nhật `maxVerifiedAt` cho mọi đợt verified hiện hành, bao gồm cả đợt `quote` thiếu giá và đợt `sold-out`.
+   - Bổ sung test fixture trong `wingsGoScheduleSnapshotMocked.unit.spec.ts` cho cả 2 trường hợp.
+3. **C3 (P2) — Integration pagination:**
+   - Trong `tests/int/wingsGoScheduleIntegration.int.spec.ts`: assert đúng 260 fixture rows (`expect(snapshot.rows).toHaveLength(260)`), tập ID unique khớp đúng 260 ID tạo ra (`expect(rowIds).toEqual(createdDepartureIds)`), đúng thứ tự ngày và ID số.
+   - Spy `payload.find` ghi nhận danh sách `page` được gọi và chứng minh đã đọc qua trang 2 (`expect(queriedPages).toContain(1); expect(queriedPages).toContain(2)`).
+4. **C4 (P2) — Test fail-closed và contract row:**
+   - Khi `now` không hợp lệ (e.g. `new Date('invalid')`) hoặc không có site (`getCurrentSite() === null`), trả về snapshot rỗng (`createEmptyScheduleSnapshot`), hoàn toàn không query dữ liệu (`payload.find` không được gọi).
+   - `buildScheduleRow` với đợt `17:00Z`: sinh `departureDay` là ngày VN (`2027-05-20`), `ctaHref` chứa `departureDate=2027-05-20`; `intent=hold-seat` khi `canHoldSeat = true`, `intent=inquiry` khi quote/sold-out; `ctaLabelOverride` chỉ đổi nhãn hiển thị, không đổi intent.
+5. **C5 (P3) — Media URL:**
+   - `extractTourMedia`: trim URL, chuẩn hóa qua `normalizePublicMediaURL`. Chỉ chấp nhận đường dẫn nội bộ bắt đầu bằng `/` hoặc URL tuyệt đối `https://` hợp lệ. Chuỗi chỉ có khoảng trắng hoặc URL malformed trả về `null`.
+   - Bổ sung test trong `wingsGoScheduleSnapshot.unit.spec.ts` cho các trường hợp: whitespace, malformed URL, path `/media/...`, path `/api/media/file/...`, HTTPS URL.
+6. **B1 (P1) — Route file export không hợp lệ:**
+   - Chuyển `resolveDepartureLeadContext` sang module riêng `app/src/lead-capture/departureLeadContext.ts`.
+   - `app/src/app/(payload)/api/lead-submissions/route.ts` import hàm này ở đầu file, loại bỏ mọi export ngoài HTTP handlers để tuân thủ quy chuẩn Next.js route segments.
+   - Đã kiểm chứng qua lệnh `pnpm run build` (Next.js 16 production build) hoàn thành thành công 100%.
+7. **B2 (P2) — Lead kiểm thử qua route POST thật:**
+   - Bổ sung describe block kiểm thử route handler `POST` thật trong `tests/int/wingsGoLeadCompatibility.int.spec.ts` chạy trên Payload SQLite database thật:
+     - Đợt `17:00Z` gửi ngày VN (`2027-05-20`) -> trả về 202, collection `form-submissions` lưu đúng `enquiryContext.departureDate = '2027-05-20'`.
+     - Đợt `17:00Z` gửi ngày UTC cũ (`2027-05-19`) -> trả về 202, vẫn lưu `enquiryContext.departureDate = '2027-05-20'`.
+     - Gửi ngày không khớp cả hai (`2027-05-25`) -> trả về 400 (`Invalid submission.`).
+8. **B3 (P3) — Mã hãng bay hoa thường:**
+   - Trong `KNOWN_AIRLINES` (`wingsGoDisplay.ts`), loại bỏ cờ `i` khỏi `codePattern` (chỉ khớp IATA code viết hoa), giữ nguyên cờ `i` ở `namePattern`.
+   - Bổ sung test trong `wingsGoScheduleHelpers.unit.spec.ts`: đủ 21 chuỗi baseline vẫn ra 11 hãng; chuỗi chứa từ thường "we travel", "ca transport" trả về `raw:`.
+9. **B4 (P3) — Allowlist từ viết tắt:**
+   - Trong `toTitleCaseWord` (`wingsGoDisplay.ts`), chỉ giữ in hoa toàn bộ khi từ trong nguồn đã viết hoa và nằm trong `ACRONYM_ALLOWLIST`.
+   - Bổ sung test trong `wingsGoScheduleHelpers.unit.spec.ts`: "Ca" giữ "Ca", "Vu" giữ "Vu", "VNA" giữ "VNA", "CA" giữ "CA", "VU" giữ "VU".
+10. **B5 (P3) — So sánh ID theo số nguyên:**
+    - Tạo helper `compareScheduleIds`: so sánh số khi cả 2 ID là số nguyên (`Number.isInteger`), ngược lại so sánh chuỗi bằng `localeCompare`.
+    - Sử dụng trong `sortScheduleRows`, `groupScheduleRowsByTour` (bổ sung tie-break id sau ngày) và sort snapshot.
+    - Bổ sung test trong `wingsGoScheduleHelpers.unit.spec.ts`: các đợt cùng ngày có ID 9 và 10 được xếp đúng thứ tự (9 trước 10).
+
+---
+
+### 6.2. Kết quả kiểm tra cổng (verbatim command summaries)
+
+- **TypeScript (`pnpm exec tsc --noEmit`):**
+  ```
+  tests/unit/wingsGroupCorporateRoutes.unit.spec.ts(116,21): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type '{ richText?: unknown; }'.
+  tests/unit/wingsGroupCorporateRoutes.unit.spec.ts(155,9): error TS2322: Type '"lo"' is not assignable to type '"vi" | "en" | "it" | "es" | "pt" | "ja" | "ko" | "fr" | "de" | null | undefined'.
+  ```
+  -> **Chỉ có đúng 2 lỗi baseline định sẵn, 0 lỗi mới.**
+
+- **Linter (`pnpm run lint`):**
+  ```
+  ✖ 469 problems (0 errors, 469 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+  ```
+  -> **Exit code 0, 0 error.**
+
+- **Unit tests (`pnpm run test:unit`):**
+  ```
+  Test Files  1 failed | 168 passed (169)
+       Tests  1 failed | 1427 passed (1428)
+    Duration  81.22s
+  ```
+  -> **Chỉ có đúng 1 failure baseline (`tests/unit/wingsGroupV3Shell.unit.spec.ts`).**
+  - `wingsGoScheduleHelpers.unit.spec.ts`: **23/23 passed**.
+  - `wingsGoScheduleSnapshot.unit.spec.ts`: **17/17 passed**.
+  - `wingsGoScheduleSnapshotMocked.unit.spec.ts`: **7/7 passed**.
+  - `wingsGoDisplay.unit.spec.ts`: **5/5 passed**.
+
+- **Component tests (`pnpm run test:component`):**
+  ```
+  Test Files  63 passed (63)
+       Tests  422 passed (422)
+    Duration  27.02s
+  ```
+  -> **63 test files passed, 422 tests passed 100%.**
+
+- **Integration tests (Payload SQLite DB thật):**
+  - `node scripts/run-integration-tests.mjs tests/int/wingsGoLeadCompatibility.int.spec.ts`:
+    ```
+    Test Files  1 passed (1)
+         Tests  9 passed (9)
+    ```
+  - `node scripts/run-integration-tests.mjs tests/int/wingsGoScheduleIntegration.int.spec.ts`:
+    ```
+    Test Files  1 passed (1)
+         Tests  5 passed (5)
+    ```
+  - `node scripts/run-integration-tests.mjs tests/int/leadSubmissionRoute.int.spec.ts`:
+    ```
+    Test Files  1 passed (1)
+         Tests  21 passed (21)
+    ```
+  - `node scripts/run-integration-tests.mjs tests/int/leadCapture.int.spec.ts`:
+    ```
+    Test Files  1 passed (1)
+         Tests  3 passed (3)
+    ```
+
+- **Production Build (`pnpm run build` - minh chứng B1):**
+  ```
+  ✓ Compiled successfully in 37.4s
+    Running TypeScript ...
+    Finished TypeScript in 64s ...
+    Collecting page data using 19 workers ...
+    Generating static pages using 19 workers (20/20) in 1138ms
+    Finalizing page optimization ...
+  Route (app)
+  ...
+  > website@1.0.0 postbuild E:\repo\WingsTravel-us093\app
+  > node scripts/prepare-standalone.mjs
+  ```
+  -> **Build thành công hoàn toàn, exit code 0.**
+

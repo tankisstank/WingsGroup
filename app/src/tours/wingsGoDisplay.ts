@@ -101,67 +101,67 @@ const KNOWN_AIRLINES: Array<{
   {
     key: 'VN',
     label: 'Vietnam Airlines',
-    codePattern: /\b(VN|VNA)\b/i,
+    codePattern: /\b(VN|VNA)\b/,
     namePattern: /\bvietnam\s+airlines?\b/i,
   },
   {
     key: 'VJ',
     label: 'Vietjet Air',
-    codePattern: /\bVJ\b/i,
+    codePattern: /\bVJ\b/,
     namePattern: /\bvietjet(\s+air)?\b/i,
   },
   {
     key: 'CA',
     label: 'Air China',
-    codePattern: /\bCA\b/i,
+    codePattern: /\bCA\b/,
     namePattern: /\bair\s+china\b/i,
   },
   {
     key: 'EK',
     label: 'Emirates',
-    codePattern: /\bEK\b/i,
+    codePattern: /\bEK\b/,
     namePattern: /\bemirates\b/i,
   },
   {
     key: 'WE',
     label: 'Parata Air',
-    codePattern: /\bWE\b/i,
+    codePattern: /\bWE\b/,
     namePattern: /\bparata\s+air\b/i,
   },
   {
     key: 'VU',
     label: 'Vietravel Airlines',
-    codePattern: /\bVU\b/i,
+    codePattern: /\bVU\b/,
     namePattern: /\bviett?ravel\s+airlines?\b/i,
   },
   {
     key: '9G',
     label: 'Sun PhuQuoc Airways',
-    codePattern: /\b9G\b/i,
+    codePattern: /\b9G\b/,
     namePattern: /\bsun\s+phu\s*quoc\s+airways\b/i,
   },
   {
     key: '7C',
     label: 'Jeju Air',
-    codePattern: /\b7C\b/i,
+    codePattern: /\b7C\b/,
     namePattern: /\bjeju\s+air\b/i,
   },
   {
     key: 'NH',
     label: 'All Nippon Airways',
-    codePattern: /\bNH\b/i,
+    codePattern: /\bNH\b/,
     namePattern: /\ball\s+nippon\s+airways\b/i,
   },
   {
     key: 'TK',
     label: 'Turkish Airlines',
-    codePattern: /\bTK\b/i,
+    codePattern: /\bTK\b/,
     namePattern: /\bturkish\s+airlines\b/i,
   },
   {
     key: 'FD',
     label: 'Thai AirAsia',
-    codePattern: /\bFD\b/i,
+    codePattern: /\bFD\b/,
     namePattern: /\bthai\s+airasia\b/i,
   },
 ]
@@ -223,7 +223,7 @@ const ACRONYM_ALLOWLIST = new Set([
   'FD',
 ])
 
-const toTitleCaseWord = (word: string) => {
+export const toTitleCaseWord = (word: string) => {
   // Duration code like 5N4Đ or 5N4D (or 6N5Đ, etc.) -> keep standard uppercase
   const durationMatch = word.match(/^(\d+)[Nn](\d+)([ĐđDd])$/)
   if (durationMatch) {
@@ -240,10 +240,15 @@ const toTitleCaseWord = (word: string) => {
     return `${n}${charUpper}`
   }
 
-  // Check allowlist for acronyms (stripping trailing/leading punctuation like , . : ( ))
-  const cleanWord = word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '').toUpperCase()
-  if (ACRONYM_ALLOWLIST.has(cleanWord)) {
-    return word.toUpperCase()
+  // Check allowlist for acronyms: only keep uppercase when the word in source was ALREADY UPPERCASE
+  const cleanWord = word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '')
+  const isAlreadyUpper =
+    cleanWord.length > 0 &&
+    cleanWord === cleanWord.toLocaleUpperCase('vi') &&
+    cleanWord !== cleanWord.toLocaleLowerCase('vi')
+
+  if (isAlreadyUpper && ACRONYM_ALLOWLIST.has(cleanWord)) {
+    return word.toLocaleUpperCase('vi')
   }
 
   const lower = word.toLocaleLowerCase('vi')
