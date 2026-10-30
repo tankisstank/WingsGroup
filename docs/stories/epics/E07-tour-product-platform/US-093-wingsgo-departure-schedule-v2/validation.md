@@ -188,6 +188,78 @@ Kết luận: **chấp nhận Phase 1**.
   - DB local không có đợt nào giữ chỗ được, nên phần thẻ thị trường sẽ ẩn.
   - Phải seed đợt đã xác minh (có `airline`, giá, `verifiedAt` < now < `expiresAt`) trên DB copy để chụp thẻ.
 
+### Phase 5 — QA của orchestrator (2026-10-31, đang chạy)
+
+**Môi trường**
+
+- Bản cũ: repo chính ở `58cbd24`, `next dev -p 3101`, DB của repo chính, chỉ gửi GET.
+- Bản mới: worktree, `next dev -p 3100`, DB copy của worktree.
+- Media: chỉ chép 94 file hero (kèm các size) mà 16 tour WingsGo dùng vào `app/public/media` của worktree (thư mục bị gitignore).
+- Bản DB trước khi seed: `scratchpad/payload-tourplatform.pre-phase5.db`.
+
+**Payload trên cùng inventory** (đo trước khi seed; 39 đợt, 17 tour, cả hai đều `next dev`)
+
+| Trang | HTML cũ | HTML mới | Flight cũ | Flight mới | Link tour |
+|---|---|---|---|---|---|
+| VI | 251.262 | 242.267 (−3,6%) | 138.241 | 73.651 (−47%) | 17 / 17 |
+| EN | 225.109 | **230.764 (+2,5%)** | 117.901 | 69.428 (−41%) | 17 / 17 |
+
+- HTML trang EN còn lớn hơn bản cũ. Trong đó thuộc tính `class` chiếm 94 KB trên 156 KB markup, khoảng 3,5 KB mỗi row.
+- Đã giao agy chuyển class Tailwind lặp sang CSS có scope (`phase5-markup-brief.md`). Sẽ đo lại sau khi xong.
+
+**Seed trên DB copy** (now = 31/10/2026)
+
+- Mọi đợt được đánh dấu đã xác minh, trừ các ca sau:
+  - id 9: xác minh đã hết hạn;
+  - id 15: sold-out;
+  - id 12: không có giá;
+  - id 7: limited, có `original_price` và `promo_label`;
+  - id 1: chuyển sang `…T17:00Z`;
+  - id 34: USD 1.290;
+  - id 30: hôm nay;
+  - id 39: hôm qua.
+- **Kết quả SSR:**
+  - 38 CTA (hôm qua không hiện);
+  - hero 35 đợt mở bán / 17 hành trình / 36 đợt có giá / gần nhất 31/10, có "Cập nhật 30/10";
+  - đợt 17:00Z ra `departureDate=2027-07-08`;
+  - promo có `<del>` và nhãn;
+  - USD hiện "1.290 US$";
+  - có thẻ thị trường.
+
+**Lỗi tìm ra trên dữ liệu seed và đã sửa**
+
+- `22f5ca9`: đợt sold-out hiện badge CMS "Đang mở bán" và urgency "Ưu tiên giữ chỗ sớm". Badge giờ chỉ áp cho `open`/`limited`, urgency chỉ khi `canHoldSeat`. Thêm 4 unit test; ghi quy tắc vào `design.md`.
+- `f0d7da2`: trang EN đọc departure strict nên mất hãng bay và nơi đi. DB local có 0/5 bản EN có hãng bay, trong khi VI có 34/39. Bộ lọc hãng bay ở EN vì thế không có lựa chọn, và `?airline=VJ` bị bỏ qua (38 thay vì 8).
+  - Cách sửa: chỉ hai dữ kiện này lấy từ bản VI của **cùng** đợt, có scope site; copy marketing vẫn EN strict.
+  - Integration test thật fail khi chưa sửa, pass sau khi sửa (6/6).
+  - Sau khi sửa, `/en?airline=VJ` ra 8 đợt.
+
+**Lead thật qua API** (D6, AC2)
+
+- Chạy Redis tạm (`us093-qa-redis`, cổng 127.0.0.1:16379) và restart dev server với `REDIS_URL`.
+- Header `Host: wingsgo.vn` và `X-Real-IP` để đi qua đường proxy giống production; host `.local` cố ý không có client IP.
+
+| Lead | Ngữ cảnh | HTTP | `enquiry_context_departure_date` lưu |
+|---|---|---|---|
+| A | đợt 1 (17:00Z), ngày VN 2027-07-08 | 202 | 2027-07-08 |
+| B | đợt 1 (17:00Z), ngày UTC cũ 2027-07-07 | 202 | 2027-07-08 |
+| C | đợt 6 (00:00Z), 2027-05-20 | 202 | 2027-05-20 |
+| D | đợt 1, ngày sai 2027-07-10 | 400 | — |
+
+- Request thứ 3 và thứ 4 từ cùng một IP bị rate limit yêu cầu Turnstile (403), đúng hành vi; gửi lại từ IP khác.
+
+**SEO và locale** (curl SSR, sau khi seed)
+
+- Không lọc: 38 CTA, 17 link tour, 0 row `hidden` ở SSR, không có robots, canonical `/lich-khoi-hanh`.
+- `noindex, follow` và canonical gốc với `?market=korea` (18 đợt / 9 tour), `?market=` (rỗng), `?market=xyz`, `?view=tour`, `?sort=price`, `?status=sold-out` (1 đợt), `/en?q=japan`, `/en?airline=VJ`.
+- `?utm_source=fb` không có robots.
+- `/en`: chuỗi tiếng Việt chỉ còn tên tour chưa dịch (D11) và địa chỉ/mô tả footer lấy từ cấu hình site. Mọi nhãn giao diện là tiếng Anh.
+
+**Revalidate (AC5)**
+
+- `9a7215b`: unit test 4/4 cho đổi giá, unpublish, xoá đợt và đổi badge tour; mỗi ca đều gọi `revalidatePath('/lich-khoi-hanh')` và `('/en/lich-khoi-hanh')`.
+- Đổi giá đợt 6 trên DB copy: cả VI và EN hiện 17.770.000. Dev không có full-route cache nên bước này chỉ là bằng chứng phụ.
+
 ### Review Phase 5 / Release
 
 Chưa chạy.
