@@ -10,6 +10,10 @@ import { SiteLink } from '@/components/SiteLink'
 import type { Media as MediaType } from '@/payload-types'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
+import type { WingsGoScheduleSnapshot } from './wingsGoSchedule'
+import { WingsGoScheduleHero } from './WingsGoScheduleHero'
+import { WingsGoScheduleMonthChart } from './WingsGoScheduleMonthChart'
+import { WingsGoScheduleMarketCards } from './WingsGoScheduleMarketCards'
 import { defaultTourSectionOrder, defaultTourSectionVisibility } from './sectionRegistry'
 import { ScheduleInteractiveDepartures } from './ScheduleInteractiveDepartures'
 import { TourItineraryAccordion } from './TourItineraryAccordion'
@@ -3833,10 +3837,12 @@ export const TourSchedulePage = ({
   hotlines,
   locale,
   schedule,
+  snapshot,
 }: {
   hotlines?: HotlineItem[]
   locale: 'en' | 'vi'
   schedule: SchedulePageViewModel
+  snapshot?: WingsGoScheduleSnapshot | null
 }) => {
   const isEn = locale === 'en'
   const resolvedHotlines =
@@ -3870,6 +3876,110 @@ export const TourSchedulePage = ({
         '🎧 Thoughtful support throughout',
       ]
     : ['📅 Lịch trình & giá tour', '🌏 Tour & Visa', '🎧 Hỗ trợ tận tâm']
+
+  if (snapshot) {
+    const initialMonthCounts: Record<string, number> = {}
+    for (const r of snapshot.rows) {
+      initialMonthCounts[r.monthKey] = (initialMonthCounts[r.monthKey] || 0) + 1
+    }
+
+    return (
+      <div className="wingsgo-schedule container py-6 space-y-8">
+        <WingsGoScheduleHero stats={snapshot.stats} locale={locale}>
+          <WingsGoScheduleMonthChart
+            months={snapshot.months}
+            counts={initialMonthCounts}
+            locale={locale}
+          />
+        </WingsGoScheduleHero>
+
+        <WingsGoScheduleMarketCards
+          cards={snapshot.marketCards}
+          rows={snapshot.rows}
+          tours={snapshot.tours}
+          locale={locale}
+        />
+
+        {/* Tạm giữ danh sách cũ bên dưới cho tới Phase 3 */}
+        <section className="space-y-8" id="wingsgo-schedule-list">
+          <Panel>
+            <SectionHeading
+              description={
+                isEn
+                  ? 'Compare upcoming dates by destination, airline and confirmed availability.'
+                  : 'Xem các đợt gần nhất theo thị trường, hãng bay và tình trạng chỗ đã xác minh.'
+              }
+              eyebrow={isEn ? 'Upcoming departures' : 'Đợt đi gần'}
+              title={isEn ? 'Open tours and departures' : 'Một số đợt khởi hành đang mở bán'}
+            />
+            <DepartureStrip departures={schedule.featuredDepartures} locale={locale} />
+          </Panel>
+
+          <Panel>
+            <SectionHeading
+              description={
+                isEn
+                  ? 'Filter by destination, month, airline or availability, then compare each departure.'
+                  : 'Lọc theo thị trường, tháng, hãng bay và tình trạng chỗ rồi so sánh từng đợt.'
+              }
+              eyebrow={isEn ? 'Filter and compare' : 'Lọc và so sánh'}
+              title={isEn ? 'All upcoming departures' : 'Tất cả đợt khởi hành đang mở bán'}
+            />
+            <ScheduleInteractiveDepartures departures={schedule.departures} locale={locale} />
+          </Panel>
+
+          <Panel>
+            <div className="rounded-[24px] border border-border/60 bg-muted/20 p-5 md:p-8">
+              <h2 className="text-2xl font-semibold text-foreground md:text-3xl">
+                {isEn ? 'Ready for a memorable journey?' : 'Sẵn sàng cho hành trình đáng nhớ?'}
+              </h2>
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {trustSignals.map((item) => (
+                  <li className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold" key={item}>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground">
+                {isEn
+                  ? 'Do not miss a departure that fits. Send a request and the WingsGo team will recommend a program, check availability and provide a quote.'
+                  : 'Đừng bỏ lỡ lịch khởi hành phù hợp. Gửi yêu cầu để đội ngũ WingsGo tư vấn chương trình, kiểm tra chỗ và báo giá.'}
+              </p>
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <SiteLink
+                  className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--site-brand)] px-5 text-sm font-semibold text-white no-underline"
+                  href={getContactPath('wings-go')}
+                >
+                  {isEn ? 'GET ADVICE & A QUOTE' : 'NHẬN TƯ VẤN & BÁO GIÁ'}
+                </SiteLink>
+            {resolvedHotlines.map((item, idx) => (
+              <a
+                key={item.normalized}
+                className="inline-flex min-h-11 items-center font-semibold text-foreground no-underline"
+                href={item.href}
+              >
+                {item.label
+                  ? `${item.label}: ${formatHotlineDisplay(item.normalized)}`
+                  : `${idx === 0 ? (isEn ? 'Call' : 'Hotline') : (isEn ? 'Alt' : 'Hotline 2')}: ${formatHotlineDisplay(item.normalized)}`}
+              </a>
+            ))}
+                {zaloCTA ? (
+                  <a
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground no-underline transition-colors hover:border-[var(--site-brand)] hover:text-[var(--site-brand)]"
+                    href={zaloCTA.href}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    💬 {zaloCTA.label}
+                  </a>
+                ) : null}
+              </div>
+            </div>
+          </Panel>
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="container space-y-8">

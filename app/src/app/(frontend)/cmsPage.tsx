@@ -50,6 +50,9 @@ import {
   getToursByMarketRoute,
 } from '@/tours/queries'
 import {
+  getWingsGoScheduleSnapshot,
+} from '@/tours/wingsGoSchedule'
+import {
   TourCampaignPage,
   TourDetailPage,
   TourMarketPage,
@@ -720,12 +723,27 @@ const resolveStructuredTourPage = async ({
   const copyLocale = getCopyLocale(locale)
 
   if (segments[0] === 'lich-khoi-hanh') {
+    const isWingsGo = site.code === 'wings-go'
+    const scheduleSnapshot = isWingsGo
+      ? await getWingsGoScheduleSnapshot({
+          draft,
+          locale: (copyLocale === 'en' ? 'en' : 'vi') as SupportedLocaleCode,
+        })
+      : null
+
     const schedule = await getResolvedScheduleData({
       draft,
       locale,
     })
 
-    return <TourSchedulePage hotlines={hotlines} locale={copyLocale} schedule={schedule} />
+    return (
+      <TourSchedulePage
+        hotlines={hotlines}
+        locale={copyLocale}
+        schedule={schedule}
+        snapshot={scheduleSnapshot}
+      />
+    )
   }
 
   if (segments[0] === 'thi-truong' && segments[1]) {

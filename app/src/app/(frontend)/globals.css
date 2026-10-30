@@ -5057,3 +5057,45 @@ body h2.wingsgo-display {
     transform: none;
   }
 }
+
+
+/* US-093 WingsGo Departure Schedule v2 */
+.wingsgo-schedule {
+  --schedule-card-radius: 24px;
+}
+
+.wingsgo-schedule .hot-rainbow-card::before {
+  border-radius: calc(var(--schedule-card-radius) + 2px);
+}
+
+.wingsgo-schedule-bar {
+  min-height: 44px;
+  min-width: 32px;
+}
+
+@media (min-width: 640px) {
+  .wingsgo-schedule-bar {
+    min-width: 44px;
+  }
+}
+
+.wingsgo-schedule-bar:focus-visible,
+.wingsgo-schedule-market-card:focus-visible {
+  outline: 3px solid var(--site-brand);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.wingsgo-schedule-market-card:focus-visible {
+  border-radius: var(--schedule-card-radius);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wingsgo-schedule-market-card,
+  .wingsgo-schedule-market-card img,
+  .wingsgo-schedule-bar,
+  .wingsgo-schedule-bar-fill {
+    transition: none !important;
+    transform: none !important;
+  }
+}

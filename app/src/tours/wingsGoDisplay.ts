@@ -34,6 +34,20 @@ export const getDepartureCityCode = (city?: null | string): null | string => {
     .join(' / ')
 }
 
+/** Human-friendly city name in Vietnamese or English for well-known airport codes. */
+export const formatDepartureCityName = (
+  code?: null | string,
+  locale: DisplayLocale = 'vi',
+): null | string => {
+  if (!code) return null
+  const upper = code.trim().toUpperCase()
+  if (upper === 'HAN') return locale === 'en' ? 'Hanoi' : 'Hà Nội'
+  if (upper === 'SGN') return locale === 'en' ? 'Ho Chi Minh City' : 'TP. Hồ Chí Minh'
+  if (upper === 'DAD') return locale === 'en' ? 'Da Nang' : 'Đà Nẵng'
+  if (upper === 'HPH') return locale === 'en' ? 'Hai Phong' : 'Hải Phòng'
+  return code
+}
+
 /** "6N5Đ" in Vietnamese, "6D5N" in English. */
 export const getCompactDurationLabel = (
   days?: null | number,

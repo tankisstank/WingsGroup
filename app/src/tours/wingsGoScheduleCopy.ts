@@ -12,6 +12,25 @@ export interface WingsGoScheduleCopy {
   heroVerifiedLabel: (day: string) => string
   heroPeakMonth: (month: string) => string
 
+  // Month Chart
+  chartHeading: string
+  chartAriaLabel: string
+  chartMonthAria: (month: string, year: string, count: number) => string
+  chartPeakMonth: (month: string, year: string, count: number) => string
+  chartNoData: string
+
+  // Market Cards
+  marketSectionKicker: string
+  marketSectionTitle: string
+  marketCardDeparting: (date: string) => string
+  marketCardHotBadge: string
+  marketCardNoPrice: string
+  marketCardContactForPrice: string
+  marketCardDepartureCount: (count: number) => string
+  marketCardToursCount: (count: number) => string
+  imageComingSoon: (title: string) => string
+  imageComingSoonFallback: string
+
   // Availability
   statusOpen: string
   statusLimited: string
@@ -64,6 +83,24 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     heroVerifiedLabel: (day) => `Cập nhật ${day}`,
     heroPeakMonth: (month) => `Cao điểm: ${month}`,
 
+    chartHeading: 'Số đợt theo tháng',
+    chartAriaLabel: 'Lọc theo tháng khởi hành',
+    chartMonthAria: (month, year, count) => `Tháng ${month}/${year}: ${count} đợt`,
+    chartPeakMonth: (month, year, count) =>
+      `Cao điểm: Tháng ${month}/${year} (${count} đợt)`,
+    chartNoData: 'Không có đợt khớp bộ lọc',
+
+    marketSectionKicker: 'Thị trường chủ lực',
+    marketSectionTitle: 'Đợt nổi bật theo thị trường',
+    marketCardDeparting: (date) => `Khởi hành ${date}`,
+    marketCardHotBadge: 'Tour hot',
+    marketCardNoPrice: 'Chưa có giá',
+    marketCardContactForPrice: 'Liên hệ để nhận lịch và giá',
+    marketCardDepartureCount: (count) => `${count} đợt`,
+    marketCardToursCount: (count) => `${count} hành trình`,
+    imageComingSoon: (title) => `Ảnh đang cập nhật cho ${title}`,
+    imageComingSoonFallback: 'Ảnh tour đang cập nhật',
+
     statusOpen: 'Mở bán',
     statusLimited: 'Sắp hết chỗ',
     statusSoldOut: 'Đã kín',
@@ -109,6 +146,27 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     heroStatNearest: 'Nearest departure',
     heroVerifiedLabel: (day) => `Updated ${day}`,
     heroPeakMonth: (month) => `Peak: ${month}`,
+
+    chartHeading: 'Departures by month',
+    chartAriaLabel: 'Filter by departure month',
+    chartMonthAria: (month, year, count) =>
+      `${month} ${year}: ${count} ${count === 1 ? 'departure' : 'departures'}`,
+    chartPeakMonth: (month, year, count) =>
+      `Peak: ${month} ${year} (${count} ${count === 1 ? 'departure' : 'departures'})`,
+    chartNoData: 'No departures match filters',
+
+    marketSectionKicker: 'Key destinations',
+    marketSectionTitle: 'Featured departures by market',
+    marketCardDeparting: (date) => `Departing ${date}`,
+    marketCardHotBadge: 'Hot tour',
+    marketCardNoPrice: 'Price on request',
+    marketCardContactForPrice: 'Contact us for schedule and pricing',
+    marketCardDepartureCount: (count) =>
+      count === 1 ? '1 departure' : `${count} departures`,
+    marketCardToursCount: (count) =>
+      count === 1 ? '1 itinerary' : `${count} itineraries`,
+    imageComingSoon: (title) => `Image coming soon for ${title}`,
+    imageComingSoonFallback: 'Tour image coming soon',
 
     statusOpen: 'Open',
     statusLimited: 'Few seats left',
