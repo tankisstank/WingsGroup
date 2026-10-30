@@ -180,3 +180,5 @@ Người dùng phát hiện ba điểm lệch so với `wingsgo-tour-redesign-v2
 Giữ nguyên ràng buộc: không chip "Tour hot" (hot vẫn là viền cầu vồng), không số liệu bịa, giá qua `PromotionPrice` ở slot #1, sticker/promo theo US-084/US-083. Font tiêu đề Playfair Display (OFL) tự host trong `app/public/fonts/wingsgo/`.
 
 Kiểm tra: component 422/422, unit 1370/1371 (lỗi có sẵn `wingsGroupV3Shell`), tsc chỉ còn 2 lỗi có sẵn, eslint sạch; dev server 1440/390 không tràn ngang, không lỗi console.
+
+Release `release-us092-35d85d6` (2026-10-30 08:19 ICT): app image `sha256:47a23a4c…`, ops `sha256:a48dfffa…`, không migration. `previous` = `release-us092-cd58ca0`, rollback image `sha256:d787de72…` trong `rollback-compose.yml`. Readiness `ready`; wingsgo/wingside/wingsgroup trả 200; font `/fonts/wingsgo/*.woff2` 200; `/tour?market=japan` vẫn `noindex, follow` và ẩn mosaic. Ảnh production 1440/390: không tràn ngang, không lỗi console. `package-release.ps1` nay copy `app/public/fonts`.
