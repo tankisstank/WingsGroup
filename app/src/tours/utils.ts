@@ -1,7 +1,7 @@
 import { getCopyLocale, type CopyLocaleCode } from '@/utilities/locales'
 import { resolveSiteInquiryContactPath } from '@/utilities/siteContactPaths'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
-import { businessCalendarMonth } from './businessCalendar'
+import { businessCalendarMonth, daysUntilBusinessDay, toBusinessCalendarDay } from './businessCalendar'
 import { normalizeGovernedTourPrice } from './currency'
 import { appendTourEnquiryContextParams, type TourEnquiryContext } from './enquiryContext'
 import type { DepartureCardViewModel } from './types'
@@ -170,6 +170,36 @@ export const getSchedulePath = () => '/lich-khoi-hanh'
 /** Site-aware inquiry/contact path. Defaults to WingsGo `/lien-he`. */
 export const getContactPath = (siteCode?: null | string) => resolveSiteInquiryContactPath(siteCode)
 
+/**
+ * US-093 D3: canHoldSeat(departure, now) is true when:
+ * 1. commerceVerified === true
+ * 2. availabilityStatus !== 'sold-out'
+ * 3. daysUntilBusinessDay(departureDate, now) !== null && >= 0
+ * 4. normalizeGovernedTourPrice({ currency, value: priceFrom }) !== null
+ */
+export const canHoldSeat = (
+  departure?: {
+    commerceVerified?: boolean | null
+    availabilityStatus?: string | null
+    departureDate?: unknown
+    currency?: string | null
+    priceFrom?: number | null
+  } | null,
+  now: unknown = new Date(),
+): boolean => {
+  if (!departure) return false
+  if (departure.commerceVerified !== true) return false
+  if (departure.availabilityStatus === 'sold-out') return false
+  const daysUntil = daysUntilBusinessDay(departure.departureDate, now)
+  if (daysUntil === null || daysUntil < 0) return false
+  const governedPrice = normalizeGovernedTourPrice({
+    currency: departure.currency,
+    value: departure.priceFrom,
+  })
+  if (!governedPrice) return false
+  return true
+}
+
 export type TourInquiryIntent = 'hold-seat' | 'inquiry' | 'request-quote' | 'contact'
 
 export const getTourInquiryPath = ({
@@ -217,8 +247,9 @@ export const getTourInquiryPath = ({
   }
 
   if (departureDate) {
+    const vnDay = toBusinessCalendarDay(departureDate)
     const cleanDate =
-      typeof departureDate === 'string' ? departureDate.slice(0, 10) : departureDate
+      vnDay || (typeof departureDate === 'string' ? departureDate.slice(0, 10) : departureDate)
     params.set('departureDate', cleanDate)
   }
 
@@ -573,8 +604,16 @@ export const isDeparturePublishable = (
 export const getPriorityMarketDeparture = (
   departures: DepartureCardViewModel[],
   market: string,
-) =>
-  getFutureDepartures(departures)
+  now?: unknown,
+) => {
+  const future = now
+    ? departures.filter((departure) => {
+        const days = daysUntilBusinessDay(departure.departureDate, now)
+        return days !== null && days >= 0
+      })
+    : getFutureDepartures(departures)
+
+  return future
     .filter((departure) => {
       const product = departure.tourProduct
       return (
@@ -591,6 +630,7 @@ export const getPriorityMarketDeparture = (
       const rightDate = right.departureDate ? new Date(right.departureDate).getTime() : Infinity
       return limited || featured || leftDate - rightDate
     })[0]
+}
 
 export const filterDepartureVariants = <T extends { displayPriority?: null | number; status?: null | string }>(
   variants?: T[] | null,

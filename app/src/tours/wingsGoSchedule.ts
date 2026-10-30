@@ -13,8 +13,18 @@ import { normalizeGovernedTourPrice } from './currency'
 import { isDepartureVerificationCurrent } from './departureCommerce'
 import { normalizeEditorialBadges } from './editorialBadges'
 import { getWingsGoScheduleCopy } from './wingsGoScheduleCopy'
-import { getDepartureCityCode, getCompactDurationLabel, getTourRouteTitle } from './wingsGoDisplay'
-import { normalizeTourPublicText } from './utils'
+import {
+  getDepartureCityCode,
+  getCompactDurationLabel,
+  getTourRouteTitle,
+  normalizeScheduleAirline,
+} from './wingsGoDisplay'
+import {
+  canHoldSeat,
+  getPriorityMarketDeparture,
+  getTourInquiryPath,
+  normalizeTourPublicText,
+} from './utils'
 import { WINGSGO_MARKET_LABELS } from './wingsGoCatalogCopy'
 import { sanitizeWingSidePublicText } from './wingsSideTourViewModel'
 
@@ -86,10 +96,30 @@ export type ScheduleFilters = {
   market?: string
   month?: string
   airline?: string
-  status?: string
+  status?: ScheduleAvailability
   q?: string
-  sort?: 'date' | 'price'
-  view?: 'date' | 'tour'
+  sort: 'date' | 'price'
+  view: 'date' | 'tour'
+}
+
+export type ScheduleSnapshotFacts = {
+  validMarkets?: Iterable<string>
+  validMonths?: Iterable<string>
+  validAirlines?: Iterable<string>
+}
+
+export type ScheduleFacetCounts = {
+  months: Record<string, number>
+  markets: Record<string, number>
+  airlines: Record<string, number>
+  statuses: Record<ScheduleAvailability, number>
+}
+
+export type WingsGoScheduleTourGroup = {
+  tour: WingsGoScheduleTour
+  rows: WingsGoScheduleRow[]
+  priceFrom: ScheduleMoney | null
+  chosenRow: WingsGoScheduleRow | null
 }
 
 export type WingsGoScheduleSnapshot = {
@@ -106,7 +136,7 @@ export type WingsGoScheduleSnapshot = {
 }
 
 // ---------------------------------------------------------------------------
-// Pure helper functions (exported for F2)
+// Pure helper functions (exported for F2 and Phase 1B)
 // ---------------------------------------------------------------------------
 
 const tourDeparturesCollection = 'tour-departures' as never
@@ -114,14 +144,18 @@ const tourDeparturesCollection = 'tour-departures' as never
 export const asDoc = <T extends object>(value: T | number | string | null | undefined): T | null =>
   value && typeof value === 'object' ? value : null
 
-export const foldVietnamese = (value: string) =>
-  value
+export const foldVietnameseText = (value?: string | null): string => {
+  if (!value) return ''
+  return value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/đ/g, 'd')
-    .replace(/Đ/g, 'D')
+    .replace(/Đ/g, 'd')
     .toLowerCase()
     .trim()
+}
+
+export const foldVietnamese = foldVietnameseText
 
 /**
  * Derive schedule availability following the 5-step table in design.md (R2).
@@ -189,6 +223,286 @@ export const buildSearchText = (
 ): string => {
   const parts = [tourTitle, market, airlineLabel].filter(Boolean).join(' ')
   return foldVietnamese(parts)
+}
+
+/**
+ * US-093 D9: Parse and whitelist schedule filters from searchParams.
+ * Drops unknown parameters, arrays/repeated params, and invalid values.
+ * Defaults sort to 'date' and view to 'date'.
+ */
+export const parseScheduleFilters = (
+  searchParams?: Record<string, string | string[] | undefined> | null,
+  facts?: ScheduleSnapshotFacts | null,
+): ScheduleFilters => {
+  const result: ScheduleFilters = {
+    sort: 'date',
+    view: 'date',
+  }
+
+  if (!searchParams || typeof searchParams !== 'object') {
+    return result
+  }
+
+  const validMarkets = facts?.validMarkets ? new Set(facts.validMarkets) : null
+  const validMonths = facts?.validMonths ? new Set(facts.validMonths) : null
+  const validAirlines = facts?.validAirlines ? new Set(facts.validAirlines) : null
+
+  const getSingleString = (param: string): string | null => {
+    const val = searchParams[param]
+    if (typeof val === 'string') {
+      const trimmed = val.trim()
+      return trimmed.length > 0 ? trimmed : null
+    }
+    return null
+  }
+
+  // 1. market
+  const marketVal = getSingleString('market')
+  if (marketVal && (!validMarkets || validMarkets.has(marketVal))) {
+    result.market = marketVal
+  }
+
+  // 2. month (YYYY-MM)
+  const monthVal = getSingleString('month')
+  if (monthVal && /^\d{4}-\d{2}$/.test(monthVal) && (!validMonths || validMonths.has(monthVal))) {
+    result.month = monthVal
+  }
+
+  // 3. airline
+  const airlineVal = getSingleString('airline')
+  if (airlineVal && (!validAirlines || validAirlines.has(airlineVal))) {
+    result.airline = airlineVal
+  }
+
+  // 4. status
+  const statusVal = getSingleString('status')
+  if (statusVal && ['open', 'limited', 'sold-out', 'quote'].includes(statusVal)) {
+    result.status = statusVal as ScheduleAvailability
+  }
+
+  // 5. q (max 80 chars)
+  const qVal = getSingleString('q')
+  if (qVal) {
+    result.q = qVal.slice(0, 80)
+  }
+
+  // 6. sort
+  const sortVal = getSingleString('sort')
+  if (sortVal === 'price') {
+    result.sort = 'price'
+  }
+
+  // 7. view
+  const viewVal = getSingleString('view')
+  if (viewVal === 'tour') {
+    result.view = 'tour'
+  }
+
+  return result
+}
+
+/**
+ * Filter schedule rows by applying active filters with AND logic.
+ */
+export const filterScheduleRows = (
+  rows: WingsGoScheduleRow[],
+  filters: ScheduleFilters,
+  tours?: Record<string, WingsGoScheduleTour>,
+): WingsGoScheduleRow[] => {
+  const foldedQuery = filters.q ? foldVietnameseText(filters.q) : ''
+
+  return rows.filter((row) => {
+    if (filters.market) {
+      const tour = tours?.[row.tourId]
+      if (!tour || tour.market !== filters.market) return false
+    }
+
+    if (filters.month) {
+      if (row.monthKey !== filters.month) return false
+    }
+
+    if (filters.airline) {
+      if (row.airline?.key !== filters.airline) return false
+    }
+
+    if (filters.status) {
+      if (row.availability !== filters.status) return false
+    }
+
+    if (foldedQuery) {
+      if (!row.searchText.includes(foldedQuery)) {
+        const tour = tours?.[row.tourId]
+        const fallback = tour ? foldVietnameseText(`${tour.title} ${tour.market || ''}`) : ''
+        if (!fallback.includes(foldedQuery)) return false
+      }
+    }
+
+    return true
+  })
+}
+
+/**
+ * Count facets for each dimension, applying all active filters EXCEPT the dimension itself.
+ */
+export const countScheduleFacets = (
+  rows: WingsGoScheduleRow[],
+  activeFilters: ScheduleFilters,
+  tours?: Record<string, WingsGoScheduleTour>,
+): ScheduleFacetCounts => {
+  const counts: ScheduleFacetCounts = {
+    months: {},
+    markets: {},
+    airlines: {},
+    statuses: {
+      open: 0,
+      limited: 0,
+      'sold-out': 0,
+      quote: 0,
+    },
+  }
+
+  // 1. Months: all filters EXCEPT month
+  const rowsNoMonth = filterScheduleRows(rows, { ...activeFilters, month: undefined }, tours)
+  for (const r of rowsNoMonth) {
+    if (r.monthKey) counts.months[r.monthKey] = (counts.months[r.monthKey] || 0) + 1
+  }
+
+  // 2. Markets: all filters EXCEPT market
+  const rowsNoMarket = filterScheduleRows(rows, { ...activeFilters, market: undefined }, tours)
+  for (const r of rowsNoMarket) {
+    const tour = tours?.[r.tourId]
+    if (tour?.market) counts.markets[tour.market] = (counts.markets[tour.market] || 0) + 1
+  }
+
+  // 3. Airlines: all filters EXCEPT airline
+  const rowsNoAirline = filterScheduleRows(rows, { ...activeFilters, airline: undefined }, tours)
+  for (const r of rowsNoAirline) {
+    if (r.airline?.key) counts.airlines[r.airline.key] = (counts.airlines[r.airline.key] || 0) + 1
+  }
+
+  // 4. Statuses: all filters EXCEPT status
+  const rowsNoStatus = filterScheduleRows(rows, { ...activeFilters, status: undefined }, tours)
+  for (const r of rowsNoStatus) {
+    if (r.availability) {
+      counts.statuses[r.availability] = (counts.statuses[r.availability] || 0) + 1
+    }
+  }
+
+  return counts
+}
+
+/**
+ * Sort schedule rows:
+ * - date: departureDay asc, then id asc.
+ * - price: VND asc, then USD asc, then no price; within group: price.value asc, then departureDay asc, then id asc.
+ */
+export const sortScheduleRows = (
+  rows: WingsGoScheduleRow[],
+  sort: 'date' | 'price' = 'date',
+): WingsGoScheduleRow[] => {
+  const list = [...rows]
+  if (sort === 'date') {
+    return list.sort((a, b) => {
+      const dayCmp = a.departureDay.localeCompare(b.departureDay)
+      if (dayCmp !== 0) return dayCmp
+      return a.id.localeCompare(b.id)
+    })
+  }
+
+  const getPriceRank = (row: WingsGoScheduleRow): number => {
+    if (!row.price || row.price.value === null || row.price.value === undefined) return 3
+    if (row.price.currency === 'VND') return 0
+    if (row.price.currency === 'USD') return 1
+    return 2
+  }
+
+  return list.sort((a, b) => {
+    const rankA = getPriceRank(a)
+    const rankB = getPriceRank(b)
+    if (rankA !== rankB) return rankA - rankB
+
+    if (rankA < 3) {
+      const diff = a.price!.value - b.price!.value
+      if (diff !== 0) return diff
+    }
+
+    const dayCmp = a.departureDay.localeCompare(b.departureDay)
+    if (dayCmp !== 0) return dayCmp
+    return a.id.localeCompare(b.id)
+  })
+}
+
+/**
+ * Group schedule rows by tour. "Giá từ" only considers rows where canHoldSeat is true.
+ * Prioritizes VND over USD, preserves original and promo of the exact chosen row.
+ */
+export const groupScheduleRowsByTour = (
+  rows: WingsGoScheduleRow[],
+  tours: Record<string, WingsGoScheduleTour>,
+): WingsGoScheduleTourGroup[] => {
+  const groups = new Map<string, WingsGoScheduleRow[]>()
+
+  for (const row of rows) {
+    const list = groups.get(row.tourId)
+    if (list) {
+      list.push(row)
+    } else {
+      groups.set(row.tourId, [row])
+    }
+  }
+
+  const result: WingsGoScheduleTourGroup[] = []
+
+  for (const [tourId, tourRows] of groups.entries()) {
+    const tour = tours[tourId]
+    if (!tour) continue
+
+    tourRows.sort((a, b) => {
+      const d = a.departureDay.localeCompare(b.departureDay)
+      if (d !== 0) return d
+      return a.id.localeCompare(b.id)
+    })
+
+    const holdSeatRows = tourRows.filter((r) => r.canHoldSeat && r.price)
+
+    let chosenRow: WingsGoScheduleRow | null = null
+
+    const vndRows = holdSeatRows.filter((r) => r.price?.currency === 'VND')
+    if (vndRows.length > 0) {
+      vndRows.sort((a, b) => {
+        const pDiff = a.price!.value - b.price!.value
+        if (pDiff !== 0) return pDiff
+        return a.departureDay.localeCompare(b.departureDay)
+      })
+      chosenRow = vndRows[0]
+    } else {
+      const usdRows = holdSeatRows.filter((r) => r.price?.currency === 'USD')
+      if (usdRows.length > 0) {
+        usdRows.sort((a, b) => {
+          const pDiff = a.price!.value - b.price!.value
+          if (pDiff !== 0) return pDiff
+          return a.departureDay.localeCompare(b.departureDay)
+        })
+        chosenRow = usdRows[0]
+      } else if (holdSeatRows.length > 0) {
+        holdSeatRows.sort((a, b) => {
+          const pDiff = a.price!.value - b.price!.value
+          if (pDiff !== 0) return pDiff
+          return a.departureDay.localeCompare(b.departureDay)
+        })
+        chosenRow = holdSeatRows[0]
+      }
+    }
+
+    result.push({
+      tour,
+      rows: tourRows,
+      priceFrom: chosenRow?.price ?? null,
+      chosenRow,
+    })
+  }
+
+  return result
 }
 
 /**
@@ -319,23 +633,29 @@ export const buildScheduleRow = ({
         }
       : null
 
-  const canHoldSeat =
-    commerceVerified === true &&
-    doc.availabilityStatus !== 'sold-out' &&
-    daysUntil >= 0 &&
-    governed !== null
+  const canHoldSeatValue = canHoldSeat(
+    {
+      commerceVerified,
+      availabilityStatus: doc.availabilityStatus,
+      departureDate: doc.departureDate,
+      currency: doc.currency,
+      priceFrom: doc.priceFrom,
+    },
+    now,
+  )
 
-  const ctaLabel = doc.ctaLabelOverride || (canHoldSeat ? copy.ctaHoldSeat : copy.ctaRequestQuote)
-  const ctaHref = `/lien-he?intent=${canHoldSeat ? 'hold-seat' : 'inquiry'}&tour=${tour.slug}&tourId=${tour.id}&departureId=${doc.id}&departureDate=${departureDay}&source=schedule`
+  const ctaLabel = doc.ctaLabelOverride || (canHoldSeatValue ? copy.ctaHoldSeat : copy.ctaRequestQuote)
+  const ctaHref = getTourInquiryPath({
+    intent: canHoldSeatValue ? 'hold-seat' : 'inquiry',
+    tourSlug: tour.slug,
+    tourId: tour.id,
+    departureId: doc.id,
+    departureDate: departureDay,
+    source: 'schedule',
+  })
 
   const departureCityCode = getDepartureCityCode(doc.departureCity)
-
-  let airlineEntry: { key: string; label: string } | null = null
-  if (doc.airline && typeof doc.airline === 'string' && doc.airline.trim()) {
-    const label = doc.airline.trim()
-    const key = `raw:${label.toLowerCase()}`
-    airlineEntry = { key, label }
-  }
+  const airlineEntry = normalizeScheduleAirline(doc.airline)
 
   const promoLabel = canPromote ? doc.promoLabel || null : null
   const urgencyLabel = commerceVerified ? doc.urgencyLabel || null : null
@@ -355,7 +675,7 @@ export const buildScheduleRow = ({
     price,
     promoLabel,
     urgencyLabel,
-    canHoldSeat,
+    canHoldSeat: canHoldSeatValue,
     ctaLabel,
     ctaHref,
     isFeatured: Boolean(doc.isFeatured),
@@ -449,7 +769,7 @@ export const getWingsGoScheduleSnapshot = async ({
         sharedDepartureCity: null,
         verifiedDay: null,
       },
-      initialFilters: {},
+      initialFilters: { sort: 'date', view: 'date' },
     }
   }
 
@@ -691,9 +1011,48 @@ export const getWingsGoScheduleSnapshot = async ({
   // F2: Compute schedule stats
   const stats = computeScheduleStats(rows, toursMap, maxVerifiedAt)
 
-  // Phase 1A: marketCards and initialFilters are placeholders
+  // Snapshot pre-filters canHoldSeat departures before populating marketCards (max 3)
+  const canHoldSeatRowIds = new Set(rows.filter((r) => r.canHoldSeat).map((r) => r.id))
+  const canHoldSeatDocs = allDocs.filter((doc) => canHoldSeatRowIds.has(String(doc.id)))
+
   const marketCards: WingsGoScheduleMarketCard[] = []
-  const initialFilters: ScheduleFilters = {}
+  for (const market of markets) {
+    const marketRows = rows.filter((r) => {
+      const tour = toursMap[r.tourId]
+      return tour?.market === market.value
+    })
+    const departureCount = marketRows.length
+    if (departureCount === 0) continue
+
+    const marketDocs = canHoldSeatDocs.filter((doc) => {
+      const tour = doc.tourProduct && typeof doc.tourProduct === 'object' ? doc.tourProduct : null
+      return tour?.market === market.value
+    })
+
+    const priorityDep = getPriorityMarketDeparture(marketDocs as any, market.value, now)
+    if (priorityDep) {
+      marketCards.push({
+        market: market.value,
+        label: market.label,
+        rowId: String(priorityDep.id),
+        tourId: String(
+          priorityDep.tourProduct && typeof priorityDep.tourProduct === 'object'
+            ? priorityDep.tourProduct.id
+            : priorityDep.tourProduct,
+        ),
+        departureCount,
+      })
+      if (marketCards.length >= 3) break
+    }
+  }
+
+  // Initial filters parsed from URL searchParams
+  const snapshotFacts: ScheduleSnapshotFacts = {
+    validMarkets: markets.map((m) => m.value),
+    validMonths: months,
+    validAirlines: airlines.map((a) => a.key),
+  }
+  const initialFilters = parseScheduleFilters(searchParams, snapshotFacts)
 
   return {
     locale: locale === 'en' ? 'en' : 'vi',

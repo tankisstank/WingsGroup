@@ -87,12 +87,165 @@ export const getShortDepartureDate = (value: unknown): null | string => {
   return `${day}/${month}`
 }
 
+export type NormalizedScheduleAirline = {
+  key: string
+  label: string
+}
+
+const KNOWN_AIRLINES: Array<{
+  key: string
+  label: string
+  codePattern: RegExp
+  namePattern: RegExp
+}> = [
+  {
+    key: 'VN',
+    label: 'Vietnam Airlines',
+    codePattern: /\b(VN|VNA)\b/i,
+    namePattern: /\bvietnam\s+airlines?\b/i,
+  },
+  {
+    key: 'VJ',
+    label: 'Vietjet Air',
+    codePattern: /\bVJ\b/i,
+    namePattern: /\bvietjet(\s+air)?\b/i,
+  },
+  {
+    key: 'CA',
+    label: 'Air China',
+    codePattern: /\bCA\b/i,
+    namePattern: /\bair\s+china\b/i,
+  },
+  {
+    key: 'EK',
+    label: 'Emirates',
+    codePattern: /\bEK\b/i,
+    namePattern: /\bemirates\b/i,
+  },
+  {
+    key: 'WE',
+    label: 'Parata Air',
+    codePattern: /\bWE\b/i,
+    namePattern: /\bparata\s+air\b/i,
+  },
+  {
+    key: 'VU',
+    label: 'Vietravel Airlines',
+    codePattern: /\bVU\b/i,
+    namePattern: /\bviett?ravel\s+airlines?\b/i,
+  },
+  {
+    key: '9G',
+    label: 'Sun PhuQuoc Airways',
+    codePattern: /\b9G\b/i,
+    namePattern: /\bsun\s+phu\s*quoc\s+airways\b/i,
+  },
+  {
+    key: '7C',
+    label: 'Jeju Air',
+    codePattern: /\b7C\b/i,
+    namePattern: /\bjeju\s+air\b/i,
+  },
+  {
+    key: 'NH',
+    label: 'All Nippon Airways',
+    codePattern: /\bNH\b/i,
+    namePattern: /\ball\s+nippon\s+airways\b/i,
+  },
+  {
+    key: 'TK',
+    label: 'Turkish Airlines',
+    codePattern: /\bTK\b/i,
+    namePattern: /\bturkish\s+airlines\b/i,
+  },
+  {
+    key: 'FD',
+    label: 'Thai AirAsia',
+    codePattern: /\bFD\b/i,
+    namePattern: /\bthai\s+airasia\b/i,
+  },
+]
+
+/**
+ * US-093 D10: Normalizes an airline string against the 11 known airlines from phase 0 baseline.
+ * Returns null if the string is empty or contains only quotes/whitespace.
+ * If unrecognized or matches multiple airlines, keeps raw cleaned string with key `raw:<string>`.
+ */
+export const normalizeScheduleAirline = (
+  raw?: unknown,
+): NormalizedScheduleAirline | null => {
+  if (raw == null || typeof raw !== 'string') return null
+
+  // NFKC normalize
+  let cleaned = raw.normalize('NFKC')
+
+  // Strip leading and trailing quotes and whitespace
+  cleaned = cleaned.replace(/^[\s"“”'‘’]+|[\s"“”'‘’]+$/g, '').trim()
+  if (!cleaned) return null
+
+  // Collapse internal whitespace
+  cleaned = cleaned.replace(/\s+/g, ' ')
+
+  const matched: Array<{ key: string; label: string }> = []
+  for (const airline of KNOWN_AIRLINES) {
+    if (airline.codePattern.test(cleaned) || airline.namePattern.test(cleaned)) {
+      matched.push({ key: airline.key, label: airline.label })
+    }
+  }
+
+  if (matched.length === 1) {
+    return matched[0]
+  }
+
+  // 0 matches or multiple matches: preserve raw cleaned string
+  return {
+    key: `raw:${cleaned.toLowerCase()}`,
+    label: cleaned,
+  }
+}
+
 const isUpperCaseText = (value: string) =>
   value === value.toLocaleUpperCase('vi') && value !== value.toLocaleLowerCase('vi')
 
+const ACRONYM_ALLOWLIST = new Set([
+  'UNESCO',
+  'VN',
+  'VNA',
+  'VJ',
+  'CA',
+  'EK',
+  'WE',
+  'VU',
+  '9G',
+  '7C',
+  'NH',
+  'TK',
+  'FD',
+])
+
 const toTitleCaseWord = (word: string) => {
-  // Keep short ASCII acronyms such as VNA or VJ.
-  if (/^[A-Z0-9]{2,3}$/.test(word)) return word
+  // Duration code like 5N4Đ or 5N4D (or 6N5Đ, etc.) -> keep standard uppercase
+  const durationMatch = word.match(/^(\d+)[Nn](\d+)([ĐđDd])$/)
+  if (durationMatch) {
+    const [, n1, n2, dayChar] = durationMatch
+    const dUpper = dayChar.toLowerCase() === 'đ' ? 'Đ' : 'D'
+    return `${n1}N${n2}${dUpper}`
+  }
+
+  // Single duration code like 5N or 5D
+  const singleDurationMatch = word.match(/^(\d+)([NnDdĐđ])$/)
+  if (singleDurationMatch) {
+    const [, n, char] = singleDurationMatch
+    const charUpper = char.toLowerCase() === 'đ' ? 'Đ' : char.toUpperCase()
+    return `${n}${charUpper}`
+  }
+
+  // Check allowlist for acronyms (stripping trailing/leading punctuation like , . : ( ))
+  const cleanWord = word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '').toUpperCase()
+  if (ACRONYM_ALLOWLIST.has(cleanWord)) {
+    return word.toUpperCase()
+  }
+
   const lower = word.toLocaleLowerCase('vi')
   return lower.charAt(0).toLocaleUpperCase('vi') + lower.slice(1)
 }

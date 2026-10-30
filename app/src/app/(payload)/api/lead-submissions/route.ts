@@ -52,9 +52,11 @@ const relationID = (value: unknown): number | string | null => {
   return typeof id === 'number' || typeof id === 'string' ? id : null
 }
 
+import { toBusinessCalendarDay } from '@/tours/businessCalendar'
+
 type PayloadClient = Awaited<ReturnType<typeof getPayload>>
 
-const resolveDepartureLeadContext = async ({
+export const resolveDepartureLeadContext = async ({
   context,
   payload,
   siteID,
@@ -92,18 +94,30 @@ const resolveDepartureLeadContext = async ({
       return null
     }
 
-    const departureDate = String(departure.departureDate || '').slice(0, 10)
+    // US-093 D6:
+    // 1. Calculate Vietnam business day from departureDate
+    const vnDay = toBusinessCalendarDay(departure.departureDate)
+    if (!vnDay || !/^\d{4}-\d{2}-\d{2}$/.test(vnDay)) {
+      return null
+    }
+
+    // 2. Calculate legacy UTC date string
+    const oldUtcDay = String(departure.departureDate || '').slice(0, 10)
+
+    // 3. If context.departureDate is provided, it must match either vnDay or oldUtcDay
     if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(departureDate) ||
-      (context.departureDate && context.departureDate !== departureDate) ||
+      (context.departureDate &&
+        context.departureDate !== vnDay &&
+        context.departureDate !== oldUtcDay) ||
       (context.tourId && context.tourId !== String(tour.id)) ||
       (context.tourSlug && context.tourSlug !== tour.slug)
     ) {
       return null
     }
 
+    // 4. Stored departureDate is always the Vietnam calendar day
     return {
-      departureDate,
+      departureDate: vnDay,
       departureId: String(departure.id),
       discovery: context.discovery,
       intent: context.intent,

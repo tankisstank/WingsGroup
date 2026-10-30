@@ -32,6 +32,7 @@ import type {
 } from './types'
 import {
   formatTourDate,
+  canHoldSeat as canHoldSeatDeparture,
   formatTourPrice,
   getAvailabilityLabel,
   getContactPath,
@@ -3509,12 +3510,7 @@ const DepartureStrip = ({
     <div className="grid gap-4 lg:grid-cols-3">
       {items.map((departure) => {
         const product = asDoc<Record<string, any>>(departure.tourProduct)
-        const canHoldSeat = Boolean(
-          departure.commerceVerified &&
-          departure.availabilityStatus !== 'sold-out' &&
-          getFutureDepartures([departure]).length > 0 &&
-          normalizeGovernedTourPrice({ currency: departure.currency, value: departure.priceFrom }),
-        )
+        const canHoldSeat = canHoldSeatDeparture(departure)
 
         return (
           <article
