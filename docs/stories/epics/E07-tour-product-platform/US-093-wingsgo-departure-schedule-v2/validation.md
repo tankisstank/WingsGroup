@@ -140,7 +140,25 @@ Kết luận: **chấp nhận Phase 1**.
   - cột biểu đồ quá nhạt;
   - số liệu hero hard-code font family.
 
-### Review Phase 3 / Release
+### Phase 3 — Review của orchestrator (2026-10-30)
+
+- **Commit `e018547`.** Orchestrator tự chạy lại: component phase 2 + 3 → 31/31; unit metadata + boundary → 13/13; tsc → 2 lỗi baseline.
+- **Theo agy:** curl SSR `/lich-khoi-hanh` có 39 đợt, không có thẻ robots; `?market=korea` có 18 đợt và `noindex, follow`; `/en/...?airline=VJ` có `noindex, follow`. Build exit 0.
+- WingsGo không còn gọi `getResolvedScheduleData` cho trang lịch.
+- agy chép trùng ảnh ra `artifacts/phase3/` ở gốc repo; orchestrator đã xoá (`9813eba`).
+- **Chấp nhận.** Ba điểm P3 giao sang Phase 4: năm lặp ở tiêu đề tháng; số trên chip "Tất cả"; URL chỉ dùng `replaceState`.
+- Codex review Phase 2–3 đang trong hàng đợi, chờ quota reset lúc 23:59.
+
+### Phase 4 — Review của orchestrator (2026-10-30)
+
+- **Commit `6692f8c`.** Orchestrator tự chạy lại: component phase 2–4 → 44/44; tsc → 2 lỗi baseline.
+- **Ảnh** trong `artifacts/phase4/`: Theo hành trình có viền cầu vồng trên thẻ tour hot, sticker, chip ngày, "Giá từ"; khối "Trước khi giữ chỗ" có hotline và Zalo OA lấy từ cấu hình.
+- **Finding, sẽ giao cùng kết quả Codex review Phase 3:**
+  - P2: chưa component nào dùng `tour.routeTitle` (`getTourRouteTitle`), nên tên dạng "TOUR HÀN QUỐC 5N4Đ: …" hiện nguyên chữ hoa (handoff mục 3.11). `WingsGoScheduleRow` còn fallback sang `row.searchText`.
+  - P3: ảnh lỗi chỉ hiện chữ alt, chưa chuyển sang ảnh fallback.
+- Ảnh vỡ là vấn đề dữ liệu local: `public/media` của worktree có 30 file, repo chính có 17.693 file. Phase 5 phải liên kết media trước khi chụp.
+
+### Review Phase 5 / Release
 
 Chưa chạy.
 
