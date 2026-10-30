@@ -73,6 +73,11 @@ const queryCollection = async ({
   limit = 20,
   locale,
   fallbackLocale = locale === 'en' ? false : 'vi',
+  page,
+  pagination = false,
+  populate,
+  select,
+  sort,
   where,
 }: {
   collection: never
@@ -81,6 +86,11 @@ const queryCollection = async ({
   fallbackLocale?: SupportedLocaleCode | false
   limit?: number
   locale?: SupportedLocaleCode
+  page?: number
+  pagination?: boolean
+  populate?: Record<string, unknown>
+  select?: Record<string, unknown>
+  sort?: string | string[]
   where: Record<string, unknown>
 }): Promise<any> => {
   const payload = await getPayload({ config: configPromise })
@@ -94,16 +104,22 @@ const queryCollection = async ({
     limit,
     locale,
     overrideAccess: draft,
-    pagination: false,
+    pagination,
     where: scopedWhere,
-  })
+    ...(page !== undefined && { page }),
+    ...(populate && { populate }),
+    ...(select && { select }),
+    ...(sort && { sort }),
+  } as any)
 }
+
 
 const asDoc = <T extends object>(value: T | number | string | null | undefined): T | null =>
   value && typeof value === 'object' ? value : null
 
 const normalizeTourProductCard = (
   tour: Record<string, any> | number | string | null | undefined,
+  locale?: SupportedLocaleCode,
 ) => {
   const doc = asDoc<Record<string, any>>(tour)
 
@@ -111,9 +127,16 @@ const normalizeTourProductCard = (
     return tour || null
   }
 
+  const { editorialBadges, hasHotEditorialBadge } = normalizeEditorialBadges(
+    doc.editorialBadges,
+    locale,
+  )
+
   return {
     durationDays: doc.durationDays,
     durationNights: doc.durationNights,
+    editorialBadges,
+    hasHot: hasHotEditorialBadge,
     heroMedia: doc.heroMedia,
     id: doc.id,
     market: doc.market,
@@ -211,7 +234,7 @@ export const selectRelatedTourCards = ({
   configured.length > 0
     ? configured.slice(0, 3)
     : rankRelatedTourFallbacks(source, candidates)
-        .map(normalizeTourProductCard)
+        .map((item) => normalizeTourProductCard(item))
         .filter(Boolean)
         .slice(0, 3)
 
@@ -240,13 +263,14 @@ const normalizeVariantCard = (
 const normalizeDepartureCard = (
   departure: Record<string, any>,
   draft = false,
+  now?: Date,
 ): DepartureCardViewModel => {
   const hasFreshnessGovernance = Boolean(departure.verifiedAt || departure.expiresAt)
   const commerceVerified =
     draft ||
     ((departure.commerceVerified === undefined || departure.commerceVerified === true) &&
       (hasFreshnessGovernance
-        ? isDepartureVerificationCurrent(departure)
+        ? isDepartureVerificationCurrent(departure, now?.getTime())
         : departure.commerceVerified === true))
   const canPromote =
     commerceVerified &&

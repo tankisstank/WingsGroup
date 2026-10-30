@@ -505,7 +505,10 @@ export const getLowestPrice = (departures?: Array<{ priceFrom?: null | number }>
   const values =
     departures
       ?.map((departure) => departure.priceFrom)
-      .filter((value): value is number => typeof value === 'number') || []
+      .filter(
+        (value): value is number =>
+          typeof value === 'number' && Number.isFinite(value) && value > 0,
+      ) || []
 
   if (values.length === 0) {
     return null
