@@ -7,7 +7,7 @@ import type {
   WingsGoScheduleMarketCard,
   WingsGoScheduleRow,
   WingsGoScheduleTour,
-} from './wingsGoSchedule'
+} from './wingsGoScheduleModel'
 import { getWingsGoScheduleCopy } from './wingsGoScheduleCopy'
 import { formatShortTourPrice } from './wingsGoDisplay'
 import { PromotionBadge } from './PromotionPrice'

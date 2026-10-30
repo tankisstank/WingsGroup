@@ -10,7 +10,7 @@ import { SiteLink } from '@/components/SiteLink'
 import type { Media as MediaType } from '@/payload-types'
 import type { Form as FormType } from '@payloadcms/plugin-form-builder/types'
 
-import type { WingsGoScheduleSnapshot } from './wingsGoSchedule'
+import type { WingsGoScheduleSnapshot } from './wingsGoScheduleModel'
 import { WingsGoScheduleHero } from './WingsGoScheduleHero'
 import { WingsGoScheduleMonthChart } from './WingsGoScheduleMonthChart'
 import { WingsGoScheduleMarketCards } from './WingsGoScheduleMarketCards'

@@ -115,3 +115,34 @@ Visual verification được thực hiện trực tiếp trên dev server local 
    - Trong Phase 2, `onSelect` của `MonthChart` và `MarketCards` đã được thiết kế sẵn sàng nhận callback, nhưng chưa gắn với URL query parameters và bảng lịch khởi hành chi tiết bên dưới. Phase 3 sẽ kết nối `onSelect(month)` và `onSelect(market)` để lọc danh sách kết hợp cuộn tự động qua `scrollToScheduleList`.
 2. **Thay thế bảng lịch cũ:**
    - Bảng lịch khởi hành cũ tạm thời được giữ ở phía dưới để không làm gãy trải nghiệm người dùng hiện tại; Phase 3 sẽ thay thế bằng bảng lịch v2 hoàn chỉnh (desktop table + mobile card list).
+
+---
+
+## 7. Vòng sửa K1–K3 (Codex Review 1B Remediation)
+
+Thực hiện theo brief `phase1b-codex-fix-brief.md` giải quyết triệt để 2 P2 và 1 P3 từ biên bản `docs/consultations/2026-10-30-us093-phase1b-codex-review.md`:
+
+### 7.1 K1 (P2) — Tách module thuần client-safe `wingsGoScheduleModel.ts`
+- Tạo mới file `app/src/tours/wingsGoScheduleModel.ts`: hoàn toàn độc lập, không import bất kỳ package server-only nào (`payload`, `@payload-config`, `siteContext`, `next/*`).
+- Chứa toàn bộ DTO types (`WingsGoScheduleRow`, `WingsGoScheduleTour`, `WingsGoScheduleSnapshot`, `ScheduleFilters`, `ScheduleFacetCounts`, `WingsGoScheduleTourGroup`,...) và pure helpers (`foldVietnameseText`, `parseScheduleFilters`, `filterScheduleRows`, `countScheduleFacets`, `sortScheduleRows`, `groupScheduleRowsByTour`, `compareScheduleIds`, `buildScheduleMonths`, `generateMonthRange`, `deriveScheduleAvailability`, `buildSearchText`, `getScheduleMarketLabel`).
+- `wingsGoSchedule.ts` import và re-export toàn bộ từ `wingsGoScheduleModel.ts` (`export * from './wingsGoScheduleModel'`) để tương thích ngược hoàn toàn.
+- Cập nhật các component client (`WingsGoScheduleMarketCards.tsx`, `StructuredPages.tsx`) chỉ import type từ `wingsGoScheduleModel.ts`.
+- Bổ sung unit test ranh giới kiến trúc tại `app/tests/unit/wingsGoScheduleModelBoundary.unit.spec.ts` kiểm tra tĩnh file `wingsGoScheduleModel.ts` không chứa import server.
+
+### 7.2 K2 (P2) — Tìm kiếm theo nhãn thị trường (VI và EN)
+- Trong `buildScheduleRow`, nhãn thị trường hiển thị (`marketLabel`) theo locale (`resolvedLocale`) được sinh ra và đưa vào `searchText` bên cạnh enum market (e.g. `japan nhat ban` / `japan japan`; `other` dùng `copy.marketOther`).
+- Cải tiến fallback trong `filterScheduleRows`: kiểm tra song song nhãn thị trường tiếng Việt và tiếng Anh, giúp `q=Nhật Bản`, `q=nhat ban` (VI) và `q=Japan` (EN) đều khớp row của tour Osaka - Kyoto (market `japan`), và `q=thi truong khac` / `q=other destinations` khớp tour thị trường `other`.
+- Bổ sung test kiểm tra `countScheduleFacets` tính toán đúng khi `q` đang hoạt động.
+
+### 7.3 K3 (P3) — Bổ sung test CTA và ranh giới hết hạn verification
+- Bổ sung test case trong `app/tests/unit/wingsGoScheduleSnapshot.unit.spec.ts`:
+  - Đợt có giá hợp lệ nhưng verification hết hạn đúng tại thời điểm `now` (`expiresAt === now`): `availability === 'quote'`, `price === null`, `canHoldSeat === false`, `intent === 'inquiry'`.
+  - Đợt quote và đợt sold-out có `ctaLabelOverride`: chỉ nhãn CTA thay đổi theo override, `intent` vẫn duy trì là `'inquiry'`.
+
+### 7.4 Kết quả kiểm tra vòng sửa K1–K3
+- **Unit tests:** 23/23 tests passed (`wingsGoScheduleModelBoundary.unit.spec.ts`, `wingsGoScheduleSnapshot.unit.spec.ts`), 7/7 tests passed (`wingsGoScheduleSnapshotMocked.unit.spec.ts`).
+- **Component tests:** 17/17 tests passed (`wingsGoSchedulePhase2.component.spec.tsx`), toàn bộ 64 test suites (439 tests) passed.
+- **Integration tests:** `wingsGoScheduleIntegration.int.spec.ts` (5 passed), `wingsGoLeadCompatibility.int.spec.ts` (9 passed).
+- **TypeScript & ESLint:** `tsc --noEmit` chỉ còn 2 lỗi baseline pre-existing, ESLint passed với 0 errors.
+- **Build:** `pnpm run build` thành công (exit code 0).
+

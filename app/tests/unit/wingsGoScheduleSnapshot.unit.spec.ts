@@ -19,9 +19,12 @@ import {
   buildScheduleMonths,
   buildScheduleRow,
   computeScheduleStats,
+  countScheduleFacets,
   deriveScheduleAvailability,
   extractTourMedia,
+  filterScheduleRows,
   type WingsGoScheduleRow,
+  type WingsGoScheduleTour,
 } from '@/tours/wingsGoSchedule'
 
 describe('US-093 Phase 1A - Date boundary and Vietnam Business Calendar', () => {
@@ -475,5 +478,204 @@ describe('US-093 Phase 1A - F5 Locale propagation to normalizeTourProductCard', 
     const cardVi = normalizeDepartureCard(rawDeparture, false, undefined, 'vi')
     const badgesVi = (cardVi.tourProduct as any)?.editorialBadges || []
     expect(badgesVi.length).toBe(2)
+  })
+})
+
+describe('US-093 K2 - Search by Market Label', () => {
+  const copyVi = getWingsGoScheduleCopy('vi')
+  const copyEn = getWingsGoScheduleCopy('en')
+
+  const tourJapan: WingsGoScheduleTour = {
+    id: 't-japan',
+    slug: 'osaka-kyoto',
+    href: '/tour/osaka-kyoto',
+    title: 'Osaka - Kyoto',
+    routeTitle: 'Osaka - Kyoto',
+    market: 'japan',
+    durationLabel: '5N4D',
+    media: null,
+    badges: [],
+    hasHot: false,
+  }
+
+  const tourOther: WingsGoScheduleTour = {
+    id: 't-other',
+    slug: 'nam-cuc-tour',
+    href: '/tour/nam-cuc-tour',
+    title: 'Nam Cực Huyền Bí',
+    routeTitle: 'Nam Cực Huyền Bí',
+    market: 'other',
+    durationLabel: '10N9D',
+    media: null,
+    badges: [],
+    hasHot: false,
+  }
+
+  const baseDocJapan = {
+    id: 'dep-jp-1',
+    departureDate: '2027-06-15T00:00:00.000Z',
+    commerceVerified: true,
+    availabilityStatus: 'open',
+    priceFrom: 35000000,
+    currency: 'VND',
+    departureCity: 'HAN',
+  }
+
+  const baseDocOther = {
+    id: 'dep-other-1',
+    departureDate: '2027-07-20T00:00:00.000Z',
+    commerceVerified: true,
+    availabilityStatus: 'open',
+    priceFrom: 150000000,
+    currency: 'VND',
+    departureCity: 'SGN',
+  }
+
+  it('matches row when searching market label in VI ("Nhật Bản", "nhat ban") and EN ("Japan")', () => {
+    const rowVi = buildScheduleRow({
+      doc: baseDocJapan,
+      tour: tourJapan,
+      copy: copyVi,
+      locale: 'vi',
+    })!
+    const rowEn = buildScheduleRow({
+      doc: baseDocJapan,
+      tour: tourJapan,
+      copy: copyEn,
+      locale: 'en',
+    })!
+
+    const tours = { 't-japan': tourJapan }
+
+    // VI row matches 'Nhật Bản' and 'nhat ban'
+    expect(filterScheduleRows([rowVi], { q: 'Nhật Bản', sort: 'date', view: 'date' }, tours)).toHaveLength(1)
+    expect(filterScheduleRows([rowVi], { q: 'nhat ban', sort: 'date', view: 'date' }, tours)).toHaveLength(1)
+    expect(filterScheduleRows([rowVi], { q: 'Japan', sort: 'date', view: 'date' }, tours)).toHaveLength(1)
+
+    // EN row matches 'Japan', 'Nhật Bản' and 'nhat ban'
+    expect(filterScheduleRows([rowEn], { q: 'Japan', sort: 'date', view: 'date' }, tours)).toHaveLength(1)
+    expect(filterScheduleRows([rowEn], { q: 'Nhật Bản', sort: 'date', view: 'date' }, tours)).toHaveLength(1)
+    expect(filterScheduleRows([rowEn], { q: 'nhat ban', sort: 'date', view: 'date' }, tours)).toHaveLength(1)
+  })
+
+  it('matches tour with other market when q="thi truong khac"', () => {
+    const rowOther = buildScheduleRow({
+      doc: baseDocOther,
+      tour: tourOther,
+      copy: copyVi,
+      locale: 'vi',
+    })!
+    const tours = { 't-other': tourOther }
+
+    expect(filterScheduleRows([rowOther], { q: 'thi truong khac', sort: 'date', view: 'date' }, tours)).toHaveLength(1)
+    expect(filterScheduleRows([rowOther], { q: 'Thị trường khác', sort: 'date', view: 'date' }, tours)).toHaveLength(1)
+    expect(filterScheduleRows([rowOther], { q: 'other destinations', sort: 'date', view: 'date' }, tours)).toHaveLength(1)
+  })
+
+  it('computes facet counts correctly when q filter is active', () => {
+    const rowJp = buildScheduleRow({
+      doc: baseDocJapan,
+      tour: tourJapan,
+      copy: copyVi,
+      locale: 'vi',
+    })!
+    const rowOth = buildScheduleRow({
+      doc: baseDocOther,
+      tour: tourOther,
+      copy: copyVi,
+      locale: 'vi',
+    })!
+
+    const rows = [rowJp, rowOth]
+    const tours = { 't-japan': tourJapan, 't-other': tourOther }
+
+    // When searching 'nhat ban', only japan matches
+    const facets = countScheduleFacets(rows, { q: 'nhat ban', sort: 'date', view: 'date' }, tours)
+    expect(facets.markets['japan']).toBe(1)
+    expect(facets.markets['other']).toBeUndefined()
+    expect(facets.statuses.open).toBe(1)
+  })
+})
+
+describe('US-093 K3 - CTA and Verification Expiry Boundary of buildScheduleRow', () => {
+  const copy = getWingsGoScheduleCopy('vi')
+  const tour = {
+    id: 't-1',
+    slug: 'vietnam-heritage',
+    title: 'Hành trình Di sản',
+    market: 'vietnam',
+  }
+
+  it('sets availability=quote, price=null, canHoldSeat=false, and intent=inquiry when verification expires exactly at now', () => {
+    const now = new Date('2027-05-10T12:00:00.000Z')
+    const expiredDoc = {
+      id: 'dep-exp-1',
+      departureDate: '2027-06-01T00:00:00.000Z',
+      commerceVerified: true,
+      verifiedAt: '2027-05-01T00:00:00.000Z',
+      expiresAt: '2027-05-10T12:00:00.000Z', // exactly equals now
+      availabilityStatus: 'open',
+      priceFrom: 15000000,
+      currency: 'VND',
+    }
+
+    const row = buildScheduleRow({
+      doc: expiredDoc,
+      tour,
+      now,
+      copy,
+      draft: false,
+    })!
+
+    expect(row).not.toBeNull()
+    expect(row.availability).toBe('quote')
+    expect(row.price).toBeNull()
+    expect(row.canHoldSeat).toBe(false)
+    expect(row.ctaHref).toContain('intent=inquiry')
+    expect(row.ctaLabel).toBe(copy.ctaRequestQuote)
+  })
+
+  it('retains intent=inquiry when ctaLabelOverride is present on quote and sold-out departures', () => {
+    const now = new Date('2027-05-10T00:00:00.000Z')
+
+    // 1. Quote with override
+    const quoteDoc = {
+      id: 'dep-quote-1',
+      departureDate: '2027-06-01T00:00:00.000Z',
+      commerceVerified: true,
+      priceFrom: null, // quote
+      ctaLabelOverride: 'Tư vấn ngay',
+    }
+    const rowQuote = buildScheduleRow({
+      doc: quoteDoc,
+      tour,
+      now,
+      copy,
+    })!
+    expect(rowQuote.availability).toBe('quote')
+    expect(rowQuote.canHoldSeat).toBe(false)
+    expect(rowQuote.ctaLabel).toBe('Tư vấn ngay')
+    expect(rowQuote.ctaHref).toContain('intent=inquiry')
+
+    // 2. Sold-out with override
+    const soldOutDoc = {
+      id: 'dep-soldout-1',
+      departureDate: '2027-06-01T00:00:00.000Z',
+      commerceVerified: true,
+      availabilityStatus: 'sold-out',
+      priceFrom: 12000000,
+      currency: 'VND',
+      ctaLabelOverride: 'Hết chỗ vui lòng gọi',
+    }
+    const rowSoldOut = buildScheduleRow({
+      doc: soldOutDoc,
+      tour,
+      now,
+      copy,
+    })!
+    expect(rowSoldOut.availability).toBe('sold-out')
+    expect(rowSoldOut.canHoldSeat).toBe(false)
+    expect(rowSoldOut.ctaLabel).toBe('Hết chỗ vui lòng gọi')
+    expect(rowSoldOut.ctaHref).toContain('intent=inquiry')
   })
 })
