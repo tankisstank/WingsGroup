@@ -35,6 +35,14 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
   const isEn = locale === 'en'
   const copy = getWingsGoScheduleCopy(locale)
 
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
+
+  // Active filter count for mobile badge
+  const activeFilterCount =
+    (filters.airline ? 1 : 0) +
+    (filters.status ? 1 : 0) +
+    (filters.sort === 'price' ? 1 : 0)
+
   // Debounced search input
   const [localQuery, setLocalQuery] = useState(filters.q || '')
 
@@ -55,16 +63,16 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
   return (
     <div
       className={cn(
-        'wingsgo-schedule-filter-bar sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b border-border py-3 mb-6 transition-colors',
+        'wingsgo-schedule-filter-bar sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b border-border py-2.5 sm:py-3 mb-6 transition-colors',
         className,
       )}
       data-od-id="schedule-filter-bar"
     >
-      {/* Top Filter Controls: Search + Selects + View Toggle */}
-      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+      {/* Top Filter Controls: Search + Mobile button + Desktop Selects/Toggle */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         {/* Search Input */}
         <label
-          className="flex items-center gap-2 min-h-[44px] px-3.5 border border-border rounded-full bg-card flex-1 min-w-[200px] sm:max-w-xs focus-within:border-[var(--site-brand)] transition-colors"
+          className="flex items-center gap-2 min-h-[44px] px-3.5 border border-border rounded-full bg-card flex-1 min-w-0 sm:min-w-[200px] sm:max-w-xs focus-within:border-[var(--site-brand)] transition-colors"
           data-od-id="schedule-search"
         >
           <svg
@@ -103,12 +111,56 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           ) : null}
         </label>
 
-        {/* Selects */}
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap sm:flex-nowrap">
+        {/* Mobile Filter Toggle Button */}
+        <button
+          aria-controls="mobile-filter-panel"
+          aria-expanded={isMobileFiltersOpen}
+          aria-label={copy.filterButtonAria(activeFilterCount)}
+          className={cn(
+            'sm:hidden inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 rounded-full text-xs font-medium border border-border bg-card text-foreground hover:bg-muted/80 shrink-0 transition-colors cursor-pointer',
+            (isMobileFiltersOpen || activeFilterCount > 0) &&
+              'border-[var(--site-brand)] text-[var(--site-brand)] font-semibold',
+          )}
+          data-od-id="mobile-filter-button"
+          onClick={() => setIsMobileFiltersOpen((prev) => !prev)}
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            className="w-4 h-4 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span>{copy.filterButton}</span>
+          {activeFilterCount > 0 ? (
+            <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-[var(--site-brand)] text-white rounded-full">
+              {activeFilterCount}
+            </span>
+          ) : null}
+        </button>
+
+        {/* Filter Panel (Desktop: inline; Mobile: expandable region) */}
+        <div
+          className={cn(
+            'sm:flex sm:items-center sm:gap-2 sm:flex-1 sm:w-auto',
+            isMobileFiltersOpen
+              ? 'flex flex-wrap items-center gap-2 pt-2.5 pb-1 border-t border-border mt-1 w-full order-3 sm:order-none sm:pt-0 sm:pb-0 sm:border-0 sm:mt-0'
+              : 'hidden sm:flex',
+          )}
+          id="mobile-filter-panel"
+        >
           {/* Airline Select */}
           <select
             aria-label={copy.airlineFilterAria}
-            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)]"
+            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)] max-w-full"
             data-od-id="airline-filter"
             id="f-airline"
             onChange={(e) =>
@@ -129,7 +181,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           {/* Status Select */}
           <select
             aria-label={copy.statusFilterAria}
-            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)]"
+            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)] max-w-full"
             data-od-id="status-filter"
             id="f-status"
             onChange={(e) =>
@@ -152,7 +204,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           {/* Sort Select */}
           <select
             aria-label={copy.sortFilterAria}
-            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)]"
+            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)] max-w-full"
             data-od-id="sort-filter"
             id="f-sort"
             onChange={(e) =>
@@ -165,50 +217,50 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
             <option value="date">{copy.sortNearest}</option>
             <option value="price">{copy.sortLowestPrice}</option>
           </select>
-        </div>
 
-        {/* View Toggle */}
-        <div
-          aria-label={copy.viewModeAria}
-          className="inline-flex ml-auto border border-border rounded-full p-1 bg-card shrink-0"
-          data-od-id="view-toggle"
-          role="group"
-        >
-          <button
-            aria-pressed={filters.view !== 'tour'}
-            className={cn(
-              'min-h-[44px] px-3.5 inline-flex items-center justify-center rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer',
-              filters.view !== 'tour'
-                ? 'bg-[var(--site-brand)] text-white shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-            data-view="date"
-            onClick={() => onUpdateFilters({ view: 'date' })}
-            type="button"
+          {/* View Toggle */}
+          <div
+            aria-label={copy.viewModeAria}
+            className="inline-flex sm:ml-auto border border-border rounded-full p-1 bg-card shrink-0"
+            data-od-id="view-toggle"
+            role="group"
           >
-            {copy.viewDate}
-          </button>
-          <button
-            aria-pressed={filters.view === 'tour'}
-            className={cn(
-              'min-h-[44px] px-3.5 inline-flex items-center justify-center rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer',
-              filters.view === 'tour'
-                ? 'bg-[var(--site-brand)] text-white shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-            data-view="tour"
-            onClick={() => onUpdateFilters({ view: 'tour' })}
-            type="button"
-          >
-            {copy.viewTour}
-          </button>
+            <button
+              aria-pressed={filters.view !== 'tour'}
+              className={cn(
+                'min-h-[44px] px-3.5 inline-flex items-center justify-center rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer',
+                filters.view !== 'tour'
+                  ? 'bg-[var(--site-brand)] text-white shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+              data-view="date"
+              onClick={() => onUpdateFilters({ view: 'date' })}
+              type="button"
+            >
+              {copy.viewDate}
+            </button>
+            <button
+              aria-pressed={filters.view === 'tour'}
+              className={cn(
+                'min-h-[44px] px-3.5 inline-flex items-center justify-center rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer',
+                filters.view === 'tour'
+                  ? 'bg-[var(--site-brand)] text-white shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+              data-view="tour"
+              onClick={() => onUpdateFilters({ view: 'tour' })}
+              type="button"
+            >
+              {copy.viewTour}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Market Filter Chips (.seg) */}
       <div
         aria-label={isEn ? 'Destinations' : 'Thị trường'}
-        className="wingsgo-schedule-seg flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none pt-2.5 sm:pt-3 pb-0.5"
+        className="wingsgo-schedule-seg flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none pt-2 sm:pt-3 pb-0.5"
         id="seg-market"
         role="group"
       >

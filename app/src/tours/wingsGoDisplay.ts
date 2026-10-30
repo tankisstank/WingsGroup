@@ -238,35 +238,40 @@ const ACRONYM_ALLOWLIST = new Set([
 ])
 
 export const toTitleCaseWord = (word: string) => {
+  // Extract leading and trailing punctuation/symbols (leaving alphanumeric core)
+  const match = word.match(/^([^\p{L}\p{N}]*)([\s\S]*?)([^\p{L}\p{N}]*)$/u)
+  if (!match) return word
+  const [, prefix, core, suffix] = match
+  if (!core) return word
+
   // Duration code like 5N4Đ or 5N4D (or 6N5Đ, etc.) -> keep standard uppercase
-  const durationMatch = word.match(/^(\d+)[Nn](\d+)([ĐđDd])$/)
+  const durationMatch = core.match(/^(\d+)[Nn](\d+)([ĐđDd])$/)
   if (durationMatch) {
     const [, n1, n2, dayChar] = durationMatch
     const dUpper = dayChar.toLowerCase() === 'đ' ? 'Đ' : 'D'
-    return `${n1}N${n2}${dUpper}`
+    return `${prefix}${n1}N${n2}${dUpper}${suffix}`
   }
 
   // Single duration code like 5N or 5D
-  const singleDurationMatch = word.match(/^(\d+)([NnDdĐđ])$/)
+  const singleDurationMatch = core.match(/^(\d+)([NnDdĐđ])$/)
   if (singleDurationMatch) {
     const [, n, char] = singleDurationMatch
     const charUpper = char.toLowerCase() === 'đ' ? 'Đ' : char.toUpperCase()
-    return `${n}${charUpper}`
+    return `${prefix}${n}${charUpper}${suffix}`
   }
 
   // Check allowlist for acronyms: only keep uppercase when the word in source was ALREADY UPPERCASE
-  const cleanWord = word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '')
   const isAlreadyUpper =
-    cleanWord.length > 0 &&
-    cleanWord === cleanWord.toLocaleUpperCase('vi') &&
-    cleanWord !== cleanWord.toLocaleLowerCase('vi')
+    core.length > 0 &&
+    core === core.toLocaleUpperCase('vi') &&
+    core !== core.toLocaleLowerCase('vi')
 
-  if (isAlreadyUpper && ACRONYM_ALLOWLIST.has(cleanWord)) {
-    return word.toLocaleUpperCase('vi')
+  if (isAlreadyUpper && ACRONYM_ALLOWLIST.has(core)) {
+    return `${prefix}${core.toLocaleUpperCase('vi')}${suffix}`
   }
 
-  const lower = word.toLocaleLowerCase('vi')
-  return lower.charAt(0).toLocaleUpperCase('vi') + lower.slice(1)
+  const lower = core.toLocaleLowerCase('vi')
+  return `${prefix}${lower.charAt(0).toLocaleUpperCase('vi') + lower.slice(1)}${suffix}`
 }
 
 /**

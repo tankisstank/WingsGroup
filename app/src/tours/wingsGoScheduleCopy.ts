@@ -38,6 +38,8 @@ export interface WingsGoScheduleCopy {
   statusQuote: string
 
   // Filter labels
+  filterButton: string
+  filterButtonAria: (count: number) => string
   filterStatusQuote: string
   filterStatusSoldOut: string
   filterStatusLimited: string
@@ -148,6 +150,9 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     statusSoldOut: 'Đã kín',
     statusQuote: 'Liên hệ báo giá',
 
+    filterButton: 'Bộ lọc',
+    filterButtonAria: (count) =>
+      count > 0 ? `Bộ lọc (${count} đang chọn)` : 'Mở bộ lọc',
     filterStatusQuote: 'Chờ báo giá',
     filterStatusSoldOut: 'Đã kín',
     filterStatusLimited: 'Sắp hết chỗ',
@@ -259,6 +264,9 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     statusSoldOut: 'Sold out',
     statusQuote: 'Request a quote',
 
+    filterButton: 'Filters',
+    filterButtonAria: (count) =>
+      count > 0 ? `Filters (${count} active)` : 'Open filters',
     filterStatusQuote: 'Quote',
     filterStatusSoldOut: 'Sold out',
     filterStatusLimited: 'Few seats left',

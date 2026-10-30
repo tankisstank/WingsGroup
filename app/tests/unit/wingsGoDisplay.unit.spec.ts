@@ -7,6 +7,7 @@ import {
   getDepartureStub,
   getShortDepartureDate,
   getTourRouteTitle,
+  toTitleCaseWord,
 } from '@/tours/wingsGoDisplay'
 
 describe('wingsGoDisplay', () => {
@@ -43,6 +44,15 @@ describe('wingsGoDisplay', () => {
     })
     expect(getShortDepartureDate('2026-12-04T17:00:00.000Z')).toBe('05/12')
     expect(getDepartureStub('not-a-date')).toBeNull()
+  })
+
+  it('preserves uppercase duration code with punctuation and allowlist acronyms (S2)', () => {
+    expect(toTitleCaseWord('6N5Đ:')).toBe('6N5Đ:')
+    expect(toTitleCaseWord('(5N4D)')).toBe('(5N4D)')
+    expect(toTitleCaseWord('5N4Đ,')).toBe('5N4Đ,')
+    expect(toTitleCaseWord('UNESCO:')).toBe('UNESCO:')
+    expect(toTitleCaseWord('HÀN')).toBe('Hàn')
+    expect(getTourRouteTitle('TOUR HÀN QUỐC 6N5Đ: BUSAN – NAMI')).toBe('Tour Hàn Quốc 6N5Đ: Busan · Nami')
   })
 
   it('turns long uppercase titles into route titles', () => {

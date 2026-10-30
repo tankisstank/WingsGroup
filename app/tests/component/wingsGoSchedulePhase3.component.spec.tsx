@@ -446,5 +446,41 @@ describe('US-093 Phase 3 Component Tests', () => {
       const clearBtn = screen.getByRole('button', { name: 'Clear search' })
       expect(clearBtn).toBeTruthy()
     })
+
+    it('S3: renders mobile filter button with aria-expanded and toggles mobile filter panel', () => {
+      const { container } = render(<WingsGoScheduleBrowser snapshot={baseSnapshot} />)
+      const filterBtn = container.querySelector('[data-od-id="mobile-filter-button"]') as HTMLButtonElement
+      expect(filterBtn).toBeTruthy()
+      expect(filterBtn.getAttribute('aria-expanded')).toBe('false')
+      expect(filterBtn.getAttribute('aria-controls')).toBe('mobile-filter-panel')
+
+      const panel = container.querySelector('#mobile-filter-panel')
+      expect(panel).toBeTruthy()
+      expect(panel?.className).toContain('hidden')
+
+      fireEvent.click(filterBtn)
+      expect(filterBtn.getAttribute('aria-expanded')).toBe('true')
+      expect(panel?.className).not.toContain('hidden')
+
+      fireEvent.click(filterBtn)
+      expect(filterBtn.getAttribute('aria-expanded')).toBe('false')
+    })
+
+    it('S3: shows active filter count badge when airline or status or sort filter is active', () => {
+      const { container } = render(<WingsGoScheduleBrowser snapshot={baseSnapshot} />)
+      const filterBtn = container.querySelector('[data-od-id="mobile-filter-button"]') as HTMLButtonElement
+
+      // Initially 0 active filters
+      expect(filterBtn.textContent).toContain('Bộ lọc')
+      expect(filterBtn.querySelector('.rounded-full')).toBeNull()
+
+      // Change airline filter
+      const airlineSelect = container.querySelector('#f-airline') as HTMLSelectElement
+      fireEvent.change(airlineSelect, { target: { value: 'VJ' } })
+
+      const badge = filterBtn.querySelector('.rounded-full')
+      expect(badge).toBeTruthy()
+      expect(badge?.textContent).toBe('1')
+    })
   })
 })

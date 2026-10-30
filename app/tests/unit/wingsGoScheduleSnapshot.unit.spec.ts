@@ -635,16 +635,16 @@ describe('US-093 K3 - CTA and Verification Expiry Boundary of buildScheduleRow',
     expect(row.ctaLabel).toBe(copy.ctaRequestQuote)
   })
 
-  it('retains intent=inquiry when ctaLabelOverride is present on quote and sold-out departures', () => {
+  it('applies ctaLabelOverride only when canHoldSeat === true, falling back to standard quote label otherwise (S1/AC2)', () => {
     const now = new Date('2027-05-10T00:00:00.000Z')
 
-    // 1. Quote with override
+    // 1. Quote with override "Giữ chỗ" -> uses standard copy.ctaRequestQuote, intent=inquiry
     const quoteDoc = {
       id: 'dep-quote-1',
       departureDate: '2027-06-01T00:00:00.000Z',
       commerceVerified: true,
       priceFrom: null, // quote
-      ctaLabelOverride: 'Tư vấn ngay',
+      ctaLabelOverride: 'Giữ chỗ',
     }
     const rowQuote = buildScheduleRow({
       doc: quoteDoc,
@@ -654,10 +654,10 @@ describe('US-093 K3 - CTA and Verification Expiry Boundary of buildScheduleRow',
     })!
     expect(rowQuote.availability).toBe('quote')
     expect(rowQuote.canHoldSeat).toBe(false)
-    expect(rowQuote.ctaLabel).toBe('Tư vấn ngay')
+    expect(rowQuote.ctaLabel).toBe(copy.ctaRequestQuote)
     expect(rowQuote.ctaHref).toContain('intent=inquiry')
 
-    // 2. Sold-out with override
+    // 2. Sold-out with override -> uses standard copy.ctaRequestQuote, intent=inquiry
     const soldOutDoc = {
       id: 'dep-soldout-1',
       departureDate: '2027-06-01T00:00:00.000Z',
@@ -675,7 +675,28 @@ describe('US-093 K3 - CTA and Verification Expiry Boundary of buildScheduleRow',
     })!
     expect(rowSoldOut.availability).toBe('sold-out')
     expect(rowSoldOut.canHoldSeat).toBe(false)
-    expect(rowSoldOut.ctaLabel).toBe('Hết chỗ vui lòng gọi')
+    expect(rowSoldOut.ctaLabel).toBe(copy.ctaRequestQuote)
     expect(rowSoldOut.ctaHref).toContain('intent=inquiry')
+
+    // 3. canHoldSeat === true with override -> uses override label, intent=hold-seat
+    const holdSeatDoc = {
+      id: 'dep-holdseat-1',
+      departureDate: '2027-06-01T00:00:00.000Z',
+      commerceVerified: true,
+      availabilityStatus: 'open',
+      priceFrom: 12000000,
+      currency: 'VND',
+      ctaLabelOverride: 'Đặt chỗ ưu đãi',
+    }
+    const rowHoldSeat = buildScheduleRow({
+      doc: holdSeatDoc,
+      tour,
+      now,
+      copy,
+    })!
+    expect(rowHoldSeat.availability).toBe('open')
+    expect(rowHoldSeat.canHoldSeat).toBe(true)
+    expect(rowHoldSeat.ctaLabel).toBe('Đặt chỗ ưu đãi')
+    expect(rowHoldSeat.ctaHref).toContain('intent=hold-seat')
   })
 })

@@ -142,6 +142,7 @@ type WingsGoScheduleSnapshot = {
 - `price.original` và `promoLabel` giữ governance hiện có của `normalizeDepartureCard`: số hữu hạn, `original > value`, cùng đợt và cùng currency. Đợt sold-out hoặc hết hạn xác minh không được khôi phục ưu đãi.
 - Khi hai đợt bằng nhau về khoá sắp xếp (ngày hoặc giá), xếp theo ngày rồi theo `id`.
 - Số liệu "đợt mở bán" ở hero = `open + limited`. Số "đợt có giá" = số đợt có `price`.
+- **Quy tắc nhãn CTA (`ctaLabelOverride`, S1/AC2):** `ctaLabelOverride` chỉ được áp dụng khi `canHoldSeat === true`. Khi `canHoldSeat === false` (chưa xác minh, hết hạn, thiếu giá hợp lệ hoặc đã kín chỗ `sold-out`), nhãn CTA luôn là nhãn chuẩn theo locale `copy.ctaRequestQuote` ("Liên hệ báo giá" / "Request a quote"), không dùng override nhằm đảm bảo tính trung thực (AC2: "Giữ chỗ" chỉ hiện khi `canHoldSeat`). `intent` và `ctaHref` luôn được xác định theo `canHoldSeat` không đổi.
 
 ### `canHoldSeat` (helper dùng chung trong `tours/utils.ts`)
 

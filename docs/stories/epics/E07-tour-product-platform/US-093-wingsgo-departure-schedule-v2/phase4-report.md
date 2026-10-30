@@ -319,3 +319,46 @@ Toàn bộ 16 ảnh chụp màn hình theo đúng quy cách đã được tạo 
 - **Integration Test (`wingsGoScheduleIntegration.int.spec.ts`):** 5/5 tests passed (100%).
 - **`pnpm run build`:** Exit code 0, Turbopack biên dịch thành công, standalone bundle hoàn tất.
 
+---
+
+## 8. Vòng sửa S1–S3 (Orchestrator review vòng 2 Phase 3–4)
+
+Theo yêu cầu tại `phase34-fix2-brief.md`, agent đã hoàn tất xử lý triệt để 3 vấn đề còn lại (S1, S2, S3):
+
+### 8.1 S1 (P1, AC2) — Quy tắc ghi đè nhãn CTA (`ctaLabelOverride`)
+- **Vấn đề:** DB local có trường `cta_label_override` = "Giữ chỗ" trên một số đợt chưa xác minh (`canHoldSeat = false`, `intent = 'inquiry'`), dẫn đến row vẫn hiển thị nhãn "Giữ chỗ", vi phạm AC2 ("Giữ chỗ" chỉ được xuất hiện khi đợt đó thực sự giữ chỗ được).
+- **Quy tắc mới (đã cập nhật vào `design.md`):** `ctaLabelOverride` chỉ được áp dụng khi `canHoldSeat === true`. Khi `canHoldSeat === false`, nhãn luôn là nhãn chuẩn theo locale ("Liên hệ báo giá" / "Request a quote"). Thuộc tính `intent` không thay đổi. Áp dụng nhất quán cho row danh sách, chip ngày Theo hành trình và thẻ thị trường (`row.ctaLabel`).
+- **Lý do sửa test K3 cũ:** Test K3 trước đây khẳng định `ctaLabelOverride` xuất hiện ngay cả trên đợt inquiry (`canHoldSeat = false`). Kỳ vọng này mâu thuẫn trực tiếp với AC2. Do đó test suite `wingsGoScheduleSnapshot.unit.spec.ts` được cập nhật lại: khi `canHoldSeat === false`, override "Giữ chỗ" trả về nhãn chuẩn `copy.ctaRequestQuote` ("Liên hệ báo giá"); khi `canHoldSeat === true`, nhãn override mới được sử dụng.
+
+### 8.2 S2 (P2) — Bảo toàn casing mã thời lượng khi dính dấu câu
+- **Vấn đề:** Tên tour dạng `"TOUR HÀN QUỐC 6N5Đ: BUSAN…"` bị hàm `toTitleCaseWord` chuyển thành `"6n5đ:"` do dấu hai chấm dính liền khiến regex không khớp mã thời lượng.
+- **Khắc phục:** Trong `wingsGoDisplay.ts`, hàm `toTitleCaseWord` tách tiền tố và hậu tố dấu câu đầu/cuối bằng regex `^([^\p{L}\p{N}]*)([\s\S]*?)([^\p{L}\p{N}]*)$/u` trước khi so khớp mã thời lượng và allowlist, sau đó ghép lại nguyên vẹn dấu câu.
+- **Kiểm thử:** Đã bổ sung unit test cho các trường hợp `6N5Đ:`, `(5N4D)`, `5N4Đ,`, `UNESCO:`, `HÀN`, và `TOUR HÀN QUỐC 6N5Đ: BUSAN – NAMI`. Toàn bộ 6/6 test của `wingsGoDisplay.unit.spec.ts` đều pass.
+
+### 8.3 S3 (P2) — Thanh lọc sticky gọn trên mobile (≤ 120px)
+- **Thiết kế Mobile (< 640px):**
+  - **Hàng 1:** Ô tìm kiếm (`flex-1 min-w-0`) kết hợp cùng nút "Bộ lọc" (`sm:hidden`, `min-h-[44px]`, `min-w-[44px]`, có badge hiển thị số bộ lọc đang bật, `aria-expanded`, `aria-controls="mobile-filter-panel"`).
+  - **Hàng 2:** Thanh chip thị trường `#seg-market` cuộn ngang (`overflow-x-auto scrollbar-none`, chip `min-h-[44px]`).
+  - **Vùng bộ lọc mở rộng (`#mobile-filter-panel`):** Chứa các dropdown chọn hãng bay, tình trạng, sắp xếp và chuyển chế độ xem (View Toggle). Khi đóng ở mobile, vùng này ẩn (`hidden sm:flex`), đảm bảo thanh sticky gọn gàng; khi người dùng nhấn "Bộ lọc", panel mở rộng ngay dưới hàng 1.
+- **Thiết kế Desktop (≥ 640px):** Giữ nguyên vẹn bố cục desktop: ô tìm kiếm, các select và view toggle nằm trên cùng một hàng ngang, bên dưới là hàng chip thị trường.
+- **Số đo thực tế bằng trình duyệt:**
+  - **Chiều cao sticky tại 390px (Mobile - đóng):** **119px** (đạt yêu cầu ≤ 120px).
+  - **Chiều cao sticky tại 390px (Mobile - mở vùng bộ lọc):** **252px**.
+  - **Chiều cao sticky tại 1440px (Desktop):** **137px**.
+  - **Kiểm tra cuộn ngang (Viewport Overflow):** Tại 360px, 390px, và 430px, `windowWidth === docWidth === bodyWidth`, hoàn toàn không có hiện tượng cuộn ngang trang. Vùng chạm của tất cả các nút bấm, select, chip đều đạt ≥ 44×44px.
+
+### 8.4 Bộ ảnh chụp kiểm chứng vòng 2 (`artifacts/phase34-fix2/`)
+1. `390-vi-theo-ngay.png` — Mobile 390px: Chế độ xem theo ngày với thanh lọc thu gọn (119px).
+2. `390-vi-bo-loc-mo.png` — Mobile 390px: Thanh lọc sau khi nhấn nút "Bộ lọc" mở rộng panel chọn hãng bay, tình trạng, sắp xếp và view toggle.
+3. `390-vi-theo-hanh-trinh.png` — Mobile 390px: Chế độ xem theo hành trình (`view=tour`).
+4. `1440-vi-theo-ngay.png` — Desktop 1440px: Chế độ xem theo ngày tiếng Việt.
+
+### 8.5 Kết quả các cổng kiểm tra
+- **`pnpm run lint`:** 0 errors (473 pre-existing warnings).
+- **`pnpm run test:unit`:** 170 passed | 1 failed (chỉ lỗi baseline pre-existing tại `wingsGroupV3Shell`).
+- **`pnpm run test:component`:** 66 passed / 66 files (482/482 passed).
+- **`pnpm exec tsc --noEmit`:** 2 lỗi baseline pre-existing tại `wingsGroupCorporateRoutes.unit.spec.ts`, 0 lỗi module WingsGo.
+- **`node scripts/run-integration-tests.mjs tests/int/wingsGoScheduleIntegration.int.spec.ts`:** 5/5 tests passed (100%).
+- **`pnpm run build`:** Exit code 0, build thành công với Next.js Turbopack và standalone bundle.
+
+

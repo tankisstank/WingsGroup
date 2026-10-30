@@ -178,7 +178,9 @@ export const buildScheduleRow = ({
     now,
   )
 
-  const ctaLabel = doc.ctaLabelOverride || (canHoldSeatValue ? copy.ctaHoldSeat : copy.ctaRequestQuote)
+  const ctaLabel = canHoldSeatValue
+    ? doc.ctaLabelOverride || copy.ctaHoldSeat
+    : copy.ctaRequestQuote
   const ctaHref = getTourInquiryPath({
     intent: canHoldSeatValue ? 'hold-seat' : 'inquiry',
     tourSlug: tour.slug,
