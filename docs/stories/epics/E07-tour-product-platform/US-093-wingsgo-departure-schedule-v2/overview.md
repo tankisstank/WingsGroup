@@ -35,6 +35,18 @@ Trang `/lich-khoi-hanh` của `wings-go` được dựng lại theo prototype v2
 
 ## Acceptance Criteria
 
+- AC1 — Hiện đủ mọi đợt published của WingsGo từ hôm nay theo lịch VN, không cắt ở 200 đợt, không hiện lại lịch quá khứ; mọi số liệu lấy từ một snapshot.
+- AC2 — Giá, ưu đãi và CTA đúng quy tắc thương mại: giá của đúng đợt, "Giữ chỗ" chỉ khi `canHoldSeat`, lead tới `/lien-he` lưu đúng ngày VN.
+- AC3 — Bộ lọc thị trường, tháng, hãng bay, tình trạng, tìm kiếm, sắp xếp và chế độ xem kết hợp AND, ghi lên URL và đọc lại ở SSR.
+- AC4 — Hai chế độ xem Theo ngày và Theo hành trình, có "Xem thêm", "Giá từ" đúng đợt, hot và sticker theo Q3.
+- AC5 — HTML ban đầu giữ link mọi tour; URL có bộ lọc noindex; `/en` không có nhãn tiếng Việt; không lẫn dữ liệu site khác; sửa CMS làm mới trang VI và EN.
+- AC6 — Giao diện bám prototype ở 1440, 768 và 390; không cuộn ngang ở 10 độ rộng; đạt a11y; payload nhỏ hơn khi so cùng dữ liệu.
+- AC7 — Không hồi quy `/tour`, trang chủ, trang thị trường, chi tiết tour WingsGo và các site WingSide, WingsGroup.
+
+Bằng chứng cho từng tiêu chí nằm trong `validation.md`.
+
+## Chi tiết tiêu chí chấp nhận
+
 1. **AC1 — Dữ liệu đủ và đúng lịch VN.** Trang hiện mọi đợt published, đúng site, từ đầu ngày hôm nay theo `Asia/Ho_Chi_Minh`:
    - Không bị cắt khi số đợt vượt 200.
    - Không hiện lại lịch quá khứ khi không còn đợt tương lai; thay vào đó hiện trạng thái rỗng.
@@ -65,8 +77,6 @@ Trang `/lich-khoi-hanh` của `wings-go` được dựng lại theo prototype v2
    - Không có lỗi console.
    - Khi so trên cùng dữ liệu, HTML và Flight payload nhỏ hơn bản cũ. Số đo trước và sau (byte tổng, số row, byte mỗi row) ghi trong `validation.md`.
 7. **AC7 — Không hồi quy.** `/tour`, trang chủ, trang thị trường, chi tiết tour WingsGo và các site WingSide, WingsGroup không đổi ngoài ý muốn. Các test được brief liệt kê tiếp tục pass.
-
-Bằng chứng cho từng tiêu chí nằm trong `validation.md`.
 
 ## Người dùng bị ảnh hưởng
 
