@@ -124,6 +124,22 @@ Kết luận: **chấp nhận Phase 1**.
   - K3 (P3): thiếu test CTA cho verification hết hạn và cho override trên row inquiry.
 - Phase 2 tiếp tục với DTO hiện tại. agy đã được nhắc chỉ dùng `import type` từ module server trong component client.
 
+### Phase 2 và vòng sửa K1–K3 — Review của orchestrator (2026-10-30)
+
+- **Commit `b29a8d1` (Phase 2) và `4d46710` (K1–K3).** Orchestrator tự chạy lại:
+  - component `wingsGoSchedulePhase2` → **17/17 pass**;
+  - unit (model boundary, snapshot, helpers, snapshot mocked, display) → **58/58 pass**;
+  - `wingsGoScheduleIntegration` → 5/5;
+  - tsc → 2 lỗi baseline.
+  - `wingsGoScheduleModel.ts` chỉ import `./currency` và `./wingsGoCatalogCopy`, không kéo theo `payload` hay `next/headers`.
+- **Ảnh** trong `artifacts/phase2/` (1440 và 390, VI và EN): hero, H1 có năm, biểu đồ có "Cao điểm".
+  - Hero ghi "0 đợt mở bán" và "0 đợt có giá" vì DB local có 0 đợt đã xác minh. Đây là hành vi đúng theo bảng trạng thái.
+  - Production ngày 2026-10-30: payload có cả `commerceVerified:true` lẫn `false`.
+  - Phase 5 phải seed thêm đợt đã xác minh trên DB copy.
+- **Chấp nhận.** Hai điểm P3 chuyển sang Phase 3:
+  - cột biểu đồ quá nhạt;
+  - số liệu hero hard-code font family.
+
 ### Review Phase 3 / Release
 
 Chưa chạy.
