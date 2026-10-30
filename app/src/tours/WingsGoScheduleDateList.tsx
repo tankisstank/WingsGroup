@@ -67,7 +67,7 @@ export const WingsGoScheduleDateList: React.FC<WingsGoScheduleDateListProps> = (
   if (sort === 'price') {
     return (
       <div className={className} data-od-id="schedule-date-list" id="wingsgo-schedule-list">
-        <div className="wingsgo-schedule-flat-rows grid gap-2.5 sm:gap-3">
+        <div className="wingsgo-schedule-flat-rows">
           {rows.map((row) => (
             <WingsGoScheduleRow
               key={row.id}
@@ -99,17 +99,17 @@ export const WingsGoScheduleDateList: React.FC<WingsGoScheduleDateListProps> = (
               data-od-id={`month-${monthKey}`}
               key={monthKey}
             >
-              <div className="wingsgo-schedule-month-head flex items-baseline justify-between gap-4 pb-3 border-b border-border mb-3.5 sm:mb-4">
-                <h3 className="wingsgo-display text-2xl sm:text-3xl font-medium leading-none text-foreground m-0">
+              <div className="wingsgo-schedule-month-head">
+                <h3 className="wingsgo-display wingsgo-schedule-month-title">
                   {copy.monthGroupTitle(monthNum, year)}
                 </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground m-0 whitespace-nowrap">
+                <p className="wingsgo-schedule-month-count">
                   {copy.departureCount(monthRows.length)}
                 </p>
               </div>
 
               <div
-                className="wingsgo-schedule-month-rows grid gap-2.5 sm:gap-3"
+                className="wingsgo-schedule-month-rows"
                 id={`month-rows-${monthKey}`}
               >
                 {monthRows.map((row, idx) => {
@@ -130,7 +130,7 @@ export const WingsGoScheduleDateList: React.FC<WingsGoScheduleDateListProps> = (
                 <button
                   aria-controls={`month-rows-${monthKey}`}
                   aria-expanded={isExpanded}
-                  className="wingsgo-schedule-more-btn mt-3 w-full min-h-[44px] sm:min-h-[48px] border border-dashed border-[var(--site-brand)]/40 rounded-2xl bg-transparent font-semibold text-xs sm:text-sm text-[var(--site-brand)] hover:bg-[var(--site-brand)]/5 transition-colors cursor-pointer"
+                  className="wingsgo-schedule-more-btn"
                   data-more={monthKey}
                   onClick={() => toggleMonth(monthKey)}
                   type="button"

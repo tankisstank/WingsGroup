@@ -160,7 +160,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           {/* Airline Select */}
           <select
             aria-label={copy.airlineFilterAria}
-            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)] max-w-full"
+            className="wingsgo-schedule-select"
             data-od-id="airline-filter"
             id="f-airline"
             onChange={(e) =>
@@ -181,7 +181,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           {/* Status Select */}
           <select
             aria-label={copy.statusFilterAria}
-            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)] max-w-full"
+            className="wingsgo-schedule-select"
             data-od-id="status-filter"
             id="f-status"
             onChange={(e) =>
@@ -204,7 +204,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           {/* Sort Select */}
           <select
             aria-label={copy.sortFilterAria}
-            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)] max-w-full"
+            className="wingsgo-schedule-select"
             data-od-id="sort-filter"
             id="f-sort"
             onChange={(e) =>
@@ -268,10 +268,8 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
         <button
           aria-pressed={!filters.market}
           className={cn(
-            'inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 rounded-full text-xs sm:text-sm font-medium border shrink-0 transition-colors cursor-pointer',
-            !filters.market
-              ? 'bg-[var(--site-brand)] text-white border-[var(--site-brand)] shadow-sm'
-              : 'border-border bg-card text-foreground hover:bg-muted/80',
+            'wingsgo-schedule-market-chip',
+            !filters.market && 'wingsgo-schedule-market-chip--selected',
           )}
           onClick={() => onUpdateFilters({ market: undefined })}
           type="button"
@@ -290,10 +288,8 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
             <button
               aria-pressed={isSelected}
               className={cn(
-                'inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 rounded-full text-xs sm:text-sm font-medium border shrink-0 transition-colors cursor-pointer',
-                isSelected
-                  ? 'bg-[var(--site-brand)] text-white border-[var(--site-brand)] shadow-sm'
-                  : 'border-border bg-card text-foreground hover:bg-muted/80',
+                'wingsgo-schedule-market-chip',
+                isSelected && 'wingsgo-schedule-market-chip--selected',
                 count === 0 && !isSelected && 'opacity-60',
               )}
               key={m.value}

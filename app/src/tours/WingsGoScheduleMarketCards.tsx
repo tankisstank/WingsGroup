@@ -101,9 +101,9 @@ export const WingsGoScheduleMarketCards: React.FC<WingsGoScheduleMarketCardsProp
           return (
             <article
               className={cn(
-                'wingsgo-schedule-market-card group flex-none w-[82%] sm:w-auto snap-start flex flex-col text-left rounded-[24px] border border-border/70 bg-card shadow-sm transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-[var(--site-brand)]/40 hover:shadow-md cursor-pointer',
+                'wingsgo-schedule-market-card group',
                 hasHot ? 'hot-rainbow-card border-transparent' : 'overflow-hidden',
-                isPressed && 'ring-2 ring-[var(--site-brand)] ring-offset-2',
+                isPressed && 'wingsgo-schedule-market-card--selected',
               )}
               data-has-hot={hasHot ? 'true' : undefined}
               data-market={card.market}
@@ -133,7 +133,7 @@ export const WingsGoScheduleMarketCards: React.FC<WingsGoScheduleMarketCardsProp
               ) : null}
 
               {/* Media banner */}
-              <div className="relative aspect-[16/10] overflow-hidden rounded-t-[23px] bg-muted">
+              <div className="wingsgo-schedule-market-media">
                 {hasBadges ? (
                   <div className="absolute inset-x-3 top-3 z-10 flex items-start justify-between gap-2 pointer-events-none">
                     {cornerStickers.length > 0 ? (
@@ -207,7 +207,7 @@ export const WingsGoScheduleMarketCards: React.FC<WingsGoScheduleMarketCardsProp
               </div>
 
               {/* Body */}
-              <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between gap-3">
+              <div className="wingsgo-schedule-market-body">
                 <div className="space-y-1.5">
                   {departureFormatted ? (
                     <small className="block text-xs font-semibold tracking-wider uppercase text-muted-foreground">
@@ -222,7 +222,7 @@ export const WingsGoScheduleMarketCards: React.FC<WingsGoScheduleMarketCardsProp
                   </b>
                 </div>
 
-                <div className="pt-2 border-t border-border/60 flex items-end justify-between gap-2 text-xs text-muted-foreground">
+                <div className="wingsgo-schedule-market-footer">
                   <span>{row?.airline?.label || '\u00A0'}</span>
                   {typeof priceValue === 'number' && priceValue > 0 ? (
                     <span>

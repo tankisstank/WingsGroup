@@ -151,7 +151,7 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
         return (
           <article
             className={cn(
-              'wingsgo-schedule-tour-card group rounded-[24px] border border-border/70 bg-card p-4 sm:p-6 shadow-sm transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-[var(--site-brand)]/40 hover:shadow-md',
+              'wingsgo-schedule-tour-card group',
               hasHot ? 'hot-rainbow-card border-transparent' : 'overflow-hidden',
             )}
             data-has-hot={hasHot ? 'true' : undefined}
@@ -165,7 +165,7 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
 
             <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-start">
               {/* Media Thumbnail */}
-              <div className="relative aspect-[16/10] w-full md:w-64 lg:w-72 shrink-0 rounded-2xl overflow-hidden bg-muted">
+              <div className="wingsgo-schedule-tour-media">
                 {/* Editorial stickers overlay */}
                 {cornerStickers.length > 0 || chosenRow?.promoLabel ? (
                   <div className="absolute inset-x-2.5 top-2.5 z-10 flex items-start justify-between gap-1.5 pointer-events-none">
@@ -227,7 +227,7 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
               </div>
 
               {/* Tour Content Details */}
-              <div className="flex-1 min-w-0 w-full space-y-3.5">
+              <div className="wingsgo-schedule-tour-body">
                 {/* Meta and Title */}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
                   <div className="space-y-1 min-w-0">
@@ -251,7 +251,7 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
                       )
                       return (
                         <SiteLink
-                          className="block text-base sm:text-lg font-bold text-foreground hover:text-[var(--site-brand)] transition-colors no-underline leading-snug"
+                          className="wingsgo-schedule-tour-title-link"
                           href={tour.href}
                           title={hasDistinctTitle ? tour.title : undefined}
                         >
@@ -307,20 +307,18 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
                           row.availabilityLabel,
                         )}
                         className={cn(
-                          'wingsgo-schedule-date-chip inline-flex flex-col items-center justify-center min-w-[70px] sm:min-w-[76px] min-h-[44px] px-2.5 py-1.5 rounded-xl border text-center no-underline transition-colors cursor-pointer',
-                          row.availability === 'sold-out'
-                            ? 'bg-muted/60 text-muted-foreground border-border hover:bg-muted'
-                            : 'bg-card border-border hover:border-[var(--site-brand)] hover:bg-[var(--site-brand)]/5',
+                          'wingsgo-schedule-date-chip min-h-[44px]',
+                          row.availability === 'sold-out' && 'wingsgo-schedule-date-chip--sold-out',
                         )}
                         data-departure-id={row.id}
                         hidden={isHidden}
                         href={row.ctaHref}
                         key={row.id}
                       >
-                        <span className="font-bold text-foreground text-xs sm:text-sm leading-tight">
+                        <span className="wingsgo-schedule-date-chip-day">
                           {dayNum}/{monthNum}
                         </span>
-                        <span className="text-[10px] sm:text-[11px] text-muted-foreground leading-tight mt-0.5 truncate max-w-full">
+                        <span className="wingsgo-schedule-date-chip-price">
                           {subText}
                         </span>
                       </SiteLink>
@@ -332,7 +330,7 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
                     <button
                       aria-controls={`tour-dates-${tour.id}`}
                       aria-expanded={isExpanded}
-                      className="wingsgo-schedule-more-dates-btn inline-flex flex-col items-center justify-center min-w-[70px] sm:min-w-[76px] min-h-[44px] px-2.5 py-1.5 rounded-xl border border-dashed border-[var(--site-brand)]/50 text-xs font-semibold text-[var(--site-brand)] hover:bg-[var(--site-brand)]/5 transition-colors cursor-pointer"
+                      className="wingsgo-schedule-more-dates-btn min-h-[44px]"
                       data-more={`tour:${tour.slug}`}
                       onClick={() => toggleTour(tour.id)}
                       type="button"
@@ -348,14 +346,14 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
                 </div>
 
                 {/* Tour Card Footer */}
-                <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xs sm:text-sm text-muted-foreground">
+                <div className="wingsgo-schedule-tour-footer">
                   <span className="truncate">
                     {copy.departureCountLabel(tourRows.length)}
                     {airlineNames ? ` • ${airlineNames}` : ''}
                   </span>
 
                   <SiteLink
-                    className="inline-flex items-center gap-1 font-semibold text-[var(--site-brand)] hover:underline no-underline shrink-0 ml-3"
+                    className="wingsgo-schedule-tour-more-link"
                     href={tour.href}
                   >
                     <span>{copy.ctaViewTour}</span>
