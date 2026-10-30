@@ -298,6 +298,15 @@ Kết luận: **chấp nhận Phase 1**.
 - WingSide (`/wing-side`), WingsGroup (`/wingsgroup`, `/wingsgroup/en`): HTML giống từng byte; `/wing-side/lich-khoi-hanh` vẫn 404 như cũ.
 - WingsGo `/`, `/tour`, `/thi-truong/han-quoc`, `/tour/seoul-nami-everland-5n4d`, `/en/tour`: chạy trên **cùng** DB (bản trước khi seed), HTML giống từng byte. Trên DB đã seed thì khác, do dữ liệu đã xác minh.
 
+**Cổng đầy đủ** (HEAD `2064ba9`, orchestrator chạy, 31/10/2026)
+
+- `pnpm run lint`: 0 lỗi (479 cảnh báo).
+- `tsc --noEmit`: 2 lỗi baseline.
+- `pnpm run test:unit`: 1460/1461. Lỗi duy nhất là `wingsGroupV3Shell`, có sẵn từ baseline.
+- `pnpm run test:component`: 482/482 (66 file).
+- Integration qua `run-integration-tests.mjs`: `wingsGoScheduleIntegration` 6/6, `wingsGoLeadCompatibility` 9/9, `leadSubmissionRoute` 21/21, `leadCapture` 3/3.
+- `pnpm run build`: compile thành công, sinh 20/20 trang tĩnh.
+
 ### Review Phase 5 / Release
 
 Chưa chạy.
