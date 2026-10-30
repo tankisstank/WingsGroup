@@ -700,3 +700,41 @@ describe('US-093 K3 - CTA and Verification Expiry Boundary of buildScheduleRow',
     expect(rowHoldSeat.ctaHref).toContain('intent=hold-seat')
   })
 })
+
+describe('US-093 Phase 5 - editorial labels only on sellable departures', () => {
+  const copy = getWingsGoScheduleCopy('vi')
+  const tour = { id: 'tour-101', slug: 'japan-journey', title: 'Hành trình Nhật Bản', market: 'japan' }
+  const now = new Date('2027-05-10T00:00:00.000Z')
+  const baseDoc = {
+    id: 601,
+    departureDate: '2027-06-20T00:00:00.000Z',
+    commerceVerified: true,
+    availabilityStatus: 'open',
+    priceFrom: 21900000,
+    currency: 'VND',
+    airline: 'Air China',
+    availabilityBadge: 'Đang mở bán',
+    urgencyLabel: 'Ưu tiên giữ chỗ sớm',
+  }
+
+  it('keeps the CMS badge and urgency on a holdable departure', () => {
+    const row = buildScheduleRow({ doc: baseDoc, tour, now, copy })
+    expect(row?.availability).toBe('open')
+    expect(row?.availabilityLabel).toBe('Đang mở bán')
+    expect(row?.urgencyLabel).toBe('Ưu tiên giữ chỗ sớm')
+  })
+
+  it('drops the CMS badge and urgency on a sold-out departure', () => {
+    const row = buildScheduleRow({ doc: { ...baseDoc, availabilityStatus: 'sold-out' }, tour, now, copy })
+    expect(row?.availability).toBe('sold-out')
+    expect(row?.availabilityLabel).toBe(copy.statusSoldOut)
+    expect(row?.urgencyLabel).toBeNull()
+  })
+
+  it('drops the CMS badge and urgency on a verified departure without a price', () => {
+    const row = buildScheduleRow({ doc: { ...baseDoc, priceFrom: null }, tour, now, copy })
+    expect(row?.availability).toBe('quote')
+    expect(row?.availabilityLabel).toBe(copy.statusQuote)
+    expect(row?.urgencyLabel).toBeNull()
+  })
+})

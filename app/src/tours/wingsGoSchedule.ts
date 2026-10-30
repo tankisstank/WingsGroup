@@ -193,7 +193,8 @@ export const buildScheduleRow = ({
   const airlineEntry = normalizeScheduleAirline(doc.airline)
 
   const promoLabel = canPromote ? doc.promoLabel || null : null
-  const urgencyLabel = commerceVerified ? doc.urgencyLabel || null : null
+  // Urgency copy ("Ưu tiên giữ chỗ sớm") only makes sense when the seat can be held.
+  const urgencyLabel = canHoldSeatValue ? doc.urgencyLabel || null : null
   const resolvedLocale = locale || (copy.marketOther === 'Other destinations' ? 'en' : 'vi')
   const marketLabel = getScheduleMarketLabel(tour.market, resolvedLocale, copy)
   const searchText = buildSearchText(

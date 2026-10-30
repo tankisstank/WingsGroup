@@ -138,7 +138,7 @@ type WingsGoScheduleSnapshot = {
 | 5 | Đã xác minh, có giá, `open` hoặc trống | `open` | Mở bán / Open | "Mở bán" |
 
 - Fixture bắt buộc cho test: sold-out không giá, sold-out chưa xác minh, đợt có `availabilityBadge` tuỳ chỉnh.
-- `availabilityBadge` chỉ đổi câu chữ hiển thị, không đổi trạng thái hay CTA.
+- `availabilityBadge` chỉ đổi câu chữ hiển thị, không đổi trạng thái hay CTA. Badge chỉ áp cho trạng thái `open`/`limited`. Ở `sold-out` và `quote` luôn dùng nhãn chuẩn, vì badge biên tập cũ (ví dụ "Đang mở bán") không được nằm trên đợt đã kín. `urgencyLabel` chỉ hiện khi `canHoldSeat` (Phase 5, phát hiện trên dữ liệu seed).
 - `price.original` và `promoLabel` giữ governance hiện có của `normalizeDepartureCard`: số hữu hạn, `original > value`, cùng đợt và cùng currency. Đợt sold-out hoặc hết hạn xác minh không được khôi phục ưu đãi.
 - Khi hai đợt bằng nhau về khoá sắp xếp (ngày hoặc giá), xếp theo ngày rồi theo `id`.
 - Số liệu "đợt mở bán" ở hero = `open + limited`. Số "đợt có giá" = số đợt có `price`.

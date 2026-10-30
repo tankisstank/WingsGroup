@@ -411,6 +411,31 @@ describe('US-093 Phase 1B - deriveScheduleAvailability', () => {
       ),
     ).toEqual({ availability: 'open', label: 'Chỉ còn 3 chỗ cuối' })
   })
+
+  it('ignores a stale editorial badge on sold-out and quote departures', () => {
+    const badge = 'Đang mở bán'
+    expect(
+      deriveScheduleAvailability(
+        { commerceVerified: true, availabilityStatus: 'sold-out', priceFrom: 21900000, currency: 'VND' },
+        copy,
+        badge,
+      ),
+    ).toEqual({ availability: 'sold-out', label: copy.statusSoldOut })
+    expect(
+      deriveScheduleAvailability(
+        { commerceVerified: false, availabilityStatus: 'open', priceFrom: 21900000, currency: 'VND' },
+        copy,
+        badge,
+      ),
+    ).toEqual({ availability: 'quote', label: copy.statusQuote })
+    expect(
+      deriveScheduleAvailability(
+        { commerceVerified: true, availabilityStatus: 'open', priceFrom: null, currency: 'VND' },
+        copy,
+        badge,
+      ),
+    ).toEqual({ availability: 'quote', label: copy.statusQuote })
+  })
 })
 
 describe('US-093 Phase 1B - parseScheduleFilters', () => {

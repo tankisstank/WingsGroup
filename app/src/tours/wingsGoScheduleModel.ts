@@ -154,13 +154,15 @@ export const deriveScheduleAvailability = (
     currency?: string | null
   },
   copy: { statusOpen: string; statusLimited: string; statusSoldOut: string; statusQuote: string },
+  // Editorial badge text only replaces the label of a sellable state (open/limited);
+  // a stale "Đang mở bán" must never sit on a sold-out or quote-only departure.
   availabilityBadge?: string | null,
 ): { availability: ScheduleAvailability; label: string } => {
   // Step 1: not commerce verified → quote
   if (!departure.commerceVerified) {
     return {
       availability: 'quote',
-      label: availabilityBadge || copy.statusQuote,
+      label: copy.statusQuote,
     }
   }
 
@@ -168,7 +170,7 @@ export const deriveScheduleAvailability = (
   if (departure.availabilityStatus === 'sold-out') {
     return {
       availability: 'sold-out',
-      label: availabilityBadge || copy.statusSoldOut,
+      label: copy.statusSoldOut,
     }
   }
 
@@ -180,7 +182,7 @@ export const deriveScheduleAvailability = (
   if (!governed) {
     return {
       availability: 'quote',
-      label: availabilityBadge || copy.statusQuote,
+      label: copy.statusQuote,
     }
   }
 
