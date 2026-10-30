@@ -393,6 +393,42 @@ export const getWingsGoScheduleSnapshot = async ({
     )
   }
 
+  // EN reads departures strictly so VI marketing copy (promo, urgency, badge, CTA) never
+  // leaks. Airline and departure city are facts, not copy: fill them from the VI record
+  // of the same departure so EN rows keep their airline, city code and airline filter.
+  if (locale === 'en') {
+    const missingFactIds = allDocs
+      .filter((doc) => !doc.airline || !doc.departureCity)
+      .map((doc) => doc.id)
+    for (let offset = 0; offset < missingFactIds.length; offset += batchSize) {
+      const viFacts = await payload.find({
+        collection: tourDeparturesCollection,
+        depth: 0,
+        draft,
+        limit: batchSize,
+        locale: 'vi' as any,
+        overrideAccess: draft,
+        pagination: false,
+        select: { airline: true, departureCity: true } as any,
+        where: {
+          and: [
+            scopedWhere as any,
+            { id: { in: missingFactIds.slice(offset, offset + batchSize) } },
+          ],
+        },
+      })
+      const factsById = new Map(
+        ((viFacts.docs || []) as any[]).map((fact) => [String(fact.id), fact]),
+      )
+      for (const doc of allDocs) {
+        const fact = factsById.get(String(doc.id))
+        if (!fact) continue
+        if (!doc.airline && fact.airline) doc.airline = fact.airline
+        if (!doc.departureCity && fact.departureCity) doc.departureCity = fact.departureCity
+      }
+    }
+  }
+
   // D11 locale fallback: if EN and some products have no title, fetch VI products
   let viProductsById: Map<string, Record<string, any>> | null = null
   if (locale === 'en') {

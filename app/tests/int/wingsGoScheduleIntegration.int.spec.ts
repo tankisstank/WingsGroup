@@ -408,6 +408,52 @@ describe('US-093 Phase 1A - Real Payload Integration Test', () => {
     expect(tour?.badges).toEqual([])
   }, 60_000)
 
+  it('keeps VI airline and departure city on EN rows but never VI marketing copy', async () => {
+    const factsTour = await createTourProduct(
+      {
+        title: `Tour Seoul ${suffix}`,
+        slug: `tour-en-facts-${suffix}`,
+        market: 'korea',
+        site: wingsGoSite.id,
+      },
+      'vi',
+    )
+
+    const departure = await payload.create({
+      collection: 'tour-departures',
+      context: { disableRevalidate: true, seed: true },
+      locale: 'vi',
+      data: {
+        departureDate: '2028-10-15T00:00:00.000Z',
+        site: wingsGoSite.id,
+        tourProduct: factsTour.id,
+        availabilityStatus: 'open',
+        priceFrom: 18900000,
+        currency: 'VND',
+        airline: 'VIETJET AIR (VJ)',
+        departureCity: 'Hà Nội',
+        promoLabel: 'Ưu đãi đặt sớm',
+        urgencyLabel: 'Còn 3 chỗ',
+        _status: 'published',
+      } as any,
+      overrideAccess: true,
+    })
+
+    currentTestSite = wingsGoSite
+    const snapshotEn = await getWingsGoScheduleSnapshot({
+      locale: 'en',
+      now: new Date('2028-10-01T00:00:00.000Z'),
+    })
+
+    const row = snapshotEn?.rows.find((candidate) => candidate.id === String(departure.id))
+    expect(row).toBeDefined()
+    expect(row?.airline).toEqual({ key: 'VJ', label: 'Vietjet Air' })
+    expect(row?.departureCityCode).toBe('HAN')
+    expect(snapshotEn?.airlines.map((airline) => airline.key)).toContain('VJ')
+    expect(row?.promoLabel).toBeNull()
+    expect(row?.urgencyLabel).toBeNull()
+  }, 60_000)
+
   it('handles deleted relation gracefully without throwing error', async () => {
     const tempTour = await createTourProduct({
       title: `Temp Tour ${suffix}`,
