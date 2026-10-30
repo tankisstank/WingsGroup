@@ -8,6 +8,7 @@ import type {
   WingsGoScheduleRow,
   WingsGoScheduleTour,
 } from './wingsGoScheduleModel'
+import { detectFailedImage } from './wingsGoScheduleImage'
 import { getWingsGoScheduleCopy } from './wingsGoScheduleCopy'
 import { formatShortTourPrice } from './wingsGoDisplay'
 import { formatTourPrice } from './utils'
@@ -176,6 +177,11 @@ export const WingsGoScheduleMarketCards: React.FC<WingsGoScheduleMarketCardsProp
                     onError={() =>
                       setImgErrors((prev) => ({ ...prev, [card.market]: true }))
                     }
+                    ref={detectFailedImage(() =>
+                      setImgErrors((prev) =>
+                        prev[card.market] ? prev : { ...prev, [card.market]: true },
+                      ),
+                    )}
                     src={tour.media.url}
                   />
                 ) : (

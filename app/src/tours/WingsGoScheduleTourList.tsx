@@ -13,6 +13,7 @@ import {
   getScheduleMarketLabel,
   compareScheduleIds,
 } from './wingsGoScheduleModel'
+import { detectFailedImage } from './wingsGoScheduleImage'
 import { getWingsGoScheduleCopy } from './wingsGoScheduleCopy'
 import { PromotionPrice, PromotionBadge } from './PromotionPrice'
 import { SiteLink } from '@/components/SiteLink'
@@ -210,6 +211,9 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
                     onError={() =>
                       setImgErrors((prev) => ({ ...prev, [tour.id]: true }))
                     }
+                    ref={detectFailedImage(() =>
+                      setImgErrors((prev) => (prev[tour.id] ? prev : { ...prev, [tour.id]: true })),
+                    )}
                     src={tour.media.url}
                   />
                 ) : (

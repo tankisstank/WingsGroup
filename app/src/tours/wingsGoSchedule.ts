@@ -24,7 +24,6 @@ import {
   canHoldSeat,
   getPriorityMarketDeparture,
   getTourInquiryPath,
-  isDeparturePublishable,
   normalizeTourPublicText,
 } from './utils'
 import { WINGSGO_MARKET_LABELS } from './wingsGoCatalogCopy'
@@ -567,10 +566,8 @@ export const getWingsGoScheduleSnapshot = async ({
 
   // Snapshot pre-filters canHoldSeat departures before populating marketCards (max 3)
   const canHoldSeatRowIds = new Set(rows.filter((r) => r.canHoldSeat).map((r) => r.id))
-  let canHoldSeatDocs = allDocs.filter((doc) => canHoldSeatRowIds.has(String(doc.id)))
-  if (canHoldSeatDocs.length === 0) {
-    canHoldSeatDocs = allDocs.filter((doc) => doc.availabilityStatus !== 'sold-out')
-  }
+  // A market with no holdable departure gets no card (handoff §3.8); no fallback to unverified ones.
+  const canHoldSeatDocs = allDocs.filter((doc) => canHoldSeatRowIds.has(String(doc.id)))
 
   const marketCards: WingsGoScheduleMarketCard[] = []
   for (const market of markets) {
@@ -589,10 +586,7 @@ export const getWingsGoScheduleSnapshot = async ({
       return tour?.market === market.value
     })
 
-    const priorityDep =
-      getPriorityMarketDeparture(marketDocs as any, market.value, now) ||
-      marketDocs.find((doc) => isDeparturePublishable(doc as any)) ||
-      marketDocs[0]
+    const priorityDep = getPriorityMarketDeparture(marketDocs as any, market.value, now)
     if (priorityDep) {
       marketCards.push({
         market: market.value,

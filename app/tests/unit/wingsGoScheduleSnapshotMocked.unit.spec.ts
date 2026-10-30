@@ -448,3 +448,53 @@ describe('US-093 Phase 1A - Schedule Snapshot & Integration Contracts', () => {
     expect(snapshot?.stats.verifiedDay).toBe('2027-01-16')
   })
 })
+
+describe('US-093 market cards only use holdable departures', () => {
+  const product = (id: string, market: string) => ({
+    id,
+    _status: 'published',
+    site: 7,
+    slug: id,
+    title: `Tour ${id}`,
+    market,
+  })
+  const verified = {
+    commerceVerified: true,
+    verifiedAt: '2026-12-20T00:00:00.000Z',
+    expiresAt: '2027-03-01T00:00:00.000Z',
+  }
+
+  it('builds a card for a market with a holdable departure and none for markets without one', async () => {
+    const docs = [
+      // japan: verified, priced, open -> holdable
+      { id: 'jp-1', departureDate: '2027-02-10T00:00:00.000Z', availabilityStatus: 'open', airline: 'Vietnam Airlines', priceFrom: 20000000, currency: 'VND', ...verified, tourProduct: product('tour-jp', 'japan') },
+      // korea: open but unverified -> quote, no card
+      { id: 'kr-1', departureDate: '2027-02-11T00:00:00.000Z', availabilityStatus: 'open', airline: 'Vietjet Air', priceFrom: 18000000, currency: 'VND', commerceVerified: false, tourProduct: product('tour-kr', 'korea') },
+      // china: verified but sold-out -> no card
+      { id: 'cn-1', departureDate: '2027-02-12T00:00:00.000Z', availabilityStatus: 'sold-out', airline: 'Air China', priceFrom: 15000000, currency: 'VND', ...verified, tourProduct: product('tour-cn', 'china') },
+    ]
+    mocks.find.mockImplementation(async (options: any) =>
+      options.collection === 'tour-departures' ? { docs, hasNextPage: false, totalDocs: docs.length } : { docs: [] },
+    )
+
+    const snapshot = await getWingsGoScheduleSnapshot({ locale: 'vi', now: new Date('2027-01-01T00:00:00.000Z') })
+
+    expect(snapshot?.rows).toHaveLength(3)
+    expect(snapshot?.marketCards.map((card) => card.market)).toEqual(['japan'])
+    expect(snapshot?.marketCards[0]).toMatchObject({ rowId: 'jp-1', tourId: 'tour-jp', departureCount: 1 })
+  })
+
+  it('returns no market cards when nothing can be held', async () => {
+    const docs = [
+      { id: 'kr-1', departureDate: '2027-02-11T00:00:00.000Z', availabilityStatus: 'open', airline: 'Vietjet Air', priceFrom: 18000000, currency: 'VND', commerceVerified: false, tourProduct: product('tour-kr', 'korea') },
+    ]
+    mocks.find.mockImplementation(async (options: any) =>
+      options.collection === 'tour-departures' ? { docs, hasNextPage: false, totalDocs: docs.length } : { docs: [] },
+    )
+
+    const snapshot = await getWingsGoScheduleSnapshot({ locale: 'vi', now: new Date('2027-01-01T00:00:00.000Z') })
+
+    expect(snapshot?.rows).toHaveLength(1)
+    expect(snapshot?.marketCards).toEqual([])
+  })
+})
