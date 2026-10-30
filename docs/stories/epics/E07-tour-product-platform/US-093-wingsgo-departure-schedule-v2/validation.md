@@ -260,6 +260,44 @@ Kết luận: **chấp nhận Phase 1**.
 - `9a7215b`: unit test 4/4 cho đổi giá, unpublish, xoá đợt và đổi badge tour; mỗi ca đều gọi `revalidatePath('/lich-khoi-hanh')` và `('/en/lich-khoi-hanh')`.
 - Đổi giá đợt 6 trên DB copy: cả VI và EN hiện 17.770.000. Dev không có full-route cache nên bước này chỉ là bằng chứng phụ.
 
+**Giảm markup (`ec167d8`, agy) — đo lại trên cùng inventory** (đổi tạm DB sang bản trước khi seed)
+
+| Trang | HTML cũ | HTML mới | Flight cũ | Flight mới | Link tour |
+|---|---|---|---|---|---|
+| VI | 251.262 | **167.629 (−33%)** | 138.241 | 73.651 (−47%) | 17 / 17 |
+| EN | 225.109 | **166.749 (−26%)** | 117.901 | 73.202 (−38%) | 17 / 17 |
+
+- Mỗi row trung bình khoảng 1,8 KB (39 row), cao hơn mục tiêu 1,6 KB của brief, nhưng AC6 (HTML và Flight đều nhỏ hơn) đã đạt.
+- Flight EN tăng nhẹ so với lần đo đầu vì row EN giờ có lại hãng bay (`f0d7da2`).
+
+**Trình duyệt** (`agent-browser`, `localhost:3100/wingsgo/...`, dữ liệu đã seed)
+
+- **Cuộn ngang:** `scrollWidth == clientWidth` ở 360, 390, 430, 600, 768, 820, 1024, 1366, 1440 và 1920 (VI), cùng 360 và 1024 (EN).
+  - Lần đo đầu, ở 1024 toggle "Theo ngày / Theo hành trình" tràn (1050 > 1009).
+  - Đã sửa ở `a7da1cd`: thêm `sm:flex-wrap` cho hàng lọc desktop.
+- **Console và page error:** không có.
+- **Bộ lọc, URL, back/forward** (bắt đầu từ `?utm_source=qa#results`):
+  - Chip "Hàn Quốc": `&market=korea`, giữ hash, 18 đợt / 9 hành trình.
+  - Thêm hãng VJ: 6 đợt.
+  - Back: 18 đợt. Back lần nữa: 38 đợt, URL `?utm_source=qa#results`. Forward: 18 đợt.
+- **Row ẩn sau enhance:** 3 link/nút nằm trong vùng `[hidden]`, cả 3 có `offsetParent === null` nên không nhận Tab.
+- **Bàn phím, biểu đồ tháng:**
+  - focus cột 7/2027 (`aria-label` "Tháng 7/2027: 8 đợt"), Enter: `?month=2027-07`, `aria-pressed=true`, focus ring `solid`;
+  - Space bỏ chọn;
+  - 6 tháng 0 đợt có `disabled`.
+- **CTA → `/lien-he`:** link `intent=hold-seat&tour=seoul-nami-everland-5n4d&tourId=1&departureId=1&departureDate=2027-07-08&source=schedule`. Form được điền sẵn `market=seoul-nami-everland-5n4d` và message "Ngày dự kiến: 2027-07-08 / Nhu cầu: Giữ chỗ".
+- **Ảnh** `artifacts/phase5/`:
+  - VI: 1440 (hero, list, tour view, empty), 768 (hero, list), 390 (hero, thẻ thị trường, list);
+  - EN: 1440 (hero, list), 390 (list).
+- **Tắt JavaScript:** chưa kiểm bằng trình duyệt. Bằng chứng thay thế: HTML SSR có đủ 38 row và 0 row `hidden` (D8).
+- **Dữ liệu cần editor xem:** đợt 6 (Shizuoka, khởi hành 20/05/2027) có `return_date` 29/11/2027, nên trang hiện "Về 29/11". Trang hiển thị đúng dữ liệu nguồn; không sửa CMS.
+- **Ngoài phạm vi:** trên mobile, nút nổi "Liên hệ" toàn site che một phần CTA của row khi cuộn.
+
+**Hồi quy AC7** (cũ 3101 so với mới 3100)
+
+- WingSide (`/wing-side`), WingsGroup (`/wingsgroup`, `/wingsgroup/en`): HTML giống từng byte; `/wing-side/lich-khoi-hanh` vẫn 404 như cũ.
+- WingsGo `/`, `/tour`, `/thi-truong/han-quoc`, `/tour/seoul-nami-everland-5n4d`, `/en/tour`: chạy trên **cùng** DB (bản trước khi seed), HTML giống từng byte. Trên DB đã seed thì khác, do dữ liệu đã xác minh.
+
 ### Review Phase 5 / Release
 
 Chưa chạy.
