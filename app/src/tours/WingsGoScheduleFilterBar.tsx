@@ -150,7 +150,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
         {/* Filter Panel (Desktop: inline; Mobile: expandable region) */}
         <div
           className={cn(
-            'sm:flex sm:items-center sm:gap-2 sm:flex-1 sm:w-auto',
+            'sm:flex sm:flex-wrap sm:items-center sm:gap-2 sm:flex-1 sm:w-auto sm:min-w-0',
             isMobileFiltersOpen
               ? 'flex flex-wrap items-center gap-2 pt-2.5 pb-1 border-t border-border mt-1 w-full order-3 sm:order-none sm:pt-0 sm:pb-0 sm:border-0 sm:mt-0'
               : 'hidden sm:flex',
