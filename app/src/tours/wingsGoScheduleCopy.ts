@@ -89,6 +89,8 @@ export interface WingsGoScheduleCopy {
   viewTour: string
   emptyTitle: string
   emptyDescription: string
+  clearSearch: string
+  tourFallbackTitle: string
 
   // Phase 4
   assuranceKicker: string
@@ -197,6 +199,8 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     viewTour: 'Theo hành trình',
     emptyTitle: 'Chưa có đợt khởi hành',
     emptyDescription: 'Hiện chưa có đợt khởi hành nào trong tương lai. Vui lòng quay lại sau.',
+    clearSearch: 'Xoá tìm kiếm',
+    tourFallbackTitle: 'Tour WingsGo',
 
     assuranceKicker: 'Trước khi giữ chỗ',
     assuranceTitle: 'Lịch để chọn. Chỗ do người thật xác nhận.',
@@ -307,6 +311,8 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     viewTour: 'By itinerary',
     emptyTitle: 'No upcoming departures',
     emptyDescription: 'There are no future departures at this time. Please check back later.',
+    clearSearch: 'Clear search',
+    tourFallbackTitle: 'WingsGo Tour',
 
     assuranceKicker: 'Before holding a seat',
     assuranceTitle: 'Schedules to choose. Seats confirmed by real experts.',

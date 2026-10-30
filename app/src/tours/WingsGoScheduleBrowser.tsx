@@ -11,6 +11,7 @@ import {
   sortScheduleRows,
   countScheduleFacets,
   parseScheduleFilters,
+  urlSearchParamsToRecord,
   getScheduleMarketLabel,
 } from './wingsGoScheduleModel'
 import { getWingsGoScheduleCopy } from './wingsGoScheduleCopy'
@@ -65,9 +66,10 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
         if (newFilters.view && newFilters.view !== 'date') params.set('view', newFilters.view)
 
         const queryStr = params.toString()
+        const hash = window.location.hash || ''
         const newUrl = queryStr
-          ? `${window.location.pathname}?${queryStr}`
-          : window.location.pathname
+          ? `${window.location.pathname}?${queryStr}${hash}`
+          : `${window.location.pathname}${hash}`
 
         if (mode === 'replace') {
           window.history.replaceState(null, '', newUrl)
@@ -85,7 +87,7 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
   useEffect(() => {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search)
-      const parsed = parseScheduleFilters(Object.fromEntries(params.entries()), {
+      const parsed = parseScheduleFilters(urlSearchParamsToRecord(params), {
         validMarkets: snapshot.markets.map((m) => m.value),
         validMonths: snapshot.months,
         validAirlines: snapshot.airlines.map((a) => a.key),
@@ -231,7 +233,7 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
         {activeChips.map((chip) => (
           <button
             aria-label={copy.clearFilterAria(chip.label)}
-            className="wingsgo-schedule-active-chip inline-flex items-center gap-1.5 min-h-[30px] sm:min-h-[32px] px-3 py-1 rounded-full bg-muted/80 text-foreground text-xs font-medium hover:bg-muted transition-colors cursor-pointer"
+            className="wingsgo-schedule-active-chip inline-flex items-center gap-1.5 min-h-[44px] px-3.5 py-1.5 rounded-full bg-muted/80 text-foreground text-xs font-medium hover:bg-muted transition-colors cursor-pointer"
             data-clear={chip.key}
             key={chip.key}
             onClick={() => updateFilters({ [chip.key]: undefined })}
@@ -244,7 +246,7 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
 
         {activeChips.length > 0 ? (
           <button
-            className="wingsgo-schedule-clear-all ml-auto text-xs sm:text-sm font-semibold text-[var(--site-brand)] hover:underline cursor-pointer bg-transparent border-none p-1"
+            className="wingsgo-schedule-clear-all ml-auto inline-flex items-center min-h-[44px] px-2 text-xs sm:text-sm font-semibold text-[var(--site-brand)] hover:underline cursor-pointer bg-transparent border-none"
             data-reset="true"
             onClick={clearAllFilters}
             type="button"

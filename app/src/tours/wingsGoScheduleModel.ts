@@ -228,6 +228,22 @@ export const buildSearchText = (
 }
 
 /**
+ * Pure adapter converting URLSearchParams to Record<string, string | string[]>
+ * preserving repeated query keys as arrays, matching SSR searchParams contract.
+ */
+export const urlSearchParamsToRecord = (
+  params: URLSearchParams,
+): Record<string, string | string[]> => {
+  const result: Record<string, string | string[]> = {}
+  for (const key of params.keys()) {
+    if (key in result) continue
+    const all = params.getAll(key)
+    result[key] = all.length > 1 ? all : all[0] ?? ''
+  }
+  return result
+}
+
+/**
  * US-093 D9: Parse and whitelist schedule filters from searchParams.
  * Drops unknown parameters, arrays/repeated params, and invalid values.
  * Defaults sort to 'date' and view to 'date'.

@@ -540,10 +540,10 @@ export const hasWingsGoScheduleFilterParams = (
 ): boolean => {
   if (!searchParams) return false
   return WINGSGO_SCHEDULE_FILTER_PARAMS.some((key) => {
-    const value = searchParams[key]
-    if (value === undefined || value === null || value === '') return false
-    if (Array.isArray(value) && value.length === 0) return false
-    return true
+    return (
+      Object.prototype.hasOwnProperty.call(searchParams, key) &&
+      searchParams[key] !== undefined
+    )
   })
 }
 

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { WingsGoScheduleHero } from '@/tours/WingsGoScheduleHero'
 import { WingsGoScheduleMonthChart } from '@/tours/WingsGoScheduleMonthChart'
 import { WingsGoScheduleMarketCards } from '@/tours/WingsGoScheduleMarketCards'
+import { buildScheduleMonths } from '@/tours/wingsGoScheduleModel'
 import type {
   WingsGoScheduleMarketCard,
   WingsGoScheduleRow,
@@ -177,10 +178,11 @@ describe('US-093 Phase 2 Component Tests', () => {
       )
       const barNov = screen.getByRole('button', { name: /11\/2026: 15 đợt/ })
 
-      fireEvent.click(barNov)
+      // Press Enter via keyboard
+      fireEvent.keyDown(barNov, { key: 'Enter', code: 'Enter' })
       expect(onSelect).toHaveBeenCalledWith('2026-11')
 
-      // Clicking an already selected month deselects it
+      // Clicking an already selected month deselects it (via Space)
       onSelect.mockClear()
       rerender(
         <WingsGoScheduleMonthChart
@@ -194,23 +196,39 @@ describe('US-093 Phase 2 Component Tests', () => {
       const barNovSelected = screen.getByRole('button', {
         name: /11\/2026: 15 đợt/,
       })
-      fireEvent.click(barNovSelected)
+      fireEvent.keyDown(barNovSelected, { key: ' ', code: 'Space' })
       expect(onSelect).toHaveBeenCalledWith(undefined)
     })
 
     it('renders gap month separator when consecutive months have a gap', () => {
+      // Using real buildScheduleMonths output with complete month range
+      const realMonths = buildScheduleMonths([
+        { monthKey: '2026-11' },
+        { monthKey: '2027-02' },
+      ])
+      // realMonths is ['2026-11', '2026-12', '2027-01', '2027-02']
+      const realCounts = {
+        '2026-11': 15,
+        '2026-12': 0,
+        '2027-01': 0,
+        '2027-02': 4,
+      }
       const { container } = render(
         <WingsGoScheduleMonthChart
-          counts={counts}
+          counts={realCounts}
           locale="vi"
-          months={months}
+          months={realMonths}
         />,
       )
-      // Between 2026-12 and 2027-02, month 2027-01 is missing (gap!)
+      // Month 2026-12 is 0-count between active months (gap!)
+      const barDec = container.querySelector('[data-month="2026-12"]')
+      expect(barDec?.className).toContain('wingsgo-schedule-bar--gap')
+
+      // Month 2027-02 resumes after 0-count gap
       const barFeb = container.querySelector('[data-month="2027-02"]')
       expect(barFeb?.className).toContain('wingsgo-schedule-bar--gap')
 
-      // 2026-11 is directly after 2026-10 (no gap)
+      // 2026-11 is at the beginning (no gap)
       const barNov = container.querySelector('[data-month="2026-11"]')
       expect(barNov?.className).not.toContain('wingsgo-schedule-bar--gap')
     })
@@ -501,6 +519,73 @@ describe('US-093 Phase 2 Component Tests', () => {
       onSelect.mockClear()
       fireEvent.keyDown(koreaCard, { key: 'Enter' })
       expect(onSelect).toHaveBeenCalledWith('korea')
+    })
+
+    it('R1: formats USD price without converting or displaying VND', () => {
+      const usdRows: WingsGoScheduleRow[] = [
+        {
+          ...mockRows[0],
+          price: { value: 1200, currency: 'USD', original: null },
+        },
+      ]
+      const { rerender } = render(
+        <WingsGoScheduleMarketCards
+          cards={[mockCards[0]]}
+          locale="vi"
+          rows={usdRows}
+          tours={mockTours}
+        />,
+      )
+      // Must not display "VND" for USD price
+      expect(screen.queryByText(/VND/)).toBeNull()
+      expect(screen.getByText(/1\.200[\s\u00A0]*US\$|\$1,200/)).toBeTruthy()
+
+      // In EN locale
+      rerender(
+        <WingsGoScheduleMarketCards
+          cards={[mockCards[0]]}
+          locale="en"
+          rows={usdRows}
+          tours={mockTours}
+        />,
+      )
+      expect(screen.queryByText(/VND/)).toBeNull()
+      expect(screen.getByText(/1\.200[\s\u00A0]*US\$|\$1,200/)).toBeTruthy()
+    })
+
+    it('O1: displays normalized routeTitle and puts full title in title attribute when different', () => {
+      render(
+        <WingsGoScheduleMarketCards
+          cards={[mockCards[0]]}
+          locale="vi"
+          rows={mockRows}
+          tours={mockTours}
+        />,
+      )
+      // Displays routeTitle "Seoul · Nami · Everland"
+      expect(screen.getByText('Seoul · Nami · Everland')).toBeTruthy()
+      const titleElem = screen.getByText('Seoul · Nami · Everland')
+      expect(titleElem.getAttribute('title')).toBe('Seoul – Đảo Nami – Everland')
+    })
+
+    it('O2: switches to fallback placeholder when image fails to load (onError)', () => {
+      render(
+        <WingsGoScheduleMarketCards
+          cards={[mockCards[0]]}
+          locale="vi"
+          rows={mockRows}
+          tours={mockTours}
+        />,
+      )
+      const img = screen.getByAltText('Seoul')
+      expect(img).toBeTruthy()
+
+      // Trigger image error
+      fireEvent.error(img)
+
+      // Fallback placeholder is now displayed
+      expect(screen.getByText('Ảnh tour đang cập nhật')).toBeTruthy()
+      expect(screen.queryByAltText('Seoul')).toBeNull()
     })
   })
 })

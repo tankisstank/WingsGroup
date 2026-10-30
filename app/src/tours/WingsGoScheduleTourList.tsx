@@ -65,6 +65,7 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
 
   // Expanded tours tracking: { [tourId]: boolean }
   const [expandedTours, setExpandedTours] = useState<Record<string, boolean>>({})
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
 
   const toggleTour = (tourId: string) => {
     setExpandedTours((prev) => ({
@@ -201,11 +202,14 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
                   </div>
                 ) : null}
 
-                {tour.media?.url ? (
+                {tour.media?.url && !imgErrors[tour.id] ? (
                   <img
                     alt={tour.media.alt || tour.title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     loading="lazy"
+                    onError={() =>
+                      setImgErrors((prev) => ({ ...prev, [tour.id]: true }))
+                    }
                     src={tour.media.url}
                   />
                 ) : (
@@ -236,12 +240,21 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
                       ) : null}
                     </div>
 
-                    <SiteLink
-                      className="block text-base sm:text-lg font-bold text-foreground hover:text-[var(--site-brand)] transition-colors no-underline leading-snug"
-                      href={tour.href}
-                    >
-                      <h3 className="m-0 text-inherit font-inherit">{tour.title}</h3>
-                    </SiteLink>
+                    {(() => {
+                      const tourDisplayTitle = tour.routeTitle || tour.title
+                      const hasDistinctTitle = Boolean(
+                        tour.title && tour.routeTitle && tour.title !== tour.routeTitle,
+                      )
+                      return (
+                        <SiteLink
+                          className="block text-base sm:text-lg font-bold text-foreground hover:text-[var(--site-brand)] transition-colors no-underline leading-snug"
+                          href={tour.href}
+                          title={hasDistinctTitle ? tour.title : undefined}
+                        >
+                          <h3 className="m-0 text-inherit font-inherit">{tourDisplayTitle}</h3>
+                        </SiteLink>
+                      )
+                    })()}
                   </div>
 
                   {/* Price Block: Lowest Price from Chosen Row */}
@@ -290,7 +303,7 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
                           row.availabilityLabel,
                         )}
                         className={cn(
-                          'wingsgo-schedule-date-chip inline-flex flex-col items-center justify-center min-w-[70px] sm:min-w-[76px] px-2.5 py-1.5 rounded-xl border text-center no-underline transition-colors cursor-pointer',
+                          'wingsgo-schedule-date-chip inline-flex flex-col items-center justify-center min-w-[70px] sm:min-w-[76px] min-h-[44px] px-2.5 py-1.5 rounded-xl border text-center no-underline transition-colors cursor-pointer',
                           row.availability === 'sold-out'
                             ? 'bg-muted/60 text-muted-foreground border-border hover:bg-muted'
                             : 'bg-card border-border hover:border-[var(--site-brand)] hover:bg-[var(--site-brand)]/5',
@@ -315,7 +328,7 @@ export const WingsGoScheduleTourList: React.FC<WingsGoScheduleTourListProps> = (
                     <button
                       aria-controls={`tour-dates-${tour.id}`}
                       aria-expanded={isExpanded}
-                      className="wingsgo-schedule-more-dates-btn inline-flex flex-col items-center justify-center min-w-[70px] sm:min-w-[76px] px-2.5 py-1.5 rounded-xl border border-dashed border-[var(--site-brand)]/50 text-xs font-semibold text-[var(--site-brand)] hover:bg-[var(--site-brand)]/5 transition-colors cursor-pointer"
+                      className="wingsgo-schedule-more-dates-btn inline-flex flex-col items-center justify-center min-w-[70px] sm:min-w-[76px] min-h-[44px] px-2.5 py-1.5 rounded-xl border border-dashed border-[var(--site-brand)]/50 text-xs font-semibold text-[var(--site-brand)] hover:bg-[var(--site-brand)]/5 transition-colors cursor-pointer"
                       data-more={`tour:${tour.slug}`}
                       onClick={() => toggleTour(tour.id)}
                       type="button"

@@ -6,11 +6,22 @@
  */
 export const scrollToScheduleList = (
   targetId = 'wingsgo-schedule-list',
-  offset = 0,
+  customOffset?: number,
 ): void => {
   if (typeof window === 'undefined') return
   const el = document.getElementById(targetId)
   if (!el) return
+
+  let offset = customOffset ?? 0
+  if (customOffset === undefined) {
+    const filterBar =
+      document.querySelector<HTMLElement>('.wingsgo-schedule-filter-bar') ||
+      document.querySelector<HTMLElement>('[data-od-id="schedule-filter-bar"]')
+    if (filterBar) {
+      offset = filterBar.getBoundingClientRect().height
+    }
+  }
+
   const rect = el.getBoundingClientRect()
   const prefersReducedMotion =
     typeof window.matchMedia === 'function' &&

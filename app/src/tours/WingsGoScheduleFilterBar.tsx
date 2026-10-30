@@ -64,7 +64,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
       <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
         {/* Search Input */}
         <label
-          className="flex items-center gap-2 min-h-[42px] px-3.5 border border-border rounded-full bg-card flex-1 min-w-[200px] sm:max-w-xs focus-within:border-[var(--site-brand)] transition-colors"
+          className="flex items-center gap-2 min-h-[44px] px-3.5 border border-border rounded-full bg-card flex-1 min-w-[200px] sm:max-w-xs focus-within:border-[var(--site-brand)] transition-colors"
           data-od-id="schedule-search"
         >
           <svg
@@ -90,8 +90,8 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           />
           {localQuery ? (
             <button
-              aria-label="Xóa tìm kiếm"
-              className="text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+              aria-label={copy.clearSearch}
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-xs text-muted-foreground hover:text-foreground cursor-pointer -mr-2"
               onClick={() => {
                 setLocalQuery('')
                 onUpdateFilters({ q: undefined })
@@ -108,7 +108,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           {/* Airline Select */}
           <select
             aria-label={copy.airlineFilterAria}
-            className="min-h-[42px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)]"
+            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)]"
             data-od-id="airline-filter"
             id="f-airline"
             onChange={(e) =>
@@ -129,7 +129,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           {/* Status Select */}
           <select
             aria-label={copy.statusFilterAria}
-            className="min-h-[42px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)]"
+            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)]"
             data-od-id="status-filter"
             id="f-status"
             onChange={(e) =>
@@ -152,7 +152,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           {/* Sort Select */}
           <select
             aria-label={copy.sortFilterAria}
-            className="min-h-[42px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)]"
+            className="min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)]"
             data-od-id="sort-filter"
             id="f-sort"
             onChange={(e) =>
@@ -177,7 +177,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           <button
             aria-pressed={filters.view !== 'tour'}
             className={cn(
-              'min-h-[34px] px-3.5 rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer',
+              'min-h-[44px] px-3.5 inline-flex items-center justify-center rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer',
               filters.view !== 'tour'
                 ? 'bg-[var(--site-brand)] text-white shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
@@ -191,7 +191,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
           <button
             aria-pressed={filters.view === 'tour'}
             className={cn(
-              'min-h-[34px] px-3.5 rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer',
+              'min-h-[44px] px-3.5 inline-flex items-center justify-center rounded-full text-xs sm:text-sm font-medium transition-colors cursor-pointer',
               filters.view === 'tour'
                 ? 'bg-[var(--site-brand)] text-white shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
@@ -216,7 +216,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
         <button
           aria-pressed={!filters.market}
           className={cn(
-            'inline-flex items-center gap-1.5 min-h-[34px] sm:min-h-[36px] px-3.5 rounded-full text-xs sm:text-sm font-medium border shrink-0 transition-colors cursor-pointer',
+            'inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 rounded-full text-xs sm:text-sm font-medium border shrink-0 transition-colors cursor-pointer',
             !filters.market
               ? 'bg-[var(--site-brand)] text-white border-[var(--site-brand)] shadow-sm'
               : 'border-border bg-card text-foreground hover:bg-muted/80',
@@ -238,7 +238,7 @@ export const WingsGoScheduleFilterBar: React.FC<WingsGoScheduleFilterBarProps> =
             <button
               aria-pressed={isSelected}
               className={cn(
-                'inline-flex items-center gap-1.5 min-h-[34px] sm:min-h-[36px] px-3.5 rounded-full text-xs sm:text-sm font-medium border shrink-0 transition-colors cursor-pointer',
+                'inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 rounded-full text-xs sm:text-sm font-medium border shrink-0 transition-colors cursor-pointer',
                 isSelected
                   ? 'bg-[var(--site-brand)] text-white border-[var(--site-brand)] shadow-sm'
                   : 'border-border bg-card text-foreground hover:bg-muted/80',

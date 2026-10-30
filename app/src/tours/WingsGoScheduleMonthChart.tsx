@@ -83,7 +83,20 @@ export const WingsGoScheduleMonthChart: React.FC<WingsGoScheduleMonthChartProps>
           const curIndex = getMonthIndex(m)
           const prevM = i > 0 ? months[i - 1] : null
           const prevIndex = prevM ? getMonthIndex(prevM) : null
-          const isGap = prevIndex !== null && curIndex - prevIndex > 1
+
+          const hasEarlierData = months.slice(0, i).some((pm) => (counts[pm] || 0) > 0)
+          const hasLaterData = months.slice(i + 1).some((nm) => (counts[nm] || 0) > 0)
+          const isZeroGap = count === 0 && hasEarlierData && hasLaterData
+          const isResumingAfterZeroGap =
+            count > 0 &&
+            prevM !== null &&
+            (counts[prevM] || 0) === 0 &&
+            hasEarlierData
+
+          const isGap =
+            (prevIndex !== null && curIndex - prevIndex > 1) ||
+            isZeroGap ||
+            isResumingAfterZeroGap
           const prevYear = prevM ? prevM.split('-')[0] : ''
           const isYearChange = i === 0 || yStr !== prevYear
           const showYear = isYearChange || isGap
@@ -111,6 +124,13 @@ export const WingsGoScheduleMonthChart: React.FC<WingsGoScheduleMonthChartProps>
               onClick={() => {
                 if (isDisabled) return
                 onSelect?.(isPressed ? undefined : m)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  if (isDisabled) return
+                  onSelect?.(isPressed ? undefined : m)
+                }
               }}
               type="button"
             >

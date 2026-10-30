@@ -16,6 +16,7 @@ export type WingsGoScheduleRowProps = {
   row: WingsGoScheduleRowType
   tour?: WingsGoScheduleTour
   locale?: SupportedLocaleCode
+  showFullDate?: boolean
   hidden?: boolean
   className?: string
 }
@@ -32,20 +33,23 @@ export const WingsGoScheduleRow: React.FC<WingsGoScheduleRowProps> = ({
   row,
   tour,
   locale = 'vi',
+  showFullDate = false,
   hidden = false,
   className,
 }) => {
   const isEn = locale === 'en'
   const copy = getWingsGoScheduleCopy(locale)
 
-  const dayNumber = row.departureDay.split('-')[2] || ''
+  const [yearNumber, monthNumber, dayNumber] = (row.departureDay || '').split('-')
   const weekdayAbbr = getScheduleWeekdayAbbr(row.departureDay, isEn ? 'en' : 'vi')
   const returnFormatted = formatReturnDay(row.returnDay)
   const marketLabel = getScheduleMarketLabel(tour?.market, isEn ? 'en' : 'vi', copy)
   const isHot = Boolean(tour?.hasHot || tour?.badges?.some((b) => b.kind === 'hot'))
 
   const tourHref = tour?.href || row.ctaHref
-  const tourTitle = tour?.title || row.searchText
+  const displayTitle = tour?.routeTitle || tour?.title || copy.tourFallbackTitle
+  const fullTitle = tour?.title || displayTitle
+  const hasDistinctTitle = Boolean(tour?.title && tour.routeTitle && tour.title !== tour.routeTitle)
 
   const getStatusBadgeClass = () => {
     switch (row.availability) {
@@ -63,7 +67,7 @@ export const WingsGoScheduleRow: React.FC<WingsGoScheduleRowProps> = ({
 
   return (
     <article
-      aria-label={`${tourTitle} - ${row.departureDay}`}
+      aria-label={`${displayTitle} - ${row.departureDay}`}
       className={cn(
         'wingsgo-schedule-row group relative grid grid-cols-[72px_minmax(0,1fr)] md:grid-cols-[96px_minmax(0,1fr)_180px_220px] items-stretch bg-card border border-border rounded-[20px] transition-[box-shadow,border-color] duration-200 hover:border-[var(--site-brand)]/40 hover:shadow-sm',
         row.availability === 'sold-out' && 'wingsgo-schedule-row--sold-out opacity-90',
@@ -73,11 +77,16 @@ export const WingsGoScheduleRow: React.FC<WingsGoScheduleRowProps> = ({
       hidden={hidden}
     >
       {/* 1. Ticket Stub */}
-      <div className="wingsgo-schedule-stub relative flex flex-col items-center justify-center p-2.5 sm:p-3 border-r-[1.5px] border-dashed border-border select-none">
+      <div className="wingsgo-schedule-stub relative flex flex-col items-center justify-center p-2.5 sm:p-3 border-r-[1.5px] border-dashed border-border select-none text-center">
         <span className="wingsgo-display text-2xl sm:text-3xl font-semibold leading-none text-[var(--site-brand)]">
-          {dayNumber}
+          {dayNumber || ''}
         </span>
-        <span className="text-[11px] sm:text-xs text-muted-foreground font-medium mt-1">
+        {showFullDate && monthNumber && yearNumber ? (
+          <span className="text-[11px] sm:text-xs font-semibold text-foreground mt-1">
+            {monthNumber}/{yearNumber}
+          </span>
+        ) : null}
+        <span className="text-[11px] sm:text-xs text-muted-foreground font-medium mt-0.5">
           {weekdayAbbr}
         </span>
       </div>
@@ -88,26 +97,30 @@ export const WingsGoScheduleRow: React.FC<WingsGoScheduleRowProps> = ({
           <SiteLink
             className="hover:text-[var(--site-brand)] transition-colors no-underline text-foreground"
             href={tourHref}
-            title={tourTitle}
+            title={hasDistinctTitle ? fullTitle : undefined}
           >
-            {tourTitle}
+            {displayTitle}
           </SiteLink>
         </h4>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
           {/* Route departure city -> market */}
           <span className="inline-flex items-center gap-1 font-semibold text-foreground tracking-wide">
-            {row.departureCityCode || 'HAN'}
-            <svg
-              aria-hidden="true"
-              className="w-3.5 h-3.5 text-[var(--site-brand)] shrink-0"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M10.5 13.5 3 11l1.5-1.5 7.5 1L16 6c1-1 3-1.5 3.5-1s0 2.5-1 3.5l-4.5 4 1 7.5L13.5 21l-2.5-7.5" />
-            </svg>
+            {row.departureCityCode ? (
+              <>
+                <span>{row.departureCityCode}</span>
+                <svg
+                  aria-hidden="true"
+                  className="w-3.5 h-3.5 text-[var(--site-brand)] shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M10.5 13.5 3 11l1.5-1.5 7.5 1L16 6c1-1 3-1.5 3.5-1s0 2.5-1 3.5l-4.5 4 1 7.5L13.5 21l-2.5-7.5" />
+                </svg>
+              </>
+            ) : null}
             <span className="uppercase">{marketLabel || 'TOUR'}</span>
           </span>
 
@@ -168,7 +181,13 @@ export const WingsGoScheduleRow: React.FC<WingsGoScheduleRowProps> = ({
         <small className="text-[11px] text-muted-foreground">
           {row.price?.value ? copy.priceFrom : copy.statusQuote}
         </small>
-        <div className="text-base sm:text-lg font-bold tracking-tight">
+        <div
+          className={cn(
+            'text-base sm:text-lg font-bold tracking-tight',
+            row.availability === 'sold-out' &&
+              'line-through text-muted-foreground/90 decoration-muted-foreground/60',
+          )}
+        >
           <PromotionPrice
             contactLabel={copy.statusQuote}
             currency={row.price?.currency}
@@ -181,8 +200,8 @@ export const WingsGoScheduleRow: React.FC<WingsGoScheduleRowProps> = ({
       {/* 4. Action Column */}
       <div className="col-span-2 md:col-span-1 p-3.5 sm:p-4 md:p-5 flex items-center justify-between md:justify-end gap-3 md:border-l md:border-border border-t md:border-t-0 border-border/70">
         <SiteLink
-          aria-label={`${copy.viewTourAction} ${tourTitle}`}
-          className="text-xs sm:text-sm font-semibold text-[var(--site-brand)] hover:underline no-underline"
+          aria-label={`${copy.viewTourAction} ${displayTitle}`}
+          className="inline-flex min-h-[44px] items-center px-1 text-xs sm:text-sm font-semibold text-[var(--site-brand)] hover:underline no-underline"
           href={tourHref}
         >
           {copy.viewTourAction}
@@ -190,7 +209,7 @@ export const WingsGoScheduleRow: React.FC<WingsGoScheduleRowProps> = ({
 
         <SiteLink
           className={cn(
-            'inline-flex min-h-[38px] sm:min-h-[40px] items-center justify-center rounded-full px-4 text-xs sm:text-sm font-semibold transition-colors no-underline whitespace-nowrap',
+            'inline-flex min-h-[44px] items-center justify-center rounded-full px-4 text-xs sm:text-sm font-semibold transition-colors no-underline whitespace-nowrap',
             row.availability === 'sold-out'
               ? 'border border-border bg-card text-foreground/85 hover:bg-muted font-medium'
               : row.canHoldSeat

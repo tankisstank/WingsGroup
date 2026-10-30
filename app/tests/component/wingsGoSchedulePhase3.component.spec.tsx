@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -131,6 +131,63 @@ describe('US-093 Phase 3 Component Tests', () => {
       rerender(<WingsGoScheduleRow row={rowNoReturn} tour={createMockTour()} />)
       expect(screen.queryByText(/Về/)).toBeNull()
     })
+
+    it('R2: showFullDate renders month and year visibly in the stub', () => {
+      const row1 = createMockRow({ id: 'dep-a', departureDay: '2026-11-15' })
+      const row2 = createMockRow({ id: 'dep-b', departureDay: '2027-08-15' })
+      render(
+        <div>
+          <WingsGoScheduleRow row={row1} showFullDate={true} tour={createMockTour()} />
+          <WingsGoScheduleRow row={row2} showFullDate={true} tour={createMockTour()} />
+        </div>,
+      )
+      expect(screen.getByText('11/2026')).toBeTruthy()
+      expect(screen.getByText('08/2027')).toBeTruthy()
+    })
+
+    it('R3: does NOT default to HAN when departureCityCode is null', () => {
+      const rowNoCity = createMockRow({ departureCityCode: null })
+      const { container } = render(
+        <WingsGoScheduleRow row={rowNoCity} tour={createMockTour()} />,
+      )
+      expect(container.textContent).not.toContain('HAN')
+    })
+
+    it('R10: applies line-through and muted styling to price on sold-out row', () => {
+      const soldOutRow = createMockRow({
+        availability: 'sold-out',
+        availabilityLabel: 'Đã kín',
+        price: { value: 15900000, currency: 'VND', original: null },
+      })
+      const { container } = render(
+        <WingsGoScheduleRow row={soldOutRow} tour={createMockTour()} />,
+      )
+      const priceWrapper = container.querySelector('.line-through')
+      expect(priceWrapper).toBeTruthy()
+      expect(priceWrapper?.className).toContain('line-through')
+      expect(priceWrapper?.className).toContain('text-muted-foreground/90')
+    })
+
+    it('O1: displays routeTitle on Row and sets title attribute to full title when different', () => {
+      const tour = createMockTour({
+        title: 'TOUR HÀN QUỐC 5N4Đ: SEOUL - NAMI - EVERLAND',
+        routeTitle: 'Seoul · Nami · Everland',
+      })
+      const row = createMockRow({ tourId: tour.id })
+      render(<WingsGoScheduleRow row={row} tour={tour} />)
+
+      expect(screen.getByText('Seoul · Nami · Everland')).toBeTruthy()
+      const link = screen.getByRole('link', { name: 'Seoul · Nami · Everland' })
+      expect(link.getAttribute('title')).toBe('TOUR HÀN QUỐC 5N4Đ: SEOUL - NAMI - EVERLAND')
+    })
+
+    it('O1: uses tourFallbackTitle and never falls back to searchText when tour is missing', () => {
+      const row = createMockRow({ searchText: 'some-raw-slug-keywords' })
+      render(<WingsGoScheduleRow row={row} tour={undefined} />)
+
+      expect(screen.getByText('Tour WingsGo')).toBeTruthy()
+      expect(screen.queryByText('some-raw-slug-keywords')).toBeNull()
+    })
   })
 
   describe('WingsGoScheduleDateList (D8 Hydration Contract)', () => {
@@ -252,8 +309,8 @@ describe('US-093 Phase 3 Component Tests', () => {
       locale: 'vi',
       todayDay: '2026-10-30',
       tours: {
-        'tour-1': createMockTour({ id: 'tour-1', market: 'korea', title: 'Tour Hàn Quốc Seoul' }),
-        'tour-2': createMockTour({ id: 'tour-2', market: 'japan', title: 'Tour Nhật Bản Tokyo' }),
+        'tour-1': createMockTour({ id: 'tour-1', market: 'korea', title: 'Tour Hàn Quốc Seoul', routeTitle: 'Tour Hàn Quốc Seoul' }),
+        'tour-2': createMockTour({ id: 'tour-2', market: 'japan', title: 'Tour Nhật Bản Tokyo', routeTitle: 'Tour Nhật Bản Tokyo' }),
       },
       rows: [
         createMockRow({ id: 'dep-1', tourId: 'tour-1', monthKey: '2026-11', departureDay: '2026-11-10', price: { value: 15000000, currency: 'VND', original: null } }),
@@ -347,6 +404,47 @@ describe('US-093 Phase 3 Component Tests', () => {
       expect(screen.getByText('Nearest date')).toBeTruthy()
       expect(screen.getAllByText('View tour').length).toBeGreaterThan(0)
       expect(screen.getAllByText('Hold seat').length).toBeGreaterThan(0)
+    })
+
+    it('R5: preserves URL hash during filter updates', () => {
+      window.location.hash = '#results'
+      const pushSpy = vi.spyOn(window.history, 'pushState')
+
+      const { container } = render(<WingsGoScheduleBrowser snapshot={baseSnapshot} />)
+      const barNov = container.querySelector('button[data-od-id="month-bar-2026-11"]')
+      fireEvent.click(barNov!)
+
+      expect(pushSpy).toHaveBeenCalled()
+      const lastCall = pushSpy.mock.calls[pushSpy.mock.calls.length - 1]
+      expect(lastCall[2]).toContain('#results')
+      pushSpy.mockRestore()
+    })
+
+    it('R5: popstate with repeated query parameters drops repeated filter matching SSR', async () => {
+      render(<WingsGoScheduleBrowser snapshot={baseSnapshot} />)
+
+      // Simulate popstate event with repeated market param ?market=korea&market=japan
+      await act(async () => {
+        window.history.pushState(null, '', '/lich-khoi-hanh?market=korea&market=japan')
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      })
+
+      // Both Korea and Japan rows should remain rendered (market filter dropped)
+      expect(screen.getAllByText(/Tour Hàn Quốc Seoul/).length).toBeGreaterThan(0)
+      expect(screen.getAllByText(/Tour Nhật Bản Tokyo/).length).toBeGreaterThan(0)
+    })
+
+    it('R8: search clear button has accessible name Clear search in EN', () => {
+      const enSnapshot: WingsGoScheduleSnapshot = {
+        ...baseSnapshot,
+        locale: 'en',
+      }
+      render(<WingsGoScheduleBrowser snapshot={enSnapshot} />)
+      const searchInput = screen.getByRole('searchbox')
+      fireEvent.change(searchInput, { target: { value: 'Seoul' } })
+
+      const clearBtn = screen.getByRole('button', { name: 'Clear search' })
+      expect(clearBtn).toBeTruthy()
     })
   })
 })

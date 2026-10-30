@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 import type {
   WingsGoScheduleMarketCard,
@@ -10,6 +10,7 @@ import type {
 } from './wingsGoScheduleModel'
 import { getWingsGoScheduleCopy } from './wingsGoScheduleCopy'
 import { formatShortTourPrice } from './wingsGoDisplay'
+import { formatTourPrice } from './utils'
 import { PromotionBadge } from './PromotionPrice'
 import { scrollToScheduleList } from './wingsGoScheduleScroll'
 import { cn } from '@/utilities/ui'
@@ -43,6 +44,7 @@ export const WingsGoScheduleMarketCards: React.FC<WingsGoScheduleMarketCardsProp
 }) => {
   const isEn = locale === 'en'
   const copy = getWingsGoScheduleCopy(locale)
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({})
   const displayCards = cards.slice(0, 3)
 
   if (displayCards.length === 0) {
@@ -87,6 +89,13 @@ export const WingsGoScheduleMarketCards: React.FC<WingsGoScheduleMarketCardsProp
           const hasBadges = cornerStickers.length > 0 || Boolean(promoBadge)
           const departureFormatted = formatDMY(row?.departureDay)
           const priceValue = row?.price?.value
+          const currency = row?.price?.currency || 'VND'
+          const cardDisplayTitle = tour?.routeTitle || tour?.title || card.label
+          const cardFullTitle = tour?.title || cardDisplayTitle
+          const hasDistinctTitle = Boolean(
+            tour?.title && tour.routeTitle && tour.title !== tour.routeTitle,
+          )
+          const hasImgError = Boolean(imgErrors[card.market])
 
           return (
             <article
@@ -159,16 +168,19 @@ export const WingsGoScheduleMarketCards: React.FC<WingsGoScheduleMarketCardsProp
                   </div>
                 ) : null}
 
-                {tour?.media?.url ? (
+                {tour?.media?.url && !hasImgError ? (
                   <img
-                    alt={tour.media.alt || tour.title}
+                    alt={tour.media.alt || cardFullTitle}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     loading="lazy"
+                    onError={() =>
+                      setImgErrors((prev) => ({ ...prev, [card.market]: true }))
+                    }
                     src={tour.media.url}
                   />
                 ) : (
                   <div
-                    aria-label={copy.imageComingSoon(tour?.title || card.label)}
+                    aria-label={copy.imageComingSoon(cardFullTitle)}
                     className="flex h-full items-center justify-center bg-[linear-gradient(135deg,color-mix(in_oklch,var(--site-brand)_18%,transparent),color-mix(in_oklch,var(--site-accent)_16%,transparent))] px-6 text-center text-sm font-semibold text-foreground/70"
                     role="img"
                   >
@@ -196,8 +208,11 @@ export const WingsGoScheduleMarketCards: React.FC<WingsGoScheduleMarketCardsProp
                       {copy.marketCardDeparting(departureFormatted)}
                     </small>
                   ) : null}
-                  <b className="block text-sm sm:text-base font-semibold leading-snug text-foreground line-clamp-2">
-                    {tour?.title || card.label}
+                  <b
+                    className="block text-sm sm:text-base font-semibold leading-snug text-foreground line-clamp-2"
+                    title={hasDistinctTitle ? cardFullTitle : undefined}
+                  >
+                    {cardDisplayTitle}
                   </b>
                 </div>
 
@@ -207,7 +222,9 @@ export const WingsGoScheduleMarketCards: React.FC<WingsGoScheduleMarketCardsProp
                     <span>
                       {isEn ? 'From ' : 'Giá từ '}
                       <strong className="text-sm sm:text-base font-bold text-foreground">
-                        {formatShortTourPrice(priceValue, isEn ? 'en' : 'vi')}
+                        {currency === 'USD'
+                          ? formatTourPrice(priceValue, 'USD')
+                          : formatShortTourPrice(priceValue, isEn ? 'en' : 'vi')}
                       </strong>
                     </span>
                   ) : (

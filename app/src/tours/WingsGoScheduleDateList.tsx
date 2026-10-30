@@ -73,6 +73,7 @@ export const WingsGoScheduleDateList: React.FC<WingsGoScheduleDateListProps> = (
               key={row.id}
               locale={locale}
               row={row}
+              showFullDate={true}
               tour={tours[row.tourId]}
             />
           ))}

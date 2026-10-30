@@ -106,9 +106,9 @@ describe('US-093 Phase 3: Departure schedule SEO and filtered URL robots', () =>
       ).toBe(false)
     })
 
-    it('returns false for empty string values', () => {
-      expect(hasWingsGoScheduleFilterParams({ market: '', q: '' })).toBe(false)
-      expect(hasWingsGoScheduleFilterParams({ airline: [] })).toBe(false)
+    it('returns true when whitelist param is present even with empty string or empty array', () => {
+      expect(hasWingsGoScheduleFilterParams({ market: '', q: '' })).toBe(true)
+      expect(hasWingsGoScheduleFilterParams({ airline: [] })).toBe(true)
     })
   })
 
@@ -166,6 +166,39 @@ describe('US-093 Phase 3: Departure schedule SEO and filtered URL robots', () =>
       })
       expect(meta.robots).toEqual({ follow: true, index: false })
       expect(meta.alternates?.canonical).toBe('https://wingsgo.vn/en/lich-khoi-hanh')
+    })
+
+    it('sets noindex, follow when ?market= (empty) or ?q= (empty) is present on VI', async () => {
+      const metaMarket = await generateCmsPageMetadataByPath({
+        requestedPath: '/lich-khoi-hanh',
+        searchParams: { market: '' },
+      })
+      expect(metaMarket.robots).toEqual({ follow: true, index: false })
+      expect(metaMarket.alternates?.canonical).toBe('https://wingsgo.vn/lich-khoi-hanh')
+
+      const metaQ = await generateCmsPageMetadataByPath({
+        requestedPath: '/lich-khoi-hanh',
+        searchParams: { q: '' },
+      })
+      expect(metaQ.robots).toEqual({ follow: true, index: false })
+      expect(metaQ.alternates?.canonical).toBe('https://wingsgo.vn/lich-khoi-hanh')
+    })
+
+    it('sets noindex, follow when ?market= (empty) or ?q= (empty) is present on EN', async () => {
+      mocks.getCurrentLocale.mockResolvedValue('en')
+      const metaMarket = await generateCmsPageMetadataByPath({
+        requestedPath: '/en/lich-khoi-hanh',
+        searchParams: { market: '' },
+      })
+      expect(metaMarket.robots).toEqual({ follow: true, index: false })
+      expect(metaMarket.alternates?.canonical).toBe('https://wingsgo.vn/en/lich-khoi-hanh')
+
+      const metaQ = await generateCmsPageMetadataByPath({
+        requestedPath: '/en/lich-khoi-hanh',
+        searchParams: { q: '' },
+      })
+      expect(metaQ.robots).toEqual({ follow: true, index: false })
+      expect(metaQ.alternates?.canonical).toBe('https://wingsgo.vn/en/lich-khoi-hanh')
     })
 
     it('does NOT set noindex on non-WingsGo sites', async () => {

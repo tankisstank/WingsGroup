@@ -65,7 +65,7 @@ describe('US-093 Phase 4 Component Tests', () => {
         />,
       )
 
-      expect(screen.getByText('Hà Nội – Seoul – Nami – Everland')).toBeTruthy()
+      expect(screen.getByText('Hà Nội – Seoul – Nami – Everland 5N4Đ')).toBeTruthy()
       const chip1 = screen.getByRole('link', { name: /10\/11\/2026/ })
       const chip2 = screen.getByRole('link', { name: /20\/11\/2026/ })
       expect(chip1.getAttribute('href')).toBe('/dat-cho?id=dep-1')
@@ -238,6 +238,65 @@ describe('US-093 Phase 4 Component Tests', () => {
       expect(screen.getByText('VIP')).toBeTruthy()
       const srOnly = card?.querySelector('.sr-only')
       expect(srOnly?.textContent).toBe('Tour hot')
+    })
+
+    it('O1: displays normalized routeTitle and sets title attribute to full title', () => {
+      const tour = createMockTour({
+        title: 'TOUR HÀN QUỐC 5N4Đ: SEOUL - NAMI - EVERLAND',
+        routeTitle: 'Seoul · Nami · Everland',
+      })
+      const row = createMockRow({ tourId: tour.id })
+      render(
+        <WingsGoScheduleTourList
+          rows={[row]}
+          tours={{ [tour.id]: tour }}
+        />,
+      )
+      expect(screen.getByText('Seoul · Nami · Everland')).toBeTruthy()
+      const link = screen.getByRole('link', { name: /Seoul · Nami · Everland/ })
+      expect(link.getAttribute('title')).toBe('TOUR HÀN QUỐC 5N4Đ: SEOUL - NAMI - EVERLAND')
+    })
+
+    it('O2: switches to fallback placeholder when tour image fails to load', () => {
+      const tour = createMockTour({
+        media: { url: '/media/broken.jpg', alt: 'Seoul' },
+      })
+      const row = createMockRow({ tourId: tour.id })
+      render(
+        <WingsGoScheduleTourList
+          rows={[row]}
+          tours={{ [tour.id]: tour }}
+        />,
+      )
+      const img = screen.getByAltText('Seoul')
+      expect(img).toBeTruthy()
+
+      // Trigger error
+      fireEvent.error(img)
+
+      expect(screen.getByText('Ảnh tour đang cập nhật')).toBeTruthy()
+      expect(screen.queryByAltText('Seoul')).toBeNull()
+    })
+
+    it('R9: date chips and more dates button have min-h-[44px]', () => {
+      const tour = createMockTour()
+      const rows = Array.from({ length: 8 }, (_, i) =>
+        createMockRow({
+          id: `dep-${i + 1}`,
+          departureDay: `2026-11-${String(i + 10).padStart(2, '0')}`,
+        }),
+      )
+      const { container } = render(
+        <WingsGoScheduleTourList
+          rows={rows}
+          tours={{ [tour.id]: tour }}
+        />,
+      )
+      const dateChip = container.querySelector('.wingsgo-schedule-date-chip')
+      expect(dateChip?.className).toContain('min-h-[44px]')
+
+      const moreBtn = container.querySelector('.wingsgo-schedule-more-dates-btn')
+      expect(moreBtn?.className).toContain('min-h-[44px]')
     })
   })
 

@@ -24,6 +24,7 @@ import {
   canHoldSeat,
   getPriorityMarketDeparture,
   getTourInquiryPath,
+  isDeparturePublishable,
   normalizeTourPublicText,
 } from './utils'
 import { WINGSGO_MARKET_LABELS } from './wingsGoCatalogCopy'
@@ -564,7 +565,10 @@ export const getWingsGoScheduleSnapshot = async ({
 
   // Snapshot pre-filters canHoldSeat departures before populating marketCards (max 3)
   const canHoldSeatRowIds = new Set(rows.filter((r) => r.canHoldSeat).map((r) => r.id))
-  const canHoldSeatDocs = allDocs.filter((doc) => canHoldSeatRowIds.has(String(doc.id)))
+  let canHoldSeatDocs = allDocs.filter((doc) => canHoldSeatRowIds.has(String(doc.id)))
+  if (canHoldSeatDocs.length === 0) {
+    canHoldSeatDocs = allDocs.filter((doc) => doc.availabilityStatus !== 'sold-out')
+  }
 
   const marketCards: WingsGoScheduleMarketCard[] = []
   for (const market of markets) {
@@ -576,11 +580,17 @@ export const getWingsGoScheduleSnapshot = async ({
     if (departureCount === 0) continue
 
     const marketDocs = canHoldSeatDocs.filter((doc) => {
-      const tour = doc.tourProduct && typeof doc.tourProduct === 'object' ? doc.tourProduct : null
+      const tourId = String(
+        doc.tourProduct && typeof doc.tourProduct === 'object' ? doc.tourProduct.id : doc.tourProduct,
+      )
+      const tour = toursMap[tourId]
       return tour?.market === market.value
     })
 
-    const priorityDep = getPriorityMarketDeparture(marketDocs as any, market.value, now)
+    const priorityDep =
+      getPriorityMarketDeparture(marketDocs as any, market.value, now) ||
+      marketDocs.find((doc) => isDeparturePublishable(doc as any)) ||
+      marketDocs[0]
     if (priorityDep) {
       marketCards.push({
         market: market.value,
