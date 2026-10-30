@@ -158,6 +158,20 @@ Kết luận: **chấp nhận Phase 1**.
   - P3: ảnh lỗi chỉ hiện chữ alt, chưa chuyển sang ảnh fallback.
 - Ảnh vỡ là vấn đề dữ liệu local: `public/media` của worktree có 30 file, repo chính có 17.693 file. Phase 5 phải liên kết media trước khi chụp.
 
+### Codex review Phase 2–3 và vòng sửa (2026-10-31)
+
+- **Biên bản:** `docs/consultations/2026-10-30-us093-phase3-codex-review.md`. **GO có điều kiện**, không có P1.
+  - 5 P2: giá USD trên thẻ thị trường; `sort=price` mất tháng/năm; tự gán "HAN"; D9 với giá trị rỗng; URL mất hash và parser popstate.
+  - 5 P3: cuộn chưa trừ thanh sticky; vạch ngăn tháng trống; nhãn VI ở EN; vùng chạm 44px; gạch giá sold-out.
+- Giao cùng O1 (tên tour chưa chuẩn hoá) và O2 (ảnh lỗi) trong `phase34-fix-brief.md`.
+- **Commit `ff6c414`.** Orchestrator tự chạy lại: component 58/58, unit 60/60, integration 5/5, tsc 2 lỗi baseline.
+  - agy thử junction tới media của repo chính. Turbopack panic ("leaves the filesystem root") nên agy đã gỡ junction.
+  - Phase 5 sẽ chép riêng các file hero media cần dùng vào `app/public/media` của worktree (thư mục này bị gitignore).
+- **Lỗi còn lại sau khi xem ảnh**, giao trong `phase34-fix2-brief.md`:
+  - S1 (P1, AC2): CMS có `ctaLabelOverride` = "Giữ chỗ" trên đợt không giữ chỗ được, nên row hiện "Giữ chỗ" trong khi `intent=inquiry`. Quy tắc mới: override chỉ dùng khi `canHoldSeat`.
+  - S2 (P2): mã thời lượng bị viết thường khi dính dấu câu ("6n5đ:").
+  - S3 (P2): thanh lọc sticky cao khoảng 280px ở 390px.
+
 ### Review Phase 5 / Release
 
 Chưa chạy.
