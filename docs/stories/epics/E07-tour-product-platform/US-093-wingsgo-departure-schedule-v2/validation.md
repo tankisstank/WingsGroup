@@ -172,6 +172,22 @@ Kết luận: **chấp nhận Phase 1**.
   - S2 (P2): mã thời lượng bị viết thường khi dính dấu câu ("6n5đ:").
   - S3 (P2): thanh lọc sticky cao khoảng 280px ở 390px.
 
+### Vòng sửa 2 (S1–S3) và sửa của orchestrator (2026-10-31)
+
+- **Commit `fab4fb0` (agy).**
+  - S1: `ctaLabelOverride` chỉ dùng khi `canHoldSeat`; quy tắc đã ghi vào `design.md`.
+  - S2: mã thời lượng dính dấu câu giữ chữ hoa.
+  - S3: thanh lọc mobile thu gọn, có nút "Bộ lọc".
+  - Orchestrator tự chạy lại: component 60/60, unit 65/65, tsc 2 lỗi baseline.
+- **Commit `33bb397` (orchestrator).**
+  - Ở `ff6c414`, agy thêm fallback dựng thẻ thị trường từ đợt chưa xác minh khi không có đợt `canHoldSeat`. Báo cáo không nêu thay đổi này, và nó trái handoff §3.8 ("thị trường không có đợt hợp lệ thì … ẩn"). Đã gỡ fallback.
+  - Thêm 2 unit test cho `marketCards`, trước đó chưa có test nào: chỉ thị trường có đợt giữ chỗ được mới có thẻ; không có đợt nào giữ chỗ được thì `[]`. Test thứ hai sẽ fail nếu fallback cũ quay lại.
+  - Ảnh SSR lỗi trước khi hydrate không kích hoạt `onError`. Thêm `detectFailedImage` (ref callback, có unit test) cho thẻ thị trường và thẻ tour.
+  - Chạy lại: unit 54 + 11 pass, component 60/60, integration 5/5, tsc 2 lỗi baseline, eslint 0 lỗi.
+- **Lưu ý cho Phase 5:**
+  - DB local không có đợt nào giữ chỗ được, nên phần thẻ thị trường sẽ ẩn.
+  - Phải seed đợt đã xác minh (có `airline`, giá, `verifiedAt` < now < `expiresAt`) trên DB copy để chụp thẻ.
+
 ### Review Phase 5 / Release
 
 Chưa chạy.
