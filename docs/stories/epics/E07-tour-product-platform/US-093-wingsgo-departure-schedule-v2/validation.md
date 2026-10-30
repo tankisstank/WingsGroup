@@ -103,6 +103,27 @@ Riêng Q3, Codex khuyến nghị không thêm nhãn hot vào row. Stakeholder ch
   - B5 (P3): so id bằng chuỗi.
 - Đã kiểm: `/lien-he` và `lead-capture/validation.ts` chỉ yêu cầu `YYYY-MM-DD` hợp lệ, nên đổi sang ngày VN không phá prefill.
 
+### Vòng sửa Phase 1 — commit `349e9c5` (2026-10-30)
+
+Orchestrator tự chạy lại:
+
+- unit liên quan → **60/60 pass**;
+- `run-integration-tests.mjs`: `wingsGoLeadCompatibility` 9/9 (gồm 3 test POST thật), `leadSubmissionRoute` 21/21, `leadCapture` 3/3, `wingsGoScheduleIntegration` 5/5;
+- `tsc` → 2 lỗi baseline;
+- `pnpm run build` do agy chạy, exit 0 (`.next/BUILD_ID` lúc 20:01).
+
+Kết luận: **chấp nhận Phase 1**.
+
+### Phase 1B — Codex review
+
+- **Biên bản:** `docs/consultations/2026-10-30-us093-phase1b-codex-review.md`.
+- **VERDICT: GO có điều kiện.** Không có P1. Đã đóng C1–C5 và B1–B5. Codex tự chạy: unit 60/60, integration 38/38, component liên quan 30/30, tsc 2 lỗi baseline.
+- Finding mới, giao trong `phase1b-codex-fix-brief.md` (K1–K3), làm sau Phase 2 và trước Phase 3:
+  - K1 (P2): helper filter/facet/sort nằm cùng module có import server (`payload`, `next/headers`), nên client không dùng được. Tách sang module thuần.
+  - K2 (P2): tìm "Nhật Bản" không ra tour `japan`, vì `searchText` chỉ có enum.
+  - K3 (P3): thiếu test CTA cho verification hết hạn và cho override trên row inquiry.
+- Phase 2 tiếp tục với DTO hiện tại. agy đã được nhắc chỉ dùng `import type` từ module server trong component client.
+
 ### Review Phase 3 / Release
 
 Chưa chạy.
