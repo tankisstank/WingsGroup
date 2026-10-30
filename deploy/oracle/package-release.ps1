@@ -25,6 +25,7 @@ Copy-Item "deploy/oracle/verify-sharp-arm64.cjs" "$tempDir/verify-sharp-arm64.cj
 # Copy public static assets (loại trừ public/media)
 New-Item -ItemType Directory -Path "$tempDir/public" | Out-Null
 Copy-Item -Recurse "app/public/brand" "$tempDir/public/brand"
+Copy-Item -Recurse "app/public/fonts" "$tempDir/public/fonts"
 Copy-Item -Recurse "app/public/samples" "$tempDir/public/samples"
 Copy-Item -Recurse "app/public/wingsside-hifi" "$tempDir/public/wingsside-hifi"
 Copy-Item "app/public/favicon.ico" "$tempDir/public/favicon.ico"
