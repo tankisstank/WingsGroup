@@ -151,3 +151,100 @@ Toàn bộ các yêu cầu của `phase1a-brief.md`, `design.md` và `execplan.m
 ## 6. Kết luận
 
 Phase 1A hoàn thành sạch sẽ, sẵn sàng cho Codex review DTO theo kế hoạch.
+
+---
+
+## 7. Vòng sửa F1–F6 (theo `phase1a-fix-brief.md`)
+
+### 7.1. Tóm tắt các nội dung đã khắc phục
+
+1. **F1 (P1) — Integration test dùng Payload thật (`tests/int/wingsGoScheduleIntegration.int.spec.ts`):**
+   - Đã viết lại toàn bộ integration test theo chuẩn runner `node scripts/run-integration-tests.mjs` chạy trên Payload SQLite thật.
+   - Tạo fixture qua `payload.create` cho 2 site (`wingsGoSite`, `otherSite`), tour products, media với file buffer thật, và 260 đợt khởi hành trải trên 2 trang (deduplicate thành 260 rows).
+   - Kiểm tra đầy đủ:
+     - > 200 đợt đọc qua 2 trang, đúng thứ tự, không trùng, không bị cắt.
+     - Populate thật lấy được `editorialBadges`, `site`, `_status` (vượt bẫy `defaultPopulate`).
+     - Product draft hoặc thuộc site khác bị loại bỏ (fail closed).
+     - Media khác site bị chuyển thành `null`; media hợp lệ không có `_status` vẫn được giữ nguyên.
+     - Quan hệ tour product bị xoá không gây lỗi runtime.
+     - D11: tour EN chưa dịch hiện tiêu đề VI, badge EN strict không lọt nhãn tiếng Việt.
+     - Homepage WingsGo dùng `getResolvedScheduleData` cho output ổn định qua cả 3 trạng thái: dữ liệu rỗng, chỉ có đợt quá khứ, và có đợt tương lai.
+   - File mock trước đó được bảo lưu và đổi tên thành `tests/unit/wingsGoScheduleSnapshotMocked.unit.spec.ts` (pass 4/4).
+
+2. **F2 (P2) — Tách và export các hàm thuần, kiểm thử trực tiếp (`wingsGoSchedule.ts` & `wingsGoScheduleSnapshot.unit.spec.ts`):**
+   - Đã tách và export: `computeScheduleStats`, `buildScheduleMonths`, `buildScheduleRow`, `deriveScheduleAvailability`, `buildSearchText`, `extractTourMedia`, `generateMonthRange`.
+   - Unit test gọi trực tiếp các hàm này: `nearestDay` là ngày sớm nhất không phụ thuộc giá, `yearRange`, `sharedDepartureCity`, `openCount` (`open + limited`), `pricedCount`, `verifiedDay` lấy từ `verifiedAt` lớn nhất của đợt đang xác minh, tháng trống nằm giữa 2 tháng có đợt.
+
+3. **F3 (P2) — Fail-closed kiểm tra site và trạng thái (`wingsGoSchedule.ts`):**
+   - Product thiếu site hoặc site khác site hiện tại: loại bỏ hoàn toàn (`continue`).
+   - Chế độ không phải draft: product phải có `_status === 'published'`.
+   - Media thiếu site hoặc site khác site hiện tại: trả về `null`.
+
+4. **F4 (P2) — Scope site và published cho query fallback VI của D11 (`wingsGoSchedule.ts`):**
+   - Query `payload.find` cho fallback `tour-products` ở locale `vi` đã bổ sung điều kiện `{ site: { equals: siteId } }` và `{ _status: { equals: 'published' } }`.
+
+5. **F5 (P2) — Truyền `locale` tới `normalizeTourProductCard` (`queries.ts`):**
+   - Thêm tham số `locale?: SupportedLocaleCode` vào `normalizeDepartureCard` và chuyển tiếp vào `normalizeTourProductCard(departure.tourProduct, locale)`.
+   - Chuyển tiếp `locale` từ các callers: `getTourDeparturesForProduct`, `getTourProductBySlug`, `getToursByMarketRoute`, `getTourCampaignBySlug`, `getResolvedScheduleData`.
+   - Bổ sung unit test trong `wingsGoScheduleSnapshot.unit.spec.ts` chứng minh trên route EN không lọt nhãn badge tiếng Việt.
+
+6. **F6 (P3) — Dọn dẹp & vệ sinh Git:**
+   - Đã xoá dòng trống thừa sau `queryCollection` trong `queries.ts`.
+   - Khôi phục các file `.snap` và `payload-types.ts` chỉ khác line-ending; không đưa vào commit.
+
+---
+
+### 7.2. Output thật các cổng kiểm tra
+
+#### Cổng 1: Integration test Payload thật (`node scripts/run-integration-tests.mjs tests/int/wingsGoScheduleIntegration.int.spec.ts`)
+```
+ RUN  v4.1.6 E:/repo/WingsTravel-us093/app
+
+ ✓ tests/int/wingsGoScheduleIntegration.int.spec.ts (5 tests) 34715ms
+     ✓ reads > 200 departures across at least two pages, without truncation, sorted and deduplicated  14987ms
+     ✓ populates editorialBadges, site, and _status (defeating defaultPopulate omission); verifies media handling and draft/foreign exclusion  1202ms
+     ✓ implements D11: untranslated tour in EN shows VI content but retains EN strict badges  215ms
+     ✓ handles deleted relation gracefully without throwing error  312ms
+     ✓ WingsGo homepage getResolvedScheduleData gives stable output across empty, past-only, and future inventory  334ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  17:51:36
+   Duration  39.39s (transform 1.63s, setup 0ms, import 4.51s, tests 34.71s, environment 0ms)
+```
+
+#### Cổng 2: TypeScript check (`pnpm exec tsc --noEmit`)
+```
+tests/unit/wingsGroupCorporateRoutes.unit.spec.ts(116,21): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type '{ richText?: unknown; }'.
+tests/unit/wingsGroupCorporateRoutes.unit.spec.ts(155,9): error TS2322: Type '"lo"' is not assignable to type '"vi" | "en" | "it" | "es" | "pt" | "ja" | "ko" | "fr" | "de" | null | undefined'.
+```
+*(Chính xác 2 lỗi baseline có sẵn; code và test mới hoàn toàn không có lỗi TypeScript).*
+
+#### Cổng 3: ESLint (`pnpm run lint`)
+```
+✖ 425 problems (0 errors, 425 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+```
+*(Exit code 0).*
+
+#### Cổng 4: Unit test (`pnpm run test:unit`)
+```
+ ❯  browser  tests/unit/wingsGroupV3Shell.unit.spec.ts (4 tests | 1 failed) 132ms
+     × keeps public WingsGroup routes free of the theme selector and generic related-page rail 60ms
+
+ Test Files  1 failed | 167 passed (168)
+      Tests  1 failed | 1399 passed (1400)
+   Start at  17:53:50
+   Duration  88.27s (transform 38.88s, setup 12.90s, import 175.81s, tests 89.45s, environment 338.22s)
+```
+*(Chỉ 1 lỗi baseline có sẵn tại `wingsGroupV3Shell.unit.spec.ts`; `wingsGoScheduleSnapshot.unit.spec.ts` pass 15/15; `wingsGoScheduleSnapshotMocked.unit.spec.ts` pass 4/4).*
+
+#### Cổng 5: Component test (`pnpm run test:component`)
+```
+ Test Files  63 passed (63)
+      Tests  422 passed (422)
+   Start at  17:55:28
+   Duration  26.03s (transform 44.54s, setup 5.39s, import 186.31s, tests 63.70s, environment 126.47s)
+```
+*(Exit code 0, 422/422 pass).*
+

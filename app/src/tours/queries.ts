@@ -226,15 +226,17 @@ export const selectRelatedTourCards = ({
   candidates,
   configured,
   source,
+  locale,
 }: {
   candidates: Record<string, any>[]
   configured: Record<string, any>[]
   source: Record<string, any>
+  locale?: SupportedLocaleCode
 }) =>
   configured.length > 0
     ? configured.slice(0, 3)
     : rankRelatedTourFallbacks(source, candidates)
-        .map((item) => normalizeTourProductCard(item))
+        .map((item) => normalizeTourProductCard(item, locale))
         .filter(Boolean)
         .slice(0, 3)
 
@@ -260,10 +262,11 @@ const normalizeVariantCard = (
   }
 }
 
-const normalizeDepartureCard = (
+export const normalizeDepartureCard = (
   departure: Record<string, any>,
   draft = false,
   now?: Date,
+  locale?: SupportedLocaleCode,
 ): DepartureCardViewModel => {
   const hasFreshnessGovernance = Boolean(departure.verifiedAt || departure.expiresAt)
   const commerceVerified =
@@ -307,7 +310,7 @@ const normalizeDepartureCard = (
     priceFrom: commerceVerified ? departure.priceFrom : null,
     promoLabel: canPromote ? departure.promoLabel : null,
     returnDate: departure.returnDate,
-    tourProduct: normalizeTourProductCard(departure.tourProduct),
+    tourProduct: normalizeTourProductCard(departure.tourProduct, locale),
     urgencyLabel: commerceVerified ? departure.urgencyLabel : null,
     variantRef: normalizeVariantCard(departure.variantRef, draft),
   }
@@ -397,7 +400,7 @@ export const getTourDeparturesForProduct = async ({
   })
 
   return sortDepartures(result.docs as any[])
-    .map((departure) => normalizeDepartureCard(departure, draft))
+    .map((departure) => normalizeDepartureCard(departure, draft, undefined, locale))
 }
 
 export const getDepartureVariantsForProduct = async ({
@@ -495,6 +498,7 @@ export const getResolvedTourDetailBySlug = async ({
     candidates: relatedResult?.docs || [],
     configured: configuredRelated,
     source: resolvedTour,
+    locale,
   })
 
   const validPublicDepartures = selectPublishableDepartures(departures, { draft })
@@ -583,7 +587,7 @@ export const getToursByMarketRoute = async ({
   })
 
   const allDepartures = sortDepartures(departuresResult.docs as any[]).map((departure) =>
-    normalizeDepartureCard(departure, draft),
+    normalizeDepartureCard(departure, draft, undefined, locale),
   )
   const futureDepartures = sortDepartures(getFutureDepartures(allDepartures))
   const visibleDepartures = futureDepartures.length > 0 ? futureDepartures : allDepartures
@@ -673,7 +677,7 @@ export const getTourCampaignBySlug = async ({
   return {
     campaign,
     departures: sortDepartures(departureResult.docs as any[]).map((departure) =>
-      normalizeDepartureCard(departure, draft),
+      normalizeDepartureCard(departure, draft, undefined, locale),
     ),
   }
 }
@@ -695,7 +699,7 @@ export const getResolvedScheduleData = async ({
   })
 
   const departures = sortDepartures(result.docs as any[]).map((departure) =>
-    normalizeDepartureCard(departure, draft),
+    normalizeDepartureCard(departure, draft, undefined, locale),
   )
   const futureDepartures = getFutureDepartures(departures)
   const visibleDepartures = futureDepartures.length > 0 ? futureDepartures : departures

@@ -1,4 +1,11 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+vi.mock('@payload-config', () => ({ default: {} }))
+vi.mock('payload', () => ({ getPayload: vi.fn() }))
+vi.mock('@/utilities/siteContext', () => ({
+  appendSiteWhere: vi.fn(),
+  getCurrentSite: vi.fn(),
+}))
 
 import {
   toBusinessCalendarDay,
@@ -6,13 +13,15 @@ import {
   daysUntilBusinessDay,
 } from '@/tours/businessCalendar'
 import { isDepartureVerificationCurrent } from '@/tours/departureCommerce'
-import { normalizeGovernedTourPrice } from '@/tours/currency'
 import { getWingsGoScheduleCopy } from '@/tours/wingsGoScheduleCopy'
-import { getDepartureCityCode } from '@/tours/wingsGoDisplay'
-import type {
-  ScheduleAvailability,
-  WingsGoScheduleRow,
-  WingsGoScheduleStats,
+import { normalizeDepartureCard } from '@/tours/queries'
+import {
+  buildScheduleMonths,
+  buildScheduleRow,
+  computeScheduleStats,
+  deriveScheduleAvailability,
+  extractTourMedia,
+  type WingsGoScheduleRow,
 } from '@/tours/wingsGoSchedule'
 
 describe('US-093 Phase 1A - Date boundary and Vietnam Business Calendar', () => {
@@ -99,74 +108,283 @@ describe('US-093 Phase 1A - Verification expiry exact boundaries', () => {
   })
 })
 
-describe('US-093 Phase 1A - Schedule copy and labels', () => {
-  it('provides complete Vietnamese schedule copy with correct marketOther label', () => {
-    const vi = getWingsGoScheduleCopy('vi')
-    expect(vi.statusOpen).toBe('Mở bán')
-    expect(vi.statusLimited).toBe('Sắp hết chỗ')
-    expect(vi.statusSoldOut).toBe('Đã kín')
-    expect(vi.statusQuote).toBe('Liên hệ báo giá')
-    expect(vi.filterStatusQuote).toBe('Chờ báo giá')
-    expect(vi.marketOther).toBe('Thị trường khác') // Distinct from /tour "Tuyến khác"
+describe('US-093 Phase 1A - F2 Pure Functions & Stats Verification', () => {
+  const copy = getWingsGoScheduleCopy('vi')
+
+  it('buildScheduleMonths includes empty gap months between first and last departure', () => {
+    const rows = [
+      { monthKey: '2027-01' },
+      { monthKey: '2027-04' },
+      { monthKey: '2027-01' },
+    ]
+    const months = buildScheduleMonths(rows)
+    expect(months).toEqual(['2027-01', '2027-02', '2027-03', '2027-04'])
   })
 
-  it('provides complete English schedule copy', () => {
-    const en = getWingsGoScheduleCopy('en')
-    expect(en.statusOpen).toBe('Open')
-    expect(en.statusLimited).toBe('Few seats left')
-    expect(en.statusSoldOut).toBe('Sold out')
-    expect(en.statusQuote).toBe('Request a quote')
-    expect(en.filterStatusQuote).toBe('Quote')
-    expect(en.marketOther).toBe('Other destinations')
+  it('buildScheduleMonths handles cross-year month spans', () => {
+    const rows = [{ monthKey: '2026-11' }, { monthKey: '2027-02' }]
+    const months = buildScheduleMonths(rows)
+    expect(months).toEqual(['2026-11', '2026-12', '2027-01', '2027-02'])
   })
-})
 
-describe('US-093 Phase 1A - Snapshot Stats logic', () => {
-  it('ensures nearestDay chooses earliest date, NOT lowest price', () => {
-    const mockRows: Partial<WingsGoScheduleRow>[] = [
+  it('deriveScheduleAvailability adheres strictly to the 5-step state decision table', () => {
+    // 1. Unverified -> quote
+    expect(
+      deriveScheduleAvailability(
+        { commerceVerified: false, availabilityStatus: 'open', priceFrom: 10000000, currency: 'VND' },
+        copy,
+      ),
+    ).toEqual({ availability: 'quote', label: copy.statusQuote })
+
+    // 2. Verified + sold-out (with or without price) -> sold-out
+    expect(
+      deriveScheduleAvailability(
+        { commerceVerified: true, availabilityStatus: 'sold-out', priceFrom: 10000000, currency: 'VND' },
+        copy,
+      ),
+    ).toEqual({ availability: 'sold-out', label: copy.statusSoldOut })
+
+    expect(
+      deriveScheduleAvailability(
+        { commerceVerified: true, availabilityStatus: 'sold-out', priceFrom: null, currency: null },
+        copy,
+      ),
+    ).toEqual({ availability: 'sold-out', label: copy.statusSoldOut })
+
+    // 3. Verified but missing valid price -> quote
+    expect(
+      deriveScheduleAvailability(
+        { commerceVerified: true, availabilityStatus: 'open', priceFrom: 0, currency: 'VND' },
+        copy,
+      ),
+    ).toEqual({ availability: 'quote', label: copy.statusQuote })
+
+    // 4. Verified + price + limited -> limited
+    expect(
+      deriveScheduleAvailability(
+        { commerceVerified: true, availabilityStatus: 'limited', priceFrom: 15000000, currency: 'VND' },
+        copy,
+      ),
+    ).toEqual({ availability: 'limited', label: copy.statusLimited })
+
+    // 5. Verified + price + open (or empty) -> open
+    expect(
+      deriveScheduleAvailability(
+        { commerceVerified: true, availabilityStatus: 'open', priceFrom: 15000000, currency: 'VND' },
+        copy,
+      ),
+    ).toEqual({ availability: 'open', label: copy.statusOpen })
+  })
+
+  it('computeScheduleStats: nearestDay chooses earliest date regardless of price', () => {
+    const rows: WingsGoScheduleRow[] = [
       {
         id: '1',
-        departureDay: '2027-02-15',
-        price: { value: 15000000, currency: 'VND', original: null },
+        tourId: 't1',
+        departureDay: '2027-01-20', // Earlier day, higher price
+        returnDay: null,
+        monthKey: '2027-01',
+        daysUntilDeparture: 20,
+        departureCityCode: 'HAN',
+        airline: null,
+        availability: 'open',
+        availabilityLabel: 'Mở bán',
+        price: { value: 50000000, currency: 'VND', original: null },
+        promoLabel: null,
+        urgencyLabel: null,
+        canHoldSeat: true,
+        ctaLabel: 'Giữ chỗ',
+        ctaHref: '#',
+        isFeatured: false,
+        searchText: '',
       },
       {
         id: '2',
-        departureDay: '2027-01-20', // Earlier day, but higher price
-        price: { value: 35000000, currency: 'VND', original: null },
+        tourId: 't2',
+        departureDay: '2027-03-10', // Later day, lower price
+        returnDay: null,
+        monthKey: '2027-03',
+        daysUntilDeparture: 70,
+        departureCityCode: 'HAN',
+        airline: null,
+        availability: 'limited',
+        availabilityLabel: 'Sắp hết chỗ',
+        price: { value: 12000000, currency: 'VND', original: null },
+        promoLabel: null,
+        urgencyLabel: null,
+        canHoldSeat: true,
+        ctaLabel: 'Giữ chỗ',
+        ctaHref: '#',
+        isFeatured: false,
+        searchText: '',
       },
       {
         id: '3',
-        departureDay: '2027-03-01',
+        tourId: 't3',
+        departureDay: '2027-05-01',
+        returnDay: null,
+        monthKey: '2027-05',
+        daysUntilDeparture: 120,
+        departureCityCode: 'HAN',
+        airline: null,
+        availability: 'quote',
+        availabilityLabel: 'Chờ báo giá',
         price: null,
+        promoLabel: null,
+        urgencyLabel: null,
+        canHoldSeat: false,
+        ctaLabel: 'Hỏi giá',
+        ctaHref: '#',
+        isFeatured: false,
+        searchText: '',
       },
     ]
 
-    // Sorted by day
-    mockRows.sort((a, b) => (a.departureDay || '').localeCompare(b.departureDay || ''))
-    expect(mockRows[0].departureDay).toBe('2027-01-20')
-    expect(mockRows[0].price?.value).toBe(35000000)
+    const stats = computeScheduleStats(rows, undefined, Date.parse('2026-10-25T00:00:00.000Z'))
+    expect(stats.nearestDay).toBe('2027-01-20')
+    expect(stats.openCount).toBe(2) // 1 open + 1 limited
+    expect(stats.pricedCount).toBe(2)
+    expect(stats.tourCount).toBe(3)
+    expect(stats.yearRange).toEqual({ from: 2027, to: 2027 })
+    expect(stats.sharedDepartureCity).toBe('HAN') // All rows are HAN
+    expect(stats.verifiedDay).toBe('2026-10-25')
   })
 
-  it('computes yearRange correctly across single and multi-year spans', () => {
-    const singleYear = ['2027-03-01', '2027-11-20']
-    const fromSingle = Number(singleYear[0].slice(0, 4))
-    const toSingle = Number(singleYear[1].slice(0, 4))
-    expect({ from: fromSingle, to: toSingle }).toEqual({ from: 2027, to: 2027 })
+  it('computeScheduleStats: sets sharedDepartureCity to null when departure cities differ or are missing', () => {
+    const rowsMixed: WingsGoScheduleRow[] = [
+      {
+        id: '1',
+        tourId: 't1',
+        departureDay: '2026-11-15',
+        returnDay: null,
+        monthKey: '2026-11',
+        daysUntilDeparture: 15,
+        departureCityCode: 'HAN',
+        airline: null,
+        availability: 'open',
+        availabilityLabel: 'Mở bán',
+        price: null,
+        promoLabel: null,
+        urgencyLabel: null,
+        canHoldSeat: false,
+        ctaLabel: 'Hỏi giá',
+        ctaHref: '#',
+        isFeatured: false,
+        searchText: '',
+      },
+      {
+        id: '2',
+        tourId: 't2',
+        departureDay: '2027-02-15',
+        returnDay: null,
+        monthKey: '2027-02',
+        daysUntilDeparture: 105,
+        departureCityCode: 'SGN', // Different city!
+        airline: null,
+        availability: 'open',
+        availabilityLabel: 'Mở bán',
+        price: null,
+        promoLabel: null,
+        urgencyLabel: null,
+        canHoldSeat: false,
+        ctaLabel: 'Hỏi giá',
+        ctaHref: '#',
+        isFeatured: false,
+        searchText: '',
+      },
+    ]
 
-    const multiYear = ['2026-11-01', '2027-04-15']
-    const fromMulti = Number(multiYear[0].slice(0, 4))
-    const toMulti = Number(multiYear[1].slice(0, 4))
-    expect({ from: fromMulti, to: toMulti }).toEqual({ from: 2026, to: 2027 })
+    const stats = computeScheduleStats(rowsMixed)
+    expect(stats.sharedDepartureCity).toBeNull()
+    expect(stats.yearRange).toEqual({ from: 2026, to: 2027 })
   })
 
-  it('detects shared departure city only when all departures share the same code', () => {
-    const citiesSame = ['Ha Noi', 'HAN', 'ha noi'].map((c) => getDepartureCityCode(c))
-    const uniqueSame = new Set(citiesSame.filter(Boolean))
-    expect(uniqueSame.size).toBe(1)
-    expect(Array.from(uniqueSame)[0]).toBe('HAN')
+  it('buildScheduleRow produces a correct WingsGoScheduleRow from doc and tour', () => {
+    const doc = {
+      id: 501,
+      departureDate: '2027-06-15T00:00:00.000Z',
+      returnDate: '2027-06-20T00:00:00.000Z',
+      commerceVerified: true,
+      availabilityStatus: 'limited',
+      priceFrom: 18900000,
+      currency: 'VND',
+      airline: 'Vietnam Airlines',
+      departureCity: 'Ha Noi',
+    }
+    const tour = {
+      id: 'tour-101',
+      slug: 'japan-journey',
+      title: 'Hành trình Nhật Bản',
+      market: 'japan',
+    }
 
-    const citiesMixed = ['Ha Noi', 'TP.HCM'].map((c) => getDepartureCityCode(c))
-    const uniqueMixed = new Set(citiesMixed.filter(Boolean))
-    expect(uniqueMixed.size).toBe(2)
+    const row = buildScheduleRow({
+      doc,
+      tour,
+      now: new Date('2027-01-01T00:00:00.000Z'),
+      copy,
+    })
+
+    expect(row).not.toBeNull()
+    expect(row?.tourId).toBe('tour-101')
+    expect(row?.departureDay).toBe('2027-06-15')
+    expect(row?.returnDay).toBe('2027-06-20')
+    expect(row?.monthKey).toBe('2027-06')
+    expect(row?.departureCityCode).toBe('HAN')
+    expect(row?.availability).toBe('limited')
+    expect(row?.canHoldSeat).toBe(true)
+    expect(row?.ctaHref).toContain('departureId=501')
+  })
+})
+
+describe('US-093 Phase 1A - F3 Media Fail-Closed Scope', () => {
+  it('extractTourMedia returns null when media has no site or different site', () => {
+    // Missing site
+    expect(extractTourMedia({ url: '/photo.jpg' }, 7)).toBeNull()
+    // Different site
+    expect(extractTourMedia({ url: '/photo.jpg', site: 3 }, 7)).toBeNull()
+    // Null media or invalid URL
+    expect(extractTourMedia(null, 7)).toBeNull()
+    expect(extractTourMedia({ site: 7, url: '' }, 7)).toBeNull()
+    // Valid media matching site
+    expect(extractTourMedia({ site: 7, url: '/photo.jpg', alt: 'Test' }, 7)).toEqual({
+      url: '/photo.jpg',
+      alt: 'Test',
+    })
+  })
+})
+
+describe('US-093 Phase 1A - F5 Locale propagation to normalizeTourProductCard', () => {
+  it('normalizeDepartureCard with locale=en drops VI-only badge and does not leak Vietnamese', () => {
+    const rawDeparture = {
+      id: 99,
+      departureDate: '2027-07-01T00:00:00.000Z',
+      commerceVerified: true,
+      availabilityStatus: 'open',
+      priceFrom: 20000000,
+      currency: 'VND',
+      tourProduct: {
+        id: 't-bilingual',
+        title: 'Bilingual Tour',
+        editorialBadges: [
+          // Untranslated in EN (only VI string)
+          { kind: 'hot', label: { vi: 'Tour hot tiếng Việt' } },
+          // Translated in both
+          { kind: 'specialized', label: { en: 'Expert Guide', vi: 'Chuyên gia' } },
+        ],
+      },
+    }
+
+    const cardEn = normalizeDepartureCard(rawDeparture, false, undefined, 'en')
+    const badgesEn = (cardEn.tourProduct as any)?.editorialBadges || []
+
+    // The VI-only badge should NOT leak into EN card
+    expect(badgesEn.some((b: any) => b.label === 'Tour hot tiếng Việt')).toBe(false)
+    expect(badgesEn).toEqual([{ kind: 'specialized', label: 'Expert Guide' }])
+
+    // On VI locale, both badges should be present
+    const cardVi = normalizeDepartureCard(rawDeparture, false, undefined, 'vi')
+    const badgesVi = (cardVi.tourProduct as any)?.editorialBadges || []
+    expect(badgesVi.length).toBe(2)
   })
 })

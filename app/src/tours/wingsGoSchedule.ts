@@ -106,15 +106,15 @@ export type WingsGoScheduleSnapshot = {
 }
 
 // ---------------------------------------------------------------------------
-// Internal helpers
+// Pure helper functions (exported for F2)
 // ---------------------------------------------------------------------------
 
 const tourDeparturesCollection = 'tour-departures' as never
 
-const asDoc = <T extends object>(value: T | number | string | null | undefined): T | null =>
+export const asDoc = <T extends object>(value: T | number | string | null | undefined): T | null =>
   value && typeof value === 'object' ? value : null
 
-const foldVietnamese = (value: string) =>
+export const foldVietnamese = (value: string) =>
   value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -126,7 +126,7 @@ const foldVietnamese = (value: string) =>
 /**
  * Derive schedule availability following the 5-step table in design.md (R2).
  */
-const deriveScheduleAvailability = (
+export const deriveScheduleAvailability = (
   departure: {
     commerceVerified: boolean
     availabilityStatus?: string | null
@@ -182,7 +182,7 @@ const deriveScheduleAvailability = (
 /**
  * Build a search-friendly text for a row (tour name + market + airline, folded).
  */
-const buildSearchText = (
+export const buildSearchText = (
   tourTitle: string,
   market: string | null,
   airlineLabel: string | null,
@@ -193,16 +193,17 @@ const buildSearchText = (
 
 /**
  * Validate and extract media for a tour, checking site ownership.
+ * F3: Media without site is rejected (null). Only accepted if site matches siteId.
  */
-const extractTourMedia = (
+export const extractTourMedia = (
   media: Record<string, any> | null | undefined,
   siteId: number | string,
 ): { url: string; alt: string } | null => {
   if (!media || typeof media !== 'object') return null
-  // Media must belong to the same site
   const mediaSiteId =
     media.site && typeof media.site === 'object' ? media.site.id : media.site
-  if (mediaSiteId != null && String(mediaSiteId) !== String(siteId)) return null
+  // F3 fail closed: media without site or site mismatch -> return null
+  if (mediaSiteId == null || String(mediaSiteId) !== String(siteId)) return null
   // Must have a valid URL
   if (!media.url || typeof media.url !== 'string') return null
   return { url: media.url, alt: media.alt || '' }
@@ -211,7 +212,7 @@ const extractTourMedia = (
 /**
  * Generate all month keys between two YYYY-MM strings, inclusive.
  */
-const generateMonthRange = (first: string, last: string): string[] => {
+export const generateMonthRange = (first: string, last: string): string[] => {
   const months: string[] = []
   let [y, m] = first.split('-').map(Number)
   const [endY, endM] = last.split('-').map(Number)
@@ -225,6 +226,185 @@ const generateMonthRange = (first: string, last: string): string[] => {
     }
   }
   return months
+}
+
+/**
+ * F2: Build schedule months array from rows, including empty gap months.
+ */
+export const buildScheduleMonths = (
+  rows: Array<Pick<WingsGoScheduleRow, 'monthKey'>>,
+): string[] => {
+  const monthSet = new Set<string>()
+  for (const row of rows) {
+    if (row.monthKey) monthSet.add(row.monthKey)
+  }
+  const sortedMonths = Array.from(monthSet).sort()
+  if (sortedMonths.length === 0) return []
+  if (sortedMonths.length === 1) return sortedMonths
+  return generateMonthRange(sortedMonths[0], sortedMonths[sortedMonths.length - 1])
+}
+
+/**
+ * F2: Build a single schedule row from normalized departure doc and tour info.
+ */
+export const buildScheduleRow = ({
+  doc,
+  tour,
+  now = new Date(),
+  copy,
+  draft = false,
+}: {
+  doc: Record<string, any>
+  tour: Pick<WingsGoScheduleTour, 'id' | 'slug' | 'title' | 'market'>
+  now?: Date
+  copy: ReturnType<typeof getWingsGoScheduleCopy>
+  draft?: boolean
+}): WingsGoScheduleRow | null => {
+  const departureDay = toBusinessCalendarDay(doc.departureDate)
+  if (!departureDay) return null
+
+  const monthKey = businessCalendarMonth(departureDay)
+  if (!monthKey) return null
+
+  const returnDay = doc.returnDate ? toBusinessCalendarDay(doc.returnDate) : null
+  const daysUntil = daysUntilBusinessDay(doc.departureDate, now)
+  if (daysUntil === null || daysUntil < 0) return null
+
+  const hasFreshnessGovernance = Boolean(doc.verifiedAt || doc.expiresAt)
+  const commerceVerified =
+    draft ||
+    ((doc.commerceVerified === undefined || doc.commerceVerified === true) &&
+      (hasFreshnessGovernance
+        ? isDepartureVerificationCurrent(doc, now.getTime())
+        : doc.commerceVerified === true))
+
+  const { availability, label: availabilityLabel } = deriveScheduleAvailability(
+    {
+      commerceVerified,
+      availabilityStatus: doc.availabilityStatus,
+      priceFrom: doc.priceFrom,
+      currency: doc.currency,
+    },
+    copy,
+    commerceVerified ? doc.availabilityBadge : null,
+  )
+
+  const governed = normalizeGovernedTourPrice({
+    currency: doc.currency,
+    value: doc.priceFrom,
+  })
+
+  const canPromote =
+    commerceVerified &&
+    (draft || hasFreshnessGovernance || doc.commerceVerified === true) &&
+    doc.availabilityStatus !== 'sold-out' &&
+    Boolean(governed)
+
+  const originalPrice =
+    canPromote &&
+    typeof doc.originalPrice === 'number' &&
+    Number.isFinite(doc.originalPrice) &&
+    doc.originalPrice > doc.priceFrom &&
+    Boolean(doc.currency) &&
+    (!doc.originalCurrency || doc.originalCurrency === doc.currency)
+      ? doc.originalPrice
+      : null
+
+  const price: ScheduleMoney | null =
+    governed && commerceVerified
+      ? {
+          value: governed.value,
+          currency: governed.currency,
+          original: originalPrice,
+        }
+      : null
+
+  const canHoldSeat =
+    commerceVerified === true &&
+    doc.availabilityStatus !== 'sold-out' &&
+    daysUntil >= 0 &&
+    governed !== null
+
+  const ctaLabel = doc.ctaLabelOverride || (canHoldSeat ? copy.ctaHoldSeat : copy.ctaRequestQuote)
+  const ctaHref = `/lien-he?intent=${canHoldSeat ? 'hold-seat' : 'inquiry'}&tour=${tour.slug}&tourId=${tour.id}&departureId=${doc.id}&departureDate=${departureDay}&source=schedule`
+
+  const departureCityCode = getDepartureCityCode(doc.departureCity)
+
+  let airlineEntry: { key: string; label: string } | null = null
+  if (doc.airline && typeof doc.airline === 'string' && doc.airline.trim()) {
+    const label = doc.airline.trim()
+    const key = `raw:${label.toLowerCase()}`
+    airlineEntry = { key, label }
+  }
+
+  const promoLabel = canPromote ? doc.promoLabel || null : null
+  const urgencyLabel = commerceVerified ? doc.urgencyLabel || null : null
+  const searchText = buildSearchText(tour.title, tour.market, airlineEntry?.label || null)
+
+  return {
+    id: String(doc.id),
+    tourId: tour.id,
+    departureDay,
+    returnDay,
+    monthKey,
+    daysUntilDeparture: daysUntil,
+    departureCityCode,
+    airline: airlineEntry,
+    availability,
+    availabilityLabel,
+    price,
+    promoLabel,
+    urgencyLabel,
+    canHoldSeat,
+    ctaLabel,
+    ctaHref,
+    isFeatured: Boolean(doc.isFeatured),
+    searchText,
+  }
+}
+
+/**
+ * F2: Compute schedule statistics from rows, tours, and max verified timestamp.
+ */
+export const computeScheduleStats = (
+  rows: WingsGoScheduleRow[],
+  tours?: Record<string, WingsGoScheduleTour>,
+  maxVerifiedAt?: number | null,
+): WingsGoScheduleStats => {
+  const tourIds = new Set(rows.map((r) => r.tourId))
+  const openCount = rows.filter(
+    (r) => r.availability === 'open' || r.availability === 'limited',
+  ).length
+  const pricedCount = rows.filter((r) => r.price !== null).length
+  const nearestDay = rows.length > 0 ? rows[0].departureDay : null
+
+  let yearRange: { from: number; to: number } | null = null
+  if (rows.length > 0) {
+    const firstYear = Number(rows[0].departureDay.slice(0, 4))
+    const lastYear = Number(rows[rows.length - 1].departureDay.slice(0, 4))
+    yearRange = { from: firstYear, to: lastYear }
+  }
+
+  let sharedDepartureCity: string | null = null
+  if (rows.length > 0) {
+    const firstCity = rows[0].departureCityCode
+    if (firstCity && rows.every((r) => r.departureCityCode === firstCity)) {
+      sharedDepartureCity = firstCity
+    }
+  }
+
+  const verifiedDay =
+    maxVerifiedAt != null ? toBusinessCalendarDay(new Date(maxVerifiedAt)) : null
+
+  return {
+    openCount,
+    tourCount: tours && Object.keys(tours).length > 0 ? Object.keys(tours).length : tourIds.size,
+    pricedCount,
+    nearestDay,
+    yearRange,
+    sharedDepartureCity,
+    verifiedDay,
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -353,7 +533,7 @@ export const getWingsGoScheduleSnapshot = async ({
       }
     }
     if (productIds.size > 0) {
-      // Fetch VI versions of those products
+      // F4: Scope by site and published for VI fallback query
       const viResult = await payload.find({
         collection: 'tour-products' as never,
         depth: 1,
@@ -363,7 +543,11 @@ export const getWingsGoScheduleSnapshot = async ({
         overrideAccess: false,
         pagination: false,
         where: {
-          id: { in: Array.from(productIds) },
+          and: [
+            { id: { in: Array.from(productIds) } },
+            { site: { equals: siteId } },
+            { _status: { equals: 'published' } },
+          ],
         },
       })
       viProductsById = new Map(
@@ -375,25 +559,26 @@ export const getWingsGoScheduleSnapshot = async ({
   // Build tours map and rows
   const toursMap: Record<string, WingsGoScheduleTour> = {}
   const rows: WingsGoScheduleRow[] = []
-  const monthSet = new Set<string>()
   const marketSet = new Set<string>()
   const airlineMap = new Map<string, { key: string; label: string }>()
   let maxVerifiedAt: number | null = null
-  const departureCityCodes: (string | null)[] = []
 
   const enPrefix = locale === 'en' ? '/en' : ''
 
   for (const doc of allDocs) {
-    // Validate product: must be a populated object, published, same site
+    // Validate product: must be a populated object
     const rawProduct = asDoc<Record<string, any>>(doc.tourProduct)
     if (!rawProduct) continue
 
+    // F3 fail-closed: product must belong to current site
     const productSiteId =
       rawProduct.site && typeof rawProduct.site === 'object'
         ? rawProduct.site.id
         : rawProduct.site
-    if (productSiteId != null && String(productSiteId) !== String(siteId)) continue
-    if (!draft && rawProduct._status && rawProduct._status !== 'published') continue
+    if (productSiteId == null || String(productSiteId) !== String(siteId)) continue
+
+    // F3 fail-closed: in non-draft mode, product must be published
+    if (!draft && rawProduct._status !== 'published') continue
 
     const productId = String(rawProduct.id)
 
@@ -407,13 +592,13 @@ export const getWingsGoScheduleSnapshot = async ({
     }
     if (!productTitle) productTitle = ''
 
-    // Badge always from EN strict read (the rawProduct already has EN badges from the main query)
+    // Badge always from EN strict read
     const { editorialBadges, hasHotEditorialBadge } = normalizeEditorialBadges(
       rawProduct.editorialBadges,
       'en',
     )
 
-    // Extract and validate media
+    // F3: Extract and validate media (media without site is rejected)
     const heroMediaDoc = asDoc<Record<string, any>>(rawProduct.heroMedia)
     const media = extractTourMedia(heroMediaDoc, siteId)
 
@@ -441,94 +626,33 @@ export const getWingsGoScheduleSnapshot = async ({
       }
     }
 
-    // Departure-level processing
-    const departureDay = toBusinessCalendarDay(doc.departureDate)
-    if (!departureDay) continue
+    const tourEntry = toursMap[productId]
 
-    const monthKey = businessCalendarMonth(departureDay)
-    if (!monthKey) continue
-    monthSet.add(monthKey)
-
-    const returnDay = doc.returnDate ? toBusinessCalendarDay(doc.returnDate) : null
-    const daysUntil = daysUntilBusinessDay(doc.departureDate, now)
-    if (daysUntil === null || daysUntil < 0) continue
-
-    // Commerce verification using the same `now`
-    const hasFreshnessGovernance = Boolean(doc.verifiedAt || doc.expiresAt)
-    const commerceVerified =
-      draft ||
-      ((doc.commerceVerified === undefined || doc.commerceVerified === true) &&
-        (hasFreshnessGovernance
-          ? isDepartureVerificationCurrent(doc, now.getTime())
-          : doc.commerceVerified === true))
-
-    // Derive availability
-    const { availability, label: availabilityLabel } = deriveScheduleAvailability(
-      {
-        commerceVerified,
-        availabilityStatus: doc.availabilityStatus,
-        priceFrom: doc.priceFrom,
-        currency: doc.currency,
-      },
+    // Build schedule row using F2 helper
+    const row = buildScheduleRow({
+      doc,
+      tour: tourEntry,
+      now,
       copy,
-      commerceVerified ? doc.availabilityBadge : null,
-    )
-
-    // Price governance
-    const governed = normalizeGovernedTourPrice({
-      currency: doc.currency,
-      value: doc.priceFrom,
+      draft,
     })
 
-    // canPromote mirrors normalizeDepartureCard logic
-    const canPromote =
-      commerceVerified &&
-      (draft || hasFreshnessGovernance || doc.commerceVerified === true) &&
-      doc.availabilityStatus !== 'sold-out' &&
-      Boolean(governed)
+    if (!row) continue
 
-    const originalPrice =
-      canPromote &&
-      typeof doc.originalPrice === 'number' &&
-      Number.isFinite(doc.originalPrice) &&
-      doc.originalPrice > doc.priceFrom &&
-      Boolean(doc.currency) &&
-      (!doc.originalCurrency || doc.originalCurrency === doc.currency)
-        ? doc.originalPrice
-        : null
+    // Track verifiedAt for stats
+    if (row.canHoldSeat || row.availability !== 'quote') {
+      if (doc.verifiedAt) {
+        const vAt = Date.parse(doc.verifiedAt)
+        if (Number.isFinite(vAt) && (maxVerifiedAt === null || vAt > maxVerifiedAt)) {
+          maxVerifiedAt = vAt
+        }
+      }
+    }
 
-    const price: ScheduleMoney | null =
-      governed && commerceVerified
-        ? {
-            value: governed.value,
-            currency: governed.currency,
-            original: originalPrice,
-          }
-        : null
-
-    // canHoldSeat: verified, not sold-out, future (>= 0), has governed price
-    const canHoldSeat =
-      commerceVerified === true &&
-      doc.availabilityStatus !== 'sold-out' &&
-      daysUntil >= 0 &&
-      governed !== null
-
-    // CTA
-    const ctaLabel = doc.ctaLabelOverride || (canHoldSeat ? copy.ctaHoldSeat : copy.ctaRequestQuote)
-    const ctaHref = `/lien-he?intent=${canHoldSeat ? 'hold-seat' : 'inquiry'}&tour=${slug}&tourId=${productId}&departureId=${doc.id}&departureDate=${departureDay}&source=schedule`
-
-    // Departure city
-    const departureCityCode = getDepartureCityCode(doc.departureCity)
-    departureCityCodes.push(departureCityCode)
-
-    // Airline
-    let airlineEntry: { key: string; label: string } | null = null
-    if (doc.airline && typeof doc.airline === 'string' && doc.airline.trim()) {
-      const label = doc.airline.trim()
-      const key = `raw:${label.toLowerCase()}`
-      airlineEntry = { key, label }
-      if (!airlineMap.has(key)) {
-        airlineMap.set(key, airlineEntry)
+    // Airline tracking
+    if (row.airline) {
+      if (!airlineMap.has(row.airline.key)) {
+        airlineMap.set(row.airline.key, row.airline)
       }
     }
 
@@ -537,43 +661,7 @@ export const getWingsGoScheduleSnapshot = async ({
       marketSet.add(market)
     }
 
-    // Promo label
-    const promoLabel = canPromote ? doc.promoLabel || null : null
-
-    // Urgency label
-    const urgencyLabel = commerceVerified ? doc.urgencyLabel || null : null
-
-    // Track verifiedAt for stats
-    if (commerceVerified && doc.verifiedAt) {
-      const vAt = Date.parse(doc.verifiedAt)
-      if (Number.isFinite(vAt) && (maxVerifiedAt === null || vAt > maxVerifiedAt)) {
-        maxVerifiedAt = vAt
-      }
-    }
-
-    // Search text
-    const searchText = buildSearchText(productTitle, market, airlineEntry?.label || null)
-
-    rows.push({
-      id: String(doc.id),
-      tourId: productId,
-      departureDay,
-      returnDay,
-      monthKey,
-      daysUntilDeparture: daysUntil,
-      departureCityCode,
-      airline: airlineEntry,
-      availability,
-      availabilityLabel,
-      price,
-      promoLabel,
-      urgencyLabel,
-      canHoldSeat,
-      ctaLabel,
-      ctaHref,
-      isFeatured: Boolean(doc.isFeatured),
-      searchText,
-    })
+    rows.push(row)
   }
 
   // Sort rows: by departureDay then by id
@@ -583,12 +671,8 @@ export const getWingsGoScheduleSnapshot = async ({
     return a.id.localeCompare(b.id)
   })
 
-  // Generate months range (all months from first to last, including gaps)
-  const sortedMonths = Array.from(monthSet).sort()
-  const months =
-    sortedMonths.length >= 2
-      ? generateMonthRange(sortedMonths[0], sortedMonths[sortedMonths.length - 1])
-      : sortedMonths
+  // F2: Build schedule months with gaps
+  const months = buildScheduleMonths(rows)
 
   // Markets list with labels
   const resolvedLocale = locale === 'en' ? 'en' : 'vi'
@@ -604,42 +688,8 @@ export const getWingsGoScheduleSnapshot = async ({
     a.label.localeCompare(b.label),
   )
 
-  // Stats
-  const tourIds = new Set(rows.map((r) => r.tourId))
-  const openCount = rows.filter(
-    (r) => r.availability === 'open' || r.availability === 'limited',
-  ).length
-  const pricedCount = rows.filter((r) => r.price !== null).length
-  const nearestDay = rows.length > 0 ? rows[0].departureDay : null
-
-  let yearRange: { from: number; to: number } | null = null
-  if (rows.length > 0) {
-    const firstYear = Number(rows[0].departureDay.slice(0, 4))
-    const lastYear = Number(rows[rows.length - 1].departureDay.slice(0, 4))
-    yearRange = { from: firstYear, to: lastYear }
-  }
-
-  // Shared departure city: only if ALL rows have the same code
-  let sharedDepartureCity: string | null = null
-  if (departureCityCodes.length > 0) {
-    const unique = new Set(departureCityCodes.filter(Boolean))
-    if (unique.size === 1) {
-      sharedDepartureCity = Array.from(unique)[0]
-    }
-  }
-
-  // Verified day: max verifiedAt among verified departures
-  const verifiedDay = maxVerifiedAt !== null ? toBusinessCalendarDay(new Date(maxVerifiedAt)) : null
-
-  const stats: WingsGoScheduleStats = {
-    openCount,
-    tourCount: tourIds.size,
-    pricedCount,
-    nearestDay,
-    yearRange,
-    sharedDepartureCity,
-    verifiedDay,
-  }
+  // F2: Compute schedule stats
+  const stats = computeScheduleStats(rows, toursMap, maxVerifiedAt)
 
   // Phase 1A: marketCards and initialFilters are placeholders
   const marketCards: WingsGoScheduleMarketCard[] = []

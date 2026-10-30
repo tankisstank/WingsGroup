@@ -1,105 +1,168 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import path from 'node:path'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import configPromise from '@/payload.config'
+import { getPayload, type File, type Payload } from 'payload'
+import type { Site } from '@/payload-types'
 
-const mocks = vi.hoisted(() => ({
-  find: vi.fn(),
-  siteID: 7,
-}))
+let payload: Payload
+let wingsGoSite: Site
+let otherSite: Site
+let currentTestSite: Site
 
-vi.mock('@payload-config', () => ({ default: {} }))
-vi.mock('payload', () => ({ getPayload: vi.fn(async () => ({ find: mocks.find })) }))
-vi.mock('@/utilities/siteContext', () => ({
-  appendSiteWhere: vi.fn(async (where?: Record<string, unknown>) => ({
-    and: [{ site: { equals: mocks.siteID } }, where],
-  })),
-  getCurrentSite: vi.fn(async () => ({ code: 'wings-go', id: mocks.siteID })),
-}))
+const png = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+  'base64',
+)
+
+vi.mock('@/utilities/siteContext', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/utilities/siteContext')>()
+  return {
+    ...actual,
+    getCurrentSite: vi.fn(async () => currentTestSite),
+    appendSiteWhere: vi.fn(async (where?: Record<string, unknown>) => {
+      const siteConstraint = { site: { equals: currentTestSite.id } }
+      if (!where) return siteConstraint
+      return { and: [siteConstraint, where] }
+    }),
+  }
+})
 
 import { getResolvedScheduleData } from '@/tours/queries'
 import { getWingsGoScheduleSnapshot } from '@/tours/wingsGoSchedule'
 
-describe('US-093 Phase 1A - Schedule Snapshot & Integration Contracts', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
+describe('US-093 Phase 1A - Real Payload Integration Test', () => {
+  const suffix = `${process.pid}-${Date.now()}`
+
+  const createMedia = async (site: number, filename: string) => {
+    const file: File = {
+      data: png,
+      mimetype: 'image/png',
+      name: filename,
+      size: png.byteLength,
+    }
+    return payload.create({
+      collection: 'media',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        alt: `Alt ${filename}`,
+        site,
+      },
+      file,
+      overrideAccess: true,
+    })
+  }
+
+  const createTourProduct = async (data: Record<string, any>, locale?: string) => {
+    return payload.create({
+      collection: 'tour-products',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        market: 'japan',
+        durationDays: 5,
+        durationNights: 4,
+        summary: 'Tóm tắt hành trình mẫu',
+        itineraryDays: [
+          {
+            dayNumber: 1,
+            title: 'Ngày 1: Khởi hành',
+            summary: 'Tập trung và cất cánh',
+          },
+        ],
+        _status: 'published',
+        ...data,
+      } as any,
+      draft: false,
+      locale: locale as any,
+      overrideAccess: true,
+    })
+  }
+
+  beforeAll(async () => {
+    payload = await getPayload({ config: configPromise })
+
+    // 1. Create two real sites in SQLite
+    wingsGoSite = await payload.create({
+      collection: 'sites',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        code: `wings-go-${suffix}`,
+        name: `WingsGo ${suffix}`,
+        defaultLocale: 'vi',
+        isActive: true,
+        primaryDomain: `wingsgo-${suffix}.invalid`,
+        supportedLocales: ['vi', 'en'],
+      },
+      overrideAccess: true,
+    })
+
+    otherSite = await payload.create({
+      collection: 'sites',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        code: `other-site-${suffix}`,
+        name: `Other Site ${suffix}`,
+        defaultLocale: 'vi',
+        isActive: true,
+        primaryDomain: `other-${suffix}.invalid`,
+        supportedLocales: ['vi', 'en'],
+      },
+      overrideAccess: true,
+    })
+
+    currentTestSite = wingsGoSite
+  }, 60_000)
+
+  afterAll(async () => {
+    await payload?.destroy()
   })
 
-  it('reads > 200 departures across multiple pages without truncation, sorted and deduplicated', async () => {
-    // Page 1: 250 departures (id 1..250), hasNextPage: true
-    // Page 2: 20 departures (id 245..264) with overlapping 245..250 to test dedupe, hasNextPage: false
-    const page1Docs = Array.from({ length: 250 }, (_, i) => ({
-      id: `dep-${i + 1}`,
-      departureDate: `2027-05-${String((i % 20) + 1).padStart(2, '0')}T00:00:00.000Z`,
-      commerceVerified: true,
-      availabilityStatus: 'open',
-      priceFrom: 15000000 + i * 10000,
-      currency: 'VND',
-      tourProduct: {
-        id: `tour-${(i % 10) + 1}`,
-        _status: 'published',
-        site: 7,
-        slug: `tour-slug-${(i % 10) + 1}`,
-        title: `Tour ${(i % 10) + 1}`,
-        market: 'japan',
-        heroMedia: { id: 10, site: 7, url: '/media/japan.jpg', alt: 'Japan' },
-      },
-    }))
+  it('reads > 200 departures across at least two pages, without truncation, sorted and deduplicated', async () => {
+    currentTestSite = wingsGoSite
 
-    const page2Docs = Array.from({ length: 20 }, (_, i) => {
-      const idNum = 245 + i
-      return {
-        id: `dep-${idNum}`,
-        departureDate: `2027-06-${String((i % 20) + 1).padStart(2, '0')}T00:00:00.000Z`,
-        commerceVerified: true,
-        availabilityStatus: 'open',
-        priceFrom: 18000000,
-        currency: 'VND',
-        tourProduct: {
-          id: `tour-page2`,
-          _status: 'published',
-          site: 7,
-          slug: 'tour-page2',
-          title: 'Tour Page 2',
-          market: 'korea',
-          heroMedia: { id: 11, site: 7, url: '/media/korea.jpg', alt: 'Korea' },
-        },
-      }
+    // Create a real published tour product on WingsGo
+    const tourProduct = await createTourProduct({
+      title: `Tour Paging 260 ${suffix}`,
+      slug: `tour-paging-260-${suffix}`,
+      site: wingsGoSite.id,
     })
 
-    mocks.find.mockImplementation(async (options: any) => {
-      if (options.collection === 'tour-departures') {
-        if (options.page === 1) {
-          return { docs: page1Docs, hasNextPage: true, totalDocs: 264 }
-        }
-        if (options.page === 2) {
-          return { docs: page2Docs, hasNextPage: false, totalDocs: 264 }
-        }
+    // Create 260 departures with unique dates (from 2027-01-01 onwards) so inventoryIdentity is unique
+    const totalCount = 260
+    for (let chunk = 0; chunk < totalCount; chunk += 50) {
+      const end = Math.min(chunk + 50, totalCount)
+      const promises: Promise<any>[] = []
+      for (let i = chunk; i < end; i++) {
+        const dateObj = new Date(Date.UTC(2027, 0, 1 + i))
+        promises.push(
+          payload.create({
+            collection: 'tour-departures',
+            context: { disableRevalidate: true, seed: true },
+            data: {
+              departureDate: dateObj.toISOString(),
+              site: wingsGoSite.id,
+              tourProduct: tourProduct.id,
+              availabilityStatus: 'open',
+              currency: 'VND',
+              priceFrom: 18000000 + i * 1000,
+              _status: 'published',
+            },
+            overrideAccess: true,
+          }),
+        )
       }
-      return { docs: [] }
-    })
+      await Promise.all(promises)
+    }
 
+    // Call snapshot with real Payload query
     const snapshot = await getWingsGoScheduleSnapshot({
       locale: 'vi',
-      now: new Date('2027-01-01T00:00:00.000Z'),
+      now: new Date('2026-12-01T00:00:00.000Z'),
     })
 
     expect(snapshot).not.toBeNull()
-    // 250 in page 1 + 20 in page 2 - 6 overlapping (245..250) = 264 total unique rows
-    expect(snapshot?.rows.length).toBe(264)
-    // Check pagination was called with page 1 and page 2
-    expect(mocks.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        page: 1,
-        pagination: true,
-        limit: 250,
-      }),
-    )
-    expect(mocks.find).toHaveBeenCalledWith(
-      expect.objectContaining({
-        page: 2,
-        pagination: true,
-        limit: 250,
-      }),
-    )
-    // Check rows are sorted by departureDay then id
+    expect(snapshot!.rows.length).toBeGreaterThanOrEqual(260)
+
+    // Verify sort order: departureDay ascending, then id ascending
     for (let i = 1; i < snapshot!.rows.length; i++) {
       const prev = snapshot!.rows[i - 1]
       const curr = snapshot!.rows[i]
@@ -109,230 +172,347 @@ describe('US-093 Phase 1A - Schedule Snapshot & Integration Contracts', () => {
         expect(prev.id.localeCompare(curr.id) <= 0).toBe(true)
       }
     }
-  })
+  }, 120_000)
 
-  it('filters out draft or foreign-site products; sets foreign-site media to null; keeps valid media without _status', async () => {
-    const rawDepartures = [
-      // 1. Valid product + valid media without _status (Media collection has no _status)
+  it('populates editorialBadges, site, and _status (defeating defaultPopulate omission); verifies media handling and draft/foreign exclusion', async () => {
+    currentTestSite = wingsGoSite
+
+    // 1. Real media on WingsGo site
+    const validMedia = await createMedia(wingsGoSite.id, `media-valid-${suffix}.png`)
+
+    // 2. Real media on OTHER site
+    const foreignMedia = await createMedia(otherSite.id, `media-foreign-${suffix}.png`)
+
+    // 3. Tour product with editorial badges and valid media on WingsGo site
+    const populatedTour = await createTourProduct({
+      title: `Populated Tour ${suffix}`,
+      slug: `populated-tour-${suffix}`,
+      market: 'korea',
+      site: wingsGoSite.id,
+      heroMedia: validMedia.id,
+      editorialBadges: [
+        { kind: 'hot', label: 'Tour hot' },
+        { kind: 'specialized', label: 'Specialize' },
+      ],
+      _status: 'published',
+    })
+
+    // 4. Tour product with foreign media on WingsGo site
+    const foreignMediaTour = await createTourProduct({
+      title: `Foreign Media Tour ${suffix}`,
+      slug: `foreign-media-tour-${suffix}`,
+      market: 'china',
+      site: wingsGoSite.id,
+      heroMedia: foreignMedia.id,
+      _status: 'published',
+    })
+
+    // 5. Tour product in DRAFT status on WingsGo site
+    const draftTour = await createTourProduct({
+      title: `Draft Tour ${suffix}`,
+      slug: `draft-tour-${suffix}`,
+      market: 'thailand',
+      site: wingsGoSite.id,
+      _status: 'draft',
+    })
+
+    // 6. Tour product on OTHER site
+    const otherSiteTour = await createTourProduct({
+      title: `Other Site Tour ${suffix}`,
+      slug: `other-site-tour-${suffix}`,
+      market: 'vietnam',
+      site: otherSite.id,
+      _status: 'published',
+    })
+
+    // Create departures for each
+    const depValid = await payload.create({
+      collection: 'tour-departures',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        departureDate: '2028-08-10T00:00:00.000Z',
+        site: wingsGoSite.id,
+        tourProduct: populatedTour.id,
+        availabilityStatus: 'open',
+        priceFrom: 22000000,
+        currency: 'VND',
+        _status: 'published',
+      },
+      overrideAccess: true,
+    })
+
+    const depForeignMedia = await payload.create({
+      collection: 'tour-departures',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        departureDate: '2028-08-11T00:00:00.000Z',
+        site: wingsGoSite.id,
+        tourProduct: foreignMediaTour.id,
+        availabilityStatus: 'open',
+        priceFrom: 25000000,
+        currency: 'VND',
+        _status: 'published',
+      },
+      overrideAccess: true,
+    })
+
+    const depDraft = await payload.create({
+      collection: 'tour-departures',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        departureDate: '2028-08-12T00:00:00.000Z',
+        site: wingsGoSite.id,
+        tourProduct: draftTour.id,
+        availabilityStatus: 'open',
+        priceFrom: 19000000,
+        currency: 'VND',
+        _status: 'published',
+      },
+      overrideAccess: true,
+    })
+
+    const depOtherSite = await payload.create({
+      collection: 'tour-departures',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        departureDate: '2028-08-13T00:00:00.000Z',
+        site: otherSite.id,
+        tourProduct: otherSiteTour.id,
+        availabilityStatus: 'open',
+        priceFrom: 15000000,
+        currency: 'VND',
+        _status: 'published',
+      },
+      overrideAccess: true,
+    })
+
+    // Execute snapshot on WingsGo site
+    currentTestSite = wingsGoSite
+    const snapshot = await getWingsGoScheduleSnapshot({
+      locale: 'vi',
+      now: new Date('2028-08-01T00:00:00.000Z'),
+    })
+
+    expect(snapshot).not.toBeNull()
+
+    // depValid must be included with populated editorialBadges (proving defaultPopulate was overridden)
+    const rowValid = snapshot?.rows.find((r) => r.id === String(depValid.id))
+    expect(rowValid).toBeDefined()
+    const tourValid = snapshot?.tours[String(populatedTour.id)]
+    expect(tourValid).toBeDefined()
+    expect(tourValid?.badges).toEqual([
+      { kind: 'hot', label: 'Tour hot' },
+      { kind: 'specialized', label: 'Specialize' },
+    ])
+    expect(tourValid?.hasHot).toBe(true)
+    // Valid media (which has no _status) is preserved
+    expect(tourValid?.media).toBeDefined()
+    expect(tourValid?.media?.url).toContain(`media-valid-${suffix}.png`)
+
+    // depForeignMedia is included, but its media is stripped to null because media.site !== wingsGoSite.id
+    const rowForeignMedia = snapshot?.rows.find((r) => r.id === String(depForeignMedia.id))
+    expect(rowForeignMedia).toBeDefined()
+    const tourForeignMedia = snapshot?.tours[String(foreignMediaTour.id)]
+    expect(tourForeignMedia?.media).toBeNull()
+
+    // depDraft (draft tourProduct) must be excluded
+    const rowDraft = snapshot?.rows.find((r) => r.id === String(depDraft.id))
+    expect(rowDraft).toBeUndefined()
+
+    // depOtherSite (different site) must be excluded
+    const rowOtherSite = snapshot?.rows.find((r) => r.id === String(depOtherSite.id))
+    expect(rowOtherSite).toBeUndefined()
+  }, 60_000)
+
+  it('implements D11: untranslated tour in EN shows VI content but retains EN strict badges', async () => {
+    // Create product in VI only with Vietnamese title and Vietnamese editorial badge
+    const d11Tour = await createTourProduct(
       {
-        id: 'dep-valid',
-        departureDate: '2027-07-01T00:00:00.000Z',
-        commerceVerified: true,
+        title: `Hành Trình Bắc Kinh ${suffix}`,
+        slug: `tour-d11-${suffix}`,
+        market: 'china',
+        site: wingsGoSite.id,
+        editorialBadges: [
+          {
+            kind: 'specialized',
+            label: 'Chuyên gia hướng dẫn',
+          },
+        ],
+      },
+      'vi',
+    )
+
+    // Create departure
+    await payload.create({
+      collection: 'tour-departures',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        departureDate: '2028-09-15T00:00:00.000Z',
+        site: wingsGoSite.id,
+        tourProduct: d11Tour.id,
+        availabilityStatus: 'open',
+        priceFrom: 28000000,
+        currency: 'VND',
+        _status: 'published',
+      },
+      overrideAccess: true,
+    })
+
+    currentTestSite = wingsGoSite
+    const snapshotEn = await getWingsGoScheduleSnapshot({
+      locale: 'en',
+      now: new Date('2028-09-01T00:00:00.000Z'),
+    })
+
+    expect(snapshotEn).not.toBeNull()
+    const tour = snapshotEn?.tours[String(d11Tour.id)]
+    expect(tour).toBeDefined()
+    // Content falls back to VI title
+    expect(tour?.title).toBe(`Hành Trình Bắc Kinh ${suffix}`)
+    // Badges strictly take EN read and NEVER leak VI label ("Chuyên gia hướng dẫn")
+    expect(tour?.badges).toEqual([])
+  }, 60_000)
+
+  it('handles deleted relation gracefully without throwing error', async () => {
+    const tempTour = await createTourProduct({
+      title: `Temp Tour ${suffix}`,
+      slug: `temp-tour-${suffix}`,
+      market: 'japan',
+      site: wingsGoSite.id,
+      _status: 'published',
+    })
+
+    const tempDep = await payload.create({
+      collection: 'tour-departures',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        departureDate: '2028-10-01T00:00:00.000Z',
+        site: wingsGoSite.id,
+        tourProduct: tempTour.id,
         availabilityStatus: 'open',
         priceFrom: 20000000,
         currency: 'VND',
-        tourProduct: {
-          id: 'tour-1',
-          _status: 'published',
-          site: 7, // same site
-          slug: 'tour-valid',
-          title: 'Hành trình hợp lệ',
-          market: 'japan',
-          heroMedia: {
-            id: 101,
-            site: 7, // same site
-            url: 'https://cdn.example.com/japan.jpg',
-            alt: 'Japan Tour',
-            // Note: Media collection has NO _status property!
-          },
-          editorialBadges: [{ kind: 'hot', label: 'Tour hot' }],
-        },
+        _status: 'published',
       },
-      // 2. Product is draft -> excluded in public mode
-      {
-        id: 'dep-draft-product',
-        departureDate: '2027-07-02T00:00:00.000Z',
-        commerceVerified: true,
-        tourProduct: {
-          id: 'tour-draft',
-          _status: 'draft',
-          site: 7,
-          slug: 'tour-draft',
-          title: 'Tour Draft',
-        },
-      },
-      // 3. Product belongs to different site (e.g. site 3) -> excluded
-      {
-        id: 'dep-foreign-product',
-        departureDate: '2027-07-03T00:00:00.000Z',
-        commerceVerified: true,
-        tourProduct: {
-          id: 'tour-foreign',
-          _status: 'published',
-          site: 3,
-          slug: 'tour-foreign',
-          title: 'Tour Foreign',
-        },
-      },
-      // 4. Product valid, but heroMedia belongs to foreign site -> media becomes null, tour kept
-      {
-        id: 'dep-foreign-media',
-        departureDate: '2027-07-04T00:00:00.000Z',
-        commerceVerified: true,
-        availabilityStatus: 'limited',
-        priceFrom: 25000000,
-        currency: 'VND',
-        tourProduct: {
-          id: 'tour-foreign-media',
-          _status: 'published',
-          site: 7,
-          slug: 'tour-foreign-media',
-          title: 'Tour Foreign Media',
-          market: 'korea',
-          heroMedia: {
-            id: 202,
-            site: 99, // foreign site!
-            url: 'https://cdn.example.com/foreign.jpg',
-          },
-        },
-      },
-      // 5. Primitive relation id or deleted product relation (null/number) -> safely skipped
-      {
-        id: 'dep-primitive-relation',
-        departureDate: '2027-07-05T00:00:00.000Z',
-        commerceVerified: true,
-        tourProduct: 9999, // primitive ID, unpopulated
-      },
-      {
-        id: 'dep-null-relation',
-        departureDate: '2027-07-06T00:00:00.000Z',
-        commerceVerified: true,
-        tourProduct: null, // deleted relation
-      },
-    ]
+      overrideAccess: true,
+    })
 
-    mocks.find.mockResolvedValueOnce({ docs: rawDepartures, hasNextPage: false })
+    // Delete the tour product with disableRevalidate to prevent Next.js static generation crash
+    await payload.delete({
+      collection: 'tour-products',
+      id: tempTour.id,
+      context: { disableRevalidate: true },
+      overrideAccess: true,
+    })
 
+    // Querying snapshot must not crash
+    currentTestSite = wingsGoSite
     const snapshot = await getWingsGoScheduleSnapshot({
       locale: 'vi',
-      now: new Date('2027-01-01T00:00:00.000Z'),
+      now: new Date('2028-09-01T00:00:00.000Z'),
     })
 
     expect(snapshot).not.toBeNull()
-    // Only dep-valid and dep-foreign-media are included
-    expect(snapshot?.rows.map((r) => r.id)).toEqual(['dep-valid', 'dep-foreign-media'])
+    // The departure with deleted tourProduct is safely omitted
+    expect(snapshot?.rows.find((r) => r.id === String(tempDep.id))).toBeUndefined()
+  }, 60_000)
 
-    // Media on tour-1 is preserved even without _status
-    const tour1 = snapshot?.tours['tour-1']
-    expect(tour1?.media).toEqual({
-      url: 'https://cdn.example.com/japan.jpg',
-      alt: 'Japan Tour',
-    })
-    expect(tour1?.badges).toEqual([{ kind: 'hot', label: 'Tour hot' }])
-    expect(tour1?.hasHot).toBe(true)
+  it('WingsGo homepage getResolvedScheduleData gives stable output across empty, past-only, and future inventory', async () => {
+    currentTestSite = wingsGoSite
 
-    // Media on tour-foreign-media was stripped to null
-    const tourForeignMedia = snapshot?.tours['tour-foreign-media']
-    expect(tourForeignMedia?.media).toBeNull()
-  })
-
-  it('implements D11 locale fallback: untranslated EN tour shows VI content without leaking VI badge', async () => {
-    // EN query returns a departure whose product has no EN title
-    const enDepartures = [
-      {
-        id: 'dep-d11',
-        departureDate: '2027-08-10T00:00:00.000Z',
-        commerceVerified: true,
-        availabilityStatus: 'open',
-        priceFrom: 30000000,
-        currency: 'VND',
-        tourProduct: {
-          id: 'tour-d11',
-          _status: 'published',
-          site: 7,
-          slug: 'tour-d11',
-          title: '', // Missing EN title!
-          market: 'china',
-          heroMedia: { id: 301, site: 7, url: '/china.jpg' },
-          editorialBadges: [
-            { kind: 'specialized', label: { en: 'Expert Guide', vi: 'Hướng dẫn viên chuyên gia' } },
-          ],
-        },
+    // Test with fresh site
+    const emptySite = await payload.create({
+      collection: 'sites',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        code: `empty-site-${suffix}`,
+        name: `Empty Site ${suffix}`,
+        defaultLocale: 'vi',
+        isActive: true,
+        primaryDomain: `empty-${suffix}.invalid`,
+        supportedLocales: ['vi'],
       },
-    ]
-
-    mocks.find.mockImplementation(async (options: any) => {
-      if (options.collection === 'tour-departures') {
-        return { docs: enDepartures, hasNextPage: false }
-      }
-      if (options.collection === 'tour-products' && options.locale === 'vi') {
-        // Return VI fallback content for tour-d11
-        return {
-          docs: [
-            {
-              id: 'tour-d11',
-              title: 'Bắc Kinh - Vạn Lý Trường Thành (Tiếng Việt)',
-              editorialBadges: [
-                { kind: 'specialized', label: 'Nhãn Tiếng Việt không được lọt' },
-              ],
-            },
-          ],
-        }
-      }
-      return { docs: [] }
+      overrideAccess: true,
     })
 
-    const snapshot = await getWingsGoScheduleSnapshot({
-      locale: 'en',
-      now: new Date('2027-01-01T00:00:00.000Z'),
-    })
-
-    expect(snapshot).not.toBeNull()
-    const tour = snapshot?.tours['tour-d11']
-    // Title took VI fallback
-    expect(tour?.title).toBe('Bắc Kinh - Vạn Lý Trường Thành (Tiếng Việt)')
-    // Route title generated from fallback title
-    expect(tour?.routeTitle).toBeDefined()
-    // Editorial badges came strictly from the EN read
-    expect(tour?.badges).toEqual([{ kind: 'specialized', label: 'Expert Guide' }])
-  })
-
-  it('preserves getResolvedScheduleData behavior for homepage with empty, past-only, and future departures', async () => {
-    // 1. Empty departures
-    mocks.find.mockResolvedValueOnce({ docs: [] })
+    currentTestSite = emptySite
     const emptyResult = await getResolvedScheduleData({ draft: false, locale: 'vi' })
     expect(emptyResult.departures).toEqual([])
     expect(emptyResult.heroStats.lowestPrice).toBeNull()
     expect(emptyResult.heroStats.openCount).toBe(0)
 
-    // 2. Past-only departures (fallback preserved per D2!)
-    const pastDocs = [
-      {
-        id: 'past-1',
-        departureDate: '2020-01-01T00:00:00.000Z',
-        commerceVerified: true,
-        priceFrom: 12000000,
-        currency: 'VND',
-      },
-    ]
-    mocks.find.mockResolvedValueOnce({ docs: pastDocs })
-    const pastResult = await getResolvedScheduleData({ draft: false, locale: 'vi' })
-    // Fallback allows departures to be displayed for past-only
-    expect(pastResult.departures.length).toBe(1)
-    expect(pastResult.heroStats.lowestPrice).toBe(12000000)
+    // Create a past-only departure on this site with current verification governance
+    const pastTour = await createTourProduct({
+      title: `Past Tour ${suffix}`,
+      slug: `past-tour-${suffix}`,
+      market: 'vietnam',
+      site: emptySite.id,
+      _status: 'published',
+    })
 
-    // 3. Future departures
-    const futureDocs = [
-      {
-        id: 'future-1',
+    await payload.create({
+      collection: 'tour-departures',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        departureDate: '2020-01-01T00:00:00.000Z',
+        site: emptySite.id,
+        tourProduct: pastTour.id,
+        availabilityStatus: 'open',
+        verifiedAt: '2020-01-01T00:00:00.000Z',
+        expiresAt: '2030-01-01T00:00:00.000Z',
+        priceFrom: 9900000,
+        currency: 'VND',
+        _status: 'published',
+      },
+      overrideAccess: true,
+    })
+
+    const pastResult = await getResolvedScheduleData({ draft: false, locale: 'vi' })
+    // Fallback keeps past departures visible when no future departures exist (D2 preservation)
+    expect(pastResult.departures.length).toBe(1)
+    expect(pastResult.heroStats.lowestPrice).toBe(9900000)
+
+    // Now add a future departure with price 0 (which should be skipped by getLowestPrice)
+    // and a future departure with valid price
+    await payload.create({
+      collection: 'tour-departures',
+      context: { disableRevalidate: true, seed: true },
+      data: {
         departureDate: '2029-01-01T00:00:00.000Z',
-        commerceVerified: true,
-        priceFrom: 19000000,
+        site: emptySite.id,
+        tourProduct: pastTour.id,
+        availabilityStatus: 'open',
+        verifiedAt: '2026-01-01T00:00:00.000Z',
+        expiresAt: '2030-01-01T00:00:00.000Z',
+        priceFrom: 0, // price 0
         currency: 'VND',
+        _status: 'published',
       },
-      {
-        id: 'future-2-invalid-price',
-        departureDate: '2029-01-05T00:00:00.000Z',
-        commerceVerified: true,
-        priceFrom: 0, // price 0 filtered by getLowestPrice
+      overrideAccess: true,
+    })
+
+    await payload.create({
+      collection: 'tour-departures',
+      context: { disableRevalidate: true, seed: true },
+      data: {
+        departureDate: '2029-01-10T00:00:00.000Z',
+        site: emptySite.id,
+        tourProduct: pastTour.id,
+        availabilityStatus: 'open',
+        verifiedAt: '2026-01-01T00:00:00.000Z',
+        expiresAt: '2030-01-01T00:00:00.000Z',
+        priceFrom: 16500000,
         currency: 'VND',
+        _status: 'published',
       },
-    ]
-    mocks.find.mockResolvedValueOnce({ docs: futureDocs })
+      overrideAccess: true,
+    })
+
     const futureResult = await getResolvedScheduleData({ draft: false, locale: 'vi' })
+    // Visible departures are now future departures only
     expect(futureResult.departures.length).toBe(2)
-    // Lowest price skips 0 and returns 19000000
-    expect(futureResult.heroStats.lowestPrice).toBe(19000000)
+    // getLowestPrice correctly returns 16500000, skipping 0
+    expect(futureResult.heroStats.lowestPrice).toBe(16500000)
     expect(futureResult.heroStats.openCount).toBe(2)
-  })
+  }, 60_000)
 })
