@@ -19,6 +19,7 @@ import { WingsGoScheduleMonthChart } from './WingsGoScheduleMonthChart'
 import { WingsGoScheduleMarketCards } from './WingsGoScheduleMarketCards'
 import { WingsGoScheduleFilterBar } from './WingsGoScheduleFilterBar'
 import { WingsGoScheduleDateList } from './WingsGoScheduleDateList'
+import { WingsGoScheduleTourList } from './WingsGoScheduleTourList'
 import { WingsGoScheduleEmpty } from './WingsGoScheduleEmpty'
 
 export type WingsGoScheduleBrowserProps = {
@@ -42,34 +43,43 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
   }))
 
   // URL two-way sync helper: writes updated whitelist params to URL while preserving others (e.g. utm_*)
-  const syncToURL = useCallback((newFilters: ScheduleFilters) => {
-    if (typeof window === 'undefined') return
-    try {
-      const params = new URLSearchParams(window.location.search)
+  // Uses pushState for discrete filter actions and replaceState for debounced search refinements.
+  const syncToURL = useCallback(
+    (newFilters: ScheduleFilters, mode: 'push' | 'replace' = 'push') => {
+      if (typeof window === 'undefined') return
+      try {
+        const params = new URLSearchParams(window.location.search)
 
-      // Whitelist params for US-093 D9
-      const whitelist = ['market', 'month', 'airline', 'status', 'q', 'sort', 'view'] as const
-      for (const key of whitelist) {
-        params.delete(key)
+        // Whitelist params for US-093 D9
+        const whitelist = ['market', 'month', 'airline', 'status', 'q', 'sort', 'view'] as const
+        for (const key of whitelist) {
+          params.delete(key)
+        }
+
+        if (newFilters.market) params.set('market', newFilters.market)
+        if (newFilters.month) params.set('month', newFilters.month)
+        if (newFilters.airline) params.set('airline', newFilters.airline)
+        if (newFilters.status) params.set('status', newFilters.status)
+        if (newFilters.q) params.set('q', newFilters.q)
+        if (newFilters.sort && newFilters.sort !== 'date') params.set('sort', newFilters.sort)
+        if (newFilters.view && newFilters.view !== 'date') params.set('view', newFilters.view)
+
+        const queryStr = params.toString()
+        const newUrl = queryStr
+          ? `${window.location.pathname}?${queryStr}`
+          : window.location.pathname
+
+        if (mode === 'replace') {
+          window.history.replaceState(null, '', newUrl)
+        } else {
+          window.history.pushState(null, '', newUrl)
+        }
+      } catch {
+        // Ignore in non-browser environments
       }
-
-      if (newFilters.market) params.set('market', newFilters.market)
-      if (newFilters.month) params.set('month', newFilters.month)
-      if (newFilters.airline) params.set('airline', newFilters.airline)
-      if (newFilters.status) params.set('status', newFilters.status)
-      if (newFilters.q) params.set('q', newFilters.q)
-      if (newFilters.sort && newFilters.sort !== 'date') params.set('sort', newFilters.sort)
-      if (newFilters.view && newFilters.view !== 'date') params.set('view', newFilters.view)
-
-      const queryStr = params.toString()
-      const newUrl = queryStr
-        ? `${window.location.pathname}?${queryStr}`
-        : window.location.pathname
-      window.history.replaceState(null, '', newUrl)
-    } catch {
-      // Ignore in non-browser environments
-    }
-  }, [])
+    },
+    [],
+  )
 
   // Listen to popstate (browser back/forward)
   useEffect(() => {
@@ -87,30 +97,31 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
     return () => window.removeEventListener('popstate', handlePopState)
   }, [snapshot])
 
-  // Update filters and sync to URL
+  // Update filters and sync to URL outside updater
   const updateFilters = useCallback(
     (updates: Partial<ScheduleFilters>) => {
-      setFilters((prev) => {
-        const next: ScheduleFilters = { ...prev, ...updates }
-        // Clean undefined / empty strings
-        for (const k of Object.keys(next) as (keyof ScheduleFilters)[]) {
-          if (next[k] === undefined || next[k] === '') {
-            delete next[k]
-          }
+      const isSearchOnly = Object.keys(updates).length === 1 && 'q' in updates
+      const mode = isSearchOnly ? 'replace' : 'push'
+
+      const next: ScheduleFilters = { ...filters, ...updates }
+      for (const k of Object.keys(next) as (keyof ScheduleFilters)[]) {
+        if (next[k] === undefined || next[k] === '') {
+          delete next[k]
         }
-        if (!next.sort) next.sort = 'date'
-        if (!next.view) next.view = 'date'
-        syncToURL(next)
-        return next
-      })
+      }
+      if (!next.sort) next.sort = 'date'
+      if (!next.view) next.view = 'date'
+
+      setFilters(next)
+      syncToURL(next, mode)
     },
-    [syncToURL],
+    [filters, syncToURL],
   )
 
   const clearAllFilters = useCallback(() => {
     const cleared: ScheduleFilters = { sort: 'date', view: 'date' }
     setFilters(cleared)
-    syncToURL(cleared)
+    syncToURL(cleared, 'push')
   }, [syncToURL])
 
   // Pure filtering and calculations
@@ -132,6 +143,13 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
   const uniqueToursCount = useMemo(
     () => new Set(filteredRows.map((r) => r.tourId)).size,
     [filteredRows],
+  )
+
+  // Total departures count when dropping 'market' filter (matches facet count logic for "All" chip)
+  const totalMarketCount = useMemo(
+    () =>
+      filterScheduleRows(snapshot.rows, { ...filters, market: undefined }, snapshot.tours).length,
+    [snapshot.rows, filters, snapshot.tours],
   )
 
   // Active filter chips list for result bar
@@ -197,7 +215,7 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
         locale={locale}
         markets={snapshot.markets}
         onUpdateFilters={updateFilters}
-        totalCount={filteredRows.length}
+        totalCount={totalMarketCount}
       />
 
       {/* 4. Result Line & Active Filter Chips */}
@@ -236,7 +254,7 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
         ) : null}
       </div>
 
-      {/* 5. Date List or Empty State */}
+      {/* 5. Date List, Tour List, or Empty State */}
       <div data-od-id="schedule-results" id="results">
         {sortedRows.length === 0 ? (
           <WingsGoScheduleEmpty
@@ -247,6 +265,13 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
             onClearFilter={(k) => updateFilters({ [k]: undefined })}
             rows={snapshot.rows}
             totalDeparturesCount={snapshot.rows.length}
+            tours={snapshot.tours}
+          />
+        ) : filters.view === 'tour' ? (
+          <WingsGoScheduleTourList
+            locale={locale}
+            rows={filteredRows}
+            sort={filters.sort}
             tours={snapshot.tours}
           />
         ) : (

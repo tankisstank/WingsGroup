@@ -89,6 +89,23 @@ export interface WingsGoScheduleCopy {
   viewTour: string
   emptyTitle: string
   emptyDescription: string
+
+  // Phase 4
+  assuranceKicker: string
+  assuranceTitle: string
+  assuranceLead: string
+  assuranceContactCTA: string
+  assuranceCallLabel: (phone: string) => string
+  assuranceStep1Title: string
+  assuranceStep1Desc: string
+  assuranceStep2Title: string
+  assuranceStep2Desc: string
+  assuranceStep3Title: string
+  assuranceStep3Desc: string
+  contactForQuote: string
+  moreDates: (count: number) => string
+  departureCountLabel: (count: number) => string
+  dateChipAria: (day: string, status: string) => string
 }
 
 export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> = {
@@ -180,6 +197,23 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     viewTour: 'Theo hành trình',
     emptyTitle: 'Chưa có đợt khởi hành',
     emptyDescription: 'Hiện chưa có đợt khởi hành nào trong tương lai. Vui lòng quay lại sau.',
+
+    assuranceKicker: 'Trước khi giữ chỗ',
+    assuranceTitle: 'Lịch để chọn. Chỗ do người thật xác nhận.',
+    assuranceLead:
+      'Số chỗ và giá vé máy bay thay đổi theo ngày. Chuyên viên WingsGo kiểm tra lại từng đợt trước khi bạn đặt cọc.',
+    assuranceContactCTA: 'Trao đổi với chuyên viên',
+    assuranceCallLabel: (phone) => `Gọi ${phone}`,
+    assuranceStep1Title: 'Chọn đợt khởi hành',
+    assuranceStep1Desc: 'So sánh ngày đi, hãng bay và giá của cùng một hành trình.',
+    assuranceStep2Title: 'Gửi yêu cầu',
+    assuranceStep2Desc: 'Tên tour và ngày đi được gửi kèm tự động.',
+    assuranceStep3Title: 'Xác nhận rồi mới đặt cọc',
+    assuranceStep3Desc: 'Chuyên viên kiểm tra số chỗ, giá và điều kiện visa.',
+    contactForQuote: 'Liên hệ báo giá',
+    moreDates: (count) => `+${count} ngày khác`,
+    departureCountLabel: (count) => `${count} đợt`,
+    dateChipAria: (day, status) => `Khởi hành ${day} - ${status}`,
   },
   en: {
     heroKicker: 'Departure schedule',
@@ -273,6 +307,23 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     viewTour: 'By itinerary',
     emptyTitle: 'No upcoming departures',
     emptyDescription: 'There are no future departures at this time. Please check back later.',
+
+    assuranceKicker: 'Before holding a seat',
+    assuranceTitle: 'Schedules to choose. Seats confirmed by real experts.',
+    assuranceLead:
+      'Seat availability and flight fares change daily. WingsGo experts verify each departure before you make a deposit.',
+    assuranceContactCTA: 'Talk to a specialist',
+    assuranceCallLabel: (phone) => `Call ${phone}`,
+    assuranceStep1Title: 'Choose departure date',
+    assuranceStep1Desc: 'Compare departure dates, airlines and prices for the same itinerary.',
+    assuranceStep2Title: 'Submit request',
+    assuranceStep2Desc: 'Tour name and chosen date are sent automatically.',
+    assuranceStep3Title: 'Confirmed before deposit',
+    assuranceStep3Desc: 'Our travel experts verify seat availability, fares and visa requirements.',
+    contactForQuote: 'Contact for quote',
+    moreDates: (count) => `+${count} more dates`,
+    departureCountLabel: (count) => (count === 1 ? '1 departure' : `${count} departures`),
+    dateChipAria: (day, status) => `Departure ${day} - ${status}`,
   },
 }
 

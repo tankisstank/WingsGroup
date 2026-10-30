@@ -100,10 +100,7 @@ export const WingsGoScheduleDateList: React.FC<WingsGoScheduleDateListProps> = (
             >
               <div className="wingsgo-schedule-month-head flex items-baseline justify-between gap-4 pb-3 border-b border-border mb-3.5 sm:mb-4">
                 <h3 className="wingsgo-display text-2xl sm:text-3xl font-medium leading-none text-foreground m-0">
-                  {copy.monthGroupTitle(monthNum, year)}{' '}
-                  <small className="text-base sm:text-lg text-muted-foreground font-normal ml-1">
-                    {year}
-                  </small>
+                  {copy.monthGroupTitle(monthNum, year)}
                 </h3>
                 <p className="text-xs sm:text-sm text-muted-foreground m-0 whitespace-nowrap">
                   {copy.departureCount(monthRows.length)}
