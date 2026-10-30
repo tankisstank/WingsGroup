@@ -5099,3 +5099,47 @@ body h2.wingsgo-display {
     transform: none !important;
   }
 }
+
+/* US-093 Phase 3 Ticket Rows & Filter Bar */
+.wingsgo-schedule-stub::before,
+.wingsgo-schedule-stub::after {
+  content: '';
+  position: absolute;
+  right: -9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--background);
+  border: 1px solid var(--border);
+  z-index: 2;
+}
+
+.wingsgo-schedule-stub::before {
+  top: -9px;
+  clip-path: inset(50% 0 0 0);
+}
+
+.wingsgo-schedule-stub::after {
+  bottom: -9px;
+  clip-path: inset(0 0 50% 0);
+}
+
+.wingsgo-schedule-seg::-webkit-scrollbar {
+  display: none;
+}
+
+.wingsgo-schedule-row--sold-out {
+  border-color: var(--border);
+  background: color-mix(in oklch, var(--muted) 30%, var(--card));
+}
+
+.wingsgo-schedule-row--sold-out .wingsgo-schedule-stub span {
+  color: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wingsgo-schedule-row,
+  .wingsgo-schedule-more-btn {
+    transition: none !important;
+  }
+}

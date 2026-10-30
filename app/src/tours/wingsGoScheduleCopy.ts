@@ -60,6 +60,29 @@ export interface WingsGoScheduleCopy {
   priceFrom: string
   noPrice: string
   searchPlaceholder: string
+  searchAriaLabel: string
+  airlineFilterAria: string
+  airlineAll: string
+  statusFilterAria: string
+  statusAll: string
+  sortFilterAria: string
+  sortNearest: string
+  sortLowestPrice: string
+  viewModeAria: string
+  marketAll: string
+  resultCounts: (departures: number, tours: number) => string
+  clearFilterAria: (label: string) => string
+  clearAllFilters: string
+  monthGroupTitle: (month: string, year: string) => string
+  showMore: (count: number) => string
+  showLess: string
+  hotTourBadge: string
+  viewTourAction: string
+  returnsOn: (date: string) => string
+  emptyFilteredTitle: string
+  emptyFilteredDesc: string
+  emptyRemoveFilter: (name: string, count: number) => string
+  emptyContactExpert: string
   sortDate: string
   sortPrice: string
   viewDate: string
@@ -126,6 +149,31 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     priceFrom: 'Giá từ',
     noPrice: 'Liên hệ',
     searchPlaceholder: 'Tìm tour, thị trường, hãng bay…',
+    searchAriaLabel: 'Tìm theo tên hành trình',
+    airlineFilterAria: 'Hãng bay',
+    airlineAll: 'Tất cả hãng bay',
+    statusFilterAria: 'Tình trạng',
+    statusAll: 'Mọi tình trạng',
+    sortFilterAria: 'Sắp xếp',
+    sortNearest: 'Ngày gần nhất',
+    sortLowestPrice: 'Giá thấp nhất',
+    viewModeAria: 'Cách hiển thị',
+    marketAll: 'Tất cả',
+    resultCounts: (departures, tours) =>
+      `${departures} đợt khởi hành • ${tours} hành trình`,
+    clearFilterAria: (label) => `Bỏ lọc ${label}`,
+    clearAllFilters: 'Xoá tất cả',
+    monthGroupTitle: (month, year) => `Tháng ${month}/${year}`,
+    showMore: (count) => `Xem thêm ${count} đợt`,
+    showLess: 'Thu gọn',
+    hotTourBadge: 'Tour hot',
+    viewTourAction: 'Xem tour',
+    returnsOn: (date) => `Về ${date}`,
+    emptyFilteredTitle: 'Không có đợt khởi hành phù hợp',
+    emptyFilteredDesc:
+      'Thử bỏ bớt một số bộ lọc bên dưới hoặc liên hệ để được tư vấn lịch riêng.',
+    emptyRemoveFilter: (name, count) => `Bỏ lọc ${name} (${count} đợt)`,
+    emptyContactExpert: 'Nhận tư vấn từ chuyên viên',
     sortDate: 'Theo ngày',
     sortPrice: 'Theo giá',
     viewDate: 'Theo ngày',
@@ -193,6 +241,32 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     priceFrom: 'From',
     noPrice: 'Contact us',
     searchPlaceholder: 'Search tours, markets, airlines…',
+    searchAriaLabel: 'Search by itinerary name',
+    airlineFilterAria: 'Airline',
+    airlineAll: 'All airlines',
+    statusFilterAria: 'Availability',
+    statusAll: 'All availability',
+    sortFilterAria: 'Sort by',
+    sortNearest: 'Nearest date',
+    sortLowestPrice: 'Lowest price',
+    viewModeAria: 'View mode',
+    marketAll: 'All',
+    resultCounts: (departures, tours) =>
+      `${departures} ${departures === 1 ? 'departure' : 'departures'} • ${tours} ${tours === 1 ? 'itinerary' : 'itineraries'}`,
+    clearFilterAria: (label) => `Remove ${label} filter`,
+    clearAllFilters: 'Clear all',
+    monthGroupTitle: (month, year) => `${month} ${year}`,
+    showMore: (count) => `Show ${count} more ${count === 1 ? 'departure' : 'departures'}`,
+    showLess: 'Show less',
+    hotTourBadge: 'Hot tour',
+    viewTourAction: 'View tour',
+    returnsOn: (date) => `Returns ${date}`,
+    emptyFilteredTitle: 'No departures match your filters',
+    emptyFilteredDesc:
+      'Try removing some filters below or contact us for a custom itinerary.',
+    emptyRemoveFilter: (name, count) =>
+      `Remove ${name} (${count} ${count === 1 ? 'departure' : 'departures'})`,
+    emptyContactExpert: 'Talk to a travel expert',
     sortDate: 'By date',
     sortPrice: 'By price',
     viewDate: 'By date',

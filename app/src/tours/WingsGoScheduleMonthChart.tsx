@@ -124,8 +124,8 @@ export const WingsGoScheduleMonthChart: React.FC<WingsGoScheduleMonthChartProps>
               </span>
               <span
                 className={cn(
-                  'wingsgo-schedule-bar-fill block w-full rounded-t-md sm:rounded-t-lg rounded-b-[3px] bg-muted/80 transition-all duration-200 group-hover:bg-[var(--site-brand)]/50',
-                  isPressed && 'bg-[var(--site-brand)]',
+                  'wingsgo-schedule-bar-fill block w-full rounded-t-md sm:rounded-t-lg rounded-b-[3px] bg-[var(--surface-strong,oklch(80%_0.02_235))] transition-all duration-200 group-hover:bg-[var(--site-brand)]/70',
+                  isPressed && 'bg-[var(--site-brand)] shadow-sm',
                   isDisabled && 'bg-muted/40',
                 )}
                 style={{ height: `${heightPercent}%` }}

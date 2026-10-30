@@ -525,6 +525,28 @@ export const hasWingsGoCatalogFilterParams = (
   })
 }
 
+export const WINGSGO_SCHEDULE_FILTER_PARAMS = [
+  'market',
+  'month',
+  'airline',
+  'status',
+  'q',
+  'sort',
+  'view',
+] as const
+
+export const hasWingsGoScheduleFilterParams = (
+  searchParams?: Record<string, string | string[] | undefined> | null,
+): boolean => {
+  if (!searchParams) return false
+  return WINGSGO_SCHEDULE_FILTER_PARAMS.some((key) => {
+    const value = searchParams[key]
+    if (value === undefined || value === null || value === '') return false
+    if (Array.isArray(value) && value.length === 0) return false
+    return true
+  })
+}
+
 export async function generateCmsPageMetadataByPath({
   requestedPath,
   searchParams,
@@ -612,6 +634,23 @@ export async function generateCmsPageMetadataByPath({
     site.code === 'wings-go' &&
     requestedPath === '/tour' &&
     hasWingsGoCatalogFilterParams(searchParams)
+  ) {
+    return {
+      ...metadata,
+      robots: {
+        ...(typeof metadata.robots === 'object' && metadata.robots !== null
+          ? metadata.robots
+          : {}),
+        follow: true,
+        index: false,
+      },
+    }
+  }
+
+  if (
+    site.code === 'wings-go' &&
+    (requestedPath === '/lich-khoi-hanh' || requestedPath === '/en/lich-khoi-hanh') &&
+    hasWingsGoScheduleFilterParams(searchParams)
   ) {
     return {
       ...metadata,
@@ -728,13 +767,16 @@ const resolveStructuredTourPage = async ({
       ? await getWingsGoScheduleSnapshot({
           draft,
           locale: (copyLocale === 'en' ? 'en' : 'vi') as SupportedLocaleCode,
+          searchParams,
         })
       : null
 
-    const schedule = await getResolvedScheduleData({
-      draft,
-      locale,
-    })
+    const schedule = isWingsGo
+      ? null
+      : await getResolvedScheduleData({
+          draft,
+          locale,
+        })
 
     return (
       <TourSchedulePage

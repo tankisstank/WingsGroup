@@ -71,7 +71,7 @@ export const WingsGoScheduleHero: React.FC<WingsGoScheduleHeroProps> = ({
 
       <div className="wingsgo-schedule-stats mt-6 pt-5 border-t border-border/70 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
         <div className="wingsgo-schedule-stat">
-          <b className="block font-['WingsGo_Display',Georgia,serif] text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
+          <b className="block wingsgo-display text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
             {stats.openCount}
           </b>
           <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
@@ -79,7 +79,7 @@ export const WingsGoScheduleHero: React.FC<WingsGoScheduleHeroProps> = ({
           </span>
         </div>
         <div className="wingsgo-schedule-stat">
-          <b className="block font-['WingsGo_Display',Georgia,serif] text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
+          <b className="block wingsgo-display text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
             {stats.tourCount}
           </b>
           <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
@@ -87,7 +87,7 @@ export const WingsGoScheduleHero: React.FC<WingsGoScheduleHeroProps> = ({
           </span>
         </div>
         <div className="wingsgo-schedule-stat">
-          <b className="block font-['WingsGo_Display',Georgia,serif] text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
+          <b className="block wingsgo-display text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
             {stats.pricedCount}
           </b>
           <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
@@ -95,7 +95,7 @@ export const WingsGoScheduleHero: React.FC<WingsGoScheduleHeroProps> = ({
           </span>
         </div>
         <div className="wingsgo-schedule-stat">
-          <b className="block font-['WingsGo_Display',Georgia,serif] text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
+          <b className="block wingsgo-display text-2xl sm:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
             {nearestDateFormatted}
           </b>
           <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">

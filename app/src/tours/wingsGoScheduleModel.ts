@@ -129,6 +129,21 @@ export const foldVietnameseText = (value?: string | null): string => {
 export const foldVietnamese = foldVietnameseText
 
 /**
+ * Deterministic day of week abbreviation for a YYYY-MM-DD string.
+ * Completely timezone-neutral, 0 hydration mismatch risk.
+ */
+export const getScheduleWeekdayAbbr = (dayString: string, locale: 'vi' | 'en' = 'vi'): string => {
+  const parts = dayString.split('-').map(Number)
+  if (parts.length < 3 || Number.isNaN(parts[0]) || Number.isNaN(parts[1]) || Number.isNaN(parts[2])) {
+    return ''
+  }
+  const dayOfWeek = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).getUTCDay()
+  const viDays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+  const enDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  return locale === 'en' ? enDays[dayOfWeek] : viDays[dayOfWeek]
+}
+
+/**
  * Derive schedule availability following the 5-step table in design.md (R2).
  */
 export const deriveScheduleAvailability = (
