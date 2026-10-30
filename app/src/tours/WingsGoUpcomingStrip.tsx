@@ -1,13 +1,21 @@
 import React from 'react'
+import { PlaneIcon } from 'lucide-react'
 
 import { SiteLink } from '@/components/SiteLink'
-import { PromotionPrice } from './PromotionPrice'
-import { formatTourDate } from './utils'
+import { WingsGoUpcomingBoard } from './WingsGoUpcomingBoard'
 import type { WingsGoCatalogCard } from './wingsGoCatalog'
 import {
   getWingsGoCatalogCopy,
   resolveWingsGoCopyLocale,
+  WINGSGO_MARKET_LABELS,
 } from './wingsGoCatalogCopy'
+import {
+  formatShortTourPrice,
+  getCompactDurationLabel,
+  getDepartureCityCode,
+  getDepartureStub,
+  getTourRouteTitle,
+} from './wingsGoDisplay'
 import type { SupportedLocaleCode } from '@/utilities/sitePaths'
 
 export type WingsGoUpcomingStripProps = {
@@ -25,90 +33,109 @@ export const WingsGoUpcomingStrip: React.FC<WingsGoUpcomingStripProps> = ({
 
   const copyLocale = resolveWingsGoCopyLocale(locale)
   const copy = getWingsGoCatalogCopy(copyLocale)
+  const [titleLead, titleEmphasis, titleTail] = copy.upcomingTitleParts
 
   return (
     <section
       aria-labelledby="wingsgo-upcoming-strip-heading"
-      className="border-b border-border/40 bg-muted/10 py-8 md:py-10"
+      className="bg-background py-12 md:py-16"
+      id="departures"
     >
-      <div className="container space-y-5">
-        <div className="flex flex-col gap-1">
-          <p className="site-brand-kicker text-xs font-semibold uppercase tracking-[0.18em]">
-            {copy.upcomingKicker}
-          </p>
-          <h2
-            className="text-2xl font-bold tracking-tight text-foreground md:text-3xl"
-            id="wingsgo-upcoming-strip-heading"
-          >
-            {copy.upcomingTitle}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {copy.upcomingDescription}
-          </p>
-        </div>
-
-        <div
-          aria-label={copy.upcomingTitle}
-          className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory scrollbar-none md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 md:overflow-visible md:pb-0"
-          role="region"
+      <div className="container">
+        <WingsGoUpcomingBoard
+          boardLabel={copy.upcomingBoardLabel}
+          heading={
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {copy.upcomingKicker}
+              </p>
+              <h2
+                aria-label={copy.upcomingTitle}
+                className="wingsgo-display text-[clamp(2.125rem,3.6vw,3.25rem)] leading-[1.06] text-foreground"
+                id="wingsgo-upcoming-strip-heading"
+              >
+                {titleLead}
+                <em>{titleEmphasis}</em>
+                {titleTail}
+              </h2>
+            </div>
+          }
+          nextLabel={copy.upcomingNext}
+          prevLabel={copy.upcomingPrev}
         >
           {cards.map((card) => {
-            const daysUntilText =
-              typeof card.nextDeparture?.daysUntilDeparture === 'number'
-                ? copy.daysUntilDepartureBadge(card.nextDeparture.daysUntilDeparture)
-                : null
+            const stub = getDepartureStub(card.nextDeparture.date, copyLocale)
+            const cityCode = getDepartureCityCode(card.nextDeparture.departureCity)
+            const marketLabel =
+              WINGSGO_MARKET_LABELS[card.market]?.[copyLocale] || card.market
+            const duration = getCompactDurationLabel(
+              card.duration.days,
+              card.duration.nights,
+              copyLocale,
+            )
+            const daysUntil = card.nextDeparture.daysUntilDeparture
+            const routeTitle =
+              copyLocale === 'vi'
+                ? getTourRouteTitle(card.title, card.nextDeparture.departureCity)
+                : card.title
 
             return (
-              <article
-                className="group relative flex w-[280px] shrink-0 snap-start flex-col justify-between rounded-[20px] border border-border/70 bg-card p-4 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--site-brand)]/40 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0 md:w-auto"
+              <SiteLink
+                className="wingsgo-ticket"
+                href={card.href}
                 key={String(card.id)}
               >
-                <SiteLink
-                  className="flex h-full flex-col justify-between gap-3 rounded-[16px] no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]"
-                  href={card.href}
-                >
-                  <div className="space-y-2">
-                    {daysUntilText ? (
-                      <span className="inline-flex w-fit items-center rounded-full bg-[var(--site-brand)]/10 px-2.5 py-0.5 text-[11px] font-bold text-[var(--site-brand)]">
-                        {daysUntilText}
+                <span className="wingsgo-ticket__stub">
+                  {stub ? (
+                    <>
+                      <span className="wingsgo-ticket__day">{stub.day}</span>
+                      <span className="text-xs font-semibold uppercase tracking-[0.08em]">
+                        {stub.month}
                       </span>
-                    ) : null}
-                    <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-[var(--site-brand)]">
-                      {card.title}
-                    </h3>
-                  </div>
-
-                  <div className="space-y-2 border-t border-border/40 pt-2 text-xs">
-                    <p className="text-muted-foreground">
-                      <span className="font-medium text-foreground">
-                        {formatTourDate(card.nextDeparture.date, copyLocale)}
-                      </span>
-                      {card.nextDeparture.departureCity ? ` • ${card.nextDeparture.departureCity}` : ''}
-                      {card.nextDeparture.airline ? ` • ${card.nextDeparture.airline}` : ''}
-                    </p>
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        {copy.heroPriceFrom}
-                      </span>
-                      <span className="font-semibold text-foreground">
-                        {card.price.kind === 'verified' ? (
-                          <PromotionPrice
-                            contactLabel={copy.contactPriceLabel}
-                            currency={card.price.currency}
-                            originalPrice={card.price.originalPrice}
-                            price={card.price.value}
-                          />
-                        ) : (
-                          card.price.label
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </SiteLink>
-              </article>
+                      <span className="text-[11px] text-muted-foreground">{stub.weekday}</span>
+                    </>
+                  ) : (
+                    <PlaneIcon className="h-6 w-6 text-[var(--site-brand)]" />
+                  )}
+                </span>
+                <span className="flex min-w-0 flex-col gap-2 px-[18px] py-4">
+                  <span className="flex min-w-0 items-center gap-2 whitespace-nowrap text-xs font-semibold uppercase tracking-[0.04em] text-muted-foreground">
+                    {cityCode ? <span className="shrink-0">{cityCode}</span> : null}
+                    <PlaneIcon
+                      aria-hidden="true"
+                      className="h-3.5 w-3.5 shrink-0 rotate-45 text-[var(--site-brand)]"
+                    />
+                    <span className="truncate">
+                      {marketLabel}
+                      {duration ? ` · ${duration}` : ''}
+                    </span>
+                  </span>
+                  <span className="line-clamp-2 text-[15.5px] font-semibold leading-[1.35]">
+                    {routeTitle}
+                  </span>
+                  {typeof daysUntil === 'number' ? (
+                    <span className="text-xs font-semibold text-[var(--site-accent)]">
+                      {copy.daysUntilDepartureBadge(daysUntil)}
+                    </span>
+                  ) : null}
+                  <span className="mt-auto flex items-end justify-between gap-2.5 text-[12.5px] text-muted-foreground">
+                    <span className="min-w-0">{card.nextDeparture.airline || ''}</span>
+                    {card.price.kind === 'verified' ? (
+                      <strong className="whitespace-nowrap text-base font-bold text-foreground">
+                        <span className="sr-only">{copy.heroPriceFrom} </span>
+                        {formatShortTourPrice(card.price.value, copyLocale)}
+                      </strong>
+                    ) : (
+                      <strong className="whitespace-nowrap text-sm font-semibold text-foreground">
+                        {copy.contactPriceShortLabel}
+                      </strong>
+                    )}
+                  </span>
+                </span>
+              </SiteLink>
             )
           })}
-        </div>
+        </WingsGoUpcomingBoard>
       </div>
     </section>
   )

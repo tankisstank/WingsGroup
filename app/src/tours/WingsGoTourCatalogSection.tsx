@@ -46,6 +46,7 @@ export const WingsGoTourCatalogSection = async ({
         filtersActive={initial.filtersActive}
         initialFilters={filters}
         locale={copyLocale}
+        markets={initial.markets}
       />
       <WingsGoUpcomingStrip
         cards={initial.upcoming}

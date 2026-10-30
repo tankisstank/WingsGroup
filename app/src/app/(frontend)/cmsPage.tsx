@@ -323,7 +323,13 @@ export async function renderCmsPageByPath({
         useWingsGroupV3Home ? 'wingsgroup-v3-home' : '',
         useWingsGroupV3Surface ? 'wingsgroup-v3-surface' : '',
         isWingsGroupPendingPolicy ? 'wingsgroup-v3-route-policy' : '',
-        useHiFiBody ? 'pb-16 md:pb-20' : isStructuredTour ? 'pb-16 md:pb-20' : 'pt-16 pb-24',
+        useHiFiBody
+          ? 'pb-16 md:pb-20'
+          : isStructuredTour
+            ? 'pb-16 md:pb-20'
+            : useWingsGoTourCatalog
+              ? 'pt-4 pb-24 md:pt-6'
+              : 'pt-16 pb-24',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -386,7 +392,9 @@ export async function renderCmsPageByPath({
               ? 'wingsgroup-v3-breadcrumb container'
               : isStructuredTour
                 ? 'wingsside-tour-breadcrumb container pb-3 pt-4 md:pt-5'
-                : undefined
+                : useWingsGoTourCatalog
+                  ? 'container pb-2 text-sm text-muted-foreground'
+                  : undefined
           }
           items={renderedBreadcrumbItems}
           linkClassName={

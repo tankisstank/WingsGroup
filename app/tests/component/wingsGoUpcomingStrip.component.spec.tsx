@@ -59,28 +59,43 @@ describe('US-092 Phase 4: WingsGoUpcomingStrip', () => {
     expect(nullContainer.firstElementChild).toBeNull()
   })
 
-  it('renders upcoming strip with section header, days until departure badges, dates, and prices in VI', () => {
+  it('renders ticket stubs with the VN business day, route, days badge and short price in VI', () => {
     const cards = [
       makeUpcomingCard(1, 0), // Today
       makeUpcomingCard(2, 3), // In 3 days
     ]
 
-    render(<WingsGoUpcomingStrip cards={cards} locale="vi" />)
+    const { container } = render(<WingsGoUpcomingStrip cards={cards} locale="vi" />)
 
-    // Heading and kicker
-    expect(screen.getByText('Lịch khởi hành cận ngày')).toBeTruthy()
+    expect(screen.getByText('Lịch khởi hành gần nhất')).toBeTruthy()
     expect(screen.getByRole('heading', { level: 2, name: 'Sắp cất cánh' })).toBeTruthy()
+    expect(container.querySelector('h2 em')?.textContent).toBe('cất cánh')
 
-    // Days until departure badges
     expect(screen.getByText('Khởi hành hôm nay')).toBeTruthy()
     expect(screen.getByText('Khởi hành sau 3 ngày')).toBeTruthy()
 
-    // Departure date & airline
-    expect(screen.getAllByText(/15\/11\/2026/)).toHaveLength(2)
-    expect(screen.getAllByText(/Hà Nội • VN/)).toHaveLength(2)
+    const tickets = container.querySelectorAll('a.wingsgo-ticket')
+    expect(tickets).toHaveLength(2)
+    const stub = tickets[0].querySelector('.wingsgo-ticket__stub')
+    expect(stub?.textContent).toBe('15Th11Chủ nhật')
+    expect(tickets[0].textContent).toContain('HAN')
+    expect(tickets[0].textContent).toContain('Tour Sắp Cất Cánh 1')
+    expect(tickets[0].textContent).toContain('Hàn Quốc · 5N4Đ')
+    expect(tickets[0].textContent).toContain('14,9 triệu')
+    expect(tickets[0].getAttribute('href')).toBe('/tour/tour-1')
+  })
 
-    // Price from label
-    expect(screen.getAllByText('Giá từ')).toHaveLength(2)
+  it('puts a 17:00Z departure on the next Vietnam calendar day', () => {
+    const card = makeUpcomingCard(1, 4)
+    card.nextDeparture.date = '2026-11-23T17:00:00.000Z'
+    const { container } = render(<WingsGoUpcomingStrip cards={[card]} locale="vi" />)
+    expect(container.querySelector('.wingsgo-ticket__day')?.textContent).toBe('24')
+  })
+
+  it('shows the contact label when the tour has no verified price', () => {
+    const card = { ...makeUpcomingCard(1, 4), price: { kind: 'contact' as const, label: 'x' } }
+    render(<WingsGoUpcomingStrip cards={[card]} locale="vi" />)
+    expect(screen.getByText('Liên hệ nhận giá')).toBeTruthy()
   })
 
   it('renders all upcoming strip copy in English when locale is en without Vietnamese text', () => {
@@ -116,37 +131,30 @@ describe('US-092 Phase 4: WingsGoUpcomingStrip', () => {
 
     const { container } = render(<WingsGoUpcomingStrip cards={enCards} locale="en" />)
 
-    expect(screen.getByText('Imminent departures')).toBeTruthy()
+    expect(screen.getByText('Next departures')).toBeTruthy()
     expect(screen.getByRole('heading', { level: 2, name: 'Departing soon' })).toBeTruthy()
     expect(screen.getByText('Departs today')).toBeTruthy()
     expect(screen.getByText('Departs in 1 day')).toBeTruthy()
-    expect(screen.getAllByText('From')).toHaveLength(2)
+    expect(container.textContent).toContain('SGN')
+    expect(container.textContent).toContain('NovSun')
+    expect(container.textContent).toContain('VND 14.9M')
 
-    // Assert no Vietnamese characters in EN
-    const textElements = container.querySelectorAll('h2, h3, p, span, a')
+    const textElements = container.querySelectorAll('h2, h3, p, span, a, button')
     for (const el of textElements) {
       expect(el.textContent || '').not.toMatch(VIETNAMESE_CHAR_REGEX)
+      expect(el.getAttribute('aria-label') || '').not.toMatch(VIETNAMESE_CHAR_REGEX)
     }
   })
 
-  it('provides horizontal scroll strip classes on mobile and grid classes on desktop', () => {
+  it('is a keyboard-scrollable board with prev/next buttons and no auto-scroll', () => {
     const cards = [makeUpcomingCard(1, 5)]
     const { container } = render(<WingsGoUpcomingStrip cards={cards} locale="vi" />)
 
     const region = container.querySelector('[role="region"]')
-    expect(region?.className).toContain('overflow-x-auto')
-    expect(region?.className).toContain('snap-x')
-    expect(region?.className).toContain('snap-mandatory')
-    expect(region?.className).toContain('md:grid')
-
-    const article = container.querySelector('article')
-    expect(article?.className).toContain('snap-start')
-    expect(article?.className).toContain('w-[280px]')
-    expect(article?.className).toContain('md:w-auto')
-    expect(article?.className).toContain('motion-reduce:transition-none')
-
-    const link = container.querySelector('a')
-    expect(link?.className).toContain('focus-visible:ring-2')
-    expect(link?.getAttribute('href')).toBe('/tour/tour-1')
+    expect(region?.className).toContain('wingsgo-board')
+    expect(region?.getAttribute('tabindex')).toBe('0')
+    expect(screen.getByRole('button', { name: 'Xem đoàn trước' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Xem đoàn tiếp theo' })).toBeTruthy()
+    expect(container.querySelector('a.wingsgo-ticket')?.getAttribute('href')).toBe('/tour/tour-1')
   })
 })

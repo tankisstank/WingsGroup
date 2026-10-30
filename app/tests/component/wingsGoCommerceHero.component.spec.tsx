@@ -27,7 +27,7 @@ vi.mock('@/components/SiteLink', () => ({
 
 import {
   WingsGoCommerceHero,
-  WingsGoHeroLargeCard,
+  WingsGoHeroFeatureTile,
 } from '@/heros/WingsGoCommerceHero'
 import type { WingsGoCatalogCard } from '@/tours/wingsGoCatalog'
 
@@ -120,6 +120,7 @@ describe('WingsGoCommerceHero', () => {
 
     const slot1 = container.querySelector('article')
     expect(slot1).not.toBeNull()
+    expect(slot1?.className).toContain('wingsgo-hero-mosaic__tile--main')
     expect(slot1?.getAttribute('data-has-hot')).toBeNull()
     expect(slot1?.classList.contains('hot-rainbow-card')).toBe(false)
     expect(slot1?.querySelector('[data-editorial-stickers="true"]')).toBeNull()
@@ -152,7 +153,6 @@ describe('WingsGoCommerceHero', () => {
     expect(text).toContain('All destinations')
     expect(text).toContain('Departure month')
     expect(text).toContain('Search tours')
-    expect(text).toContain('Trending tours')
     expect(text).toContain('Departs in 5 days')
 
     // No Vietnamese strings in UI copy
@@ -178,7 +178,7 @@ describe('WingsGoCommerceHero', () => {
     })
 
     const { container: containerVI } = render(
-      <WingsGoHeroLargeCard card={contactCardVI} locale="vi" />,
+      <WingsGoHeroFeatureTile card={contactCardVI} locale="vi" />,
     )
     expect(containerVI.textContent).toContain('Liên hệ để nhận giá mới nhất')
 
@@ -188,7 +188,7 @@ describe('WingsGoCommerceHero', () => {
       price: { kind: 'contact', label: 'Liên hệ để nhận giá mới nhất' },
     })
     const { container: containerEN } = render(
-      <WingsGoHeroLargeCard card={contactCardEN} locale="en" />,
+      <WingsGoHeroFeatureTile card={contactCardEN} locale="en" />,
     )
     expect(containerEN.textContent).toContain('Contact us for latest pricing')
   })
@@ -205,7 +205,7 @@ describe('WingsGoCommerceHero', () => {
     expect(screen.getByRole('heading', { level: 1 })).toBeTruthy()
     expect(screen.getByRole('form')).toBeTruthy()
     expect(container.querySelector('article')).toBeNull()
-    expect(container.querySelector('.site-departure-stack')).toBeNull()
+    expect(container.querySelector('[data-wingsgo-hero-mosaic="true"]')).toBeNull()
   })
 
   it('quick search submit calls router.push with expected params, { scroll: false }, and never calls scrollIntoView', () => {
@@ -244,5 +244,52 @@ describe('WingsGoCommerceHero', () => {
     expect(parsed.searchParams.get('season')).toBe('autumn')
     expect(parsed.searchParams.get('cursor')).toBeNull()
     expect(parsed.searchParams.get('offset')).toBeNull()
+  })
+
+  it('lays out slot #1 as the tall mosaic tile with slots #2-#3 beside it', () => {
+    const { container } = render(
+      <WingsGoCommerceHero
+        cards={[
+          makeCard({ id: 1, title: 'HÀ NỘI – BUSAN – GYEONGJU – SEOUL' }),
+          makeCard({ id: 2, nextDeparture: { airline: 'VN', date: '2026-11-11T17:00:00.000Z', daysUntilDeparture: 14, departureCity: 'Hà Nội', promoLabel: null } }),
+          makeCard({ id: 3 }),
+        ]}
+        filtersActive={false}
+        locale="vi"
+      />,
+    )
+
+    const mosaic = container.querySelector('[data-wingsgo-hero-mosaic="true"]')
+    expect(mosaic).not.toBeNull()
+    const tiles = mosaic?.querySelectorAll('article') || []
+    expect(tiles).toHaveLength(3)
+    expect(tiles[0].className).toContain('wingsgo-hero-mosaic__tile--main')
+    expect(tiles[0].textContent).toContain('Busan · Gyeongju · Seoul')
+    expect(tiles[0].textContent).toContain('5N4Đ · Khởi hành 15/11/2026')
+    // 17:00Z on 11/11 is already 12/11 in Vietnam.
+    expect(tiles[1].textContent).toContain('Khởi hành 12/11')
+
+    // The search column sits beside the mosaic on desktop.
+    expect(mosaic?.parentElement?.className).toContain('lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]')
+  })
+
+  it('shows market and itinerary counts only from the catalog snapshot', () => {
+    const { container } = render(
+      <WingsGoCommerceHero
+        cards={[makeCard()]}
+        locale="vi"
+        markets={[
+          { count: 8, image: null, lowestPrice: null, market: 'japan' },
+          { count: 5, image: null, lowestPrice: null, market: 'korea' },
+          { count: 0, image: null, lowestPrice: null, market: 'china' },
+        ]}
+      />,
+    )
+
+    const text = container.textContent || ''
+    expect(text).toContain('2 thị trường')
+    expect(text).toContain('Nhật Bản · Hàn Quốc')
+    expect(text).toContain('13 hành trình')
+    expect(text).not.toContain('3 thị trường')
   })
 })

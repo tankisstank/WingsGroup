@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
+import { ArrowRight } from 'lucide-react'
 
 import {
   WINGSGO_CATALOG_MARKETS,
@@ -65,18 +66,25 @@ export const WingsGoQuickSearchForm: React.FC<{
     router.push(targetUrl, { scroll: false })
   }
 
+  const fieldClass =
+    'block min-w-0 border-border px-4 pb-3 pt-2.5 sm:border-r sm:last:border-r-0 max-sm:border-b max-sm:last:border-b-0'
+  const labelClass =
+    'block text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground'
+  const selectClass =
+    'mt-1 min-h-[30px] w-full cursor-pointer truncate border-0 bg-transparent p-0 pr-5 text-[15px] font-semibold text-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--site-brand)]'
+
   return (
     <form
       aria-label={copy.quickSearchTitle}
-      className="rounded-2xl border border-border/80 bg-card/90 p-4 shadow-sm backdrop-blur-xs md:p-5"
+      className="rounded-3xl border border-border bg-card p-2.5 shadow-[0_8px_24px_color-mix(in_oklch,var(--site-brand)_8%,transparent)]"
       onSubmit={handleSubmit}
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:items-end">
-        <label className="flex flex-col gap-1.5 text-xs font-semibold text-muted-foreground">
-          <span>{copy.quickSearchMarketLabel}</span>
+      <div className="grid sm:grid-cols-3">
+        <label className={fieldClass}>
+          <span className={labelClass}>{copy.quickSearchMarketLabel}</span>
           <select
             aria-label={copy.quickSearchMarketLabel}
-            className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:border-[var(--site-brand)] focus:outline-hidden"
+            className={selectClass}
             defaultValue={initialFilters?.market || ''}
             name="market"
           >
@@ -89,11 +97,11 @@ export const WingsGoQuickSearchForm: React.FC<{
           </select>
         </label>
 
-        <label className="flex flex-col gap-1.5 text-xs font-semibold text-muted-foreground">
-          <span>{copy.quickSearchMonthLabel}</span>
+        <label className={fieldClass}>
+          <span className={labelClass}>{copy.quickSearchMonthLabel}</span>
           <select
             aria-label={copy.quickSearchMonthLabel}
-            className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:border-[var(--site-brand)] focus:outline-hidden"
+            className={selectClass}
             defaultValue={initialFilters?.departureMonth || ''}
             name="departureMonth"
           >
@@ -106,11 +114,11 @@ export const WingsGoQuickSearchForm: React.FC<{
           </select>
         </label>
 
-        <label className="flex flex-col gap-1.5 text-xs font-semibold text-muted-foreground">
-          <span>{copy.quickSearchSeasonLabel}</span>
+        <label className={fieldClass}>
+          <span className={labelClass}>{copy.quickSearchSeasonLabel}</span>
           <select
             aria-label={copy.quickSearchSeasonLabel}
-            className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:border-[var(--site-brand)] focus:outline-hidden"
+            className={selectClass}
             defaultValue={initialFilters?.season || ''}
             name="season"
           >
@@ -121,15 +129,16 @@ export const WingsGoQuickSearchForm: React.FC<{
             <option value="winter">{copy.seasonWinter}</option>
           </select>
         </label>
+      </div>
 
-        <div>
-          <button
-            className="h-10 w-full rounded-lg bg-[var(--site-brand,#e11d48)] px-4 text-sm font-semibold text-white shadow-xs transition-opacity hover:opacity-90 focus:outline-hidden"
-            type="submit"
-          >
-            {copy.quickSearchSubmit}
-          </button>
-        </div>
+      <div className="mt-1 flex justify-end border-t border-border px-1.5 pb-1 pt-2">
+        <button
+          className="inline-flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-full bg-[var(--site-accent)] px-6 text-[15px] font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--site-brand)] focus-visible:ring-offset-2 sm:w-auto"
+          type="submit"
+        >
+          {copy.quickSearchSubmit}
+          <ArrowRight aria-hidden="true" className="h-[18px] w-[18px]" />
+        </button>
       </div>
     </form>
   )

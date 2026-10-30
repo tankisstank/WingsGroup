@@ -2,16 +2,22 @@ import { getCopyLocale, type CopyLocaleCode } from '@/utilities/locales'
 
 export interface WingsGoCatalogCopy {
   contactPriceLabel: string
+  contactPriceShortLabel: string
 
   // Hero section
   heroKicker: string
   heroTitle: string
+  heroTitleParts: [string, string, string]
   heroSubtitle: string
   heroTrendingTitle: string
   heroViewTour: string
   heroNextDeparture: string
   heroPriceFrom: string
   daysUntilDepartureBadge: (days: number) => string
+  heroDeparturePrefix: string
+  heroProofMarkets: (count: number) => string
+  heroProofTours: (count: number) => string
+  heroProofToursNote: string
 
   // Quick search
   quickSearchTitle: string
@@ -32,7 +38,11 @@ export interface WingsGoCatalogCopy {
   // Upcoming strip section
   upcomingKicker: string
   upcomingTitle: string
+  upcomingTitleParts: [string, string, string]
   upcomingDescription: string
+  upcomingPrev: string
+  upcomingNext: string
+  upcomingBoardLabel: string
 
   // Market tiles section
   marketTilesKicker: string
@@ -96,9 +106,11 @@ export interface WingsGoCatalogCopy {
 export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = {
   vi: {
     contactPriceLabel: 'Liên hệ để nhận giá mới nhất',
+    contactPriceShortLabel: 'Liên hệ nhận giá',
 
     heroKicker: 'WingsGo Tours',
     heroTitle: 'Khám phá thế giới cùng WingsGo',
+    heroTitleParts: ['Khám phá ', 'thế giới', ' cùng WingsGo'],
     heroSubtitle:
       'Tour chọn lọc chất lượng cao, lịch khởi hành rõ ràng, trải nghiệm trọn vẹn và giá minh bạch.',
     heroTrendingTitle: 'Tour đang được quan tâm',
@@ -107,6 +119,10 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     heroPriceFrom: 'Giá từ',
     daysUntilDepartureBadge: (days: number) =>
       days === 0 ? 'Khởi hành hôm nay' : `Khởi hành sau ${days} ngày`,
+    heroDeparturePrefix: 'Khởi hành',
+    heroProofMarkets: (count: number) => `${count} thị trường`,
+    heroProofTours: (count: number) => `${count} hành trình`,
+    heroProofToursNote: 'đang mở bán',
 
     quickSearchTitle: 'Tìm kiếm tour nhanh',
     quickSearchMarketLabel: 'Điểm đến',
@@ -122,8 +138,12 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     seasonAutumn: 'Mùa thu (T9 - T11)',
     seasonWinter: 'Mùa đông (T12 - T2)',
 
-    upcomingKicker: 'Lịch khởi hành cận ngày',
+    upcomingKicker: 'Lịch khởi hành gần nhất',
     upcomingTitle: 'Sắp cất cánh',
+    upcomingTitleParts: ['Sắp ', 'cất cánh', '.'],
+    upcomingPrev: 'Xem đoàn trước',
+    upcomingNext: 'Xem đoàn tiếp theo',
+    upcomingBoardLabel: 'Các đoàn sắp khởi hành, cuộn ngang',
     upcomingDescription:
       'Những chuyến đi có ngày khởi hành gần nhất, giá minh bạch và sẵn sàng cất cánh.',
 
@@ -185,9 +205,11 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
   },
   en: {
     contactPriceLabel: 'Contact us for latest pricing',
+    contactPriceShortLabel: 'Ask for price',
 
     heroKicker: 'WingsGo Tours',
     heroTitle: 'Explore the World with WingsGo',
+    heroTitleParts: ['Explore ', 'the World', ' with WingsGo'],
     heroSubtitle:
       'Curated premium tours, reliable departure dates, seamless journeys, and transparent pricing.',
     heroTrendingTitle: 'Trending tours',
@@ -196,6 +218,10 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     heroPriceFrom: 'From',
     daysUntilDepartureBadge: (days: number) =>
       days === 0 ? 'Departs today' : days === 1 ? 'Departs in 1 day' : `Departs in ${days} days`,
+    heroDeparturePrefix: 'Departs',
+    heroProofMarkets: (count: number) => (count === 1 ? '1 market' : `${count} markets`),
+    heroProofTours: (count: number) => (count === 1 ? '1 itinerary' : `${count} itineraries`),
+    heroProofToursNote: 'open for booking',
 
     quickSearchTitle: 'Quick tour search',
     quickSearchMarketLabel: 'Destination',
@@ -211,8 +237,12 @@ export const WINGSGO_CATALOG_COPY: Record<CopyLocaleCode, WingsGoCatalogCopy> = 
     seasonAutumn: 'Autumn (Sep - Nov)',
     seasonWinter: 'Winter (Dec - Feb)',
 
-    upcomingKicker: 'Imminent departures',
+    upcomingKicker: 'Next departures',
     upcomingTitle: 'Departing soon',
+    upcomingTitleParts: ['Departing ', 'soon', '.'],
+    upcomingPrev: 'Previous departures',
+    upcomingNext: 'Next departures',
+    upcomingBoardLabel: 'Upcoming departures, scroll horizontally',
     upcomingDescription:
       'Tours with nearest departure dates, transparent pricing, and ready to take off.',
 

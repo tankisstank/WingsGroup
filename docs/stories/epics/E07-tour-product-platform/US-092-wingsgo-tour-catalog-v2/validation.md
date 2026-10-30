@@ -166,3 +166,17 @@ pnpm run build
 | Ảnh chụp và log trình duyệt | Production 2026-10-30: `agent-browser` `/tour` 1440px và 390px, không lỗi console, không cuộn ngang ở 390px. Chưa làm E2E đầy đủ Phase 6 (reduced motion, bàn phím, đổi curation) |
 | Bằng chứng dynamic/no-store | Production: API trả `Cache-Control: private, no-cache, no-store, max-age=0, must-revalidate`; `/tour` `force-dynamic` (guard test) |
 | Release review bằng Codex | Lần 1 NO-GO (P1 lint) → sửa → lần 2 **GO**. Biên bản `docs/consultations/2026-10-30-us092-release-review.md` |
+
+## Chỉnh theo mockup sau release (2026-10-30)
+
+Người dùng phát hiện ba điểm lệch so với `wingsgo-tour-redesign-v2.html` trên bản production `release-us092-cd58ca0`:
+
+| Điểm lệch | Sửa |
+|---|---|
+| "Sắp cất cánh" là grid card thường | Bảng vé cuộn ngang: cuống vé ngày/tháng/thứ theo lịch VN, tuyến `HAN ✈ THỊ TRƯỜNG · 6N5Đ`, giá rút gọn, nút trước/sau (ẩn trên mobile, tôn trọng reduced motion). |
+| Breadcrumb có khoảng trống lớn | `/tour` WingsGo dùng `pt-4 md:pt-6` cho article và breadcrumb không có `pt-8`; hero còn `pt-4 md:pt-7`. |
+| Hero xếp dọc, ba tour nằm dưới ô tìm kiếm | Hero 2 cột 5/7: tiêu đề, dock tìm kiếm và số liệu thật (số thị trường, số hành trình từ `markets`) bên trái; mosaic slot #1 cao hai hàng cùng slot #2–#3 bên phải. |
+
+Giữ nguyên ràng buộc: không chip "Tour hot" (hot vẫn là viền cầu vồng), không số liệu bịa, giá qua `PromotionPrice` ở slot #1, sticker/promo theo US-084/US-083. Font tiêu đề Playfair Display (OFL) tự host trong `app/public/fonts/wingsgo/`.
+
+Kiểm tra: component 422/422, unit 1370/1371 (lỗi có sẵn `wingsGroupV3Shell`), tsc chỉ còn 2 lỗi có sẵn, eslint sạch; dev server 1440/390 không tràn ngang, không lỗi console.
