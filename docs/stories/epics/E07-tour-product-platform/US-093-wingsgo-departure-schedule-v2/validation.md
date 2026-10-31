@@ -11,7 +11,8 @@ Story chỉ đóng khi:
 **Trạng thái (31/10/2026):**
 
 - Implementation và QA local đã xong.
-- Codex release review: **GO có điều kiện**. P2 về nút nổi đã sửa; P2 về gate baseline chờ release owner chấp thuận (xem mục Release).
+- Codex release review: **GO có điều kiện**. Mọi finding P2/P3 đã sửa hoặc đã có bằng chứng bổ sung (xem mục Release).
+- Toàn bộ gate xanh: lint 0 lỗi, `tsc` 0 lỗi, unit 1463/1463, component 482/482, integration 39/39, build thành công.
 - Chưa phát hành.
 
 ## Quyết định stakeholder
@@ -321,9 +322,9 @@ Kết luận: **chấp nhận Phase 1**.
 | Finding | Xử lý |
 |---|---|
 | P2.1 — Nút nổi "Liên hệ" (`SiteContactFab`, cố định góc phải dưới) che CTA row trên mobile | **Đã sửa ở `f490e48`.** Dưới `md`, CTA chính đặt bên trái (`flex-row-reverse`); dưới 640px trang có thêm khoảng trống cuối (112px). Đo bằng trình duyệt: 360px CTA ở x=31, không cuộn ngang ở 360/768/1024/1440, không có lỗi. Ảnh `artifacts/phase5/vi-390-list-fab-fix.png`. Nút nổi vẫn có thể che link phụ "Xem tour" ở một số vị trí cuộn; tên tour cũng là link tới trang tour. |
-| P2.2 — Gate chưa xanh tuyệt đối: `tsc` còn 2 lỗi, unit 1460/1461 | **Chờ release owner chấp thuận.** Cả hai đã có trên master `58cbd24` trước US-093 (Phase 0: unit 1375/1376 cùng test `wingsGroupV3Shell`; `tsc` 2 lỗi ở `wingsGroupCorporateRoutes.unit.spec.ts`). US-093 không thêm lỗi mới. |
-| P3.1 — Quy mô query | Chấp nhận. Đã có phân trang 250 và cảnh báo khi > 1.000 đợt. Sau khi phát hành cần theo dõi thời gian query và kích thước HTML. |
-| P3.2 — Chưa kiểm khi tắt JS và full-route cache production | Đưa vào smoke test trước khi deploy: tắt JS ở `/lich-khoi-hanh`; sửa giá một đợt trên staging/candidate rồi kiểm VI và EN. |
+| P2.2 — Gate chưa xanh tuyệt đối: `tsc` còn 2 lỗi, unit 1460/1461 | **Đã sửa ở `38d565e`, chỉ sửa test, không đổi code ứng dụng.** (1) `wingsGroupCorporateRoutes`: bỏ field `hero.type` không có trong type (hàm chỉ đọc `hero.richText`, nên hành vi không đổi); đánh dấu locale `'lo'` là input sai có chủ đích bằng `as never`. (2) `wingsGroupV3Shell`: 3 assertion đọc source đã lỗi thời từ `a451bc3`, commit đã mở rộng theme sáng cố định và việc ẩn theme selector sang WingsGo. Assertion giờ theo điều kiện hiện tại; ý định "WingsGroup không có theme selector" vẫn được kiểm. Kết quả: `tsc` 0 lỗi, unit 1463/1463. |
+| P3.1 — Quy mô query | **Đã thêm ở `1df29dc`.** Log `[wingsGoSchedule] Slow snapshot …` khi dựng snapshot quá 1,5 s (`SCHEDULE_SNAPSHOT_SLOW_MS`), kèm số đợt, số row, số trang query và locale; có 2 unit test (log khi chậm, im lặng khi nhanh). Giữ phân trang 250 và cảnh báo khi > 1.000 đợt. |
+| P3.2 — Chưa kiểm khi tắt JS và full-route cache production | **Đã kiểm trên production build** (`next build` + `next start -p 3102`, DB copy). **Cache:** route trả `cache-control: private, max-age=0, must-revalidate`, tức render động mỗi request, không có full-route cache bị cũ. Sửa giá đợt 6 qua REST API của Payload (cùng đường với CMS, hook chạy không lỗi): VI và EN đổi ngay. Unpublish đợt 30: biến mất khỏi VI và EN (1 → 0); publish lại: hiện lại (0 → 1). Đã dùng mật khẩu tạm cho admin của DB copy; đã khôi phục hash cũ và xoá file mật khẩu. **Tắt JS** (Playwright `javaScriptEnabled: false`, 390px, route `wingsgo.local` → localhost): `/lich-khoi-hanh` 200, 42 article đều hiện, 0 `hidden`, 38/38 CTA hiện, 17 link tour, không có nút "Xem thêm", không cuộn ngang; `/en/lich-khoi-hanh?view=tour` cũng hiện đủ 38 CTA, 17 link tour. Ảnh `artifacts/phase5/vi-390-js-off.png`. |
 | P3.3 — Alias `wg-*` là selector global | **Đã sửa ở `f490e48`.** 36 selector đặt dưới `.wingsgo-schedule`. Component test 482/482, lint 0 lỗi. |
 | P3.4 — Ma trận AC còn ghi "Chưa có" | Đã cập nhật bên dưới. |
 
@@ -353,6 +354,6 @@ Chi tiết trong `phase0-baseline.md`. Tóm tắt:
 | AC2 | Unit/component: trạng thái, ưu đãi, `canHoldSeat`, override chỉ khi giữ chỗ được, badge/urgency chỉ cho đợt bán được. Lead thật qua API + Redis: 17:00Z với ngày VN và ngày UTC cũ đều lưu 2027-07-08; ngày sai trả 400. CTA trên trình duyệt → `/lien-he` được điền sẵn | Đạt |
 | AC3 | Unit: filter, facet, whitelist, hãng bay. Trình duyệt: lọc, URL, back/forward, giữ `utm`/hash, biểu đồ dùng Enter/Space, trạng thái rỗng | Đạt |
 | AC4 | Component Phase 3–4: "Xem thêm", D8, "Giá từ" VND/USD, chip ngày "+N", hot/sticker theo Q3. Ảnh Theo hành trình | Đạt |
-| AC5 | SSR: 17/17 link tour; robots/canonical đúng cho các URL có tham số; `/en` chỉ còn tên tour chưa dịch (D11). Test revalidate VI/EN 4/4. Sửa giá trên DB copy → VI và EN đều đổi | Đạt; bổ sung smoke test cache production (P3.2) |
-| AC6 | Payload cùng inventory: HTML −33%/−26%, Flight −47%/−38%. Không cuộn ngang ở 10 độ rộng. Không lỗi console. Bàn phím/focus. Ảnh 1440/768/390 VI và EN. Nút nổi mobile đã xử lý | Đạt; chưa kiểm tắt JS bằng trình duyệt (P3.2) |
-| AC7 | Trên cùng DB: WingsGo `/`, `/tour`, thị trường, chi tiết tour, `/en/tour`, WingSide và WingsGroup giống từng byte. Component 482/482, integration 39/39, build thành công. Unit 1460/1461 và `tsc` 2 lỗi là baseline | Đạt; baseline chờ chấp thuận (P2.2) |
+| AC5 | SSR: 17/17 link tour; robots/canonical đúng cho các URL có tham số; `/en` chỉ còn tên tour chưa dịch (D11). Test revalidate VI/EN 4/4. Trên production build: sửa giá và unpublish/publish qua REST, VI và EN đổi ngay | Đạt |
+| AC6 | Payload cùng inventory: HTML −33%/−26%, Flight −47%/−38%. Không cuộn ngang ở 10 độ rộng. Không lỗi console. Bàn phím/focus. Ảnh 1440/768/390 VI và EN. Nút nổi mobile đã xử lý. Tắt JS: đủ row và CTA | Đạt |
+| AC7 | Trên cùng DB: WingsGo `/`, `/tour`, thị trường, chi tiết tour, `/en/tour`, WingSide và WingsGroup giống từng byte. lint 0 lỗi, `tsc` 0 lỗi, unit 1463/1463, component 482/482, integration 39/39, build thành công (HEAD `1df29dc`) | Đạt |
