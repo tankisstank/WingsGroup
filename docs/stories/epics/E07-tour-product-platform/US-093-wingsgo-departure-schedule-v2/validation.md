@@ -8,7 +8,11 @@ Story chỉ đóng khi:
 - mọi finding P1/P2/P3 của Codex đã được xử lý hoặc có quyết định phạm vi rõ ràng;
 - release review của Codex đã chạy.
 
-Hiện đây là khung validation ở giai đoạn lập kế hoạch và **chưa có bằng chứng implementation**.
+**Trạng thái (31/10/2026):**
+
+- Implementation và QA local đã xong.
+- Codex release review: **GO có điều kiện**. P2 về nút nổi đã sửa; P2 về gate baseline chờ release owner chấp thuận (xem mục Release).
+- Chưa phát hành.
 
 ## Quyết định stakeholder
 
@@ -307,9 +311,26 @@ Kết luận: **chấp nhận Phase 1**.
 - Integration qua `run-integration-tests.mjs`: `wingsGoScheduleIntegration` 6/6, `wingsGoLeadCompatibility` 9/9, `leadSubmissionRoute` 21/21, `leadCapture` 3/3.
 - `pnpm run build`: compile thành công, sinh 20/20 trang tĩnh.
 
-### Review Phase 5 / Release
+### Release review — Codex (2026-10-31)
 
-Chưa chạy.
+- **Biên bản:** `docs/consultations/2026-10-31-us093-release-codex-review.md`, review trên `5ed5a1a`.
+- **VERDICT: GO có điều kiện.** Không có P1. Không thấy lỗi logic, lộ dữ liệu site khác hay lộ copy VI sang EN. Đối chiếu đủ các ràng buộc của handoff.
+
+**Xử lý finding**
+
+| Finding | Xử lý |
+|---|---|
+| P2.1 — Nút nổi "Liên hệ" (`SiteContactFab`, cố định góc phải dưới) che CTA row trên mobile | **Đã sửa ở `f490e48`.** Dưới `md`, CTA chính đặt bên trái (`flex-row-reverse`); dưới 640px trang có thêm khoảng trống cuối (112px). Đo bằng trình duyệt: 360px CTA ở x=31, không cuộn ngang ở 360/768/1024/1440, không có lỗi. Ảnh `artifacts/phase5/vi-390-list-fab-fix.png`. Nút nổi vẫn có thể che link phụ "Xem tour" ở một số vị trí cuộn; tên tour cũng là link tới trang tour. |
+| P2.2 — Gate chưa xanh tuyệt đối: `tsc` còn 2 lỗi, unit 1460/1461 | **Chờ release owner chấp thuận.** Cả hai đã có trên master `58cbd24` trước US-093 (Phase 0: unit 1375/1376 cùng test `wingsGroupV3Shell`; `tsc` 2 lỗi ở `wingsGroupCorporateRoutes.unit.spec.ts`). US-093 không thêm lỗi mới. |
+| P3.1 — Quy mô query | Chấp nhận. Đã có phân trang 250 và cảnh báo khi > 1.000 đợt. Sau khi phát hành cần theo dõi thời gian query và kích thước HTML. |
+| P3.2 — Chưa kiểm khi tắt JS và full-route cache production | Đưa vào smoke test trước khi deploy: tắt JS ở `/lich-khoi-hanh`; sửa giá một đợt trên staging/candidate rồi kiểm VI và EN. |
+| P3.3 — Alias `wg-*` là selector global | **Đã sửa ở `f490e48`.** 36 selector đặt dưới `.wingsgo-schedule`. Component test 482/482, lint 0 lỗi. |
+| P3.4 — Ma trận AC còn ghi "Chưa có" | Đã cập nhật bên dưới. |
+
+**Ghi chú dữ liệu cho editor**
+
+- Đợt 6 (Shizuoka, khởi hành 20/05/2027) có `return_date` 29/11/2027.
+- Theo `phase0-baseline.md`, chưa rõ đợt production nào có `verified_at` hiện hành. Hero chỉ đếm "đợt mở bán" cho các đợt đã xác minh, nên cần kiểm số này trên production trước khi phát hành.
 
 ## Baseline (Phase 0)
 
@@ -326,12 +347,12 @@ Chi tiết trong `phase0-baseline.md`. Tóm tắt:
 
 ## Ma trận tiêu chí → bằng chứng
 
-| AC | Bằng chứng cần có | Trạng thái |
+| AC | Bằng chứng | Trạng thái |
 |---|---|---|
-| AC1 | Unit test: query hơn 200 đợt, không hồi sinh lịch quá khứ, ranh giới ngày VN. Integration: populate và scope site. Số liệu snapshot khớp DB local | Chưa có |
-| AC2 | Component test: row đủ trạng thái và ưu đãi. Unit test: `canHoldSeat`, lead resolver. Trình duyệt: CTA → `/lien-he` với ngày VN; lead `17:00Z` được lưu | Chưa có |
-| AC3 | Unit test: filter, facet, whitelist, hãng bay. Component test: biểu đồ dùng bàn phím, trạng thái rỗng. Trình duyệt: tải lại trang và back/forward | Chưa có |
-| AC4 | Component test: thu gọn/mở rộng, "Giá từ", chip ngày, hot/sticker theo Q3 | Chưa có |
-| AC5 | So tập link tour trong HTML. Unit test metadata. Trình duyệt `/en`. Test hook revalidate cho cả VI và EN. Sửa CMS local và quan sát trang | Chưa có |
-| AC6 | Ảnh 1440/390 (VI và EN) và 768. Kiểm cuộn ngang ở 10 độ rộng, tương phản, reduced motion, console. Payload trước và sau | Chưa có |
-| AC7 | Toàn bộ suite pass. Các test brief liệt kê pass. Kiểm hồi quy `/tour`, trang chủ, trang thị trường, chi tiết tour, WingSide, WingsGroup | Chưa có |
+| AC1 | Integration thật: 260 đợt qua 2 trang, không trùng, đúng thứ tự. Unit: ranh giới ngày VN, hết hạn xác minh. QA seed: đợt hôm qua bị loại, hero 35/17/36/31-10 khớp DB | Đạt |
+| AC2 | Unit/component: trạng thái, ưu đãi, `canHoldSeat`, override chỉ khi giữ chỗ được, badge/urgency chỉ cho đợt bán được. Lead thật qua API + Redis: 17:00Z với ngày VN và ngày UTC cũ đều lưu 2027-07-08; ngày sai trả 400. CTA trên trình duyệt → `/lien-he` được điền sẵn | Đạt |
+| AC3 | Unit: filter, facet, whitelist, hãng bay. Trình duyệt: lọc, URL, back/forward, giữ `utm`/hash, biểu đồ dùng Enter/Space, trạng thái rỗng | Đạt |
+| AC4 | Component Phase 3–4: "Xem thêm", D8, "Giá từ" VND/USD, chip ngày "+N", hot/sticker theo Q3. Ảnh Theo hành trình | Đạt |
+| AC5 | SSR: 17/17 link tour; robots/canonical đúng cho các URL có tham số; `/en` chỉ còn tên tour chưa dịch (D11). Test revalidate VI/EN 4/4. Sửa giá trên DB copy → VI và EN đều đổi | Đạt; bổ sung smoke test cache production (P3.2) |
+| AC6 | Payload cùng inventory: HTML −33%/−26%, Flight −47%/−38%. Không cuộn ngang ở 10 độ rộng. Không lỗi console. Bàn phím/focus. Ảnh 1440/768/390 VI và EN. Nút nổi mobile đã xử lý | Đạt; chưa kiểm tắt JS bằng trình duyệt (P3.2) |
+| AC7 | Trên cùng DB: WingsGo `/`, `/tour`, thị trường, chi tiết tour, `/en/tour`, WingSide và WingsGroup giống từng byte. Component 482/482, integration 39/39, build thành công. Unit 1460/1461 và `tsc` 2 lỗi là baseline | Đạt; baseline chờ chấp thuận (P2.2) |
