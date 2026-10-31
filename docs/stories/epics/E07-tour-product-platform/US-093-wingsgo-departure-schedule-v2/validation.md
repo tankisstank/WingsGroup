@@ -13,7 +13,7 @@ Story chỉ đóng khi:
 - Implementation và QA local đã xong.
 - Codex release review: **GO có điều kiện**. Mọi finding P2/P3 đã sửa hoặc đã có bằng chứng bổ sung (xem mục Release).
 - Toàn bộ gate xanh: lint 0 lỗi, `tsc` 0 lỗi, unit 1463/1463, component 482/482, integration 39/39, build thành công.
-- Chưa phát hành.
+- **Đã phát hành production** `release-us093-8fc1217` ngày 31/10/2026 (xem mục "Release production").
 
 ## Quyết định stakeholder
 
@@ -311,6 +311,56 @@ Kết luận: **chấp nhận Phase 1**.
 - `pnpm run test:component`: 482/482 (66 file).
 - Integration qua `run-integration-tests.mjs`: `wingsGoScheduleIntegration` 6/6, `wingsGoLeadCompatibility` 9/9, `leadSubmissionRoute` 21/21, `leadCapture` 3/3.
 - `pnpm run build`: compile thành công, sinh 20/20 trang tĩnh.
+
+### Release production — `release-us093-8fc1217` (2026-10-31, khoảng 08:46 ICT)
+
+**Trước deploy**
+
+- Release đang chạy là `release-us092-35d85d6`. `app` của nó giống master `58cbd24`: diff `35d85d6..58cbd24 -- app` có 0 file.
+- Master được fast-forward lên `8fc1217`; nhánh không có migration mới.
+- Production có đủ 52/52 migration của code trong `payload_migrations`. Dòng `dev` dư là dữ liệu cũ.
+- Đĩa còn trống 13 GB.
+
+**Đóng gói**
+
+- `pnpm run build`, `generate-symlinks.js`, `package-release.ps1`.
+- Lần chạy đầu từ Git Bash: `tar.exe` trỏ tới GNU tar nên tạo ra file tar không nén mang đuôi `.zip`. Đã chạy lại từ PowerShell (`C:\Windows\system32	ar.exe`) và được zip hợp lệ 36,8 MB, không có `public/media`, có fonts.
+
+**Upload và build trên VPS**
+
+- Zip đã chứa sẵn `relink.sh`, đồng thời runbook upload thêm một bản `relink.sh` riêng (hai bản giống hệt nhau, đã kiểm SHA-256). Vì vậy `unzip` dừng chờ hỏi ghi đè qua SSH không tương tác; đã dừng tiến trình và chạy lại bằng `unzip -o … < /dev/null`.
+- **Cần sửa runbook:** dùng `unzip -o`, và chỉ định PowerShell/Windows tar cho bước đóng gói.
+
+**Image**
+
+- App: `sha256:91166be29ced8b7251cc069a5d59e3368a1eeab7073e2a44ed5cd085d6f5fe78`.
+- Ops: `sha256:5cedf965691089414d8275a389a62dce12cc9cc4a3daf51eb2423f746514d210`, label revision `8fc1217d85b0fa0bf26b2d1735063435ede598d8` đã kiểm khớp.
+
+**Cutover và rollback**
+
+- Chạy nguyên script Bước 7 của runbook. Readiness đạt ở lần thử thứ 2: database up, Redis up, leadDelivery configured.
+- `current` = `release-us093-8fc1217`, `previous` = `release-us092-35d85d6`.
+- Image dùng để rollback: `sha256:47a23a4c…`, ghi trong `current/PREVIOUS_IMAGE_ID` và `rollback-compose.yml`.
+- Không có schema mới, nên rollback chỉ cần đổi image.
+
+**Smoke test production** (curl từ bên ngoài)
+
+- `wingsgo.vn/lich-khoi-hanh`: 200, khoảng 2,7 s, HTML 565.571 byte.
+  - Trước đó 779.519 byte, bị trần 200 đợt và chỉ có 44 link tour.
+  - Nay có 211 CTA và 49 link tour; hero ghi 86 đợt mở bán / 49 hành trình / 86 đợt có giá / đợt gần nhất 31/10, "Cập nhật 30/10/2026".
+  - 125 đợt chưa xác minh hiện "Liên hệ báo giá".
+- `/en/lich-khoi-hanh`: 200, 211 CTA, 49 link tour, nhãn tiếng Anh.
+- URL có bộ lọc trả `noindex, follow` và canonical theo locale:
+  - `?market=korea`: 47 đợt;
+  - `?view=tour`;
+  - `/en?airline=VN`: 117 đợt.
+- `/`, `/tour`, `/en/tour`, `/lien-he`, `wingside.vn`, `wingsgroup.vn` đều 200.
+
+**Trình duyệt production** (`agent-browser`, VI và EN)
+
+- Không cuộn ngang ở 360, 390, 768, 1024, 1440 và 1920; không có lỗi console.
+- Sau enhance: 167 row bị ẩn và 5 nút "Xem thêm".
+- Ảnh trong `artifacts/production/`: VI và EN ở 1440 (hero, list) và 390 (list).
 
 ### Release review — Codex (2026-10-31)
 
