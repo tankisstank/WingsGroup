@@ -498,3 +498,46 @@ describe('US-093 market cards only use holdable departures', () => {
     expect(snapshot?.marketCards).toEqual([])
   })
 })
+
+describe('US-093 slow snapshot warning (release review P3.1)', () => {
+  const docs = [
+    {
+      id: 'jp-1',
+      departureDate: '2027-02-10T00:00:00.000Z',
+      availabilityStatus: 'open',
+      airline: 'Vietnam Airlines',
+      priceFrom: 20000000,
+      currency: 'VND',
+      commerceVerified: false,
+      tourProduct: { id: 'tour-jp', _status: 'published', site: 7, slug: 'tour-jp', title: 'Tour JP', market: 'japan' },
+    },
+  ]
+
+  it('warns with context when building the snapshot exceeds the budget', async () => {
+    mocks.find.mockImplementation(async (options: any) =>
+      options.collection === 'tour-departures' ? { docs, hasNextPage: false, totalDocs: 1 } : { docs: [] },
+    )
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    let clock = 1_000_000
+    const now = vi.spyOn(Date, 'now').mockImplementation(() => (clock += 5000))
+
+    await getWingsGoScheduleSnapshot({ locale: 'vi', now: new Date('2027-01-01T00:00:00.000Z') })
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[wingsGoSchedule] Slow snapshot for site wings-go'))
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('1 departures, 1 rows, 1 page(s), locale vi'))
+    now.mockRestore()
+    warn.mockRestore()
+  })
+
+  it('stays quiet when the snapshot is fast', async () => {
+    mocks.find.mockImplementation(async (options: any) =>
+      options.collection === 'tour-departures' ? { docs, hasNextPage: false, totalDocs: 1 } : { docs: [] },
+    )
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    await getWingsGoScheduleSnapshot({ locale: 'vi', now: new Date('2027-01-01T00:00:00.000Z') })
+
+    expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('Slow snapshot'))
+    warn.mockRestore()
+  })
+})

@@ -49,6 +49,9 @@ import {
 
 const tourDeparturesCollection = 'tour-departures' as never
 
+/** Snapshot build time above which a warning is logged (release review P3.1). */
+export const SCHEDULE_SNAPSHOT_SLOW_MS = 1500
+
 /**
  * Validate and extract media for a tour, checking site ownership.
  * F3: Media without site is rejected (null). Only accepted if site matches siteId.
@@ -335,6 +338,7 @@ export const getWingsGoScheduleSnapshot = async ({
         ],
       }
 
+  const queryStartedAt = Date.now()
   const payload = await getPayload({ config: configPromise })
   const scopedWhere = await appendSiteWhere(baseWhere as never)
 
@@ -647,6 +651,15 @@ export const getWingsGoScheduleSnapshot = async ({
     validAirlines: airlines.map((a) => a.key),
   }
   const initialFilters = parseScheduleFilters(searchParams, snapshotFacts)
+
+  // Release review P3.1: surface slow snapshots in production logs with enough
+  // context (rows, locale, query pages) to decide on caching before it hurts.
+  const elapsedMs = Date.now() - queryStartedAt
+  if (elapsedMs > SCHEDULE_SNAPSHOT_SLOW_MS) {
+    console.warn(
+      `[wingsGoSchedule] Slow snapshot for site ${site.code}: ${elapsedMs}ms, ${allDocs.length} departures, ${rows.length} rows, ${currentPage} page(s), locale ${locale}`,
+    )
+  }
 
   return {
     locale: locale === 'en' ? 'en' : 'vi',
