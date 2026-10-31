@@ -5103,8 +5103,8 @@ body h2.wingsgo-display {
 /* US-093 Phase 3 Ticket Rows & Filter Bar */
 .wingsgo-schedule-stub::before,
 .wingsgo-schedule-stub::after,
-.wg-stub::before,
-.wg-stub::after {
+.wingsgo-schedule .wg-stub::before,
+.wingsgo-schedule .wg-stub::after {
   content: '';
   position: absolute;
   right: -9px;
@@ -5117,13 +5117,13 @@ body h2.wingsgo-display {
 }
 
 .wingsgo-schedule-stub::before,
-.wg-stub::before {
+.wingsgo-schedule .wg-stub::before {
   top: -9px;
   clip-path: inset(50% 0 0 0);
 }
 
 .wingsgo-schedule-stub::after,
-.wg-stub::after {
+.wingsgo-schedule .wg-stub::after {
   bottom: -9px;
   clip-path: inset(0 0 50% 0);
 }
@@ -5133,19 +5133,19 @@ body h2.wingsgo-display {
 }
 
 .wingsgo-schedule-row--sold-out,
-.wg-row--sold-out {
+.wingsgo-schedule .wg-row--sold-out {
   border-color: var(--border);
   background: color-mix(in oklch, var(--muted) 30%, var(--card));
 }
 
 .wingsgo-schedule-row--sold-out .wingsgo-schedule-stub span,
-.wg-row--sold-out .wg-stub span {
+.wingsgo-schedule .wg-row--sold-out .wg-stub span {
   color: var(--muted-foreground);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .wingsgo-schedule-row,
-  .wg-row,
+  .wingsgo-schedule .wg-row,
   .wingsgo-schedule-more-btn {
     transition: none !important;
   }
@@ -5153,57 +5153,57 @@ body h2.wingsgo-display {
 
 /* US-093 Phase 5 Semantic Schedule Classes */
 .wingsgo-schedule-row,
-.wg-row {
+.wingsgo-schedule .wg-row {
   @apply relative grid grid-cols-[72px_minmax(0,1fr)] md:grid-cols-[96px_minmax(0,1fr)_180px_220px] items-stretch bg-card border border-border rounded-[20px] transition-[box-shadow,border-color] duration-200 hover:border-[var(--site-brand)]/40 hover:shadow-sm;
 }
 
 .wingsgo-schedule-stub,
-.wg-stub {
+.wingsgo-schedule .wg-stub {
   @apply relative flex flex-col items-center justify-center p-2.5 sm:p-3 border-r-[1.5px] border-dashed border-border select-none text-center;
 }
 
 .wingsgo-schedule-stub-day,
-.wg-day {
+.wingsgo-schedule .wg-day {
   @apply text-2xl sm:text-3xl font-semibold leading-none text-[var(--site-brand)];
 }
 
 .wingsgo-schedule-stub-month,
-.wg-month {
+.wingsgo-schedule .wg-month {
   @apply text-[11px] sm:text-xs font-semibold text-foreground mt-1;
 }
 
 .wingsgo-schedule-stub-weekday,
-.wg-wday {
+.wingsgo-schedule .wg-wday {
   @apply text-[11px] sm:text-xs text-muted-foreground font-medium mt-0.5;
 }
 
 .wingsgo-schedule-main,
-.wg-main {
+.wingsgo-schedule .wg-main {
   @apply p-3.5 sm:p-4 md:p-5 flex flex-col justify-center gap-2 min-w-0;
 }
 
 .wingsgo-schedule-title,
-.wg-title {
+.wingsgo-schedule .wg-title {
   @apply text-sm sm:text-base font-semibold leading-snug text-foreground m-0;
 }
 
 .wingsgo-schedule-title-link,
-.wg-link {
+.wingsgo-schedule .wg-link {
   @apply hover:text-[var(--site-brand)] transition-colors no-underline text-foreground;
 }
 
 .wingsgo-schedule-meta,
-.wg-meta {
+.wingsgo-schedule .wg-meta {
   @apply flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground;
 }
 
 .wingsgo-schedule-route,
-.wg-route {
+.wingsgo-schedule .wg-route {
   @apply inline-flex items-center gap-1 font-semibold text-foreground tracking-wide;
 }
 
 .wingsgo-schedule-plane-icon,
-.wg-plane {
+.wingsgo-schedule .wg-plane {
   @apply w-3.5 h-3.5 text-[var(--site-brand)] shrink-0 inline-block;
   background-color: currentColor;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='black' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M10.5 13.5 3 11l1.5-1.5 7.5 1L16 6c1-1 3-1.5 3.5-1s0 2.5-1 3.5l-4.5 4 1 7.5L13.5 21l-2.5-7.5'/%3E%3C/svg%3E") no-repeat center / contain;
@@ -5211,12 +5211,12 @@ body h2.wingsgo-display {
 }
 
 .wingsgo-schedule-hot-badge,
-.wg-hot-badge {
+.wingsgo-schedule .wg-hot-badge {
   @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30;
 }
 
 .wingsgo-schedule-hot-icon,
-.wg-hot-icon {
+.wingsgo-schedule .wg-hot-icon {
   @apply w-3 h-3 text-amber-600 dark:text-amber-400 inline-block shrink-0;
   background-color: currentColor;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M12 2c.5 3.5-1 6-2 7.5 2-.5 4-2 4-5 3.5 3.5 5 7.5 5 11 0 4.4-3.6 8-8 8s-8-3.6-8-8c0-4 3-8 9-13.5z'/%3E%3C/svg%3E") no-repeat center / contain;
@@ -5224,82 +5224,83 @@ body h2.wingsgo-display {
 }
 
 .wingsgo-schedule-badge,
-.wg-badge {
+.wingsgo-schedule .wg-badge {
   @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border;
 }
 
 .wingsgo-schedule-badge--open,
-.wg-badge--open {
+.wingsgo-schedule .wg-badge--open {
   @apply bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/30;
 }
 
 .wingsgo-schedule-badge--limited,
-.wg-badge--limited {
+.wingsgo-schedule .wg-badge--limited {
   @apply bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30;
 }
 
 .wingsgo-schedule-badge--sold-out,
-.wg-badge--sold-out {
+.wingsgo-schedule .wg-badge--sold-out {
   @apply bg-muted text-muted-foreground border-border;
 }
 
 .wingsgo-schedule-badge--quote,
-.wg-badge--quote {
+.wingsgo-schedule .wg-badge--quote {
   @apply bg-muted/70 text-foreground/80 border-border;
 }
 
 .wingsgo-schedule-urgency,
-.wg-urgency {
+.wingsgo-schedule .wg-urgency {
   @apply text-xs font-medium text-amber-700 dark:text-amber-400;
 }
 
 .wingsgo-schedule-price-col,
-.wg-price-col {
+.wingsgo-schedule .wg-price-col {
   @apply col-start-2 md:col-start-3 p-3.5 sm:p-4 md:p-5 flex flex-col justify-center md:border-l md:border-border;
 }
 
 .wingsgo-schedule-price-label,
-.wg-price-lbl {
+.wingsgo-schedule .wg-price-lbl {
   @apply text-[11px] text-muted-foreground;
 }
 
 .wingsgo-schedule-price-val,
-.wg-price-val {
+.wingsgo-schedule .wg-price-val {
   @apply text-base sm:text-lg font-bold tracking-tight;
 }
 
 .wingsgo-schedule-price-val--sold-out,
-.wg-price-val--sold-out {
+.wingsgo-schedule .wg-price-val--sold-out {
   @apply line-through text-muted-foreground/90 decoration-muted-foreground/60;
 }
 
 .wingsgo-schedule-action-col,
-.wg-actions {
-  @apply col-span-2 md:col-span-1 p-3.5 sm:p-4 md:p-5 flex items-center justify-between md:justify-end gap-3 md:border-l md:border-border border-t md:border-t-0 border-border/70;
+.wingsgo-schedule .wg-actions {
+  /* Mobile: primary CTA on the left, clear of the fixed site contact button (bottom-right). */
+  @apply col-span-2 md:col-span-1 p-3.5 sm:p-4 md:p-5 flex flex-row-reverse md:flex-row items-center justify-between md:justify-end gap-3 md:border-l md:border-border border-t md:border-t-0 border-border/70;
 }
 
 .wingsgo-schedule-view-link,
-.wg-view {
+.wingsgo-schedule .wg-view {
   @apply inline-flex min-h-[44px] items-center px-1 text-xs sm:text-sm font-semibold text-[var(--site-brand)] hover:underline no-underline;
 }
 
 .wingsgo-schedule-cta-btn,
-.wg-cta {
+.wingsgo-schedule .wg-cta {
   @apply inline-flex min-h-[44px] items-center justify-center rounded-full px-4 text-xs sm:text-sm font-semibold transition-colors no-underline whitespace-nowrap;
 }
 
 .wingsgo-schedule-cta-btn--primary,
-.wg-cta--primary {
+.wingsgo-schedule .wg-cta--primary {
   @apply bg-[var(--site-brand)] text-white hover:bg-[var(--site-brand)]/90 shadow-sm;
 }
 
 .wingsgo-schedule-cta-btn--secondary,
-.wg-cta--secondary {
+.wingsgo-schedule .wg-cta--secondary {
   @apply border border-border bg-card text-foreground hover:border-[var(--site-brand)];
 }
 
 .wingsgo-schedule-cta-btn--sold-out,
-.wg-cta--sold-out {
+.wingsgo-schedule .wg-cta--sold-out {
   @apply border border-border bg-card text-foreground/85 hover:bg-muted font-medium;
 }
 
@@ -5398,4 +5399,11 @@ body h2.wingsgo-display {
 
 .wingsgo-schedule-select {
   @apply min-h-[44px] border border-border rounded-full px-3 text-xs sm:text-sm bg-card text-foreground cursor-pointer outline-none hover:border-border/80 focus:border-[var(--site-brand)] max-w-full;
+}
+
+/* Mobile: leave room below the last schedule card for the fixed site contact button. */
+@media (max-width: 639px) {
+  .wingsgo-schedule {
+    padding-bottom: 7rem;
+  }
 }
