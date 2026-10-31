@@ -113,7 +113,7 @@ describe('WingsGroup corporate route contract', () => {
           page: {
             ...page,
             title: 'WingsPlus',
-            hero: { type: 'none' },
+            hero: {},
             layout: [{ blockType: 'featureGrid', items: [{ title: 'MICE' }] }],
           },
           locale,
@@ -152,7 +152,8 @@ describe('WingsGroup corporate route contract', () => {
     }
     expect(
       isWingsGroupV3PublicSurfacePathAllowed({
-        locale: 'lo',
+        // An unsupported locale must be rejected; the cast lets the test pass it in.
+        locale: 'lo' as never,
         path: '/gioi-thieu-wingsplus',
         settings,
         siteCode: 'wings-group',

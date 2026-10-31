@@ -39,12 +39,17 @@ describe('WingsGroup v3 shared public shell', () => {
     expect(footer).toContain('isWingsGroupV3SurfacePath(publicRoute)')
     expect(layout).toContain('isWingsGroupV3SurfacePath(publicRoute)')
     expect(footer).toContain("' site-footer--wingsgroup-v3'")
-    expect(footer).toContain('!isWingsGroup ? <ThemeSelector')
+    // WingsGo also hides the selector since a451bc3; WingsGroup must stay without it.
+    expect(footer).toContain('!isWingsGroup && !isWingsGo ? <ThemeSelector')
     expect(footer).toContain('MapPinIcon')
     expect(footer).toContain('Head Office: 2nd Floor, 28B Alley 44 Hao Nam')
-    expect(layout).toContain("data-theme={site.code === 'wings-group' ? 'light' : undefined}")
+    expect(layout).toContain(
+      "data-theme={site.code === 'wings-group' || site.code === 'wings-go' ? 'light' : undefined}",
+    )
     expect(layout).toContain('siteCode={site.code}')
-    expect(read('providers/Theme/index.tsx')).toContain('const isWingsGroup = siteCode ===')
+    expect(read('providers/Theme/index.tsx')).toContain(
+      "const isAlwaysLight = siteCode === 'wings-group' || siteCode === 'wings-go'",
+    )
     expect(layout).toContain('!isWingsGroupV3Surface ? <AdminBar')
     expect(layout).toContain('<AdminBar')
     expect(page).toContain("useWingsGroupV3Surface ? 'wingsgroup-v3-surface' : ''")
