@@ -541,3 +541,41 @@ describe('US-093 slow snapshot warning (release review P3.1)', () => {
     warn.mockRestore()
   })
 })
+
+describe('US-093 month chart backdrop', () => {
+  const verified = { commerceVerified: true, verifiedAt: '2026-12-20T00:00:00.000Z', expiresAt: '2027-03-01T00:00:00.000Z' }
+  const product = (id: string, market: string, heroMedia: unknown) => ({
+    id, _status: 'published', site: 7, slug: id, title: `Tour ${id}`, market, heroMedia,
+  })
+
+  it('uses the photo of the lead market card tour', async () => {
+    const docs = [
+      { id: 'kr-1', departureDate: '2027-02-01T00:00:00.000Z', availabilityStatus: 'open', airline: 'Vietjet Air', priceFrom: 1, currency: 'VND', commerceVerified: false, tourProduct: product('tour-kr', 'korea', { id: 1, site: 7, url: '/media/korea.jpg', alt: 'Hàn Quốc' }) },
+      { id: 'jp-1', departureDate: '2027-02-10T00:00:00.000Z', availabilityStatus: 'open', airline: 'Vietnam Airlines', priceFrom: 20000000, currency: 'VND', ...verified, tourProduct: product('tour-jp', 'japan', { id: 2, site: 7, url: '/media/japan.jpg', alt: 'Nhật Bản' }) },
+    ]
+    mocks.find.mockImplementation(async (options: any) =>
+      options.collection === 'tour-departures' ? { docs, hasNextPage: false, totalDocs: docs.length } : { docs: [] },
+    )
+    const snapshot = await getWingsGoScheduleSnapshot({ locale: 'vi', now: new Date('2027-01-01T00:00:00.000Z') })
+    expect(snapshot?.marketCards[0]?.tourId).toBe('tour-jp')
+    expect(snapshot?.chartBackdrop).toEqual({ url: '/media/japan.jpg', alt: 'Nhật Bản' })
+  })
+
+  it('falls back to the first tour with a photo, and to null without a same-site one', async () => {
+    const withPhoto = [
+      { id: 'kr-1', departureDate: '2027-02-01T00:00:00.000Z', availabilityStatus: 'open', priceFrom: 1, currency: 'VND', commerceVerified: false, tourProduct: product('tour-kr', 'korea', { id: 1, site: 7, url: '/media/korea.jpg', alt: '' }) },
+    ]
+    mocks.find.mockImplementation(async (options: any) =>
+      options.collection === 'tour-departures' ? { docs: withPhoto, hasNextPage: false, totalDocs: 1 } : { docs: [] },
+    )
+    let snapshot = await getWingsGoScheduleSnapshot({ locale: 'vi', now: new Date('2027-01-01T00:00:00.000Z') })
+    expect(snapshot?.chartBackdrop).toEqual({ url: '/media/korea.jpg', alt: '' })
+
+    const foreignPhoto = [{ ...withPhoto[0], tourProduct: product('tour-kr', 'korea', { id: 1, site: 99, url: '/media/other-site.jpg' }) }]
+    mocks.find.mockImplementation(async (options: any) =>
+      options.collection === 'tour-departures' ? { docs: foreignPhoto, hasNextPage: false, totalDocs: 1 } : { docs: [] },
+    )
+    snapshot = await getWingsGoScheduleSnapshot({ locale: 'vi', now: new Date('2027-01-01T00:00:00.000Z') })
+    expect(snapshot?.chartBackdrop).toBeNull()
+  })
+})

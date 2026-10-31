@@ -137,6 +137,13 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
     [filteredRows, filters.sort],
   )
 
+  // Whole-snapshot month totals: months without any departure collapse in the chart.
+  const totalMonthCounts = useMemo(() => {
+    const totals: Record<string, number> = {}
+    for (const row of snapshot.rows) totals[row.monthKey] = (totals[row.monthKey] || 0) + 1
+    return totals
+  }, [snapshot.rows])
+
   const facetCounts = useMemo(
     () => countScheduleFacets(snapshot.rows, filters, snapshot.tours),
     [snapshot.rows, filters, snapshot.tours],
@@ -191,11 +198,14 @@ export const WingsGoScheduleBrowser: React.FC<WingsGoScheduleBrowserProps> = ({
       {/* 1. Hero with connected Month Chart */}
       <WingsGoScheduleHero locale={locale} stats={snapshot.stats}>
         <WingsGoScheduleMonthChart
+          backdrop={snapshot.chartBackdrop}
           counts={facetCounts.months}
           locale={locale}
           months={snapshot.months}
           onSelect={(m) => updateFilters({ month: m })}
           selected={filters.month}
+          totalCounts={totalMonthCounts}
+          verifiedDay={snapshot.stats.verifiedDay}
         />
       </WingsGoScheduleHero>
 

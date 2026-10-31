@@ -104,6 +104,8 @@ export type WingsGoScheduleSnapshot = {
   markets: { value: string; label: string }[]
   airlines: { key: string; label: string }[]
   marketCards: WingsGoScheduleMarketCard[]
+  /** Faint photo behind the month chart: a same-site tour hero image, or null. */
+  chartBackdrop: { url: string; alt: string } | null
   stats: WingsGoScheduleStats
   initialFilters: ScheduleFilters
 }

@@ -12,6 +12,21 @@ export type WingsGoScheduleMonthChartProps = {
   onSelect?: (month?: string) => void
   locale?: SupportedLocaleCode
   className?: string
+  /**
+   * Departure counts of the whole snapshot. When given, months with no departure at all
+   * collapse into a dashed divider; months emptied only by other filters stay as
+   * disabled bars.
+   */
+  totalCounts?: Record<string, number>
+  /** Same-site tour photo shown faintly behind the chart. */
+  backdrop?: { url: string; alt: string } | null
+  /** VN calendar day (YYYY-MM-DD) of the latest current verification. */
+  verifiedDay?: string | null
+}
+
+const formatDayMonthYear = (day?: string | null): string | null => {
+  const match = day?.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : null
 }
 
 const EN_MONTH_ABBRS = [
@@ -31,17 +46,25 @@ export const WingsGoScheduleMonthChart: React.FC<WingsGoScheduleMonthChartProps>
   onSelect,
   locale = 'vi',
   className,
+  totalCounts,
+  backdrop,
+  verifiedDay,
 }) => {
   const isEn = locale === 'en'
   const copy = getWingsGoScheduleCopy(locale)
 
+  const visibleMonths = totalCounts
+    ? months.filter((m) => (totalCounts[m] || 0) > 0 || m === selected)
+    : months
+  const verifiedLabel = formatDayMonthYear(verifiedDay)
+
   // Find max count for height scaling (minimum 1 to prevent div by 0)
-  const maxCount = Math.max(1, ...months.map((m) => counts[m] || 0))
+  const maxCount = Math.max(1, ...visibleMonths.map((m) => counts[m] || 0))
 
   // Find peak month: highest count; ties broken by earliest month
   let peakMonth: string | null = null
   let peakMax = 0
-  for (const m of months) {
+  for (const m of visibleMonths) {
     const c = counts[m] || 0
     if (c > peakMax) {
       peakMax = c
@@ -57,7 +80,15 @@ export const WingsGoScheduleMonthChart: React.FC<WingsGoScheduleMonthChartProps>
       )}
       data-od-id="month-chart"
     >
-      <div className="wingsgo-schedule-months-head mb-4 sm:mb-5">
+      {backdrop?.url ? (
+        <span
+          aria-hidden="true"
+          className="wingsgo-schedule-months-backdrop"
+          data-testid="month-chart-backdrop"
+          style={{ backgroundImage: `url("${backdrop.url.replace(/"/g, '%22')}")` }}
+        />
+      ) : null}
+      <div className="wingsgo-schedule-months-head relative mb-4 sm:mb-5">
         <h2 className="wingsgo-display text-xl sm:text-2xl font-normal leading-tight text-foreground">
           {isEn ? (
             <>
@@ -73,19 +104,19 @@ export const WingsGoScheduleMonthChart: React.FC<WingsGoScheduleMonthChartProps>
 
       <div
         aria-label={copy.chartAriaLabel}
-        className="wingsgo-schedule-bars grid grid-flow-col auto-cols-[minmax(0,1fr)] items-end gap-1.5 sm:gap-2.5 h-[170px] sm:h-[220px]"
+        className="wingsgo-schedule-bars relative grid grid-flow-col auto-cols-[minmax(0,1fr)] items-end gap-1.5 sm:gap-2.5 h-[170px] sm:h-[220px]"
         role="group"
       >
-        {months.map((m, i) => {
+        {visibleMonths.map((m, i, shown) => {
           const count = counts[m] || 0
           const [yStr, monStr] = m.split('-')
           const monNum = parseInt(monStr, 10)
           const curIndex = getMonthIndex(m)
-          const prevM = i > 0 ? months[i - 1] : null
+          const prevM = i > 0 ? shown[i - 1] : null
           const prevIndex = prevM ? getMonthIndex(prevM) : null
 
-          const hasEarlierData = months.slice(0, i).some((pm) => (counts[pm] || 0) > 0)
-          const hasLaterData = months.slice(i + 1).some((nm) => (counts[nm] || 0) > 0)
+          const hasEarlierData = shown.slice(0, i).some((pm) => (counts[pm] || 0) > 0)
+          const hasLaterData = shown.slice(i + 1).some((nm) => (counts[nm] || 0) > 0)
           const isZeroGap = count === 0 && hasEarlierData && hasLaterData
           const isResumingAfterZeroGap =
             count > 0 &&
@@ -144,7 +175,7 @@ export const WingsGoScheduleMonthChart: React.FC<WingsGoScheduleMonthChartProps>
               </span>
               <span
                 className={cn(
-                  'wingsgo-schedule-bar-fill block w-full rounded-t-md sm:rounded-t-lg rounded-b-[3px] bg-[var(--surface-strong,oklch(80%_0.02_235))] transition-all duration-200 group-hover:bg-[var(--site-brand)]/70',
+                  'wingsgo-schedule-bar-fill block w-full rounded-t-md sm:rounded-t-lg rounded-b-[3px] bg-[color-mix(in_oklch,var(--site-brand)_14%,white)] transition-all duration-200 group-hover:bg-[var(--site-brand)]/70',
                   isPressed && 'bg-[var(--site-brand)] shadow-sm',
                   isDisabled && 'bg-muted/40',
                 )}
@@ -166,22 +197,28 @@ export const WingsGoScheduleMonthChart: React.FC<WingsGoScheduleMonthChartProps>
         })}
       </div>
 
-      <div className="wingsgo-schedule-months-foot mt-4 pt-3.5 border-t border-border/70 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+      <div className="wingsgo-schedule-months-foot relative mt-4 pt-3.5 border-t border-border/70 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
         <span className="wingsgo-schedule-peak">
           {peakMonth && peakMax > 0 ? (
             <>
-              {copy.chartPeakMonth(
-                isEn
-                  ? EN_MONTH_ABBRS[parseInt(peakMonth.split('-')[1], 10) - 1]
-                  : `${parseInt(peakMonth.split('-')[1], 10)}`,
-                peakMonth.split('-')[0],
-                peakMax,
-              )}
+              {copy.chartPeakLabel}{' '}
+              <strong className="font-semibold text-foreground">
+                {copy.chartPeakMonthName(
+                  isEn
+                    ? EN_MONTH_ABBRS[parseInt(peakMonth.split('-')[1], 10) - 1]
+                    : `${parseInt(peakMonth.split('-')[1], 10)}`,
+                  peakMonth.split('-')[0],
+                )}
+              </strong>{' '}
+              {copy.chartPeakCount(peakMax)}
             </>
           ) : (
             copy.chartNoData
           )}
         </span>
+        {verifiedLabel ? (
+          <span className="wingsgo-schedule-months-updated">{copy.heroVerifiedLabel(verifiedLabel)}</span>
+        ) : null}
       </div>
     </div>
   )

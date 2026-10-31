@@ -418,6 +418,7 @@ describe('US-093 Phase 4 Component Tests', () => {
         ],
         airlines: [{ key: 'VJ', label: 'Vietjet Air' }],
         marketCards: [],
+        chartBackdrop: null,
         stats: {
           openCount: 2,
           tourCount: 2,
@@ -453,6 +454,7 @@ describe('US-093 Phase 4 Component Tests', () => {
         markets: [{ value: 'korea', label: 'Hàn Quốc' }],
         airlines: [{ key: 'VJ', label: 'Vietjet Air' }],
         marketCards: [],
+        chartBackdrop: null,
         stats: {
           openCount: 1,
           tourCount: 1,

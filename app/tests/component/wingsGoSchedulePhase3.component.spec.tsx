@@ -307,6 +307,7 @@ describe('US-093 Phase 3 Component Tests', () => {
   describe('WingsGoScheduleBrowser integration', () => {
     const baseSnapshot: WingsGoScheduleSnapshot = {
       locale: 'vi',
+      chartBackdrop: null,
       todayDay: '2026-10-30',
       tours: {
         'tour-1': createMockTour({ id: 'tour-1', market: 'korea', title: 'Tour Hàn Quốc Seoul', routeTitle: 'Tour Hàn Quốc Seoul' }),

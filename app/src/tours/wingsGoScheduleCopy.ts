@@ -17,6 +17,9 @@ export interface WingsGoScheduleCopy {
   chartAriaLabel: string
   chartMonthAria: (month: string, year: string, count: number) => string
   chartPeakMonth: (month: string, year: string, count: number) => string
+  chartPeakLabel: string
+  chartPeakMonthName: (month: string, year: string) => string
+  chartPeakCount: (count: number) => string
   chartNoData: string
 
   // Market Cards
@@ -132,6 +135,9 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
     chartMonthAria: (month, year, count) => `Tháng ${month}/${year}: ${count} đợt`,
     chartPeakMonth: (month, year, count) =>
       `Cao điểm: Tháng ${month}/${year} (${count} đợt)`,
+    chartPeakLabel: 'Cao điểm:',
+    chartPeakMonthName: (month, year) => `Tháng ${month}/${year}`,
+    chartPeakCount: (count) => `với ${count} đợt`,
     chartNoData: 'Không có đợt khớp bộ lọc',
 
     marketSectionKicker: 'Thị trường chủ lực',
@@ -244,6 +250,9 @@ export const WINGSGO_SCHEDULE_COPY: Record<CopyLocaleCode, WingsGoScheduleCopy> 
       `${month} ${year}: ${count} ${count === 1 ? 'departure' : 'departures'}`,
     chartPeakMonth: (month, year, count) =>
       `Peak: ${month} ${year} (${count} ${count === 1 ? 'departure' : 'departures'})`,
+    chartPeakLabel: 'Peak:',
+    chartPeakMonthName: (month, year) => `${month} ${year}`,
+    chartPeakCount: (count) => `with ${count} ${count === 1 ? 'departure' : 'departures'}`,
     chartNoData: 'No departures match filters',
 
     marketSectionKicker: 'Key destinations',

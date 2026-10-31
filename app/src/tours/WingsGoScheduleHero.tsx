@@ -104,7 +104,8 @@ export const WingsGoScheduleHero: React.FC<WingsGoScheduleHeroProps> = ({
         </div>
       </div>
 
-      {verifiedFormatted ? (
+      {/* With the month chart beside it, the update date sits in the chart footer. */}
+      {verifiedFormatted && !children ? (
         <p className="mt-4 text-xs text-muted-foreground">
           {copy.heroVerifiedLabel(verifiedFormatted)}
         </p>

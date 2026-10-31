@@ -255,7 +255,9 @@ describe('US-093 Phase 2 Component Tests', () => {
         />,
       )
       // 2026-11 has highest count = 15
-      expect(screen.getByText(/Cao điểm: Tháng 11\/2026 \(15 đợt\)/)).toBeTruthy()
+      // Mockup wording: "Cao điểm: <strong>Tháng 11/2026</strong> với 15 đợt"
+      const peak = document.querySelector('.wingsgo-schedule-peak') as HTMLElement
+      expect(peak.textContent?.replace(/\s+/g, ' ').trim()).toBe('Cao điểm: Tháng 11/2026 với 15 đợt')
     })
   })
 
@@ -587,5 +589,73 @@ describe('US-093 Phase 2 Component Tests', () => {
       expect(screen.getByText('Ảnh tour đang cập nhật')).toBeTruthy()
       expect(screen.queryByAltText('Seoul')).toBeNull()
     })
+  })
+})
+
+describe('Month chart matches the v2 mockup card', () => {
+  const months = ['2026-10', '2026-11', '2026-12', '2027-01', '2027-02', '2027-03', '2027-04', '2027-05', '2027-06']
+  const totals = { '2026-10': 4, '2026-11': 64, '2026-12': 53, '2027-01': 11, '2027-02': 26, '2027-03': 17, '2027-06': 1 }
+
+  it('shows a faint same-site tour photo behind the chart, hidden from assistive tech', () => {
+    render(
+      <WingsGoScheduleMonthChart
+        backdrop={{ url: '/media/korea-coast.webp', alt: 'Bờ biển' }}
+        counts={totals}
+        months={months}
+      />,
+    )
+    const backdrop = screen.getByTestId('month-chart-backdrop')
+    expect(backdrop.getAttribute('aria-hidden')).toBe('true')
+    expect(backdrop.getAttribute('style')).toContain('/media/korea-coast.webp')
+  })
+
+  it('renders no backdrop layer without a photo', () => {
+    render(<WingsGoScheduleMonthChart backdrop={null} counts={totals} months={months} />)
+    expect(screen.queryByTestId('month-chart-backdrop')).toBeNull()
+  })
+
+  it('collapses months with no departures into a dashed divider and labels the new year', () => {
+    const { container } = render(
+      <WingsGoScheduleMonthChart counts={totals} months={months} totalCounts={totals} />,
+    )
+    const shown = [...container.querySelectorAll('[data-month]')].map((bar) => bar.getAttribute('data-month'))
+    expect(shown).toEqual(['2026-10', '2026-11', '2026-12', '2027-01', '2027-02', '2027-03', '2027-06'])
+    const june = container.querySelector('[data-month="2027-06"]') as HTMLElement
+    expect(june.className).toContain('wingsgo-schedule-bar--gap')
+    expect(june.textContent).toContain('2027')
+  })
+
+  it('keeps a month emptied only by other filters as a disabled bar', () => {
+    const filtered = { ...totals, '2027-01': 0 }
+    const { container } = render(
+      <WingsGoScheduleMonthChart counts={filtered} months={months} totalCounts={totals} />,
+    )
+    const january = container.querySelector('[data-month="2027-01"]') as HTMLButtonElement
+    expect(january).not.toBeNull()
+    expect(january.disabled).toBe(true)
+  })
+
+  it('shows the peak month in bold with the update date in the footer', () => {
+    render(
+      <WingsGoScheduleMonthChart counts={totals} months={months} totalCounts={totals} verifiedDay="2026-10-30" />,
+    )
+    expect(screen.getByText('Tháng 11/2026').tagName).toBe('STRONG')
+    expect(screen.getByText(/với 64 đợt/)).toBeTruthy()
+    expect(screen.getByText('Cập nhật 30/10/2026')).toBeTruthy()
+  })
+
+  it('uses English footer copy on /en', () => {
+    render(
+      <WingsGoScheduleMonthChart
+        counts={totals}
+        locale="en"
+        months={months}
+        totalCounts={totals}
+        verifiedDay="2026-10-30"
+      />,
+    )
+    expect(screen.getByText('Nov 2026').tagName).toBe('STRONG')
+    expect(screen.getByText(/with 64 departures/)).toBeTruthy()
+    expect(screen.getByText('Updated 30/10/2026')).toBeTruthy()
   })
 })

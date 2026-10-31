@@ -288,6 +288,7 @@ export const createEmptyScheduleSnapshot = (
   markets: [],
   airlines: [],
   marketCards: [],
+      chartBackdrop: null,
   stats: {
     openCount: 0,
     tourCount: 0,
@@ -644,6 +645,15 @@ export const getWingsGoScheduleSnapshot = async ({
     }
   }
 
+  // Month chart backdrop: the lead market card's tour photo, else the first tour that
+  // has one. Media already passed the site and URL checks in extractTourMedia.
+  const backdropTour =
+    marketCards.map((card) => toursMap[card.tourId]).find((tour) => tour?.media?.url) ||
+    rows.map((row) => toursMap[row.tourId]).find((tour) => tour?.media?.url)
+  const chartBackdrop = backdropTour?.media?.url
+    ? { url: backdropTour.media.url, alt: backdropTour.media.alt || '' }
+    : null
+
   // Initial filters parsed from URL searchParams
   const snapshotFacts: ScheduleSnapshotFacts = {
     validMarkets: markets.map((m) => m.value),
@@ -670,6 +680,7 @@ export const getWingsGoScheduleSnapshot = async ({
     markets,
     airlines,
     marketCards,
+    chartBackdrop,
     stats,
     initialFilters,
   }

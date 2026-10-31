@@ -5407,3 +5407,29 @@ body h2.wingsgo-display {
     padding-bottom: 7rem;
   }
 }
+
+/* US-093: faint tour photo behind the month chart, fading in from the left. */
+.wingsgo-schedule-months-backdrop {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 62%;
+  background-position: center;
+  background-size: cover;
+  opacity: 0.09;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%);
+  mask-image: linear-gradient(90deg, transparent, #000 60%);
+  pointer-events: none;
+}
+
+@media (max-width: 639px) {
+  .wingsgo-schedule-months-backdrop {
+    width: 100%;
+    opacity: 0.07;
+  }
+}
+
+@media print {
+  .wingsgo-schedule-months-backdrop {
+    display: none;
+  }
+}
