@@ -16,7 +16,7 @@ export const resolveWingsGroupLocalPreviewMediaDirectory = (
         'E09_PREVIEW_MEDIA_SEED requires the authenticated in-memory E09 preview store; normal public/media is not a preview target.',
       )
     }
-    return path.resolve(localPreviewMediaModuleDirectory, '../../public/media')
+    return path.resolve(process.cwd(), 'public/media')
   }
 
   if (process.env.NODE_ENV === 'production' || process.env.E09_PREVIEW_MEDIA_SEED !== 'true') {

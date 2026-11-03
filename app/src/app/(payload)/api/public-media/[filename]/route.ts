@@ -21,6 +21,16 @@ import {
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+const PAYLOAD_STANDARD_IMAGE_SIZES = [
+  'thumbnail',
+  'square',
+  'small',
+  'medium',
+  'large',
+  'xlarge',
+  'og',
+] as const
+
 const json = (message: string, status: number): Response =>
   Response.json(
     { errors: [{ message }] },
@@ -76,6 +86,9 @@ export async function GET(
     if (!site && isExactLocalLoopback && process.env.NODE_ENV !== 'production') {
       const filenameConditionsForSearch = [
         { filename: { equals: filename } },
+        ...PAYLOAD_STANDARD_IMAGE_SIZES.map((name) => ({
+          [`sizes.${name}.filename`]: { equals: filename },
+        })),
         ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ name }) => ({
           [`sizes.${name}.filename`]: { equals: filename },
         })),
@@ -104,6 +117,9 @@ export async function GET(
   // in the standard Payload sizes map and cover both governed and tenant media.
   const filenameConditions = [
     { filename: { equals: filename } },
+    ...PAYLOAD_STANDARD_IMAGE_SIZES.map((name) => ({
+      [`sizes.${name}.filename`]: { equals: filename },
+    })),
     ...WINGSGROUP_V3_DERIVATIVE_IMAGE_SIZES.map(({ name }) => ({
       [`sizes.${name}.filename`]: { equals: filename },
     })),

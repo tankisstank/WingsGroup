@@ -1,4 +1,4 @@
-import { cp, mkdir, rm } from 'node:fs/promises'
+import { cp, mkdir, readdir, rm } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -31,6 +31,24 @@ await copyTree(path.join(appRoot, 'public'), path.join(standaloneRoot, 'public')
 // installed package trees explicitly for local/staging SQLite boot.
 const pnpmVirtualStore = path.join(appRoot, 'node_modules', '.pnpm', 'node_modules')
 await copyTree(path.join(pnpmVirtualStore, 'libsql'), path.join(standaloneRoot, 'node_modules', 'libsql'))
-await copyTree(path.join(pnpmVirtualStore, '@libsql'), path.join(standaloneRoot, 'node_modules', '@libsql'))
-await copyTree(path.join(pnpmVirtualStore, '@neon-rs'), path.join(standaloneRoot, 'node_modules', '@neon-rs'))
+for (const scope of ['@libsql', '@neon-rs']) {
+  const sourceScope = path.join(pnpmVirtualStore, scope)
+  if (!existsSync(sourceScope)) {
+    console.log(`Skipping missing source: ${path.relative(appRoot, sourceScope)}`)
+    continue
+  }
+  const entries = await readdir(sourceScope)
+  for (const entry of entries) {
+    const dest = path.join(standaloneRoot, 'node_modules', scope, entry)
+    if (!existsSync(dest)) {
+      await copyTree(path.join(sourceScope, entry), dest)
+    }
+  }
+}
 await copyTree(path.join(pnpmVirtualStore, 'detect-libc'), path.join(standaloneRoot, 'node_modules', 'detect-libc'))
+for (const pkg of ['promise-limit', 'js-base64', 'ws']) {
+  const dest = path.join(standaloneRoot, 'node_modules', pkg)
+  if (!existsSync(dest)) {
+    await copyTree(path.join(pnpmVirtualStore, pkg), dest)
+  }
+}
