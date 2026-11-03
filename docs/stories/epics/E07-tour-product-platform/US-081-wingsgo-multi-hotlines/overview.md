@@ -2,7 +2,7 @@
 
 ## 1. Trạng thái (Status)
 
-`Đang thực hiện` — follow-up CTA ngày 2026-11-02. Bàn giao footer ngày
+`Đã bàn giao` — follow-up CTA bắt đầu 2026-11-02, production 2026-11-03. Bàn giao footer ngày
 2026-10-24 bên dưới là bằng chứng lịch sử, không phải proof cho AC5.
 
 Follow-up ngày2026-10-23 theo phản hồi trực tiếp của người dùng: footer WingsGo vẫn có theme selector, số cũ và nhiều CTA. Release d6057d4 trước đó chỉ rút gọn WingsGroup; không phải bằng chứng sửa WingsGo. Candidate đã được deploy production và CMS WingsGo đã được cập nhật theo wrapper transaction có row lock. Evidence: wingsgo-footer-review-20261023/.
@@ -87,3 +87,16 @@ Production audit read-only ngày23/10: settingsID16 WingsGo vẫn0912910101, set
 - Footer production: một link gọi, một email ưu tiên, không theme selector, không lặp CTA/Zalo/số phụ.
 - Health ready sau cutover: database, Redis, lead delivery đều đạt.
 - Kỹ thuật đã bàn giao; stakeholder UAT và kiểm tra thiết bị thật còn chờ xác nhận.
+
+
+## Production follow-up — 2026-11-03
+
+Production follow-up delivered 2026-11-03, owner c0508g, revision5b81a19d663f2f78a04d0e411fcfa0afbd416c4a. Bounded Payload CTA/H1 apply verified:556 page-locales/6sites,only3 changed locales,all1399 media unchanged,drafts preserved; rerun noop. ARM64 media path defect found by public browser QA, rolled back and fixed with3unit/typecheck/ESLint/build and independent Codex noP1/P2/P3. Fresh encrypted PG backup+disposable restore,28/28 migrations,immutable image gate,readiness passed. Production desktop1440/mobile390 verifies hotline0948786775,newVIH1,EN unchanged,caption scope,playing video and4WingsPlus descriptions pre-line/nooverflow. Evidence followups-20261102/PRODUCTION-REPORT.md. Technical delivery is not stakeholder acceptance; real calls/leads and physical Safari/iOS not exercised.
+
+- Deployed code: `5b81a19d663f2f78a04d0e411fcfa0afbd416c4a`, branch `work/followups-20261102-us081-088-005`.
+- Release: `/home/ubuntu/wings-travel/releases/release-5b81a19`; previous `release-us093-8efdbbf` retained.
+- CMS journals remain protected on VPS at `shared/artifacts/followups-642b857/{cta-apply,heading-apply}.json`. No shared media edits or database restore performed.
+- New follow-up state: **Đã bàn giao / Full**, start2026-11-02, delivery/review2026-11-03. Earlier dated candidate-only and historical delivery entries remain as history.
+- Evidence: `followups-20261102/production-content-verify-final.log`, `production-media-gates-2.log`, `production-media-cutover-2.log`, `production-browser-qa.json`, four production screenshots, `production-media-codex-review.md` plus original independent reviews. No unresolved P1/P2/P3.
+
+Resolved production findings: campaign identity now follows exact public pathname despite namespaced CMS slug; standalone preserves traced database driver packages; media directory now resolves from runtime app-root cwd. The first media-defective image was rolled back immediately after public QA; final preview tested actual1024-byte206 media response before cutover. Existing preview-store restrictions and tenant access checks remain intact.
