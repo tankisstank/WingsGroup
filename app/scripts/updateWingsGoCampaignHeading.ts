@@ -12,7 +12,7 @@ import {
 } from './updateWingsGoCtaHotline'
 
 export const TARGET_SITE_CODE = 'wings-go'
-export const TARGET_PAGE_SLUG = 'campaign'
+export const TARGET_PAGE_PATHNAME = '/campaign'
 export const TARGET_LOCALE = 'vi' as const
 
 export const OLD_CAMPAIGN_H1 = 'Tour theo mùa: Khám phá vẻ đẹp bốn mùa châu Á'
@@ -95,6 +95,12 @@ export function validateSnapshotReport(report: CampaignHeadingReport): void {
   if (report.version !== 1 || report.siteCode !== TARGET_SITE_CODE) {
     throw new Error(`Invalid report format: expected version 1 and siteCode '${TARGET_SITE_CODE}'`)
   }
+  if (report.pathname !== TARGET_PAGE_PATHNAME) {
+    throw new Error(`Snapshot validation failed: expected pathname '${TARGET_PAGE_PATHNAME}', got '${report.pathname}'`)
+  }
+  if (typeof report.slug !== 'string' || !report.slug.trim()) {
+    throw new Error('Snapshot validation failed: invalid report slug (expected non-empty string)')
+  }
   if (report.locale !== TARGET_LOCALE) {
     throw new Error(`Invalid report locale: expected '${TARGET_LOCALE}', got '${report.locale}'`)
   }
@@ -137,10 +143,10 @@ async function assertLiveCampaignGuards(
     throw new Error(`Safety abort: Page ${report.pageID} status is '${livePage._status}', expected 'published'`)
   }
 
-  const liveSlug = livePage.slug
-  const livePathname = livePage.pathname || `/${liveSlug}`
-  if (liveSlug !== TARGET_PAGE_SLUG || livePathname !== `/${TARGET_PAGE_SLUG}`) {
-    throw new Error(`Security abort: Expected slug '${TARGET_PAGE_SLUG}' and pathname '/${TARGET_PAGE_SLUG}', got slug '${liveSlug}' and pathname '${livePathname}'`)
+  if (livePage.slug !== report.slug || livePage.pathname !== TARGET_PAGE_PATHNAME) {
+    throw new Error(
+      `Security abort: Expected slug '${report.slug}' and pathname '${TARGET_PAGE_PATHNAME}', got slug '${livePage.slug}' and pathname '${livePage.pathname}'`,
+    )
   }
   if (checkUpdatedAt && livePage.updatedAt !== report.updatedAt) {
     throw new Error(`Compare-and-stop: Concurrent modification detected on page ${report.pageID}. Expected updatedAt '${report.updatedAt}', got '${livePage.updatedAt}'.`)
@@ -183,11 +189,12 @@ export async function planWingsGoCampaignHeadingUpdate(
     where: {
       and: [
         { site: { equals: site.id } },
-        { slug: { equals: TARGET_PAGE_SLUG } },
+        { pathname: { equals: TARGET_PAGE_PATHNAME } },
         { _status: { equals: 'published' } },
       ],
     },
     depth: 0,
+    draft: false,
     fallbackLocale: false,
     limit: 2,
     locale: TARGET_LOCALE,
@@ -196,10 +203,15 @@ export async function planWingsGoCampaignHeadingUpdate(
   })
 
   if (pagesResult.docs.length !== 1) {
-    throw new Error(`Expected exactly one published page with slug '${TARGET_PAGE_SLUG}' on WingsGo, found ${pagesResult.docs.length}`)
+    throw new Error(`Expected exactly one published page with pathname '${TARGET_PAGE_PATHNAME}' on WingsGo, found ${pagesResult.docs.length}`)
   }
 
   const page = pagesResult.docs[0]
+  const pageSlug = typeof page.slug === 'string' ? page.slug.trim() : ''
+  if (!pageSlug) {
+    throw new Error(`Page ${page.id} has invalid empty slug.`)
+  }
+
   const hero = (page.hero && typeof page.hero === 'object' ? page.hero : {}) as Record<string, unknown>
   const { updatedHero, changed, changes } = transformCampaignHero(hero)
 
@@ -208,8 +220,8 @@ export async function planWingsGoCampaignHeadingUpdate(
     siteCode: TARGET_SITE_CODE,
     siteID: site.id,
     pageID: page.id,
-    slug: page.slug || TARGET_PAGE_SLUG,
-    pathname: page.pathname || `/${TARGET_PAGE_SLUG}`,
+    slug: pageSlug,
+    pathname: TARGET_PAGE_PATHNAME,
     pageTitle: page.title || '',
     createdAt: new Date().toISOString(),
     mode: 'dry-run',
@@ -258,7 +270,10 @@ export async function applyWingsGoCampaignHeadingUpdate(
       collection: 'pages',
       id: report.pageID,
       locale: TARGET_LOCALE,
-      data: { hero: report.afterHero } as never,
+      data: {
+        hero: report.afterHero,
+        pathname: TARGET_PAGE_PATHNAME,
+      } as never,
       draft: false,
       overrideAccess: true,
       req,
@@ -307,7 +322,10 @@ export async function rollbackWingsGoCampaignHeadingUpdate(
       collection: 'pages',
       id: report.pageID,
       locale: TARGET_LOCALE,
-      data: { hero: report.beforeHero } as never,
+      data: {
+        hero: report.beforeHero,
+        pathname: TARGET_PAGE_PATHNAME,
+      } as never,
       draft: false,
       overrideAccess: true,
       req,
@@ -361,7 +379,6 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
   }
 
   run().then(() => {
-    // Standalone Payload leaves idle PostgreSQL sockets alive after destroy.
     process.stdout.write('', () => process.exit(0))
   }).catch((error) => {
     console.error('Fatal error during campaign heading updater execution:', error)
