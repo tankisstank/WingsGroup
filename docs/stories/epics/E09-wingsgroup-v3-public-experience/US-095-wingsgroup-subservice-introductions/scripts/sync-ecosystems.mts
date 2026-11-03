@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict'
 import { writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createLocalReq, getPayload } from 'payload'
 import { sql } from '@payloadcms/db-postgres'
 import config from '@/payload.config'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const payload = await getPayload({ config })
 const locales = ['vi', 'en'] as const

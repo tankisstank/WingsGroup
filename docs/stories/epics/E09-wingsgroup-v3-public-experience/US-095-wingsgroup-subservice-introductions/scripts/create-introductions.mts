@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict'
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createLocalReq, getPayload } from 'payload'
 import config from '@/payload.config'
 import { WINGSGROUP_CONTENT_VALIDATION_MARKER } from '@/wingsgroup/corporateRoutes'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const payload = await getPayload({ config })
 try {
