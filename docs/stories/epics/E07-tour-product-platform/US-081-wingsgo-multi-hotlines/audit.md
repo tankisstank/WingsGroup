@@ -42,4 +42,18 @@ Các gate P2 đã đóng:
 
 Release vẫn có giới hạn: chưa gọi số/Zalo/gửi lead thật, chưa test Safari/iOS và chưa có stakeholder UAT. Đây là giới hạn nghiệm thu, không phải blocker kỹ thuật deploy.
 
+## Follow-up CTA — review 2026-11-02
+
+Candidate baseline8efdbbf tại `followups-20261102/candidate`, owner c0508g. Không ghi production hoặc deploy.
+
+| Finding độc lập | Mức | Xử lý và bằng chứng mới |
+| --- | --- | --- |
+| Apply lặp ghi đè snapshot gốc | P2 | `fs.open(wx)` + fsync trước ghi; từ chối EEXIST và giữ nguyên bytes. Unit và PostgreSQL recovery qua. |
+| Rewrite journal sau commit có thể phá rollback | P2 | Journal bất biến, không rewrite sau commit; test disk-full injection và rollback từ prewrite planned journal qua. |
+| Lock acquisition lỗi làm leak transaction | P2 | Helper rollback ngay khi setup/lock lỗi; unit injection cho apply và rollback qua. |
+
+Root bổ sung guard draft mọi locale được hỗ trợ, kể cả locale không có CTA cần đổi. PostgreSQL thật xác nhận EN draft được giữ nguyên, writer editor bị row lock chặn đến sau commit, conflict nhiều trang rollback nguyên giao dịch, tenant/hotline phụ nguyên vẹn. Kiểm lại `us081-all-locales-pg.log`:2tests pass; `safety-unit-final.log`:24tests pass gồm heading và page wizard.
+
+Codex review cuối `followups-20261102/final-codex-review.md`: không còn P1/P2/P3; reviewer chạy22unit +6component, không ghi PostgreSQL theo brief. Orchestrator có log PostgreSQL riêng. Candidate đang rà soát/Partial, lịch sử phát hành24/10 giữ nguyên. Chưa làm inventory draft production có xác thực, apply production, cuộc gọi/lead thật hoặc thiết bị Safari/iOS.
+
 

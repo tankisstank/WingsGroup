@@ -1490,7 +1490,7 @@ function extractAcceptanceCriteria(markdown) {
     items.push(pending.trim())
   }
 
-  return items.slice(0, 6)
+  return items
 }
 
 function toProofStatusKey(story, mapping = {}) {

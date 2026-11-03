@@ -4,7 +4,7 @@ vi.mock('@payload-config', () => ({ default: {} }))
 vi.mock('next/headers', () => ({ headers: vi.fn() }))
 vi.mock('payload', () => ({ createLocalReq: vi.fn(), getPayload: vi.fn() }))
 
-import { parsePageWizardPayload } from '@/app/(payload)/api/page-wizard/route'
+import { parsePageWizardPayload } from '@/utilities/pageWizardPayload'
 
 describe('Page Wizard locale contract', () => {
   const basePayload = {

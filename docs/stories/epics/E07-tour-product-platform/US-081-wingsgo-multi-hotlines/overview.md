@@ -2,7 +2,8 @@
 
 ## 1. Trạng thái (Status)
 
-`Đã bàn giao`
+`Đang thực hiện` — follow-up CTA ngày 2026-11-02. Bàn giao footer ngày
+2026-10-24 bên dưới là bằng chứng lịch sử, không phải proof cho AC5.
 
 Follow-up ngày2026-10-23 theo phản hồi trực tiếp của người dùng: footer WingsGo vẫn có theme selector, số cũ và nhiều CTA. Release d6057d4 trước đó chỉ rút gọn WingsGroup; không phải bằng chứng sửa WingsGo. Candidate đã được deploy production và CMS WingsGo đã được cập nhật theo wrapper transaction có row lock. Evidence: wingsgo-footer-review-20261023/.
 
@@ -48,12 +49,30 @@ Hệ thống phải đảm bảo:
 
 ## Acceptance Criteria
 
-Tiêu chí chấp nhận theo thứ tự AC1–AC4; ba đầu số và định dạng được quy định tại Hợp đồng Sản phẩm.
+Tiêu chí chấp nhận theo thứ tự AC1–AC5; ba đầu số và định dạng được quy định tại Hợp đồng Sản phẩm.
 
 - Giữ kênh phụ trong menu; rút gọn liên hệ footer.
 - Gọi trực tiếp qua liên kết `tel:` chuẩn hóa và bộ quay số trên mobile.
 - Giữ menu desktop gọn, gọi số chính và mở danh sách hotline phụ.
 - Bảo toàn cấu hình và giao diện liên hệ của các site khác.
+- Đồng bộ hotline trong CTA các trang WingsGo.
+
+## Follow-up CTA — 2026-11-02
+
+Owner c0508g; bắt đầu 2026-11-02. Candidate local tại
+`followups-20261102/candidate`, baseline `8efdbbf`. Mốc review là ngày kiểm
+thực tế, không kế thừa hạn hay proof bàn giao cũ. Không ghi production.
+Kiểm kê sitemap public: 88 URL HTTP 200, 4 URL có CTA, 3 URL còn số cũ
+(`/`, `/campaign`, `/thi-truong`); `/en` có CTA không dùng số cũ.
+API CMS public trả 403; inventory này không chứng minh trạng thái draft.
+Evidence mới: `followups-20261102/public-cta-inventory.json`.
+
+AC5 bao gồm mô tả, nhãn và tel của CTA đã xuất bản theo từng locale;
+inventory, dry-run, snapshot trước ghi, kiểm đồng thời trong giao dịch
+PostgreSQL, verify, noop và rollback có mục tiêu. Bảo toàn draft editor,
+hotline phụ và tenant khác.
+
+Review candidate 2026-11-02: 36 kiểm thử tập trung và 2 kiểm thử PostgreSQL thực qua; có VI/EN, noop, snapshot sửa trái phép, tenant khác, draft, stale version, rollback và writer đồng thời bị row lock chặn. Codex review lần đầu có ba finding P2: ghi đè journal khi chạy lại, rewrite sau commit làm hỏng recovery, transaction leak khi lock lỗi. Đã sửa bằng journal `wx` + fsync bất biến và rollback ngay trong helper lock; ba kiểm thử hồi quy qua. Typecheck và ESLint exit 0 (còn cảnh báo any trong mock/adapter). Browser local xác nhận mô tả/nhãn/tel mới và số phụ nguyên vẹn. Follow-up đang rà soát, proof Partial; chưa phát hành. Các log và review ở `followups-20261102/`.
 
 ## Follow-up light theme và an toàn dữ liệu
 

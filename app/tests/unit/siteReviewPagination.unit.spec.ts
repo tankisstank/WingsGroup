@@ -4,7 +4,7 @@ vi.mock('@payload-config', () => ({ default: {} }))
 vi.mock('next/headers', () => ({ headers: vi.fn() }))
 vi.mock('payload', () => ({ createLocalReq: vi.fn(), getPayload: vi.fn() }))
 
-import { loadCollection } from '@/app/(payload)/api/site-review/route'
+import { loadCollection } from '@/utilities/siteReviewCollection'
 
 describe('Site Review collection pagination', () => {
   it('loads every page instead of silently truncating at 1,000 records', async () => {

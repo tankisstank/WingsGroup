@@ -31,3 +31,8 @@ Cutover code trước mọi mutation nội dung; immutable digest, readiness dat
 Đang chờ kết luận follow-up độc lập; chưa ghi đã deploy hoặc story hoàn tất tại thời điểm lập tài liệu này. Bằng chứng production sẽ bổ sung validation.md sau thực thi.
 - 2026-10-27 follow-up `recovery-release-review.md`: SHIP; prior P2 closed with real pre-apply and post-commit interruption/recovery tests.
 - Cutover first attempt stopped before symlink/content changes: Payload migrate prompted about an existing dev-push marker. No consent was entered; stopped only own migration container. Final app has no migrations diff, so cutover now runs read-only migrate:status and requires exactly52 migration rows all applied. No marker/database metadata edits. Bounded independent review recorded separately.
+# Follow-up AC7 — 2026-11-02
+
+Owner c0508g. Candidate only, baseline8efdbbf. Ba kiểm thử FeatureGrid giữ text chính xác gồm dòng trống, một dòng và chữ dài; standard + accordion/tabs dùng pre-line/break-words. Browser bốn nhóm nội dung thật ở1440/390px không overflow; accordion mở giữ newline. Bằng chứng `followups-20261102/us088-*.log`, `us088-browser-*.json`, `us088-detail-click.json`, ảnh WingsPlus.
+
+Codex review độc lập cuối không có P1/P2/P3: `followups-20261102/final-codex-review.md`. Không thay schema/textarea, nhập lại CMS hay deploy. Follow-up Đang rà soát/Partial, không thay lịch sử bàn giao cũ.

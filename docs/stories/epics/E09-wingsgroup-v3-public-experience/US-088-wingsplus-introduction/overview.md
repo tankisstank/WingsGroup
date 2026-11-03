@@ -24,6 +24,15 @@ Owner c0508g; bắt đầu 2026-10-27. Epic E09, project Core. Site nội dung l
 - Giữ mô tả hệ sinh thái ngắn, CTA Xem giới thiệu mở /gioi-thieu-wingsplus; bảo toàn nội dung và draft hiện hữu.
 - Kiểm tra production trên desktop và mobile, lưu review và bằng chứng.
 - Cập nhật trạng thái, kết quả Harness và Plane theo thực tế.
+- Giữ xuống dòng trong mô tả bốn nhóm dịch vụ WingsPlus.
+
+## Follow-up 2026-11-02 — AC7
+
+Owner c0508g. Bắt đầu và review candidate ngày 2026-11-02; trạng thái Đang rà soát, proof Partial. Lịch sử bàn giao 2026-10-27 bên dưới và trong validation/audit vẫn được giữ nguyên; follow-up chưa phát hành.
+
+Feature Grid giữ nguyên textarea và dữ liệu CMS, dùng `white-space: pre-line` và ngắt chữ dài cho mô tả thẻ lẫn phần chi tiết accordion/tabs. Ba kiểm thử component bao gồm newline, dòng trống, một dòng và chữ dài. Browser local dùng nguyên nội dung công khai bốn nhóm Company Trip, MICE, Private Tour, Wellness & Medical Travel: giữ 7/4/6/7 newline, không tràn ngang ở 1440px và 390px. Accordion mở và giữ pre-line. Typecheck và ESLint exit 0.
+
+Bằng chứng đợt mới: `followups-20261102/us088-component.log`, `us088-browser-desktop.json`, `us088-browser-mobile.json`, `us088-detail-click.json`, ảnh `wingsplus-desktop.png` / `wingsplus-mobile.png`. Candidate ở `followups-20261102/candidate`; chưa push/deploy/publish.
 
 ## Implementation and Rollback
 

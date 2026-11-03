@@ -6,7 +6,7 @@ vi.mock('@/utilities/previewHandoff', () => ({
   getTrustedCMSOrigins: () => new Set(['https://wingsgroup.vn']),
 }))
 
-import { sameOriginCookieMutation } from '@/app/(payload)/api/tour-authoring/[id]/route'
+import { sameOriginCookieMutation } from '@/utilities/tourAuthoringOrigin'
 
 describe('tour authoring mutation origin checks', () => {
   it('accepts the production CMS referer when the app runs behind an internal proxy', () => {

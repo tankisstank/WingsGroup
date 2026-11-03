@@ -6,7 +6,16 @@ import { CMSLink } from '@/components/Link'
 import { Media } from '@/components/Media'
 import RichText from '@/components/RichText'
 
-export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richText }) => {
+export type MediumImpactHeroProps = Page['hero'] & {
+  showMediaCaption?: boolean
+}
+
+export const MediumImpactHero: React.FC<MediumImpactHeroProps> = ({
+  links,
+  media,
+  richText,
+  showMediaCaption = true,
+}) => {
   return (
     <section className="site-detail-hero">
       <div className="container site-detail-hero__grid">
@@ -33,7 +42,7 @@ export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richTex
               priority
               resource={media}
             />
-            {media?.caption && (
+            {showMediaCaption && media?.caption && (
               <div className="mt-3">
                 <RichText data={media.caption} enableGutter={false} />
               </div>

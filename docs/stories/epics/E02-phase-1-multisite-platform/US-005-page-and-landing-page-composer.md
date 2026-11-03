@@ -2,7 +2,7 @@
 
 ## Status
 
-implemented
+in_progress
 
 ## Lane
 
@@ -25,6 +25,14 @@ least one landing page pattern without recurring structural frontend edits.
 - Core marketing pages can be managed from structured content in Payload.
 - At least one landing page pattern is reusable for campaign or market-specific variants.
 - Editors can change hero, CTA, and supporting sections without code changes for standard cases.
+- Hiển thị H1 campaign WingsGo tiếng Việt theo nội dung đã duyệt.
+- Ẩn caption media riêng trang campaign WingsGo.
+
+## Follow-up 2026-11-02 — AC4–AC5
+
+Owner c0508g; bắt đầu 2026-11-02. Phạm vi candidate: H1 tiếng Việt “Tour theo mùa: Khám phá vẻ đẹp thế giới”, cập nhật qua Payload có guard giá trị cũ; không đổi H2 hoặc tự dịch H1 tiếng Anh. Prop nội bộ `showMediaCaption` mặc định true, chỉ đặt false cho site WingsGo tại `/campaign`; không xóa caption của media dùng chung. Kiểm chứng và review đợt mới được ghi riêng; không kế thừa bàn giao 2026-05-27.
+
+Review local 2026-11-02: công cụ H1 mặc định dry-run, journal bất biến trước ghi, transaction/row lock PostgreSQL, kiểm tenant/path/updatedAt và draft mọi locale. Nội dung H1 khác hai giá trị đã duyệt hoặc bị chia formatting sẽ dừng để editor rà soát. Rehearsal kiểm snapshot tamper, wrong route, stale version, EN draft, noop và rollback; EN hero, layout và caption media giữ nguyên. Browser desktop và mobile390: đúng một H1 mới, không caption dưới video, video thực phát readyState4/pausedfalse, không overflow; CTA mở `/wingsgo/lien-he#contact-form`. Trang caption-control dùng cùng media vẫn hiện cả hai phần caption; EN campaign giữ nguyên H1. Bằng chứng `followups-20261102/us005-independent-pg-proof.json`, `campaign-browser-*.json`, `campaign-caption-control.json`, `campaign-cta-click.json` và ảnh. Candidate Đang rà soát / Partial, chưa phát hành.
 
 ## Design Notes
 

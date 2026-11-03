@@ -454,6 +454,7 @@ export async function renderCmsPageByPath({
               siteHeroDefaults={settings?.heroDefaults}
               allowWingsGroupDevelopmentMedia={draft && useWingsGroupV3Surface}
               wingsGroupV3Enabled={useWingsGroupV3Surface}
+              showMediaCaption={!(site.code === 'wings-go' && requestedPath === '/campaign')}
             />
           )}
           {isWingsGoHomepage ? (

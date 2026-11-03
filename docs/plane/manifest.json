@@ -347,15 +347,16 @@
       "phase": "Phase 1",
       "workstream": "Content",
       "customerVisible": "Yes",
-      "planeStateOverride": "Đã bàn giao",
-      "proofStatusOverride": "Full",
+      "planeStateOverride": "Đang rà soát",
+      "proofStatusOverride": "Partial",
       "childStateOverrides": {
         "1": "Đã bàn giao",
         "2": "Đã bàn giao",
         "3": "Đã bàn giao",
         "4": "Đã bàn giao",
         "5": "Đã bàn giao",
-        "6": "Đã bàn giao"
+        "6": "Đã bàn giao",
+        "7": "Đang rà soát"
       },
       "childDateOverrides": {
         "1": {
@@ -381,9 +382,13 @@
         "6": {
           "startDate": "2026-10-27",
           "targetDate": "2026-10-27"
+        },
+        "7": {
+          "startDate": "2026-11-02",
+          "targetDate": "2026-11-02"
         }
       },
-      "proofStatusNote": "2026-10-27 delivered on correct WingsGroup site: page375 /gioi-thieu-wingsplus VI+EN, Hero/4groups/specialistCTA; homepage191 shortcopy+Xem giới thiệu links to Group page. Own wrongsite372 withdrawn. Release8a0e470 ARM64ready; build/typecheck0,70unit27component28integration, backuprestore6sites, realcontention/recoverypass, independentCodexSHIP. Actualdesktop/mobile390 and primaryCTAform checks pass; public/data productionchecks0,21unrelatedpagesunchanged, public/draftheropreserved. No reallead/email or physicaldevice test. Details US088validation and wingsplus-on-wingsgroup-20261027."
+      "proofStatusNote": "2026-10-27 delivered on correct WingsGroup site: page375 /gioi-thieu-wingsplus VI+EN, Hero/4groups/specialistCTA; homepage191 shortcopy+Xem giới thiệu links to Group page. Own wrongsite372 withdrawn. Release8a0e470 ARM64ready; build/typecheck0,70unit27component28integration, backuprestore6sites, realcontention/recoverypass, independentCodexSHIP. Actualdesktop/mobile390 and primaryCTAform checks pass; public/data productionchecks0,21unrelatedpagesunchanged, public/draftheropreserved. No reallead/email or physicaldevice test. Details US088validation and wingsplus-on-wingsgroup-20261027. Follow-up AC7 started/reviewed 2026-11-02 owner c0508g:3component tests,actual4group text at1440/390px pre-line/nooverflow,accordion details; candidate only,build0,Codex noP1/P2/P3. Partial/inreview applies only to newfollowup; historical delivery remains unchanged."
     },
     "US-087": {
       "projectKey": "core",
@@ -421,7 +426,47 @@
     "US-002": { "projectKey": "core", "module": "E01 - Lớp vận hành Harness", "epicKey": "E01", "site": "Core", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "No" },
     "US-003": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
     "US-004": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
-    "US-005": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
+    "US-005": {
+  "projectKey": "core",
+  "module": "E02 - Nền tảng multisite giai đoạn 1",
+  "epicKey": "E02",
+  "site": "Core",
+  "phase": "Phase 1",
+  "workstream": "CMS",
+  "customerVisible": "Yes",
+  "proofStatusOverride": "Partial",
+  "planeStateOverride": "Đang rà soát",
+  "childStateOverrides": {
+    "1": "Đã bàn giao",
+    "2": "Đã bàn giao",
+    "3": "Đã bàn giao",
+    "4": "Đang rà soát",
+    "5": "Đang rà soát"
+  },
+  "childDateOverrides": {
+    "1": {
+      "startDate": "2026-05-25",
+      "targetDate": "2026-05-25"
+    },
+    "2": {
+      "startDate": "2026-05-26",
+      "targetDate": "2026-05-26"
+    },
+    "3": {
+      "startDate": "2026-05-27",
+      "targetDate": "2026-05-27"
+    },
+    "4": {
+      "startDate": "2026-11-02",
+      "targetDate": "2026-11-02"
+    },
+    "5": {
+      "startDate": "2026-11-02",
+      "targetDate": "2026-11-02"
+    }
+  },
+  "proofStatusNote": "Historical delivery 2026-05-27 preserved in story and plane-before.json. Follow-up AC4-AC5 started 2026-11-02, owner c0508g: guarded VI campaign H1 update and scoped media caption rendering. Candidate only; verification in progress, no production publish/deploy. Local review 2026-11-02 passed:7 heading unit,3 caption component,realPG guardedapply/rollback,desktop/mobile390 realvideo and scopedcaption controls. Final integrated build/review recorded in followups-20261102."
+},
     "US-006": { "projectKey": "core", "module": "E02 - Nền tảng multisite giai đoạn 1", "epicKey": "E02", "site": "Core", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
     "US-007": { "projectKey": "wingstravel", "module": "Go-live Review", "site": "WingsTravel", "phase": "Phase 1", "workstream": "Platform", "customerVisible": "Yes" },
     "US-008": { "projectKey": "core", "module": "E03 - SEO, metadata và theme nền tảng", "epicKey": "E03", "site": "Core", "phase": "Phase 1", "workstream": "SEO", "customerVisible": "Yes" },
@@ -492,7 +537,47 @@
     "US-078": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes" },
     "US-079": { "projectKey": "wingsside", "module": "Tours & Services", "epicKey": "E10", "site": "WingSide", "phase": "Phase 2", "workstream": "CMS", "customerVisible": "Yes" },
     "US-080": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
-    "US-081": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "CMS", "customerVisible": "Yes", "proofStatusOverride": "Full", "planeStateOverride": "Đã bàn giao", "proofStatusNote": "Follow-up 2026-10-23 deployed to WingsGo production on 2026-10-24 at revision 16ff60a28ba48489d7d06de648780c522372e13f. Footer has one main call 0948786775 and one preferred email; theme selector and duplicate contact CTA removed, secondary channels remain in menu/dialog, and FAB hides at footer. Fresh encrypted backup/restore, 28/28 migration status, PostgreSQL transaction with FOR UPDATE, CMS apply 0912910101 to 0948786775, readiness, and public VI/EN browser QA are recorded in wingsgo-footer-review-20261023/review.md and US-081 validation/audit. Delivery is not stakeholder acceptance; real calls/Zalo/lead and Safari/iOS remain unverified. Preserve existing dates." },
+    "US-081": {
+      "projectKey": "wingsgo",
+      "module": "E07 - Nền tảng sản phẩm tour WingsGo",
+      "epicKey": "E07",
+      "site": "WingsGo",
+      "phase": "Phase 1",
+      "workstream": "CMS",
+      "customerVisible": "Yes",
+      "proofStatusOverride": "Partial",
+      "planeStateOverride": "Đang rà soát",
+      "proofStatusNote": "Follow-up 2026-10-23 deployed to WingsGo production on 2026-10-24 at revision 16ff60a28ba48489d7d06de648780c522372e13f. Footer has one main call 0948786775 and one preferred email; theme selector and duplicate contact CTA removed, secondary channels remain in menu/dialog, and FAB hides at footer. Fresh encrypted backup/restore, 28/28 migration status, PostgreSQL transaction with FOR UPDATE, CMS apply 0912910101 to 0948786775, readiness, and public VI/EN browser QA are recorded in wingsgo-footer-review-20261023/review.md and US-081 validation/audit. Delivery is not stakeholder acceptance; real calls/Zalo/lead and Safari/iOS remain unverified. Preserve existing dates. Follow-up AC5 2026-11-02 owner c0508g: 88 public URLs inventoried, bounded CTA updater, 36 focused tests and 2 real PostgreSQL contention/recovery tests, typecheck/ESLint0. Candidate in review; no production content writes or deployment.",
+      "childStateOverrides": {
+        "1": "Đã bàn giao",
+        "2": "Đã bàn giao",
+        "3": "Đã bàn giao",
+        "4": "Đã bàn giao",
+        "5": "Đang rà soát"
+      },
+      "childDateOverrides": {
+        "1": {
+          "startDate": "2026-10-19",
+          "targetDate": "2026-10-19"
+        },
+        "2": {
+          "startDate": "2026-10-20",
+          "targetDate": "2026-10-20"
+        },
+        "3": {
+          "startDate": "2026-10-21",
+          "targetDate": "2026-10-21"
+        },
+        "4": {
+          "startDate": "2026-10-22",
+          "targetDate": "2026-10-22"
+        },
+        "5": {
+          "startDate": "2026-11-02",
+          "targetDate": "2026-11-02"
+        }
+      }
+    },
     "US-082": { "projectKey": "core", "module": "Theme & Branding", "epicKey": "E09", "site": "WingsGroup", "phase": "Phase 1", "workstream": "Localization", "customerVisible": "Yes" },
     "US-083": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
     "US-084": { "projectKey": "wingsgo", "module": "E07 - Nền tảng sản phẩm tour WingsGo", "epicKey": "E07", "site": "WingsGo", "phase": "Phase 1", "workstream": "Tours", "customerVisible": "Yes" },
