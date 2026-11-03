@@ -87,7 +87,26 @@ const trustedSettings = ({
 })
 
 describe('WingsGroup corporate route contract', () => {
-  it('admits only the governed WingsPlus introduction without expanding the corporate seed inventory', async () => {
+  it('admits only the governed introduction routes without expanding the corporate seed inventory', async () => {
+    const introPaths = [
+      '/gioi-thieu-wingsgo',
+      '/gioi-thieu-wingside',
+      '/gioi-thieu-wingspass',
+      '/gioi-thieu-wingsplus',
+      '/gioi-thieu-wingscare',
+    ] as const
+
+    for (const introPath of introPaths) {
+      expect(getSiteAliasFromPathname(introPath)).toBeNull()
+      expect(getWingsGroupRouteDefinition(introPath)).toEqual({
+        archetype: 'corporate',
+        path: introPath,
+        policy: false,
+      })
+      expect(isWingsGroupV3SurfacePath(introPath)).toBe(true)
+      expect(isWingsGroupScopedInternalHref(introPath)).toBe(true)
+    }
+
     expect(getSiteAliasFromPathname('/gioi-thieu-wingsplus')).toBeNull()
     expect(getSiteAliasFromPathname('/wingsplus')).toBe('wingsplus')
     const settings = trustedSettings({ englishPublicationState: 'approved' })
@@ -105,23 +124,25 @@ describe('WingsGroup corporate route contract', () => {
       expect(isWingsGroupRoutePublic({ page, locale, settings, siteCode: 'wings-group' })).toBe(
         true,
       )
-      expect(JSON.stringify(buildWingsGroupPublicPageAccessWhere(locale, settings))).toContain(
-        '"equals":"/gioi-thieu-wingsplus"',
-      )
-      await expect(
-        isRuntimeResolvablePage({
-          page: {
-            ...page,
-            title: 'WingsPlus',
-            hero: {},
-            layout: [{ blockType: 'featureGrid', items: [{ title: 'MICE' }] }],
-          },
-          locale,
-          pathname: '/gioi-thieu-wingsplus',
-          settings,
-          siteCode: 'wings-group',
-        }),
-      ).resolves.toBe(true)
+      for (const introPath of introPaths) {
+        expect(JSON.stringify(buildWingsGroupPublicPageAccessWhere(locale, settings))).toContain(
+          `"equals":"${introPath}"`,
+        )
+        await expect(
+          isRuntimeResolvablePage({
+            page: {
+              ...page,
+              title: introPath,
+              hero: {},
+              layout: [{ blockType: 'featureGrid', items: [{ title: 'Service' }] }],
+            },
+            locale,
+            pathname: introPath,
+            settings,
+            siteCode: 'wings-group',
+          }),
+        ).resolves.toBe(true)
+      }
     }
     expect(
       isWingsGroupRoutePublic({

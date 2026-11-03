@@ -1,0 +1,382 @@
+{
+  "slug": "gioi-thieu-wingside",
+  "media": 1110,
+  "vi": {
+    "site": 1,
+    "title": "Giới thiệu WingSide",
+    "slug": "gioi-thieu-wingside",
+    "parentPage": null,
+    "hero": {
+      "type": "highImpact",
+      "presentation": "centered-visual",
+      "variant": "standard",
+      "media": 1110,
+      "richText": {
+        "root": {
+          "type": "root",
+          "children": [
+            {
+              "type": "heading",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "WingSide – Du lịch Việt Nam & Trải nghiệm bản địa",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "tag": "h1",
+              "version": 1
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "Hành trình khám phá vẻ đẹp Việt Nam theo nhịp đi riêng, tôn vinh văn hóa địa phương và kỳ nghỉ gia đình.",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "textFormat": 0,
+              "version": 1
+            }
+          ],
+          "direction": "ltr",
+          "format": "",
+          "indent": 0,
+          "version": 1
+        }
+      },
+      "links": [
+        {
+          "link": {
+            "type": "custom",
+            "appearance": "default",
+            "label": "Trao đổi với chuyên viên",
+            "url": "/lien-he#contact-form"
+          }
+        }
+      ]
+    },
+    "layout": [
+      {
+        "blockType": "featureGrid",
+        "columns": "2",
+        "description": "Từ cảnh sắc thiên nhiên kỳ vĩ đến chiều sâu di sản văn hóa, mỗi chuyến đi được tạo dựng theo mong muốn của bạn.",
+        "eyebrow": "Dịch vụ WingSide",
+        "items": [
+          {
+            "description": "Lịch trình linh hoạt khám phá cảnh sắc và văn hóa Việt Nam theo sở thích, tốc độ và nhu cầu riêng của bạn.",
+            "enableLink": false,
+            "meta": "Private Vietnam Tour",
+            "title": "Hành trình thiết kế riêng"
+          },
+          {
+            "description": "Trải nghiệm ẩm thực truyền thống, làng nghề và nhịp sống địa phương cùng người đồng hành bản địa giàu trải nghiệm.",
+            "enableLink": false,
+            "meta": "Văn hóa & Ẩm thực",
+            "title": "Trải nghiệm bản địa chân thực"
+          },
+          {
+            "description": "Các tuyến biển đảo, vùng cao và di sản với dịch vụ xe riêng, lịch trình thảnh thơi phù hợp mọi độ tuổi.",
+            "enableLink": false,
+            "meta": "Nghỉ dưỡng gắn kết",
+            "title": "Kỳ nghỉ gia đình & Nhóm bạn"
+          },
+          {
+            "description": "Tuyển chọn các resort cao cấp, khách sạn boutique cùng xe du lịch đời mới mang lại sự thoải mái trọn vẹn.",
+            "enableLink": false,
+            "meta": "Tiêu chuẩn tiện nghi",
+            "title": "Lưu trú & Vận chuyển tuyển chọn"
+          }
+        ],
+        "presentation": "icon-grid",
+        "title": "Bốn giá trị cho hành trình khám phá Việt Nam",
+        "variant": "default"
+      },
+      {
+        "blockType": "cta",
+        "presentation": "card",
+        "richText": {
+          "root": {
+            "type": "root",
+            "children": [
+              {
+                "type": "heading",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Khám phá Việt Nam theo cách của bạn",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "tag": "h2",
+                "version": 1
+              },
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Chia sẻ điểm đến mơ ước và ý tưởng chuyến đi để chuyên viên WingSide xây dựng hành trình riêng cho bạn.",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "version": 1
+              }
+            ],
+            "direction": "ltr",
+            "format": "",
+            "indent": 0,
+            "version": 1
+          }
+        },
+        "links": [
+          {
+            "link": {
+              "type": "custom",
+              "appearance": "default",
+              "label": "Trao đổi với chuyên viên",
+              "url": "/lien-he#contact-form"
+            }
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "title": "WingSide | Du lịch Việt Nam & Trải nghiệm bản địa",
+      "description": "Hành trình Việt Nam được thiết kế theo nhịp đi riêng, trải nghiệm bản địa sâu sắc và kỳ nghỉ riêng tư cho gia đình.",
+      "image": 1110
+    },
+    "_status": "published",
+    "wingsGroupRoute": {
+      "managedBy": "wingsgroup-v3",
+      "archetype": "corporate",
+      "publication": {
+        "vi": "approved",
+        "en": "approved"
+      },
+      "contentApproval": {
+        "vi": "wingsgroup-content-approved-v1",
+        "en": "wingsgroup-content-approved-v1"
+      }
+    }
+  },
+  "en": {
+    "site": 1,
+    "title": "About WingSide",
+    "slug": "gioi-thieu-wingside",
+    "parentPage": null,
+    "hero": {
+      "type": "highImpact",
+      "presentation": "centered-visual",
+      "variant": "standard",
+      "media": 1110,
+      "richText": {
+        "root": {
+          "type": "root",
+          "children": [
+            {
+              "type": "heading",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "WingSide – Vietnam Discovery & Local Experiences",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "tag": "h1",
+              "version": 1
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "Discover the richness of Vietnam at your own pace, honoring local culture and private family retreats.",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "textFormat": 0,
+              "version": 1
+            }
+          ],
+          "direction": "ltr",
+          "format": "",
+          "indent": 0,
+          "version": 1
+        }
+      },
+      "links": [
+        {
+          "link": {
+            "type": "custom",
+            "appearance": "default",
+            "label": "Speak with a specialist",
+            "url": "/lien-he#contact-form"
+          }
+        }
+      ]
+    },
+    "layout": [
+      {
+        "blockType": "featureGrid",
+        "columns": "2",
+        "description": "From natural landscapes to cultural heritage, every route is crafted around your preferences.",
+        "eyebrow": "WingSide Services",
+        "items": [
+          {
+            "description": "Flexible itineraries exploring Vietnam's heritage and landscapes shaped around your preferences, timing and pace.",
+            "enableLink": false,
+            "meta": "Custom Itinerary",
+            "title": "Tailor-made Itineraries"
+          },
+          {
+            "description": "Authentic culinary journeys, craft villages and cultural encounters guided by insightful local hosts.",
+            "enableLink": false,
+            "meta": "Culture & Gastronomy",
+            "title": "Authentic Local Experiences"
+          },
+          {
+            "description": "Coastal getaways, highland discoveries and heritage tours with private vehicles and family-friendly pacing.",
+            "enableLink": false,
+            "meta": "Family & Friends",
+            "title": "Private & Family Vacations"
+          },
+          {
+            "description": "Carefully selected boutique hotels, premier resorts and modern private transport for complete comfort.",
+            "enableLink": false,
+            "meta": "Curated Quality",
+            "title": "Curated Stays & Transport"
+          }
+        ],
+        "presentation": "icon-grid",
+        "title": "Four pillars for your Vietnam journey",
+        "variant": "default"
+      },
+      {
+        "blockType": "cta",
+        "presentation": "card",
+        "richText": {
+          "root": {
+            "type": "root",
+            "children": [
+              {
+                "type": "heading",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Experience Vietnam Your Way",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "tag": "h2",
+                "version": 1
+              },
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Tell us about your preferred rhythm and dream destinations for a customized Vietnam proposal.",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "version": 1
+              }
+            ],
+            "direction": "ltr",
+            "format": "",
+            "indent": 0,
+            "version": 1
+          }
+        },
+        "links": [
+          {
+            "link": {
+              "type": "custom",
+              "appearance": "default",
+              "label": "Speak with a specialist",
+              "url": "/lien-he#contact-form"
+            }
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "title": "WingSide | Vietnam Discovery & Private Journeys",
+      "description": "Tailor-made Vietnam journeys shaped around local culture, private family groups and immersive experiences.",
+      "image": 1110
+    },
+    "_status": "published",
+    "wingsGroupRoute": {
+      "managedBy": "wingsgroup-v3",
+      "archetype": "corporate",
+      "publication": {
+        "vi": "approved",
+        "en": "approved"
+      },
+      "contentApproval": {
+        "vi": "wingsgroup-content-approved-v1",
+        "en": "wingsgroup-content-approved-v1"
+      }
+    }
+  }
+}

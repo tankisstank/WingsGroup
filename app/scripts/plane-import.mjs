@@ -1490,7 +1490,7 @@ function extractAcceptanceCriteria(markdown) {
     items.push(pending.trim())
   }
 
-  return items.slice(0, 6)
+  return items
 }
 
 function toProofStatusKey(story, mapping = {}) {
@@ -1542,7 +1542,15 @@ function deriveStoryDates(story) {
   }
 }
 
-function deriveRecordDates(story, childCount = 0) {
+function deriveRecordDates(story, childCount = 0, mapping = {}) {
+  const mappedStart = toDateOnly(mapping.startDate)
+  const mappedTarget = toDateOnly(mapping.targetDate)
+  if (mappedStart && mappedTarget) {
+    if (mappedTarget < mappedStart) {
+      throw new Error(`Invalid mapped dates for ${story.id}: target precedes start`)
+    }
+    return { startDate: mappedStart, targetDate: mappedTarget }
+  }
   const baseDates = deriveStoryDates(story)
   if (baseDates.startDate && childCount > 0) {
     const sequentialTargetDate = addDays(baseDates.startDate, childCount - 1)
@@ -1562,7 +1570,7 @@ function deriveChildDates(story, childIndex, childCount = 0, mapping = {}) {
       targetDate: toDateOnly(override.targetDate),
     }
   }
-  const recordDates = deriveRecordDates(story, childCount)
+  const recordDates = deriveRecordDates(story, childCount, mapping)
   if (recordDates.startDate && childCount > 0) {
     const spanDays = diffDays(recordDates.startDate, recordDates.targetDate)
     const offset = childCount <= 1 ? 0 : Math.round((childIndex * spanDays) / (childCount - 1))
@@ -1678,7 +1686,7 @@ function buildStoryRecords(manifest, { ignoreStoryFilter = false } = {}) {
 }
 
 function deriveEpicDates(records) {
-  const dates = records.map((record) => deriveRecordDates(record.story, record.childTasks.length))
+  const dates = records.map((record) => deriveRecordDates(record.story, record.childTasks.length, record.mapping))
   return {
     startDate:
       dates
@@ -2622,7 +2630,7 @@ async function ensureHistory(client, manifest, projectMap) {
       workItems.find((item) => item.name === record.parentName)
 
     const desiredStateId = setup.stateMap.get(toPlaneStateName(record.story, record.mapping))?.id
-    const storyDates = deriveRecordDates(record.story, record.childTasks.length)
+    const storyDates = deriveRecordDates(record.story, record.childTasks.length, record.mapping)
     const parentPayload = {
       name: toPlaneItemName(record.parentName),
       description_html: record.descriptionHtml,
@@ -2825,7 +2833,7 @@ async function syncHistoryDates(client, manifest, projectMap) {
   for (const record of storyRecords) {
     const project = projectMap.get(record.mapping.projectKey)
     const workItems = projectWorkItems.get(record.mapping.projectKey)
-    const dates = deriveRecordDates(record.story, record.childTasks.length)
+    const dates = deriveRecordDates(record.story, record.childTasks.length, record.mapping)
     const parent = workItems.find((item) => item.external_id === `story:${record.story.id}`)
 
     await patchDates(project, parent, dates)
@@ -2871,7 +2879,7 @@ async function syncWingsGoItems(client, manifest, projectMap) {
 
   for (const record of records) {
     const parent = workItems.find((item) => item.external_id === `story:${record.story.id}`)
-    const parentDates = deriveRecordDates(record.story, record.childTasks.length)
+    const parentDates = deriveRecordDates(record.story, record.childTasks.length, record.mapping)
 
     await patchItem(parent, {
       name: toPlaneItemName(record.parentName),
@@ -2937,7 +2945,7 @@ async function syncImportedWorkItems(client, manifest, projectMap) {
 
     for (const record of groupedRecords) {
       const parent = workItems.find((item) => item.external_id === `story:${record.story.id}`)
-      const parentDates = deriveRecordDates(record.story, record.childTasks.length)
+      const parentDates = deriveRecordDates(record.story, record.childTasks.length, record.mapping)
       const desiredStateId = stateMap.get(toPlaneStateName(record.story, record.mapping))
 
       await patchItem(project, parent, {

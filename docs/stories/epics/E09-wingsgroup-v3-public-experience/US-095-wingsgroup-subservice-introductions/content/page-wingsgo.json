@@ -1,0 +1,382 @@
+{
+  "slug": "gioi-thieu-wingsgo",
+  "media": 1100,
+  "vi": {
+    "site": 1,
+    "title": "Giới thiệu WingsGo",
+    "slug": "gioi-thieu-wingsgo",
+    "parentPage": null,
+    "hero": {
+      "type": "highImpact",
+      "presentation": "centered-visual",
+      "variant": "standard",
+      "media": 1100,
+      "richText": {
+        "root": {
+          "type": "root",
+          "children": [
+            {
+              "type": "heading",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "WingsGo – Du lịch nước ngoài & Tour trọn gói",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "tag": "h1",
+              "version": 1
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "Khám phá thế giới với lịch trình chọn lọc, khởi hành định kỳ và sự chuẩn bị kỹ lưỡng cho từng chuyến đi.",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "textFormat": 0,
+              "version": 1
+            }
+          ],
+          "direction": "ltr",
+          "format": "",
+          "indent": 0,
+          "version": 1
+        }
+      },
+      "links": [
+        {
+          "link": {
+            "type": "custom",
+            "appearance": "default",
+            "label": "Trao đổi với chuyên viên",
+            "url": "/lien-he#contact-form"
+          }
+        }
+      ]
+    },
+    "layout": [
+      {
+        "blockType": "featureGrid",
+        "columns": "2",
+        "description": "Các tuyến du lịch quốc tế được tổ chức bài bản, lịch khởi hành minh bạch và tư vấn thủ tục chu đáo.",
+        "eyebrow": "Dịch vụ WingsGo",
+        "items": [
+          {
+            "description": "Hành trình chọn lọc tại Đông Bắc Á, Đông Nam Á, Châu Âu, Mỹ, Úc với dịch vụ tiêu chuẩn và lịch khởi hành rõ ràng.",
+            "enableLink": false,
+            "meta": "Du lịch đoàn",
+            "title": "Tour quốc tế trọn gói"
+          },
+          {
+            "description": "Hướng dẫn chuẩn bị hồ sơ minh bạch, tỷ lệ đậu cao, đồng hành sát sao trước ngày khởi hành.",
+            "enableLink": false,
+            "meta": "Thủ tục xuất nhập cảnh",
+            "title": "Tư vấn & Hoàn thiện Visa"
+          },
+          {
+            "description": "Cập nhật chi tiết theo từng tháng và ngày làm việc, đảm bảo đúng hẹn và giá trọn gói không phát sinh.",
+            "enableLink": false,
+            "meta": "Minh bạch lịch trình",
+            "title": "Lịch khởi hành định kỳ"
+          },
+          {
+            "description": "Đội ngũ hướng dẫn viên am hiểu văn hóa bản địa, nhiệt tình hỗ trợ và chăm sóc đoàn suốt chuyến đi.",
+            "enableLink": false,
+            "meta": "Đồng hành suốt tuyến",
+            "title": "Hướng dẫn viên chuyên nghiệp"
+          }
+        ],
+        "presentation": "icon-grid",
+        "title": "Bốn điểm tựa cho chuyến du lịch nước ngoài",
+        "variant": "default"
+      },
+      {
+        "blockType": "cta",
+        "presentation": "card",
+        "richText": {
+          "root": {
+            "type": "root",
+            "children": [
+              {
+                "type": "heading",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Sẵn sàng cho chuyến đi tiếp theo?",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "tag": "h2",
+                "version": 1
+              },
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Trao đổi cùng chuyên viên WingsGo để chọn điểm đến, lịch khởi hành và nhận tư vấn chi tiết.",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "version": 1
+              }
+            ],
+            "direction": "ltr",
+            "format": "",
+            "indent": 0,
+            "version": 1
+          }
+        },
+        "links": [
+          {
+            "link": {
+              "type": "custom",
+              "appearance": "default",
+              "label": "Trao đổi với chuyên viên",
+              "url": "/lien-he#contact-form"
+            }
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "title": "WingsGo | Du lịch nước ngoài & Tour trọn gói",
+      "description": "Hành trình nước ngoài chọn lọc, lịch khởi hành định kỳ và dịch vụ tư vấn visa, thủ tục trọn gói trước chuyến đi.",
+      "image": 1100
+    },
+    "_status": "published",
+    "wingsGroupRoute": {
+      "managedBy": "wingsgroup-v3",
+      "archetype": "corporate",
+      "publication": {
+        "vi": "approved",
+        "en": "approved"
+      },
+      "contentApproval": {
+        "vi": "wingsgroup-content-approved-v1",
+        "en": "wingsgroup-content-approved-v1"
+      }
+    }
+  },
+  "en": {
+    "site": 1,
+    "title": "About WingsGo",
+    "slug": "gioi-thieu-wingsgo",
+    "parentPage": null,
+    "hero": {
+      "type": "highImpact",
+      "presentation": "centered-visual",
+      "variant": "standard",
+      "media": 1100,
+      "richText": {
+        "root": {
+          "type": "root",
+          "children": [
+            {
+              "type": "heading",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "WingsGo – Outbound Travel & Group Tours",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "tag": "h1",
+              "version": 1
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "Explore the world with curated itineraries, structured departures and comprehensive pre-trip support.",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "textFormat": 0,
+              "version": 1
+            }
+          ],
+          "direction": "ltr",
+          "format": "",
+          "indent": 0,
+          "version": 1
+        }
+      },
+      "links": [
+        {
+          "link": {
+            "type": "custom",
+            "appearance": "default",
+            "label": "Speak with a specialist",
+            "url": "/lien-he#contact-form"
+          }
+        }
+      ]
+    },
+    "layout": [
+      {
+        "blockType": "featureGrid",
+        "columns": "2",
+        "description": "Structured outbound travel with reliable schedules, clear pricing and dedicated guidance.",
+        "eyebrow": "WingsGo Services",
+        "items": [
+          {
+            "description": "Curated journeys across Northeast Asia, Southeast Asia, Europe, Americas and Australia with standardized service quality.",
+            "enableLink": false,
+            "meta": "Group Travel",
+            "title": "Curated Outbound Tours"
+          },
+          {
+            "description": "Clear visa requirements, thorough document review and responsive pre-trip support.",
+            "enableLink": false,
+            "meta": "Travel Documentation",
+            "title": "Visa Advisory & Support"
+          },
+          {
+            "description": "Transparent departure dates published regularly by month and working days with all-inclusive pricing.",
+            "enableLink": false,
+            "meta": "Clear Scheduling",
+            "title": "Structured Departures"
+          },
+          {
+            "description": "Dedicated tour escorts with cultural depth, attentive assistance and multilingual communication.",
+            "enableLink": false,
+            "meta": "Professional Escort",
+            "title": "Dedicated Tour Leaders"
+          }
+        ],
+        "presentation": "icon-grid",
+        "title": "Four pillars for your international journey",
+        "variant": "default"
+      },
+      {
+        "blockType": "cta",
+        "presentation": "card",
+        "richText": {
+          "root": {
+            "type": "root",
+            "children": [
+              {
+                "type": "heading",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Ready for your next adventure?",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "tag": "h2",
+                "version": 1
+              },
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Connect with a WingsGo specialist to explore upcoming destinations, schedules and tailored advice.",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "version": 1
+              }
+            ],
+            "direction": "ltr",
+            "format": "",
+            "indent": 0,
+            "version": 1
+          }
+        },
+        "links": [
+          {
+            "link": {
+              "type": "custom",
+              "appearance": "default",
+              "label": "Speak with a specialist",
+              "url": "/lien-he#contact-form"
+            }
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "title": "WingsGo | Outbound Travel & Structured Departures",
+      "description": "Curated outbound retail tours, regular departure schedules and comprehensive visa support.",
+      "image": 1100
+    },
+    "_status": "published",
+    "wingsGroupRoute": {
+      "managedBy": "wingsgroup-v3",
+      "archetype": "corporate",
+      "publication": {
+        "vi": "approved",
+        "en": "approved"
+      },
+      "contentApproval": {
+        "vi": "wingsgroup-content-approved-v1",
+        "en": "wingsgroup-content-approved-v1"
+      }
+    }
+  }
+}

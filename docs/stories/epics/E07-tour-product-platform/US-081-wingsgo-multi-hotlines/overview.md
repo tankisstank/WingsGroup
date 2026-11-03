@@ -2,7 +2,8 @@
 
 ## 1. Trạng thái (Status)
 
-`Đã bàn giao`
+`Đã bàn giao` — follow-up CTA bắt đầu 2026-11-02, production 2026-11-03. Bàn giao footer ngày
+2026-10-24 bên dưới là bằng chứng lịch sử, không phải proof cho AC5.
 
 Follow-up ngày2026-10-23 theo phản hồi trực tiếp của người dùng: footer WingsGo vẫn có theme selector, số cũ và nhiều CTA. Release d6057d4 trước đó chỉ rút gọn WingsGroup; không phải bằng chứng sửa WingsGo. Candidate đã được deploy production và CMS WingsGo đã được cập nhật theo wrapper transaction có row lock. Evidence: wingsgo-footer-review-20261023/.
 
@@ -48,12 +49,30 @@ Hệ thống phải đảm bảo:
 
 ## Acceptance Criteria
 
-Tiêu chí chấp nhận theo thứ tự AC1–AC4; ba đầu số và định dạng được quy định tại Hợp đồng Sản phẩm.
+Tiêu chí chấp nhận theo thứ tự AC1–AC5; ba đầu số và định dạng được quy định tại Hợp đồng Sản phẩm.
 
 - Giữ kênh phụ trong menu; rút gọn liên hệ footer.
 - Gọi trực tiếp qua liên kết `tel:` chuẩn hóa và bộ quay số trên mobile.
 - Giữ menu desktop gọn, gọi số chính và mở danh sách hotline phụ.
 - Bảo toàn cấu hình và giao diện liên hệ của các site khác.
+- Đồng bộ hotline trong CTA các trang WingsGo.
+
+## Follow-up CTA — 2026-11-02
+
+Owner c0508g; bắt đầu 2026-11-02. Candidate local tại
+`followups-20261102/candidate`, baseline `8efdbbf`. Mốc review là ngày kiểm
+thực tế, không kế thừa hạn hay proof bàn giao cũ. Không ghi production.
+Kiểm kê sitemap public: 88 URL HTTP 200, 4 URL có CTA, 3 URL còn số cũ
+(`/`, `/campaign`, `/thi-truong`); `/en` có CTA không dùng số cũ.
+API CMS public trả 403; inventory này không chứng minh trạng thái draft.
+Evidence mới: `followups-20261102/public-cta-inventory.json`.
+
+AC5 bao gồm mô tả, nhãn và tel của CTA đã xuất bản theo từng locale;
+inventory, dry-run, snapshot trước ghi, kiểm đồng thời trong giao dịch
+PostgreSQL, verify, noop và rollback có mục tiêu. Bảo toàn draft editor,
+hotline phụ và tenant khác.
+
+Review candidate 2026-11-02: 36 kiểm thử tập trung và 2 kiểm thử PostgreSQL thực qua; có VI/EN, noop, snapshot sửa trái phép, tenant khác, draft, stale version, rollback và writer đồng thời bị row lock chặn. Codex review lần đầu có ba finding P2: ghi đè journal khi chạy lại, rewrite sau commit làm hỏng recovery, transaction leak khi lock lỗi. Đã sửa bằng journal `wx` + fsync bất biến và rollback ngay trong helper lock; ba kiểm thử hồi quy qua. Typecheck và ESLint exit 0 (còn cảnh báo any trong mock/adapter). Browser local xác nhận mô tả/nhãn/tel mới và số phụ nguyên vẹn. Follow-up đang rà soát, proof Partial; chưa phát hành. Các log và review ở `followups-20261102/`.
 
 ## Follow-up light theme và an toàn dữ liệu
 
@@ -68,3 +87,16 @@ Production audit read-only ngày23/10: settingsID16 WingsGo vẫn0912910101, set
 - Footer production: một link gọi, một email ưu tiên, không theme selector, không lặp CTA/Zalo/số phụ.
 - Health ready sau cutover: database, Redis, lead delivery đều đạt.
 - Kỹ thuật đã bàn giao; stakeholder UAT và kiểm tra thiết bị thật còn chờ xác nhận.
+
+
+## Production follow-up — 2026-11-03
+
+Production follow-up delivered 2026-11-03, owner c0508g, revision5b81a19d663f2f78a04d0e411fcfa0afbd416c4a. Bounded Payload CTA/H1 apply verified:556 page-locales/6sites,only3 changed locales,all1399 media unchanged,drafts preserved; rerun noop. ARM64 media path defect found by public browser QA, rolled back and fixed with3unit/typecheck/ESLint/build and independent Codex noP1/P2/P3. Fresh encrypted PG backup+disposable restore,28/28 migrations,immutable image gate,readiness passed. Production desktop1440/mobile390 verifies hotline0948786775,newVIH1,EN unchanged,caption scope,playing video and4WingsPlus descriptions pre-line/nooverflow. Evidence followups-20261102/PRODUCTION-REPORT.md. Technical delivery is not stakeholder acceptance; real calls/leads and physical Safari/iOS not exercised.
+
+- Deployed code: `5b81a19d663f2f78a04d0e411fcfa0afbd416c4a`, branch `work/followups-20261102-us081-088-005`.
+- Release: `/home/ubuntu/wings-travel/releases/release-5b81a19`; previous `release-us093-8efdbbf` retained.
+- CMS journals remain protected on VPS at `shared/artifacts/followups-642b857/{cta-apply,heading-apply}.json`. No shared media edits or database restore performed.
+- New follow-up state: **Đã bàn giao / Full**, start2026-11-02, delivery/review2026-11-03. Earlier dated candidate-only and historical delivery entries remain as history.
+- Evidence: `followups-20261102/production-content-verify-final.log`, `production-media-gates-2.log`, `production-media-cutover-2.log`, `production-browser-qa.json`, four production screenshots, `production-media-codex-review.md` plus original independent reviews. No unresolved P1/P2/P3.
+
+Resolved production findings: campaign identity now follows exact public pathname despite namespaced CMS slug; standalone preserves traced database driver packages; media directory now resolves from runtime app-root cwd. The first media-defective image was rolled back immediately after public QA; final preview tested actual1024-byte206 media response before cutover. Existing preview-store restrictions and tenant access checks remain intact.

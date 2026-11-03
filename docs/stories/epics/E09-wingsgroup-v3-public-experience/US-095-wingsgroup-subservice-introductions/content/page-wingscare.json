@@ -1,0 +1,382 @@
+{
+  "slug": "gioi-thieu-wingscare",
+  "media": 1108,
+  "vi": {
+    "site": 1,
+    "title": "Giới thiệu WingsCare",
+    "slug": "gioi-thieu-wingscare",
+    "parentPage": null,
+    "hero": {
+      "type": "highImpact",
+      "presentation": "centered-visual",
+      "variant": "standard",
+      "media": 1108,
+      "richText": {
+        "root": {
+          "type": "root",
+          "children": [
+            {
+              "type": "heading",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "WingsCare – Chăm sóc & Đồng hành hành trình",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "tag": "h1",
+              "version": 1
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "Bảo hiểm du lịch toàn diện và đầu mối hỗ trợ 24/7, mang đến sự an tâm tuyệt đối trên mỗi dặm đường.",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "textFormat": 0,
+              "version": 1
+            }
+          ],
+          "direction": "ltr",
+          "format": "",
+          "indent": 0,
+          "version": 1
+        }
+      },
+      "links": [
+        {
+          "link": {
+            "type": "custom",
+            "appearance": "default",
+            "label": "Trao đổi với chuyên viên",
+            "url": "/lien-he#contact-form"
+          }
+        }
+      ]
+    },
+    "layout": [
+      {
+        "blockType": "featureGrid",
+        "columns": "2",
+        "description": "Giải pháp bảo hiểm du lịch, hỗ trợ khẩn cấp và bảo vệ quyền lợi tối đa cho mọi hành khách.",
+        "eyebrow": "Dịch vụ WingsCare",
+        "items": [
+          {
+            "description": "Cung cấp và tư vấn các chương trình bảo hiểm quốc tế, bảo vệ sức khỏe, hành lý và lịch trình với quyền lợi rõ ràng.",
+            "enableLink": false,
+            "meta": "An tâm khám phá",
+            "title": "Bảo hiểm du lịch toàn diện"
+          },
+          {
+            "description": "Tiếp nhận và xử lý nhanh các tình huống phát sinh y tế, thất lạc giấy tờ hoặc thay đổi đột xuất trong chuyến đi.",
+            "enableLink": false,
+            "meta": "Đồng hành mọi lúc",
+            "title": "Tổng đài hỗ trợ khẩn cấp 24/7"
+          },
+          {
+            "description": "Cung cấp thông tin tiêm chủng, quy định nhập cảnh, thời tiết và thông tin liên lạc khẩn cấp tại điểm đến.",
+            "enableLink": false,
+            "meta": "Chuẩn bị chu đáo",
+            "title": "Hướng dẫn y tế & Lưu ý trước chuyến đi"
+          },
+          {
+            "description": "Hướng dẫn thủ tục bồi hoàn bảo hiểm nhanh chóng, lắng nghe phản hồi và tri ân khách hàng thân thiết.",
+            "enableLink": false,
+            "meta": "Chăm sóc sau hành trình",
+            "title": "Hỗ trợ quyền lợi sau chuyến đi"
+          }
+        ],
+        "presentation": "icon-grid",
+        "title": "Bốn lá chắn đồng hành cùng chuyến đi",
+        "variant": "default"
+      },
+      {
+        "blockType": "cta",
+        "presentation": "card",
+        "richText": {
+          "root": {
+            "type": "root",
+            "children": [
+              {
+                "type": "heading",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "An tâm trên mọi nẻo đường cùng WingsCare",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "tag": "h2",
+                "version": 1
+              },
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Kết nối với đội ngũ tư vấn WingsCare để được hỗ trợ lựa chọn gói bảo hiểm và các dịch vụ chăm sóc hành trình phù hợp.",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "version": 1
+              }
+            ],
+            "direction": "ltr",
+            "format": "",
+            "indent": 0,
+            "version": 1
+          }
+        },
+        "links": [
+          {
+            "link": {
+              "type": "custom",
+              "appearance": "default",
+              "label": "Trao đổi với chuyên viên",
+              "url": "/lien-he#contact-form"
+            }
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "title": "WingsCare | Chăm sóc & Đồng hành hành trình",
+      "description": "Tư vấn bảo hiểm du lịch, hỗ trợ khẩn cấp 24/7 và chăm sóc khách hàng toàn diện suốt chuyến đi.",
+      "image": 1108
+    },
+    "_status": "published",
+    "wingsGroupRoute": {
+      "managedBy": "wingsgroup-v3",
+      "archetype": "corporate",
+      "publication": {
+        "vi": "approved",
+        "en": "approved"
+      },
+      "contentApproval": {
+        "vi": "wingsgroup-content-approved-v1",
+        "en": "wingsgroup-content-approved-v1"
+      }
+    }
+  },
+  "en": {
+    "site": 1,
+    "title": "About WingsCare",
+    "slug": "gioi-thieu-wingscare",
+    "parentPage": null,
+    "hero": {
+      "type": "highImpact",
+      "presentation": "centered-visual",
+      "variant": "standard",
+      "media": 1108,
+      "richText": {
+        "root": {
+          "type": "root",
+          "children": [
+            {
+              "type": "heading",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "WingsCare – Travel Care & Dedicated Support",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "tag": "h1",
+              "version": 1
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "Comprehensive travel insurance guidance and 24/7 emergency response, ensuring complete peace of mind on every journey.",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "textFormat": 0,
+              "version": 1
+            }
+          ],
+          "direction": "ltr",
+          "format": "",
+          "indent": 0,
+          "version": 1
+        }
+      },
+      "links": [
+        {
+          "link": {
+            "type": "custom",
+            "appearance": "default",
+            "label": "Speak with a specialist",
+            "url": "/lien-he#contact-form"
+          }
+        }
+      ]
+    },
+    "layout": [
+      {
+        "blockType": "featureGrid",
+        "columns": "2",
+        "description": "Travel protection packages, emergency response coordination and customer rights advocacy across all journeys.",
+        "eyebrow": "WingsCare Services",
+        "items": [
+          {
+            "description": "Guidance on international and domestic travel insurance packages, safeguarding health, luggage and schedules with transparent benefits.",
+            "enableLink": false,
+            "meta": "Travel Protection",
+            "title": "Comprehensive Travel Insurance"
+          },
+          {
+            "description": "Responsive liaison for medical occurrences, lost travel documents or unforeseen schedule alterations while abroad.",
+            "enableLink": false,
+            "meta": "Always Available",
+            "title": "24/7 Emergency Support"
+          },
+          {
+            "description": "Up-to-date guidance on immunizations, destination immigration rules, climatic conditions and consular contact points.",
+            "enableLink": false,
+            "meta": "Thorough Preparation",
+            "title": "Pre-trip Health & Guidance"
+          },
+          {
+            "description": "Efficient insurance reimbursement filing, post-travel feedback review and loyalty member appreciation.",
+            "enableLink": false,
+            "meta": "Post-journey Support",
+            "title": "Post-journey Claims & Care"
+          }
+        ],
+        "presentation": "icon-grid",
+        "title": "Four shields supporting your travels",
+        "variant": "default"
+      },
+      {
+        "blockType": "cta",
+        "presentation": "card",
+        "richText": {
+          "root": {
+            "type": "root",
+            "children": [
+              {
+                "type": "heading",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Confidence at Every Step with WingsCare",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "tag": "h2",
+                "version": 1
+              },
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Connect with our advisory team to select appropriate travel protection and support services for your journey.",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "version": 1
+              }
+            ],
+            "direction": "ltr",
+            "format": "",
+            "indent": 0,
+            "version": 1
+          }
+        },
+        "links": [
+          {
+            "link": {
+              "type": "custom",
+              "appearance": "default",
+              "label": "Speak with a specialist",
+              "url": "/lien-he#contact-form"
+            }
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "title": "WingsCare | Travel Protection & Support",
+      "description": "Travel care, insurance guidance and responsive 24/7 assistance across every stage of travel.",
+      "image": 1108
+    },
+    "_status": "published",
+    "wingsGroupRoute": {
+      "managedBy": "wingsgroup-v3",
+      "archetype": "corporate",
+      "publication": {
+        "vi": "approved",
+        "en": "approved"
+      },
+      "contentApproval": {
+        "vi": "wingsgroup-content-approved-v1",
+        "en": "wingsgroup-content-approved-v1"
+      }
+    }
+  }
+}

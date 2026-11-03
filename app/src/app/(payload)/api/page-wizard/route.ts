@@ -16,24 +16,10 @@ import {
 
 import { vietnameseSlugify } from '@/utilities/slugify'
 
-type PageWizardPayload = {
-  locale?: string
-  preset?: LayoutPresetKey
-  site?: number | string
-  slug?: string
-  summary?: string
-  title?: string
-}
-
-class PageWizardError extends Error {
-  status: number
-
-  constructor(message: string, status = 400) {
-    super(message)
-    this.name = 'PageWizardError'
-    this.status = status
-  }
-}
+import {
+  PageWizardError,
+  parsePageWizardPayload,
+} from './parsePageWizardPayload'
 
 const slugify = (value: string) => vietnameseSlugify(value)
 
@@ -103,33 +89,6 @@ const hasSameID = (value: unknown, expected: number | string): boolean =>
   String(value && typeof value === 'object' && 'id' in value ? value.id : value) ===
   String(expected)
 
-export const parsePageWizardPayload = (body: unknown) => {
-  if (!body || typeof body !== 'object' || Array.isArray(body)) {
-    throw new PageWizardError('Dữ liệu tạo trang không hợp lệ.')
-  }
-
-  const value = body as PageWizardPayload
-  const title = typeof value.title === 'string' ? value.title.trim() : ''
-  const slugSource = typeof value.slug === 'string' ? value.slug : title
-  const slug = slugify(slugSource)
-  const summary = typeof value.summary === 'string' ? value.summary.trim() : ''
-  const siteID = normalizeSiteID(value.site)
-  const locale = value.locale === undefined ? 'vi' : value.locale
-
-  if (!siteID || !title || !slug) {
-    throw new PageWizardError('Thiếu site, tiêu đề hoặc đường dẫn.')
-  }
-
-  if (!isLayoutPresetKey(value.preset)) {
-    throw new PageWizardError('Loại trang không hợp lệ.')
-  }
-
-  if (!isCmsLocale(locale)) {
-    throw new PageWizardError('Locale không hợp lệ hoặc chưa được bật trong CMS.')
-  }
-
-  return { locale, preset: value.preset, siteID, slug, summary, title }
-}
 
 export async function POST(request: Request): Promise<Response> {
   try {

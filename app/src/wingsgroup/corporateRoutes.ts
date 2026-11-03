@@ -38,6 +38,14 @@ export const WINGSGROUP_CORPORATE_ROUTES = [
 export const WINGSGROUP_PUBLIC_LOCALE_CODES = ['vi', 'en'] as const
 export type WingsGroupPublicLocale = (typeof WINGSGROUP_PUBLIC_LOCALE_CODES)[number]
 
+export const WINGSGROUP_INTRODUCTION_ROUTES = [
+  { archetype: 'corporate', path: '/gioi-thieu-wingsgo', policy: false },
+  { archetype: 'corporate', path: '/gioi-thieu-wingside', policy: false },
+  { archetype: 'corporate', path: '/gioi-thieu-wingspass', policy: false },
+  { archetype: 'corporate', path: '/gioi-thieu-wingsplus', policy: false },
+  { archetype: 'corporate', path: '/gioi-thieu-wingscare', policy: false },
+] as const
+
 export const WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE = {
   archetype: 'corporate',
   path: '/gioi-thieu-wingsplus',
@@ -45,9 +53,10 @@ export const WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE = {
 } as const
 
 export type WingsGroupCorporateRouteDefinition = (typeof WINGSGROUP_CORPORATE_ROUTES)[number]
+export type WingsGroupIntroductionRouteDefinition = (typeof WINGSGROUP_INTRODUCTION_ROUTES)[number]
 export type WingsGroupRouteDefinition =
   | WingsGroupCorporateRouteDefinition
-  | typeof WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE
+  | WingsGroupIntroductionRouteDefinition
 export type WingsGroupRouteArchetype = WingsGroupRouteDefinition['archetype']
 export type WingsGroupRoutePath = WingsGroupRouteDefinition['path']
 export type WingsGroupPublicationState = 'approved' | 'hidden' | 'pending'
@@ -95,9 +104,8 @@ export const getWingsGroupRouteDefinition = (value: unknown): WingsGroupRouteDef
   const path = normalizeCorporateRoutePath(value)
   return (
     WINGSGROUP_CORPORATE_ROUTES.find((route) => route.path === path) ||
-    (path === WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE.path
-      ? WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE
-      : null)
+    WINGSGROUP_INTRODUCTION_ROUTES.find((route) => route.path === path) ||
+    null
   )
 }
 
@@ -495,7 +503,7 @@ export const buildWingsGroupPublicPageAccessWhere = (locale: unknown, settings: 
         )
       : []
   const routeClauses: Where[] = [
-    ...[...WINGSGROUP_CORPORATE_ROUTES, WINGSGROUP_WINGSPLUS_INTRODUCTION_ROUTE]
+    ...[...WINGSGROUP_CORPORATE_ROUTES, ...WINGSGROUP_INTRODUCTION_ROUTES]
       .filter(({ policy }) => !policy)
       .map(
         ({ archetype, path }): Where => ({

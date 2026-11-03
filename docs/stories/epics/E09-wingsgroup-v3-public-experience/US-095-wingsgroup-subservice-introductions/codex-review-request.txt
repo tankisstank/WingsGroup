@@ -1,0 +1,20 @@
+Bạn là chuyên gia phản biện kiến trúc và bảo mật hệ thống Payload CMS đa tenant WingsTravel.
+Hãy thực hiện phản biện kiến trúc độc lập (Planning & Pre-implementation Review) cho Story US-095: "Xuất bản 4 trang giới thiệu dịch vụ con và đồng bộ khối hệ sinh thái WingsGroup".
+
+Bối cảnh:
+1. Trang chủ WingsGroup hiện có khối "Chọn dịch vụ phù hợp với hành trình của bạn" (Ecosystem Explorer) giới thiệu 5 thương hiệu: WingsGo, WingSide, WingsPass, WingsPlus, WingsCare.
+2. Trước đây US-088 đã phát hành trang giới thiệu cho WingsPlus tại /gioi-thieu-wingsplus (site WingsGroup id: 1) và đổi CTA trên trang chủ thành "Xem giới thiệu".
+3. Yêu cầu mới:
+   - Sửa/cập nhật phần giới thiệu và đổi CTA cả 5 thương hiệu thành "Xem giới thiệu" trỏ tới 5 trang tương ứng.
+   - Bổ sung 4 trang giới thiệu con cho WingsGo, WingSide, WingsPass, WingsCare trên site WingsGroup: /gioi-thieu-wingsgo, /gioi-thieu-wingside, /gioi-thieu-wingspass, /gioi-thieu-wingscare.
+   - Đồng thời đồng bộ trang /he-sinh-thai (id: 181) để phần Chọn dịch vụ phù hợp với hành trình cũng giống như trang chủ (id: 191).
+4. Thiết kế kỹ thuật đã thực hiện:
+   - Route Governance trong app/src/wingsgroup/corporateRoutes.ts: Khai báo WINGSGROUP_INTRODUCTION_ROUTES gồm 5 route và alias, giữ nguyên WINGSGROUP_CORPORATE_ROUTES (10 routes), cập nhật getWingsGroupRouteDefinition và buildWingsGroupPublicPageAccessWhere.
+   - Unit tests và Component tests đã pass, tsc --noEmit và eslint pass 0 errors.
+   - Script chuẩn bị dữ liệu: Dùng Payload API tạo 4 pages trên site 1, status published, dùng 4 media ID có sẵn đã kiểm duyệt governance (1100, 1110, 1098, 1108).
+   - Update transaction trên 2 pages (191 và 181) bảo đảm lock concurrency và rollback nếu lỗi.
+
+Yêu cầu phản biện:
+- Kiểm tra tính tương thích ngược, multisite isolation, và exact route governance (liệu có rủi ro lộ route tenant khác hay 404 không mong muốn?).
+- Đánh giá phân loại rủi ro (P1 - Critical, P2 - Major, P3 - Minor) nếu có.
+- Khuyến nghị về rollback plan và các điểm cần lưu ý khi phát hành lên production ARM64.

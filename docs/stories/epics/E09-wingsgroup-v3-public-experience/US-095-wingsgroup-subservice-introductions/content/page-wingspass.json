@@ -1,0 +1,382 @@
+{
+  "slug": "gioi-thieu-wingspass",
+  "media": 1098,
+  "vi": {
+    "site": 1,
+    "title": "Giới thiệu WingsPass",
+    "slug": "gioi-thieu-wingspass",
+    "parentPage": null,
+    "hero": {
+      "type": "highImpact",
+      "presentation": "centered-visual",
+      "variant": "standard",
+      "media": 1098,
+      "richText": {
+        "root": {
+          "type": "root",
+          "children": [
+            {
+              "type": "heading",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "WingsPass – Dịch vụ sân bay & Đón tiễn chuyên nghiệp",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "tag": "h1",
+              "version": 1
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "Hỗ trợ điểm chạm sân bay chu đáo, tối ưu thời gian làm thủ tục cho khởi đầu và kết thúc hành trình êm ái.",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "textFormat": 0,
+              "version": 1
+            }
+          ],
+          "direction": "ltr",
+          "format": "",
+          "indent": 0,
+          "version": 1
+        }
+      },
+      "links": [
+        {
+          "link": {
+            "type": "custom",
+            "appearance": "default",
+            "label": "Trao đổi với chuyên viên",
+            "url": "/lien-he#contact-form"
+          }
+        }
+      ]
+    },
+    "layout": [
+      {
+        "blockType": "featureGrid",
+        "columns": "2",
+        "description": "Giải pháp đón tiễn, hỗ trợ hàng không và thủ tục ưu tiên tại các sân bay lớn trong và ngoài nước.",
+        "eyebrow": "Dịch vụ WingsPass",
+        "items": [
+          {
+            "description": "Nhân viên đón tiếp tận nơi tại cửa máy bay hoặc sảnh ga, hỗ trợ hành lý và phương tiện di chuyển nhanh gọn.",
+            "enableLink": false,
+            "meta": "Meet & Greet",
+            "title": "Đón tiễn sân bay chu đáo"
+          },
+          {
+            "description": "Tiết kiệm tối đa thời gian xếp hàng tại khu vực soi chiếu an ninh và xuất nhập cảnh theo quy định ưu tiên.",
+            "enableLink": false,
+            "meta": "Ưu tiên thủ tục",
+            "title": "Hỗ trợ Fast Track"
+          },
+          {
+            "description": "Quy trình đón tiếp riêng biệt, phòng chờ thương gia sang trọng và bảo đảm tính riêng tư cho đoàn.",
+            "enableLink": false,
+            "meta": "Dịch vụ cao cấp",
+            "title": "Dịch vụ khách VIP & Ngoại giao"
+          },
+          {
+            "description": "Hướng dẫn làm thủ tục chuyến bay nối chuyến, hoàn thuế VAT và xử lý hành lý tại sân bay thuận tiện.",
+            "enableLink": false,
+            "meta": "Chuyển tiếp & Hoàn thuế",
+            "title": "Hỗ trợ transit & thủ tục phát sinh"
+          }
+        ],
+        "presentation": "icon-grid",
+        "title": "Bốn tiện ích cho trải nghiệm sân bay êm ái",
+        "variant": "default"
+      },
+      {
+        "blockType": "cta",
+        "presentation": "card",
+        "richText": {
+          "root": {
+            "type": "root",
+            "children": [
+              {
+                "type": "heading",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Trải nghiệm sân bay nhanh chóng & nhẹ nhàng",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "tag": "h2",
+                "version": 1
+              },
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Liên hệ với WingsPass trước chuyến bay để sắp xếp nhân sự đón tiễn và dịch vụ Fast Track phù hợp.",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "version": 1
+              }
+            ],
+            "direction": "ltr",
+            "format": "",
+            "indent": 0,
+            "version": 1
+          }
+        },
+        "links": [
+          {
+            "link": {
+              "type": "custom",
+              "appearance": "default",
+              "label": "Trao đổi với chuyên viên",
+              "url": "/lien-he#contact-form"
+            }
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "title": "WingsPass | Dịch vụ sân bay & Đón tiễn chuyên nghiệp",
+      "description": "Dịch vụ đón tiễn tại sân bay, hỗ trợ thủ tục hàng không nhanh chóng và Fast Track tiện lợi.",
+      "image": 1098
+    },
+    "_status": "published",
+    "wingsGroupRoute": {
+      "managedBy": "wingsgroup-v3",
+      "archetype": "corporate",
+      "publication": {
+        "vi": "approved",
+        "en": "approved"
+      },
+      "contentApproval": {
+        "vi": "wingsgroup-content-approved-v1",
+        "en": "wingsgroup-content-approved-v1"
+      }
+    }
+  },
+  "en": {
+    "site": 1,
+    "title": "About WingsPass",
+    "slug": "gioi-thieu-wingspass",
+    "parentPage": null,
+    "hero": {
+      "type": "highImpact",
+      "presentation": "centered-visual",
+      "variant": "standard",
+      "media": 1098,
+      "richText": {
+        "root": {
+          "type": "root",
+          "children": [
+            {
+              "type": "heading",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "WingsPass – Airport Services & Fast Track",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "tag": "h1",
+              "version": 1
+            },
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "detail": 0,
+                  "format": 0,
+                  "mode": "normal",
+                  "style": "",
+                  "text": "Dedicated airport touchpoint assistance, streamlining terminal formalities for a relaxed journey start and finish.",
+                  "version": 1
+                }
+              ],
+              "direction": "ltr",
+              "format": "",
+              "indent": 0,
+              "textFormat": 0,
+              "version": 1
+            }
+          ],
+          "direction": "ltr",
+          "format": "",
+          "indent": 0,
+          "version": 1
+        }
+      },
+      "links": [
+        {
+          "link": {
+            "type": "custom",
+            "appearance": "default",
+            "label": "Speak with a specialist",
+            "url": "/lien-he#contact-form"
+          }
+        }
+      ]
+    },
+    "layout": [
+      {
+        "blockType": "featureGrid",
+        "columns": "2",
+        "description": "Meet and greet solutions, priority terminal clearance and lounge access at key domestic and international hubs.",
+        "eyebrow": "WingsPass Services",
+        "items": [
+          {
+            "description": "Dedicated airport attendants greeting travellers at the aircraft gate or arrivals hall with luggage support.",
+            "enableLink": false,
+            "meta": "Meet & Greet",
+            "title": "Airport Meet & Greet"
+          },
+          {
+            "description": "Minimized queueing through priority security screening and immigration lanes according to hub regulations.",
+            "enableLink": false,
+            "meta": "Fast Clearance",
+            "title": "Fast Track Immigration"
+          },
+          {
+            "description": "Private protocol reception, premium business lounge access and discreet handling for VIP delegations.",
+            "enableLink": false,
+            "meta": "VIP Handling",
+            "title": "VIP & Delegation Assistance"
+          },
+          {
+            "description": "Guidance on terminal transfers, connecting flight check-in and airport VAT refund procedures.",
+            "enableLink": false,
+            "meta": "Transit Support",
+            "title": "Transit & Refund Assistance"
+          }
+        ],
+        "presentation": "icon-grid",
+        "title": "Four pillars for a seamless airport experience",
+        "variant": "default"
+      },
+      {
+        "blockType": "cta",
+        "presentation": "card",
+        "richText": {
+          "root": {
+            "type": "root",
+            "children": [
+              {
+                "type": "heading",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "A Smoother Airport Experience",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "tag": "h2",
+                "version": 1
+              },
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "detail": 0,
+                    "format": 0,
+                    "mode": "normal",
+                    "style": "",
+                    "text": "Contact WingsPass prior to your flight to coordinate greeting times and personalized airport arrangements.",
+                    "version": 1
+                  }
+                ],
+                "direction": "ltr",
+                "format": "",
+                "indent": 0,
+                "textFormat": 0,
+                "version": 1
+              }
+            ],
+            "direction": "ltr",
+            "format": "",
+            "indent": 0,
+            "version": 1
+          }
+        },
+        "links": [
+          {
+            "link": {
+              "type": "custom",
+              "appearance": "default",
+              "label": "Speak with a specialist",
+              "url": "/lien-he#contact-form"
+            }
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "title": "WingsPass | Airport Meet & Greet and Fast Track",
+      "description": "Airport touchpoints, arrival support, VIP reception and Fast Track clearance upon request.",
+      "image": 1098
+    },
+    "_status": "published",
+    "wingsGroupRoute": {
+      "managedBy": "wingsgroup-v3",
+      "archetype": "corporate",
+      "publication": {
+        "vi": "approved",
+        "en": "approved"
+      },
+      "contentApproval": {
+        "vi": "wingsgroup-content-approved-v1",
+        "en": "wingsgroup-content-approved-v1"
+      }
+    }
+  }
+}

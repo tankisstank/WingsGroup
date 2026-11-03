@@ -42,4 +42,31 @@ Các gate P2 đã đóng:
 
 Release vẫn có giới hạn: chưa gọi số/Zalo/gửi lead thật, chưa test Safari/iOS và chưa có stakeholder UAT. Đây là giới hạn nghiệm thu, không phải blocker kỹ thuật deploy.
 
+## Follow-up CTA — review 2026-11-02
 
+Candidate baseline8efdbbf tại `followups-20261102/candidate`, owner c0508g. Không ghi production hoặc deploy.
+
+| Finding độc lập | Mức | Xử lý và bằng chứng mới |
+| --- | --- | --- |
+| Apply lặp ghi đè snapshot gốc | P2 | `fs.open(wx)` + fsync trước ghi; từ chối EEXIST và giữ nguyên bytes. Unit và PostgreSQL recovery qua. |
+| Rewrite journal sau commit có thể phá rollback | P2 | Journal bất biến, không rewrite sau commit; test disk-full injection và rollback từ prewrite planned journal qua. |
+| Lock acquisition lỗi làm leak transaction | P2 | Helper rollback ngay khi setup/lock lỗi; unit injection cho apply và rollback qua. |
+
+Root bổ sung guard draft mọi locale được hỗ trợ, kể cả locale không có CTA cần đổi. PostgreSQL thật xác nhận EN draft được giữ nguyên, writer editor bị row lock chặn đến sau commit, conflict nhiều trang rollback nguyên giao dịch, tenant/hotline phụ nguyên vẹn. Kiểm lại `us081-all-locales-pg.log`:2tests pass; `safety-unit-final.log`:24tests pass gồm heading và page wizard.
+
+Codex review cuối `followups-20261102/final-codex-review.md`: không còn P1/P2/P3; reviewer chạy22unit +6component, không ghi PostgreSQL theo brief. Orchestrator có log PostgreSQL riêng. Candidate đang rà soát/Partial, lịch sử phát hành24/10 giữ nguyên. Chưa làm inventory draft production có xác thực, apply production, cuộc gọi/lead thật hoặc thiết bị Safari/iOS.
+
+
+
+
+## Production follow-up — 2026-11-03
+
+Production follow-up delivered 2026-11-03, owner c0508g, revision5b81a19d663f2f78a04d0e411fcfa0afbd416c4a. Bounded Payload CTA/H1 apply verified:556 page-locales/6sites,only3 changed locales,all1399 media unchanged,drafts preserved; rerun noop. ARM64 media path defect found by public browser QA, rolled back and fixed with3unit/typecheck/ESLint/build and independent Codex noP1/P2/P3. Fresh encrypted PG backup+disposable restore,28/28 migrations,immutable image gate,readiness passed. Production desktop1440/mobile390 verifies hotline0948786775,newVIH1,EN unchanged,caption scope,playing video and4WingsPlus descriptions pre-line/nooverflow. Evidence followups-20261102/PRODUCTION-REPORT.md. Technical delivery is not stakeholder acceptance; real calls/leads and physical Safari/iOS not exercised.
+
+- Deployed code: `5b81a19d663f2f78a04d0e411fcfa0afbd416c4a`, branch `work/followups-20261102-us081-088-005`.
+- Release: `/home/ubuntu/wings-travel/releases/release-5b81a19`; previous `release-us093-8efdbbf` retained.
+- CMS journals remain protected on VPS at `shared/artifacts/followups-642b857/{cta-apply,heading-apply}.json`. No shared media edits or database restore performed.
+- New follow-up state: **Đã bàn giao / Full**, start2026-11-02, delivery/review2026-11-03. Earlier dated candidate-only and historical delivery entries remain as history.
+- Evidence: `followups-20261102/production-content-verify-final.log`, `production-media-gates-2.log`, `production-media-cutover-2.log`, `production-browser-qa.json`, four production screenshots, `production-media-codex-review.md` plus original independent reviews. No unresolved P1/P2/P3.
+
+Resolved production findings: campaign identity now follows exact public pathname despite namespaced CMS slug; standalone preserves traced database driver packages; media directory now resolves from runtime app-root cwd. The first media-defective image was rolled back immediately after public QA; final preview tested actual1024-byte206 media response before cutover. Existing preview-store restrictions and tenant access checks remain intact.

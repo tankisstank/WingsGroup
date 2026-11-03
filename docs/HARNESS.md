@@ -80,6 +80,20 @@ Harness v0 deliberately excludes:
 
 Those should arrive only when a selected story needs them.
 
+## US-094 requirements checkpoint — 2026-11-02
+
+The canonical US-094 packet lives in this main repository at
+[`docs/stories/epics/E07-tour-product-platform/US-094-wingsgo-homepage-working-day-departures/overview.md`](stories/epics/E07-tour-product-platform/US-094-wingsgo-homepage-working-day-departures/overview.md).
+It defines homepage departure selection using 14/7 working days, excluding
+both endpoint dates, weekends, Vietnamese holidays and substitute holidays.
+This is requirements authoring only: status `planned`, all four implementation
+proof flags `0`. November 2 is the authoring checkpoint, not a delivery deadline.
+
+The main repository and `WingsTravel-us093` currently hard-link the same Harness
+database. Do not import or create a duplicate US-094 record when transferring
+the documents. Intake #175 and trace #347 remain valid historical records.
+See the story's [tracking record](stories/epics/E07-tour-product-platform/US-094-wingsgo-homepage-working-day-departures/tracking.md).
+
 ## Durable Layer
 
 Policy documents describe how to work. The durable layer stores what happened.
