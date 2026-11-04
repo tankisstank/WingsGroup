@@ -107,4 +107,5 @@ if (process.argv.includes('--self-test')) {
     if (transactionID && !committed) await payload.db.rollbackTransaction(transactionID)
     await payload.destroy()
   }
+  process.exit(0)
 }
