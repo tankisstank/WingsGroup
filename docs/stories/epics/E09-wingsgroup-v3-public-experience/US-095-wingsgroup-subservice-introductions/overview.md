@@ -28,9 +28,9 @@ Là người dùng tìm hiểu hệ sinh thái WingsGroup, tôi muốn xem thôn
 
 ## Acceptance Criteria
 
-- [ ] AC1: Khai báo đầy đủ 4 route mới trong `corporateRoutes.ts`, unit test kiểm tra route public hợp lệ và chặn các route không thuộc danh mục.
-- [ ] AC2: Tạo 4 trang mới trong CMS thuộc site WingsGroup với slug `/gioi-thieu-wingsgo`, `/gioi-thieu-wingside`, `/gioi-thieu-wingspass`, `/gioi-thieu-wingscare`, đầy đủ Hero, Feature Grid và CTA.
-- [ ] AC3: Cập nhật khối Ecosystem Explorer trên Trang chủ (`/`) trỏ 5 CTA tới 5 trang `/gioi-thieu-*`.
-- [ ] AC4: Cập nhật khối Ecosystem Explorer trên trang `/he-sinh-thai` đồng bộ 100% nội dung và CTA với Trang chủ.
-- [ ] AC5: Kiểm thử unit test, component test, typecheck, lint pass exit 0.
-- [ ] AC6: Biên bản rà soát kiến trúc & phát hành thông qua Codex Consultation Gate.
+- [x] AC1: Khai báo đầy đủ 4 route mới trong `corporateRoutes.ts`, unit test kiểm tra route public hợp lệ và chặn các route không thuộc danh mục.
+- [x] AC2: Tạo 4 trang mới trong CMS thuộc site WingsGroup với slug `/gioi-thieu-wingsgo`, `/gioi-thieu-wingside`, `/gioi-thieu-wingspass`, `/gioi-thieu-wingscare`, đầy đủ Hero, Feature Grid và CTA.
+- [x] AC3: Cập nhật khối Ecosystem Explorer trên Trang chủ (`/`) trỏ 5 CTA tới 5 trang `/gioi-thieu-*`.
+- [x] AC4: Cập nhật khối Ecosystem Explorer trên trang `/he-sinh-thai` đồng bộ 100% nội dung và CTA với Trang chủ.
+- [x] AC5: Kiểm thử unit test, component test, typecheck, lint pass exit 0.
+- [x] AC6: Biên bản rà soát kiến trúc & phát hành thông qua Codex Consultation Gate.

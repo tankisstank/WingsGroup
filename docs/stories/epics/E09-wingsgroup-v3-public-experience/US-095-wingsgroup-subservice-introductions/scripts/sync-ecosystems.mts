@@ -133,9 +133,10 @@ try {
         id: page.id,
         locale,
         req,
+        draft: false,
         overrideAccess: false,
-        context: { disableRevalidate: true },
         data: {
+          _status: 'published',
           layout: newLayout,
         },
       })
