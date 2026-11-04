@@ -1,9 +1,6 @@
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { isWingsGroupLocalPreviewStoreConfigured } from './localPreviewStore'
-
-const localPreviewMediaModuleDirectory = path.dirname(fileURLToPath(import.meta.url))
 
 export const resolveWingsGroupLocalPreviewMediaDirectory = (
   configuredDirectory = process.env.E09_PREVIEW_MEDIA_DIRECTORY,

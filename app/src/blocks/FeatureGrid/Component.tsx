@@ -87,12 +87,12 @@ export const FeatureGridBlock: React.FC<FeatureGridBlockProps> = ({
                 </p>
               ) : null}
               {item.description ? (
-                <p className="mt-3 text-sm leading-7 text-muted-foreground">{item.description}</p>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground whitespace-pre-line break-words">{item.description}</p>
               ) : null}
               {presentation === 'accordion' || presentation === 'tabs' ? (
                 <details className="layout-feature__details">
                   <summary>Xem chi tiết</summary>
-                  <p>{item.description || 'Bổ sung nội dung chi tiết cho mục này.'}</p>
+                  <p className="whitespace-pre-line break-words">{item.description || 'Bổ sung nội dung chi tiết cho mục này.'}</p>
                 </details>
               ) : null}
               {item.enableLink && item.link?.label ? (

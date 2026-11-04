@@ -589,3 +589,15 @@ Redis operation, or Plane-date repair occurred during this UAT.
 | Source fix | PASS | Cập nhật `isWingsGroupPublishedMedia` nhận diện ảnh CMS chuẩn cho `wings-group` (có URL và alt/filename), giữ nguyên bảo vệ chặt chẽ cho tài sản do hệ sinh thái quản lý và chặn media ngoại lai từ tenant khác. |
 | Model unit test | PASS | `tests/unit/wingsGroupV3PublicModel.unit.spec.ts` pass 12/12 tests bao gồm ca kiểm thử cho standard CMS media và foreign tenant isolation. |
 | TypeScript check | PASS | `pnpm tsc --noEmit` hoàn thành với 0 lỗi. |
+
+## Production tour edit module regression — 2026-11-03
+
+- Follow-up started and reviewed on 2026-11-03; production ready at 12:15 Bangkok.
+- Authenticated edit `/admin/collections/tour-products/181` failed with React306: lazy resolved `[object Module]`; server digest `2310470905`.
+- Flight reference `6f:I[94326,...,"*"]` identified `TourAuthoring/index.tsx`. Removed unused barrel re-exports in commit `5585697f039acea4b5829d1bf8670949f39cc944`; default component implementation and data/access behavior remain unchanged.
+- Independent checks: 20 unit tests, 11 component tests, scoped ESLint, production webpack build/typecheck all exit 0. Codex predeployment review: no P1/P2/P3 findings.
+- Real local production-build browser QA: edit form, itinerary tab, draft departure save and readiness refresh pass; Flight resolves `default`; no browser errors.
+- Fresh encrypted PostgreSQL backup and disposable restore verified. Both ARM64 images match the source commit; all 52 registered migrations applied, no pending migrations.
+- Production release `release-5585697` activated. Existing authenticated Edge tab now renders tour 181, title input enabled, published departure loaded, itinerary tab has 11 rows. Flight resolves `default`, with no new browser errors or server invalid-element errors.
+- No production tour/departure content was saved during QA. Earlier US-075 acceptance gaps remain separate; this follow-up does not mark the entire story accepted.
+- Full report and rollback: `docs/releases/cms-tour-edit-20261103.md`. Local evidence: `cms-tour-edit-20261103/production-qa.json`, `local-flight.json`, `codex-review.md`, build/test/deployment logs.

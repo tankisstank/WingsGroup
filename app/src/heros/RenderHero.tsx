@@ -23,6 +23,7 @@ export const RenderHero: React.FC<
     siteHeroDefaults?: SiteHeroDefaultsLike | null
     wingsGroupV3Enabled?: boolean
     allowWingsGroupDevelopmentMedia?: boolean
+    showMediaCaption?: boolean
   }
 > = (props) => {
   const { type, wingsGroupV3Enabled } = props || {}

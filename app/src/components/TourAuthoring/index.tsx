@@ -9,9 +9,6 @@ import TourAuthoringReadiness from './TourAuthoringReadiness'
 import { useTourPreviewRefresh } from './useTourPreviewRefresh'
 import { tourAuthoringRelationID, tourAuthoringSiteCode } from '@/utilities/tourAuthoring'
 
-export { default as TourDepartureManager } from './TourDepartureManager'
-export * from './types'
-
 export default function TourProductAuthoring() {
   const [departureRevision, setDepartureRevision] = useState(0)
   const { reportUpdate } = useDocumentEvents()
