@@ -22,6 +22,7 @@
 - Cutover readiness and fresh production readiness: database/Redis up, lead delivery configured, exact active image verified.
 - Authenticated Edge production tour181: enabled title field, all 11 itinerary rows, Tour authoring and existing published departure 16/12/2026 render. No production CMS record saved during QA.
 - Production browser: 8/8 regression checks passed, including campaign VI/EN, caption control, video playback, CTA and WingsPlus at 1440/390; browser errors empty.
+- US-095 production browser: 28/28 checks passed — eight VI/EN introduction routes and twenty ecosystem tab/CTA checks across the home and ecosystem pages. WingsPlus service label matches in both locales.
 - Plane: filtered work item sync patched 27 items with missingCount=0. US-075 note updated separately because its Harness row is absent, preserving metadata and six children. API readback verified all five stories, correct E02/E07/E09 parents, meaningful child names and complete dates.
 
 ## Evidence and limitations
