@@ -2,7 +2,9 @@
 
 ## 1. Trạng thái (Status)
 
-`Đã bàn giao` — follow-up CTA bắt đầu 2026-11-02, production 2026-11-03. Bàn giao footer ngày
+`implemented / Đã bàn giao` — đối soát 2026-11-04, proof Full. Release tích hợp `2265e13` đã kiểm chứng hotline CTA và bảo toàn tenant/draft; chưa có xác nhận nghiệm thu stakeholder. Trạng thái hiện tại: `docs/releases/us-status-20261104.md`.
+
+Lịch sử: follow-up CTA bắt đầu 2026-11-02, production 2026-11-03. Bàn giao footer ngày
 2026-10-24 bên dưới là bằng chứng lịch sử, không phải proof cho AC5.
 
 Follow-up ngày2026-10-23 theo phản hồi trực tiếp của người dùng: footer WingsGo vẫn có theme selector, số cũ và nhiều CTA. Release d6057d4 trước đó chỉ rút gọn WingsGroup; không phải bằng chứng sửa WingsGo. Candidate đã được deploy production và CMS WingsGo đã được cập nhật theo wrapper transaction có row lock. Evidence: wingsgo-footer-review-20261023/.

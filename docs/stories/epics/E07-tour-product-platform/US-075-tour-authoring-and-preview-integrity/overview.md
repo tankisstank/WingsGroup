@@ -2,7 +2,11 @@
 
 ## Status
 
-in_progress
+in_progress / Chờ xác nhận — đối soát 2026-11-04, proof Partial. Lỗi edit tour181 đã sửa trên production `2265e13`; form, 11 ngày lịch trình và departure hiện hữu render đúng, local lưu/reload departure nháp đạt.
+
+Còn thiếu UAT toàn luồng Save→Preview→Publish, gallery, itinerary validation và phân quyền VI/EN WingsGo/WingSide trên runtime hiện hành. Chưa đóng toàn bộ bảy AC bằng bằng chứng của riêng tour181.
+
+Trạng thái hiện tại: `docs/releases/us-status-20261104.md`. Các finding/checkpoint bên dưới là lịch sử; giữ nguyên ngày và bằng chứng đã ghi nhận.
 
 ## Lane
 
@@ -311,7 +315,11 @@ collection `Media`/các quy trình nền tảng hiện có.
 - Slug input/server normalization, PostgreSQL transaction boundary của relink /
   publish và redirect `301` cũ → mới có unit/integration proof; redirect cũ
   không bị duplicate hoặc ghi đè đích khác.
-- Unit/integration/component/E2E và staging/release smoke chứng minh luồng tạo,
+- Kiểm chứng toàn luồng biên tập và xuất bản tour.
+
+## Chi tiết kiểm chứng AC7
+
+Unit/integration/component/E2E và staging/release smoke chứng minh luồng tạo,
   sửa, thêm nhanh departure, readiness, preview, publish boundary và rollback an
   toàn; không có schema change ngoài migration type redirect `301`/`307`, và không có
   CMS production write ngoài release được phê duyệt. Quality proof bao phủ

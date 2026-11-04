@@ -2,7 +2,9 @@
 
 ## Status
 
-implemented — production follow-up delivered 2026-11-03 (technical delivery, not stakeholder acceptance)
+implemented / Đã bàn giao — đối soát 2026-11-04, proof Full. Release tích hợp `2265e13` đã triển khai và kiểm chứng H1/caption/video/CTA desktop/mobile. Chưa có xác nhận nghiệm thu stakeholder.
+
+Trạng thái hiện tại: `docs/releases/us-status-20261104.md`. Các mốc bên dưới là lịch sử.
 
 ## Lane
 

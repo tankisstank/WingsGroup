@@ -1,5 +1,11 @@
 # US-088 — Xuất bản trang giới thiệu WingsPlus
 
+## Status — đối soát 2026-11-04
+
+implemented / Đã bàn giao, proof Full. Release tích hợp `2265e13` đã kiểm chứng bốn nhóm dịch vụ giữ newline ở 1440/390, không tràn ngang và nhãn hệ sinh thái đồng bộ. Chưa có xác nhận nghiệm thu stakeholder.
+
+Trạng thái hiện tại: `docs/releases/us-status-20261104.md`. Các mốc review candidate và bàn giao bên dưới là lịch sử.
+
 ## User Story
 
 Là khách tìm hiểu WingsPlus, tôi muốn đọc trang giới thiệu có bốn nhóm dịch vụ và nút trao đổi với chuyên viên, để chọn hướng tư vấn phù hợp trước khi gửi yêu cầu.

@@ -1,5 +1,11 @@
 # US-095 — Xuất bản 4 trang giới thiệu dịch vụ con và đồng bộ khối hệ sinh thái WingsGroup
 
+## Status — đối soát 2026-11-04
+
+implemented / Đã bàn giao, proof Full. Production `2265e13` đã qua 28/28 browser checks: tám route VI/EN và hai mươi tab/CTA ở home/ecosystem; nhãn WingsPlus thống nhất. Chưa có xác nhận nghiệm thu stakeholder.
+
+Trạng thái hiện tại: `docs/releases/us-status-20261104.md`. Giữ nguyên các ngày bắt đầu/target và bằng chứng bàn giao trước đó.
+
 ## User Story
 
 Là người dùng tìm hiểu hệ sinh thái WingsGroup, tôi muốn xem thông tin giới thiệu chi tiết của từng dịch vụ con (WingsGo, WingSide, WingsPass, WingsCare, bên cạnh WingsPlus đã có) qua các trang con chuyên biệt, và thấy các liên kết này được đồng bộ nhất quán tại khối "Chọn dịch vụ phù hợp với hành trình của bạn" ở cả Trang chủ và trang Hệ sinh thái (`/he-sinh-thai`), để tôi có thể hiểu rõ năng lực phục vụ của từng thương hiệu trước khi gửi yêu cầu tư vấn.
