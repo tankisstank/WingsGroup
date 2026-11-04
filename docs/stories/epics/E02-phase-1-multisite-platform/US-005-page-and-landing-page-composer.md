@@ -2,7 +2,7 @@
 
 ## Status
 
-implemented / Đã bàn giao — đối soát 2026-11-04, proof Full. Release tích hợp `2265e13` đã triển khai và kiểm chứng H1/caption/video/CTA desktop/mobile. Chưa có xác nhận nghiệm thu stakeholder.
+Hoàn tất / Full — người dùng xác nhận nghiệm thu ngày 2026-11-04; Harness giữ `implemented` và ghi xác nhận trong evidence. Release tích hợp `2265e13` đã triển khai và kiểm chứng H1/caption/video/CTA desktop/mobile. Biên bản nghiệm thu: `docs/releases/us-acceptance-20261104.md`.
 
 Trạng thái hiện tại: `docs/releases/us-status-20261104.md`. Các mốc bên dưới là lịch sử.
 

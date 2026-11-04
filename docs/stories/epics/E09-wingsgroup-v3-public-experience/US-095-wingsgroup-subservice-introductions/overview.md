@@ -2,7 +2,7 @@
 
 ## Status — đối soát 2026-11-04
 
-implemented / Đã bàn giao, proof Full. Production `2265e13` đã qua 28/28 browser checks: tám route VI/EN và hai mươi tab/CTA ở home/ecosystem; nhãn WingsPlus thống nhất. Chưa có xác nhận nghiệm thu stakeholder.
+Hoàn tất / Full — người dùng xác nhận nghiệm thu ngày 2026-11-04; Harness giữ `implemented` và ghi xác nhận trong evidence. Production `2265e13` đã qua 28/28 browser checks: tám route VI/EN và hai mươi tab/CTA ở home/ecosystem; nhãn WingsPlus thống nhất. Biên bản nghiệm thu: `docs/releases/us-acceptance-20261104.md`.
 
 Trạng thái hiện tại: `docs/releases/us-status-20261104.md`. Giữ nguyên các ngày bắt đầu/target và bằng chứng bàn giao trước đó.
 

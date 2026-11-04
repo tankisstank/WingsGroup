@@ -2,7 +2,7 @@
 
 ## 1. Trạng thái (Status)
 
-`implemented / Đã bàn giao` — đối soát 2026-11-04, proof Full. Release tích hợp `2265e13` đã kiểm chứng hotline CTA và bảo toàn tenant/draft; chưa có xác nhận nghiệm thu stakeholder. Trạng thái hiện tại: `docs/releases/us-status-20261104.md`.
+`Hoàn tất / Full` — người dùng xác nhận nghiệm thu ngày 2026-11-04; Harness giữ `implemented` và ghi xác nhận trong evidence. Release tích hợp `2265e13` đã kiểm chứng hotline CTA và bảo toàn tenant/draft. Biên bản nghiệm thu: `docs/releases/us-acceptance-20261104.md`. Trạng thái hiện tại: `docs/releases/us-status-20261104.md`.
 
 Lịch sử: follow-up CTA bắt đầu 2026-11-02, production 2026-11-03. Bàn giao footer ngày
 2026-10-24 bên dưới là bằng chứng lịch sử, không phải proof cho AC5.

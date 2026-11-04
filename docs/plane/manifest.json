@@ -347,16 +347,16 @@
       "phase": "Phase 1",
       "workstream": "Content",
       "customerVisible": "Yes",
-      "planeStateOverride": "Đã bàn giao",
+      "planeStateOverride": "Hoàn tất",
       "proofStatusOverride": "Full",
       "childStateOverrides": {
-        "1": "Đã bàn giao",
-        "2": "Đã bàn giao",
-        "3": "Đã bàn giao",
-        "4": "Đã bàn giao",
-        "5": "Đã bàn giao",
-        "6": "Đã bàn giao",
-        "7": "Đã bàn giao"
+        "1": "Hoàn tất",
+        "2": "Hoàn tất",
+        "3": "Hoàn tất",
+        "4": "Hoàn tất",
+        "5": "Hoàn tất",
+        "6": "Hoàn tất",
+        "7": "Hoàn tất"
       },
       "childDateOverrides": {
         "1": {
@@ -388,7 +388,7 @@
           "targetDate": "2026-11-03"
         }
       },
-      "proofStatusNote": "Current status 2026-11-04: Full / Đã bàn giao on integrated production2265e13, verified in docs/releases/us095-integrated-20261104.md. Technical delivery, not stakeholder acceptance; no acceptance evidence to mark Hoàn tất. Status reconciliation: docs/releases/us-status-20261104.md. Dates preserved. Historical checkpoints follow: 2026-10-27 delivered on correct WingsGroup site: page375 /gioi-thieu-wingsplus VI+EN, Hero/4groups/specialistCTA; homepage191 shortcopy+Xem giới thiệu links to Group page. Own wrongsite372 withdrawn. Release8a0e470 ARM64ready; build/typecheck0,70unit27component28integration, backuprestore6sites, realcontention/recoverypass, independentCodexSHIP. Actualdesktop/mobile390 and primaryCTAform checks pass; public/data productionchecks0,21unrelatedpagesunchanged, public/draftheropreserved. No reallead/email or physicaldevice test. Details US088validation and wingsplus-on-wingsgroup-20261027. Follow-up AC7 started/reviewed 2026-11-02 owner c0508g:3component tests,actual4group text at1440/390px pre-line/nooverflow,accordion details; candidate only,build0,Codex noP1/P2/P3. Partial/inreview applies only to newfollowup; historical delivery remains unchanged. Production follow-up delivered 2026-11-03, owner c0508g, revision5b81a19d663f2f78a04d0e411fcfa0afbd416c4a. Bounded Payload CTA/H1 apply verified:556 page-locales/6sites,only3 changed locales,all1399 media unchanged,drafts preserved; rerun noop. ARM64 media path defect found by public browser QA, rolled back and fixed with3unit/typecheck/ESLint/build and independent Codex noP1/P2/P3. Fresh encrypted PG backup+disposable restore,28/28 migrations,immutable image gate,readiness passed. Production desktop1440/mobile390 verifies hotline0948786775,newVIH1,EN unchanged,caption scope,playing video and4WingsPlus descriptions pre-line/nooverflow. Evidence followups-20261102/PRODUCTION-REPORT.md. Technical delivery is not stakeholder acceptance; real calls/leads and physical Safari/iOS not exercised. Follow-up 2026-11-04: integrated production release2265e13 restores all delivered CMS editor/US-005/US-081/US-088 fixes while preserving US-095. Build/tests and independent Codex review passed; encrypted backup/restore,52 migrations,ARM64 image provenance,guarded label apply/noop and rollback/draft rehearsal verified. Authenticated production tour181 form,11 itinerary days and published departure render. Report docs/releases/us095-integrated-20261104.md. Historical acceptance/status/dates preserved.",
+      "proofStatusNote": "Accepted 2026-11-04: user explicitly confirmed US-088 Full / Đã bàn giao and Đã hoàn tất. Current state Full / Hoàn tất, including all existing child tasks. Acceptance record: docs/releases/us-acceptance-20261104.md. Production release2265e13 evidence and historical start/target dates preserved. Historical checkpoints follow: 2026-10-27 delivered on correct WingsGroup site: page375 /gioi-thieu-wingsplus VI+EN, Hero/4groups/specialistCTA; homepage191 shortcopy+Xem giới thiệu links to Group page. Own wrongsite372 withdrawn. Release8a0e470 ARM64ready; build/typecheck0,70unit27component28integration, backuprestore6sites, realcontention/recoverypass, independentCodexSHIP. Actualdesktop/mobile390 and primaryCTAform checks pass; public/data productionchecks0,21unrelatedpagesunchanged, public/draftheropreserved. No reallead/email or physicaldevice test. Details US088validation and wingsplus-on-wingsgroup-20261027. Follow-up AC7 started/reviewed 2026-11-02 owner c0508g:3component tests,actual4group text at1440/390px pre-line/nooverflow,accordion details; candidate only,build0,Codex noP1/P2/P3. Partial/inreview applies only to newfollowup; historical delivery remains unchanged. Production follow-up delivered 2026-11-03, owner c0508g, revision5b81a19d663f2f78a04d0e411fcfa0afbd416c4a. Bounded Payload CTA/H1 apply verified:556 page-locales/6sites,only3 changed locales,all1399 media unchanged,drafts preserved; rerun noop. ARM64 media path defect found by public browser QA, rolled back and fixed with3unit/typecheck/ESLint/build and independent Codex noP1/P2/P3. Fresh encrypted PG backup+disposable restore,28/28 migrations,immutable image gate,readiness passed. Production desktop1440/mobile390 verifies hotline0948786775,newVIH1,EN unchanged,caption scope,playing video and4WingsPlus descriptions pre-line/nooverflow. Evidence followups-20261102/PRODUCTION-REPORT.md. Technical delivery is not stakeholder acceptance; real calls/leads and physical Safari/iOS not exercised. Follow-up 2026-11-04: integrated production release2265e13 restores all delivered CMS editor/US-005/US-081/US-088 fixes while preserving US-095. Build/tests and independent Codex review passed; encrypted backup/restore,52 migrations,ARM64 image provenance,guarded label apply/noop and rollback/draft rehearsal verified. Authenticated production tour181 form,11 itinerary days and published departure render. Report docs/releases/us095-integrated-20261104.md. Historical acceptance/status/dates preserved.",
       "startDate": "2026-10-27",
       "targetDate": "2026-11-03"
     },
@@ -437,13 +437,13 @@
       "workstream": "CMS",
       "customerVisible": "Yes",
       "proofStatusOverride": "Full",
-      "planeStateOverride": "Đã bàn giao",
+      "planeStateOverride": "Hoàn tất",
       "childStateOverrides": {
-        "1": "Đã bàn giao",
-        "2": "Đã bàn giao",
-        "3": "Đã bàn giao",
-        "4": "Đã bàn giao",
-        "5": "Đã bàn giao"
+        "1": "Hoàn tất",
+        "2": "Hoàn tất",
+        "3": "Hoàn tất",
+        "4": "Hoàn tất",
+        "5": "Hoàn tất"
       },
       "childDateOverrides": {
         "1": {
@@ -467,7 +467,7 @@
           "targetDate": "2026-11-03"
         }
       },
-      "proofStatusNote": "Current status 2026-11-04: Full / Đã bàn giao on integrated production2265e13, verified in docs/releases/us095-integrated-20261104.md. Technical delivery, not stakeholder acceptance; no acceptance evidence to mark Hoàn tất. Status reconciliation: docs/releases/us-status-20261104.md. Dates preserved. Historical checkpoints follow: Historical delivery 2026-05-27 preserved in story and plane-before.json. Follow-up AC4-AC5 started 2026-11-02, owner c0508g: guarded VI campaign H1 update and scoped media caption rendering. Candidate only; verification in progress, no production publish/deploy. Local review 2026-11-02 passed:7 heading unit,3 caption component,realPG guardedapply/rollback,desktop/mobile390 realvideo and scopedcaption controls. Final integrated build/review recorded in followups-20261102. Production follow-up delivered 2026-11-03, owner c0508g, revision5b81a19d663f2f78a04d0e411fcfa0afbd416c4a. Bounded Payload CTA/H1 apply verified:556 page-locales/6sites,only3 changed locales,all1399 media unchanged,drafts preserved; rerun noop. ARM64 media path defect found by public browser QA, rolled back and fixed with3unit/typecheck/ESLint/build and independent Codex noP1/P2/P3. Fresh encrypted PG backup+disposable restore,28/28 migrations,immutable image gate,readiness passed. Production desktop1440/mobile390 verifies hotline0948786775,newVIH1,EN unchanged,caption scope,playing video and4WingsPlus descriptions pre-line/nooverflow. Evidence followups-20261102/PRODUCTION-REPORT.md. Technical delivery is not stakeholder acceptance; real calls/leads and physical Safari/iOS not exercised. Follow-up 2026-11-04: integrated production release2265e13 restores all delivered CMS editor/US-005/US-081/US-088 fixes while preserving US-095. Build/tests and independent Codex review passed; encrypted backup/restore,52 migrations,ARM64 image provenance,guarded label apply/noop and rollback/draft rehearsal verified. Authenticated production tour181 form,11 itinerary days and published departure render. Report docs/releases/us095-integrated-20261104.md. Historical acceptance/status/dates preserved.",
+      "proofStatusNote": "Accepted 2026-11-04: user explicitly confirmed US-005 Full / Đã bàn giao and Đã hoàn tất. Current state Full / Hoàn tất, including all existing child tasks. Acceptance record: docs/releases/us-acceptance-20261104.md. Production release2265e13 evidence and historical start/target dates preserved. Historical checkpoints follow: Historical delivery 2026-05-27 preserved in story and plane-before.json. Follow-up AC4-AC5 started 2026-11-02, owner c0508g: guarded VI campaign H1 update and scoped media caption rendering. Candidate only; verification in progress, no production publish/deploy. Local review 2026-11-02 passed:7 heading unit,3 caption component,realPG guardedapply/rollback,desktop/mobile390 realvideo and scopedcaption controls. Final integrated build/review recorded in followups-20261102. Production follow-up delivered 2026-11-03, owner c0508g, revision5b81a19d663f2f78a04d0e411fcfa0afbd416c4a. Bounded Payload CTA/H1 apply verified:556 page-locales/6sites,only3 changed locales,all1399 media unchanged,drafts preserved; rerun noop. ARM64 media path defect found by public browser QA, rolled back and fixed with3unit/typecheck/ESLint/build and independent Codex noP1/P2/P3. Fresh encrypted PG backup+disposable restore,28/28 migrations,immutable image gate,readiness passed. Production desktop1440/mobile390 verifies hotline0948786775,newVIH1,EN unchanged,caption scope,playing video and4WingsPlus descriptions pre-line/nooverflow. Evidence followups-20261102/PRODUCTION-REPORT.md. Technical delivery is not stakeholder acceptance; real calls/leads and physical Safari/iOS not exercised. Follow-up 2026-11-04: integrated production release2265e13 restores all delivered CMS editor/US-005/US-081/US-088 fixes while preserving US-095. Build/tests and independent Codex review passed; encrypted backup/restore,52 migrations,ARM64 image provenance,guarded label apply/noop and rollback/draft rehearsal verified. Authenticated production tour181 form,11 itinerary days and published departure render. Report docs/releases/us095-integrated-20261104.md. Historical acceptance/status/dates preserved.",
       "startDate": "2026-05-25",
       "targetDate": "2026-11-03"
     },
@@ -602,14 +602,14 @@
       "workstream": "CMS",
       "customerVisible": "Yes",
       "proofStatusOverride": "Full",
-      "planeStateOverride": "Đã bàn giao",
-      "proofStatusNote": "Current status 2026-11-04: Full / Đã bàn giao on integrated production2265e13, verified in docs/releases/us095-integrated-20261104.md. Technical delivery, not stakeholder acceptance; no acceptance evidence to mark Hoàn tất. Status reconciliation: docs/releases/us-status-20261104.md. Dates preserved. Historical checkpoints follow: Follow-up 2026-10-23 deployed to WingsGo production on 2026-10-24 at revision 16ff60a28ba48489d7d06de648780c522372e13f. Footer has one main call 0948786775 and one preferred email; theme selector and duplicate contact CTA removed, secondary channels remain in menu/dialog, and FAB hides at footer. Fresh encrypted backup/restore, 28/28 migration status, PostgreSQL transaction with FOR UPDATE, CMS apply 0912910101 to 0948786775, readiness, and public VI/EN browser QA are recorded in wingsgo-footer-review-20261023/review.md and US-081 validation/audit. Delivery is not stakeholder acceptance; real calls/Zalo/lead and Safari/iOS remain unverified. Preserve existing dates. Follow-up AC5 2026-11-02 owner c0508g: 88 public URLs inventoried, bounded CTA updater, 36 focused tests and 2 real PostgreSQL contention/recovery tests, typecheck/ESLint0. Candidate in review; no production content writes or deployment. Production follow-up delivered 2026-11-03, owner c0508g, revision5b81a19d663f2f78a04d0e411fcfa0afbd416c4a. Bounded Payload CTA/H1 apply verified:556 page-locales/6sites,only3 changed locales,all1399 media unchanged,drafts preserved; rerun noop. ARM64 media path defect found by public browser QA, rolled back and fixed with3unit/typecheck/ESLint/build and independent Codex noP1/P2/P3. Fresh encrypted PG backup+disposable restore,28/28 migrations,immutable image gate,readiness passed. Production desktop1440/mobile390 verifies hotline0948786775,newVIH1,EN unchanged,caption scope,playing video and4WingsPlus descriptions pre-line/nooverflow. Evidence followups-20261102/PRODUCTION-REPORT.md. Technical delivery is not stakeholder acceptance; real calls/leads and physical Safari/iOS not exercised. Follow-up 2026-11-04: integrated production release2265e13 restores all delivered CMS editor/US-005/US-081/US-088 fixes while preserving US-095. Build/tests and independent Codex review passed; encrypted backup/restore,52 migrations,ARM64 image provenance,guarded label apply/noop and rollback/draft rehearsal verified. Authenticated production tour181 form,11 itinerary days and published departure render. Report docs/releases/us095-integrated-20261104.md. Historical acceptance/status/dates preserved.",
+      "planeStateOverride": "Hoàn tất",
+      "proofStatusNote": "Accepted 2026-11-04: user explicitly confirmed US-081 Full / Đã bàn giao and Đã hoàn tất. Current state Full / Hoàn tất, including all existing child tasks. Acceptance record: docs/releases/us-acceptance-20261104.md. Production release2265e13 evidence and historical start/target dates preserved. Historical checkpoints follow: Follow-up 2026-10-23 deployed to WingsGo production on 2026-10-24 at revision 16ff60a28ba48489d7d06de648780c522372e13f. Footer has one main call 0948786775 and one preferred email; theme selector and duplicate contact CTA removed, secondary channels remain in menu/dialog, and FAB hides at footer. Fresh encrypted backup/restore, 28/28 migration status, PostgreSQL transaction with FOR UPDATE, CMS apply 0912910101 to 0948786775, readiness, and public VI/EN browser QA are recorded in wingsgo-footer-review-20261023/review.md and US-081 validation/audit. Delivery is not stakeholder acceptance; real calls/Zalo/lead and Safari/iOS remain unverified. Preserve existing dates. Follow-up AC5 2026-11-02 owner c0508g: 88 public URLs inventoried, bounded CTA updater, 36 focused tests and 2 real PostgreSQL contention/recovery tests, typecheck/ESLint0. Candidate in review; no production content writes or deployment. Production follow-up delivered 2026-11-03, owner c0508g, revision5b81a19d663f2f78a04d0e411fcfa0afbd416c4a. Bounded Payload CTA/H1 apply verified:556 page-locales/6sites,only3 changed locales,all1399 media unchanged,drafts preserved; rerun noop. ARM64 media path defect found by public browser QA, rolled back and fixed with3unit/typecheck/ESLint/build and independent Codex noP1/P2/P3. Fresh encrypted PG backup+disposable restore,28/28 migrations,immutable image gate,readiness passed. Production desktop1440/mobile390 verifies hotline0948786775,newVIH1,EN unchanged,caption scope,playing video and4WingsPlus descriptions pre-line/nooverflow. Evidence followups-20261102/PRODUCTION-REPORT.md. Technical delivery is not stakeholder acceptance; real calls/leads and physical Safari/iOS not exercised. Follow-up 2026-11-04: integrated production release2265e13 restores all delivered CMS editor/US-005/US-081/US-088 fixes while preserving US-095. Build/tests and independent Codex review passed; encrypted backup/restore,52 migrations,ARM64 image provenance,guarded label apply/noop and rollback/draft rehearsal verified. Authenticated production tour181 form,11 itinerary days and published departure render. Report docs/releases/us095-integrated-20261104.md. Historical acceptance/status/dates preserved.",
       "childStateOverrides": {
-        "1": "Đã bàn giao",
-        "2": "Đã bàn giao",
-        "3": "Đã bàn giao",
-        "4": "Đã bàn giao",
-        "5": "Đã bàn giao"
+        "1": "Hoàn tất",
+        "2": "Hoàn tất",
+        "3": "Hoàn tất",
+        "4": "Hoàn tất",
+        "5": "Hoàn tất"
       },
       "childDateOverrides": {
         "1": {
@@ -698,17 +698,17 @@
       "customerVisible": "Yes",
       "startDate": "2026-11-03",
       "targetDate": "2026-11-03",
-      "planeStateOverride": "Đã bàn giao",
+      "planeStateOverride": "Hoàn tất",
       "proofStatusOverride": "Full",
       "childStateOverrides": {
-        "1": "Đã bàn giao",
-        "2": "Đã bàn giao",
-        "3": "Đã bàn giao",
-        "4": "Đã bàn giao",
-        "5": "Đã bàn giao",
-        "6": "Đã bàn giao"
+        "1": "Hoàn tất",
+        "2": "Hoàn tất",
+        "3": "Hoàn tất",
+        "4": "Hoàn tất",
+        "5": "Hoàn tất",
+        "6": "Hoàn tất"
       },
-      "proofStatusNote": "Current status 2026-11-04: Full / Đã bàn giao on integrated production2265e13, verified in docs/releases/us095-integrated-20261104.md. Technical delivery, not stakeholder acceptance; no acceptance evidence to mark Hoàn tất. Status reconciliation: docs/releases/us-status-20261104.md. Dates preserved. Historical checkpoints follow: Đã phát hành production release-931b7ea trên Oracle Cloud VPS ARM64 ngày 03/11/2026. Bổ sung 4 route giới thiệu con (/gioi-thieu-wingsgo, /gioi-thieu-wingside, /gioi-thieu-wingspass, /gioi-thieu-wingscare) trong corporateRoutes.ts; tạo và xuất bản 4 trang CMS tương ứng (ID 384, 385, 386, 387); đồng bộ khối Ecosystem Explorer trên Trang chủ (ID 191) và /he-sinh-thai (ID 181). Khắc phục triệt để lỗi media staticDir build-time và chuẩn kích thước ảnh Payload (commit 78f7b54, image wingstravel-app:release-931b7ea-fixed). Toàn bộ 7 trang và ảnh trả về HTTP 200 OK. Health check status=ready. Unit test 18/18, component test 27/27 pass. Codex consultation gate GO. Follow-up 2026-11-04: integrated production release2265e13 restores all delivered CMS editor/US-005/US-081/US-088 fixes while preserving US-095. Build/tests and independent Codex review passed; encrypted backup/restore,52 migrations,ARM64 image provenance,guarded label apply/noop and rollback/draft rehearsal verified. Authenticated production tour181 form,11 itinerary days and published departure render. Report docs/releases/us095-integrated-20261104.md. Historical acceptance/status/dates preserved."
+      "proofStatusNote": "Accepted 2026-11-04: user explicitly confirmed US-095 Full / Đã bàn giao and Đã hoàn tất. Current state Full / Hoàn tất, including all existing child tasks. Acceptance record: docs/releases/us-acceptance-20261104.md. Production release2265e13 evidence and historical start/target dates preserved. Historical checkpoints follow: Đã phát hành production release-931b7ea trên Oracle Cloud VPS ARM64 ngày 03/11/2026. Bổ sung 4 route giới thiệu con (/gioi-thieu-wingsgo, /gioi-thieu-wingside, /gioi-thieu-wingspass, /gioi-thieu-wingscare) trong corporateRoutes.ts; tạo và xuất bản 4 trang CMS tương ứng (ID 384, 385, 386, 387); đồng bộ khối Ecosystem Explorer trên Trang chủ (ID 191) và /he-sinh-thai (ID 181). Khắc phục triệt để lỗi media staticDir build-time và chuẩn kích thước ảnh Payload (commit 78f7b54, image wingstravel-app:release-931b7ea-fixed). Toàn bộ 7 trang và ảnh trả về HTTP 200 OK. Health check status=ready. Unit test 18/18, component test 27/27 pass. Codex consultation gate GO. Follow-up 2026-11-04: integrated production release2265e13 restores all delivered CMS editor/US-005/US-081/US-088 fixes while preserving US-095. Build/tests and independent Codex review passed; encrypted backup/restore,52 migrations,ARM64 image provenance,guarded label apply/noop and rollback/draft rehearsal verified. Authenticated production tour181 form,11 itinerary days and published departure render. Report docs/releases/us095-integrated-20261104.md. Historical acceptance/status/dates preserved."
     }
   }
 }
