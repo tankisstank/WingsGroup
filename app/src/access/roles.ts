@@ -47,10 +47,6 @@ export const buildSiteWhere = (fieldName = 'site', siteIDs: RelationID[] = []): 
   }
 }
 
-export const canAccessAdmin: Access = ({ req }) => {
-  return Boolean(req.user)
-}
-
 export const adminAccess = ({ req }: { req: { user?: unknown } }): boolean => {
   return Boolean(req.user)
 }
