@@ -219,51 +219,6 @@ export function ContentLocaleListControl() {
   )
 }
 
-export function ContentLocaleDocumentControl() {
-  const { hrefFor, localeCode, options, selectLocale } = useLocaleLinks()
-  const current = options.find((option) => option.code === localeCode)
-  const { loadState, retryStatuses, statusFor } = useDocumentLocaleStatuses()
-
-  return (
-    <ControlShell
-      currentLabel={current?.label || `Locale (${localeCode})`}
-      scope="Áp dụng cho bản ghi hiện tại"
-    >
-      <LocaleLinks
-        currentCode={localeCode}
-        hrefFor={hrefFor}
-        onSelect={selectLocale}
-        options={options}
-      />
-      <div aria-label="Trạng thái dịch" className="wings-content-locale-control__statuses">
-        {options.map((option) => {
-          const status = statusFor(option.code)
-          return (
-            <span key={option.code}>
-              <b>{option.label}</b>
-              <em
-                aria-label={`${localeLabelWithCode(option)}: ${statusLabel[status]}`}
-                data-status={status}
-              >
-                {statusLabel[status]}
-              </em>
-            </span>
-          )
-        })}
-      </div>
-      {loadState === 'error' ? (
-        <p className="wings-content-locale-control__error" role="alert">
-          Không tải được trạng thái bản dịch.{' '}
-          <button onClick={retryStatuses} type="button">
-            Thử lại
-          </button>
-        </p>
-      ) : null}
-    </ControlShell>
-  )
-}
-
-/** A toolbar-safe alternative to the full document locale panel. */
 export function ContentLocaleCompactDocumentControl() {
   const { hrefFor, localeCode, options, selectLocale } = useLocaleLinks()
   const { loadState, retryStatuses, statusFor } = useDocumentLocaleStatuses()
