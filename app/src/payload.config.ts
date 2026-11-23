@@ -36,6 +36,7 @@ import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { cmsEnabledLocaleMetadata, getPayloadLocaleLabel } from './utilities/locales'
 import { resolveLocalDatabaseURL } from './utilities/localDatabase'
+import { isAuthorizedCronRequest } from './utilities/cronAuth'
 import { repairLocalSQLiteSchema } from './utilities/repairLocalSQLiteSchema'
 import {
   getWingsGroupLocalPreviewStoreURL,
@@ -264,14 +265,8 @@ export default buildConfig({
       run: ({ req }: { req: PayloadRequest }): boolean => {
         if (req.user?.role === 'super-admin') return true
 
-        const secret = process.env.CRON_SECRET
-        if (!secret) return false
-
-        // If there is no logged in user, then check
-        // for the Vercel Cron secret to be present as an
-        // Authorization header:
-        const authHeader = req.headers.get('authorization')
-        return authHeader === `Bearer ${secret}`
+        // Without a logged in super-admin, require the cron secret as a Bearer token.
+        return isAuthorizedCronRequest(req.headers.get('authorization'), process.env.CRON_SECRET)
       },
     },
     tasks: [

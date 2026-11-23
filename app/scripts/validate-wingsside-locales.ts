@@ -7,7 +7,6 @@ import config from '../src/payload.config'
 import { createLocalReq, getPayload } from 'payload'
 import type { Page } from '../src/payload-types'
 
-import { ensureLocalAdminUser } from '../src/utilities/adminSeed'
 import { publicLocales, type PublicLocaleCode } from '../src/i18n/publicCopy'
 import {
   auditWingsSideLocaleContent,
@@ -44,8 +43,8 @@ const getArgumentValue = (name: string): string | undefined => {
 const outputDirectory = getArgumentValue('--output-dir')
 
 const payload = await getPayload({ config })
-const adminUser = await ensureLocalAdminUser(payload)
-const req = await createLocalReq({ user: adminUser }, payload)
+// Read-only audit: every query uses overrideAccess, so no admin user is seeded.
+const req = await createLocalReq({}, payload)
 
 const siteResult = await payload.find({
   collection: 'sites',

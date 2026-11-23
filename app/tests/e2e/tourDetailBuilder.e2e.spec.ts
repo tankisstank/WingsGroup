@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { e2eBaseURL } from '../helpers/baseURL'
-import { localAdminCredentials } from '../../src/utilities/adminSeed'
+import { getLocalAdminPassword, localAdminCredentials } from '../../src/utilities/adminSeed'
 
 const tourSlug = 'shizuoka-nui-phu-si-tokyo-5n4d'
 const builderSectionIDs = [
@@ -23,7 +23,7 @@ test.describe('Tour detail builder public contract', () => {
     const loginResponse = await request.post(`${e2eBaseURL}/api/users/login`, {
       data: {
         email: localAdminCredentials.email,
-        password: localAdminCredentials.password,
+        password: getLocalAdminPassword(),
       },
     })
     expect(loginResponse.ok()).toBe(true)

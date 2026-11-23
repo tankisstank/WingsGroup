@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { randomBytes } from 'node:crypto'
 
 const appRoot = process.cwd()
 const args = process.argv.slice(2)
@@ -146,6 +147,10 @@ try {
     ...process.env,
     DATABASE_URL: databaseURL,
     E2E_ALLOW_DATABASE_RESET: managedPostgres ? 'true' : process.env.E2E_ALLOW_DATABASE_RESET,
+    LOCAL_ADMIN_PASSWORD:
+      process.env.LOCAL_ADMIN_PASSWORD || randomBytes(24).toString('base64url'),
+    LOCAL_ADMIN_SEED_ALLOW_DISPOSABLE_POSTGRES:
+      managedPostgres || process.env.E2E_ALLOW_DATABASE_RESET === 'true' ? 'true' : undefined,
     NODE_OPTIONS: '--no-deprecation --import=tsx/esm',
     PAYLOAD_DB_PUSH: 'false',
     PAYLOAD_SECRET: 'test-only-secret-not-for-production',

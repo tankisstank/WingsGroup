@@ -453,6 +453,7 @@ try {
     CRON_SECRET: '',
     DATABASE_URL: databaseURL,
     IMPORT_ADMIN_EMAIL: '',
+    LOCAL_ADMIN_SEED_ALLOW_DISPOSABLE_POSTGRES: 'true',
     NODE_ENV: 'test',
     NODE_OPTIONS: '',
     PAYLOAD_DB_PUSH: 'false',

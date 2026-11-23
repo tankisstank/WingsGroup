@@ -65,7 +65,7 @@ const payload = await getPayload({ config })
 const context = { seed: true, disableRevalidate: true }
 try {
   const { ensureLocalAdminUser } = await import('../../src/utilities/adminSeed')
-  const admin = await ensureLocalAdminUser(payload)
+  const admin = await ensureLocalAdminUser(payload, undefined, { allowDisposablePostgres: true })
   const req = await createLocalReq({ user: admin }, payload)
   for (const code of ['wing-side']) {
     const tenant = (await payload.find({ collection: 'sites', where: { code: { equals: code } }, limit: 1 })).docs[0]

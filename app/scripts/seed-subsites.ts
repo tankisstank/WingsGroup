@@ -9377,17 +9377,12 @@ async function main() {
       throw new Error('No admin user found. The local admin seed did not complete.')
     }
 
-    const adminUser =
-      currentUser.role === 'super-admin'
-        ? currentUser
-        : await payload.update({
-            collection: 'users',
-            id: currentUser.id,
-            data: {
-              role: 'super-admin',
-              sites: [],
-            },
-          })
+    if (currentUser.role !== 'super-admin') {
+      throw new Error(
+        `${localAdminCredentials.email} exists without the super-admin role; refusing to promote it.`,
+      )
+    }
+    const adminUser = currentUser
 
     const req = await createLocalReq({ user: adminUser }, payload)
     const databaseURL = process.env.DATABASE_URL || ''

@@ -236,10 +236,14 @@ export const HomeHiFiPage = ({
               {title}
             </h1>
             {lede ? (
-              <p
-                className="lede"
-                dangerouslySetInnerHTML={{ __html: lede.replace(/\n/g, '<br />') }}
-              />
+              <p className="lede">
+                {lede.split('\n').map((line, index) => (
+                  <React.Fragment key={index}>
+                    {index > 0 ? <br /> : null}
+                    {line}
+                  </React.Fragment>
+                ))}
+              </p>
             ) : null}
             <div className="cta-row">
               <a className="btn btn-primary" data-od-id="home-cta-plan" href="#home-planner">
