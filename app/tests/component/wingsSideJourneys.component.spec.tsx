@@ -2,12 +2,6 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const navigation = vi.hoisted(() => ({
-  replaceDocumentLocation: vi.fn((href: string) => {
-    window.history.replaceState(null, '', href)
-  }),
-}))
-
 const restoreKey = 'wingsside:journeys:navigation-restore'
 const router = { refresh: vi.fn(), replace: vi.fn() }
 let params = new URLSearchParams('destination=hanoi&style=culture&duration=8-14&utm_source=pm')
@@ -17,7 +11,6 @@ vi.mock('next/navigation', () => ({
   useRouter: () => router,
   useSearchParams: () => params,
 }))
-vi.mock('@/utilities/fullDocumentNavigation', () => navigation)
 vi.mock('@/components/SiteLink', () => ({
   SiteLink: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a href={String(href)} {...props}>
@@ -65,10 +58,6 @@ afterEach(() => {
 beforeEach(() => {
   router.replace.mockReset()
   router.refresh.mockReset()
-  navigation.replaceDocumentLocation.mockReset()
-  navigation.replaceDocumentLocation.mockImplementation((href: string) => {
-    window.history.replaceState(null, '', href)
-  })
   window.sessionStorage.clear()
   vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
   Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 })
@@ -383,7 +372,6 @@ describe('WingSideJourneysClient', () => {
 
     const href = '/wing-side/journeys?destination=hanoi&style=culture&duration=1-7'
     expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
-    expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
     expect(window.sessionStorage.getItem(restoreKey)).toBeNull()
     expect(document.activeElement).toBe(screen.getByLabelText('Duration'))
@@ -404,7 +392,6 @@ describe('WingSideJourneysClient', () => {
 
     const href = '/wing-side/vi/journeys?destination=hue&style=culture&duration=8-14'
     expect(router.replace).toHaveBeenCalledWith(href, { scroll: false })
-    expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
     expect(document.activeElement).toBe(screen.getByLabelText('Điểm đến'))
   })
@@ -444,7 +431,6 @@ describe('WingSideJourneysClient', () => {
       '/wing-side/journeys?destination=hanoi&style=family&duration=15-plus',
       { scroll: false },
     )
-    expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
     expect(router.refresh).not.toHaveBeenCalled()
   })
 
@@ -524,6 +510,5 @@ describe('WingSideJourneysClient', () => {
     expect(document.activeElement).toBe(screen.getByLabelText('Style'))
     expect(window.scrollTo).toHaveBeenCalledWith(0, 246)
     expect(window.sessionStorage.getItem(restoreKey)).toBeNull()
-    expect(navigation.replaceDocumentLocation).not.toHaveBeenCalled()
   })
 })
