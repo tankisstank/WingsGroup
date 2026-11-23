@@ -3,9 +3,6 @@ export const retailTourEnabledSiteCodes = ['wings-go'] as const
 /** Sites that render structured /tour/:slug TourDetailPage. */
 export const structuredTourDetailSiteCodes = ['wings-go', 'wing-side'] as const
 
-/** Alias used by US-046 feature branch. */
-export const structuredTourDetailEnabledSiteCodes = structuredTourDetailSiteCodes
-
 /** Private / consultative inbound — no retail hold-seat / departure matrix UX. */
 export const consultativeTourSiteCodes = ['wing-side'] as const
 
