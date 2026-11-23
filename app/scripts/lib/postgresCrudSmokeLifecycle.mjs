@@ -130,6 +130,7 @@ export const runPostgresCrudSmoke = async ({
     const runtimeEnvironment = {
       ...environment,
       DATABASE_URL: `postgresql://${user}:${password}@127.0.0.1:${port}/${database}`,
+      LOCAL_ADMIN_SEED_ALLOW_DISPOSABLE_POSTGRES: 'true',
     }
 
     if (onMigrationStart) onMigrationStart()

@@ -91,7 +91,7 @@ async function loadPages() {
 
 async function loginCMS(page) {
   const users = [
-    { email: 'local-admin@wingsgroup.test', password: 'test' },
+    { email: 'local-admin@wingsgroup.test', password: process.env.LOCAL_ADMIN_PASSWORD || 'test' },
     { email: 'dev@payloadcms.com', password: 'test' },
     { email: 'dev@payloadcms.com', password: 'password' },
   ]

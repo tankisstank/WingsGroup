@@ -193,6 +193,7 @@ export async function renderCmsPageByPath({
         depth: 3,
         fallbackLocale: false,
         limit: 2,
+        draft,
         locale,
         overrideAccess: true,
         pagination: false,
@@ -201,6 +202,7 @@ export async function renderCmsPageByPath({
             { site: { equals: siteID } },
             { 'wingsSideHiFi.enabled': { equals: true } },
             { 'wingsSideHiFi.routeVariant': { equals: 'home' } },
+            ...(draft ? [] : [{ _status: { equals: 'published' as const } }]),
           ],
         },
       })

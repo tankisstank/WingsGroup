@@ -47,15 +47,20 @@ Current seed set:
 
 ## Local Admin Credential
 
-Local seed/bootstrap keeps this super-admin account available for CMS review and
-development:
+Local seed/bootstrap scripts create this super-admin account for CMS review and
+development when it does not exist yet:
 
 - Email: `local-admin@wingsgroup.test`
-- Password: `test`
+- Password: the value of `LOCAL_ADMIN_PASSWORD`. When it is unset on a local
+  `file:` SQLite database, the development default `test` is used.
 
-The account is code-owned in `app/src/utilities/adminSeed.ts`. The `/next/seed`
-endpoint and `app/scripts/seed-subsites.ts` both create or reset it so local DB
-reseeding does not leave the team without a known admin login.
+The account is code-owned in `app/src/utilities/adminSeed.ts`
+(`ensureLocalAdminUser`). It refuses to run when `NODE_ENV=production` or when
+the database is not a local `file:` SQLite URL. Disposable PostgreSQL harnesses
+(E2E, CRUD proofs, rehearsals) opt in with
+`LOCAL_ADMIN_SEED_ALLOW_DISPOSABLE_POSTGRES=true`; without `LOCAL_ADMIN_PASSWORD`
+they get a random password. An existing account is never reset: its password
+and role are left unchanged.
 
 ## Update Rule
 
